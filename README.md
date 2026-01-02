@@ -209,7 +209,7 @@ enum TaskStatus {
 ## Deployment & Maintenance
 
 - Vercel for frontend hosting
-- Neon or Supabase for PostgreSQL database
+- Neon or Supabase for PostgreSQL database / Docker
 - Environment-specific configurations
 - Monitoring and logging setup
 - Backup and recovery procedures
@@ -217,7 +217,7 @@ enum TaskStatus {
 ## Potential Challenges & Solutions
 
 1. **Large Quran dataset**: Use API caching and pagination
-2. **Arabic text rendering**: Use proper fonts and RTL support
+2. **Arabic text rendering**: Use proper fonts and RTL support (Maybe use this font family: MshQuraanW -> Must find the file for this font to include it with the codebase)
 3. **Progress tracking complexity**: Simplify with clear status indicators
 4. **Admin scalability**: Start with basic CRUD, expand as needed
 
