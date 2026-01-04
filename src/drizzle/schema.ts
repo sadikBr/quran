@@ -1,1 +1,2 @@
-export * from "./schema/user";
+export * from "./schema/auth-schema";
+export * from "./schema/enums";
