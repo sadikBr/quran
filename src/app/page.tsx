@@ -1,83 +1,33 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 export default function Home() {
-    const { data: session, isPending, error } = authClient.useSession();
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
+    const { data: session } = authClient.useSession();
 
-    const signUp = () => {
-        authClient.signUp.email(
-            {
-                email: `brahimsadik98+${Math.floor(Math.random() * 1000)}@gmail.com`,
-                password: "password",
-                name: "Brahim SADIK",
-                image: "",
-            },
-            {
-                onRequest: (_ctx) => {
-                    setLoading(true);
-                },
-                onSuccess: (_ctx) => {
-                    setLoading(false);
-                    router.push("/dashboard");
-                },
-                onError: (ctx) => {
-                    alert(JSON.stringify(ctx.error));
-                },
-            },
-        );
-    };
-
-    const signIn = () => {
-        authClient.signIn.email(
-            {
-                email: "brahimsadik98@gmail.com",
-                password: "password",
-            },
-            {
-                onRequest: (_ctx) => {
-                    setLoading(true);
-                },
-                onSuccess: (_ctx) => {
-                    setLoading(false);
-                    router.push("/dashboard");
-                },
-                onError: (ctx) => {
-                    alert(JSON.stringify(ctx.error));
-                },
-            },
-        );
-    };
-
-    const logout = () => {
+    const signOut = () => {
         authClient.signOut();
     };
 
     return (
         <div className="w-screen h-screen flex items-center justify-center">
-            {isPending ? (
-                <div>Loading...</div>
-            ) : error ? (
-                <div>Error: {error.message}</div>
-            ) : session ? (
+            {session ? (
                 <div className="flex flex-col gap-2">
-                    <div>Logged In as {session.user.name}</div>
-                    <Button variant="destructive" onClick={logout}>
-                        Logout
+                    <div>Logged in as {session.user.name}</div>
+                    <Button variant="destructive" onClick={signOut}>
+                        Sign Out
                     </Button>
                 </div>
             ) : (
                 <div className="flex gap-2 items-center">
-                    <Button variant="outline" onClick={signUp}>
-                        {loading ? "Signing Up..." : "Sign Up"}
+                    <Button asChild variant="link">
+                        <Link href="/signUp">Sign Up</Link>
                     </Button>
-                    <Button variant="outline" onClick={signIn}>
-                        {loading ? "Signing In..." : "SignIn"}
+                    <Button asChild>
+                        <Link href="/signIn">Sign In</Link>
                     </Button>
                 </div>
             )}
