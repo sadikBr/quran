@@ -40,8 +40,8 @@ const formSchema = z
     });
 
 export default function SignUpPage() {
-    const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
     const form = useForm({
         defaultValues: {
@@ -53,6 +53,7 @@ export default function SignUpPage() {
         },
         validators: {
             onSubmit: formSchema,
+            onChange: formSchema,
         },
         onSubmit: async ({ value }) => {
             const { email, password, name, image } = value;

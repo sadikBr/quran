@@ -1,33 +1,29 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-import { authClient } from "@/lib/auth-client";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import SignOutButton from "@/components/signout-button";
 
-export default function Home() {
-    const { data: session } = authClient.useSession();
-
-    const signOut = () => {
-        authClient.signOut();
-    };
+export default async function Home() {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
 
     return (
         <div className="w-screen h-screen flex items-center justify-center">
             {session ? (
                 <div className="flex flex-col gap-2">
                     <div>Logged in as {session.user.name}</div>
-                    <Button variant="destructive" onClick={signOut}>
-                        Sign Out
-                    </Button>
+                    <SignOutButton />
                 </div>
             ) : (
                 <div className="flex gap-2 items-center">
                     <Button asChild variant="link">
-                        <Link href="/signUp">Sign Up</Link>
+                        <Link href="/sign-up">Sign Up</Link>
                     </Button>
                     <Button asChild>
-                        <Link href="/signIn">Sign In</Link>
+                        <Link href="/sign-in">Sign In</Link>
                     </Button>
                 </div>
             )}
