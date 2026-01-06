@@ -11,7 +11,7 @@ export default function SignOutButton() {
         authClient.signOut({
             fetchOptions: {
                 onSuccess: () => {
-                    router.push("/sign-in");
+                    router.push("/");
                 },
             },
         });

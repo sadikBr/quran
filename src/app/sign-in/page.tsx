@@ -50,7 +50,7 @@ export default function SignInPage() {
                         setLoading(true);
                     },
                     onSuccess: (_ctx) => {
-                        router.push("/");
+                        router.push("/dashboard");
                     },
                     onError: (ctx) => {
                         console.log(ctx.error);

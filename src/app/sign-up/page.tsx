@@ -64,7 +64,7 @@ export default function SignUpPage() {
                         setLoading(true);
                     },
                     onSuccess: (_ctx) => {
-                        router.push("/");
+                        router.push("/dashboard");
                     },
                     onError: (ctx) => {
                         console.log(ctx.error);
