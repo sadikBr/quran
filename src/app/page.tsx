@@ -18,12 +18,17 @@ export default async function Home() {
                     <SignOutButton />
                 </div>
             ) : (
-                <div className="flex gap-2 items-center">
-                    <Button asChild variant="link">
-                        <Link href="/sign-up">Sign Up</Link>
-                    </Button>
-                    <Button asChild>
-                        <Link href="/sign-in">Sign In</Link>
+                <div className="flex flex-col gap-4">
+                    <div className="flex gap-2 items-center">
+                        <Button asChild variant="link">
+                            <Link href="/sign-up">Sign Up</Link>
+                        </Button>
+                        <Button asChild>
+                            <Link href="/sign-in">Sign In</Link>
+                        </Button>
+                    </div>
+                    <Button asChild variant="secondary">
+                        <Link href="/quran">Start Reading</Link>
                     </Button>
                 </div>
             )}
