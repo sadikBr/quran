@@ -11,15 +11,15 @@ export default async function Home() {
     });
 
     return (
-        <div className="w-screen h-screen flex items-center justify-center">
-            {session ? (
-                <div className="flex flex-col gap-2">
-                    <div>Logged in as {session.user.name}</div>
-                    <SignOutButton />
-                </div>
-            ) : (
-                <div className="flex flex-col gap-4">
-                    <div className="flex gap-2 items-center">
+        <div className="w-screen h-screen flex flex-col gap-4 items-center justify-center">
+            <div className="flex flex-col gap-4">
+                {session ? (
+                    <div className="flex flex-col gap-4">
+                        <div>Logged in as {session.user.name}</div>
+                        <SignOutButton />
+                    </div>
+                ) : (
+                    <div className="flex gap-4 items-center">
                         <Button asChild variant="link">
                             <Link href="/sign-up">Sign Up</Link>
                         </Button>
@@ -27,14 +27,14 @@ export default async function Home() {
                             <Link href="/sign-in">Sign In</Link>
                         </Button>
                     </div>
-                    <Button asChild variant="secondary">
-                        <Link href="/quran/page/1">Start Reading</Link>
-                    </Button>
-                    <Button asChild variant="secondary">
-                        <Link href="/quran">Index</Link>
-                    </Button>
-                </div>
-            )}
+                )}
+                <Button asChild variant="secondary">
+                    <Link href="/quran/page/1">Start Reading</Link>
+                </Button>
+                <Button asChild variant="secondary">
+                    <Link href="/quran">Index</Link>
+                </Button>
+            </div>
         </div>
     );
 }
