@@ -15,8 +15,8 @@ export default function SurahFrame({ surah }: { surah: SurahType }) {
                 className={cn(
                     "flex items-center justify-between px-4 py-6 border-2 text-5xl",
                     surah.revelationType === "Meccan"
-                        ? "border-accent"
-                        : "border-primary",
+                        ? "border-accent text-accent"
+                        : "border-primary text-primary",
                 )}
             >
                 <p

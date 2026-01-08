@@ -29,7 +29,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className="dark">
+        <html lang="en">
             <body
                 className={`${oxanium.variable} ${firaCode.variable} ${merriweather.variable} antialiased`}
             >
