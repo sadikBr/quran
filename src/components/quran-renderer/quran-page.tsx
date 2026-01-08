@@ -9,7 +9,7 @@ export default async function QuranPage({ page }: { page: number }) {
     const pageData: PageData = await response.json();
 
     return (
-        <div className="rtl w-screen h-screen p-8 overflow-hidden flex flex-col gap-8">
+        <div className="rtl flex-1 p-8 overflow-auto flex flex-col justify-center gap-4">
             {Object.keys(pageData.data.surahs).map((surahNumber) => {
                 const surah = pageData.data.surahs[surahNumber];
                 const ayahs = pageData.data.ayahs.filter(

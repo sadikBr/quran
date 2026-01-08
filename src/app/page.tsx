@@ -28,7 +28,10 @@ export default async function Home() {
                         </Button>
                     </div>
                     <Button asChild variant="secondary">
-                        <Link href="/quran">Start Reading</Link>
+                        <Link href="/quran/page/1">Start Reading</Link>
+                    </Button>
+                    <Button asChild variant="secondary">
+                        <Link href="/quran">Index</Link>
                     </Button>
                 </div>
             )}

@@ -12,11 +12,11 @@ export default function Surah({
     return (
         <div>
             {ayahs[0].numberInSurah === 1 && (
-                <div className="surah-name text-center my-4">
+                <div className="surah-name text-primary text-6xl text-center my-2">
                     {getArabicNumber(surah.number)}
                 </div>
             )}
-            <div className="flex items-center justify-center flex-wrap gap-2">
+            <div className="space-x-2 text-center">
                 {ayahs.map((ayah) => {
                     return <Ayah key={ayah.number} ayah={ayah} />;
                 })}

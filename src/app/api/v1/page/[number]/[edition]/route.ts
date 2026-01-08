@@ -8,7 +8,6 @@ export const GET = async (
 
     const pageData: PageData = await getPageData(Number(number), edition);
 
-    console.log(pageData);
     return Response.json(pageData);
 };
 
