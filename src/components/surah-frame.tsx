@@ -7,13 +7,14 @@ export default function SurahFrame({ surah }: { surah: SurahType }) {
     return (
         <div
             className={cn(
+                "mb-4 ltr",
                 surah.revelationType === "Meccan" ? "bg-primary" : "bg-accent",
             )}
         >
             <Link
                 href={`/quran/surah/${surah.number}`}
                 className={cn(
-                    "flex items-center justify-between px-4 py-6 border-2 text-5xl",
+                    "flex items-center justify-between px-4 py-2 border-2 text-5xl",
                     surah.revelationType === "Meccan"
                         ? "border-accent text-accent"
                         : "border-primary text-primary",

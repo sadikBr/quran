@@ -236,6 +236,10 @@
     direction: rtl;
 }
 
+.ltr {
+    direction: ltr;
+}
+
 .surah-name {
     font-family: Surah;
 }
