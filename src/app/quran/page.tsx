@@ -1,4 +1,4 @@
-import SurahFrame from "@/components/surah-frame";
+import SurahFrame from "@/components/quran-renderer/surah-frame";
 import { SurahType } from "@/types";
 
 export default async function IndexPage() {

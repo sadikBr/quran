@@ -1,7 +1,7 @@
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import Ayah from "@/components/quran-renderer/ayah";
 import { AyahType, SurahType } from "@/types";
-import SurahFrame from "../surah-frame";
+import SurahFrame from "@/components/quran-renderer/surah-frame";
 
 export default function Surah({
     surah,
