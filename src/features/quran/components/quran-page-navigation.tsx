@@ -22,6 +22,7 @@ export default function QuranPageNavigation({ page }: { page: number }) {
             <div className="mx-auto flex max-w-5xl items-center justify-between p-4">
                 <Button
                     variant="outline"
+                    asChild
                     disabled={page <= QuranInfo.minPageNumber}
                 >
                     {page <= QuranInfo.minPageNumber ? (
@@ -46,6 +47,7 @@ export default function QuranPageNavigation({ page }: { page: number }) {
                 </form>
                 <Button
                     variant="outline"
+                    asChild
                     disabled={page >= QuranInfo.maxPageNumber}
                 >
                     {page >= QuranInfo.maxPageNumber ? (

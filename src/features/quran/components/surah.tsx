@@ -17,7 +17,11 @@ export default function Surah({
                 {ayahs[0].numberInSurah === 1 && (
                     <SurahFrame surah={surah} activateLink={false} />
                 )}
-                <div className="space-x-2 text-center">
+                <div
+                    dir="rtl"
+                    lang="ar"
+                    className="mt-5 border-y border-primary/15 py-5 text-center leading-[2.5] sm:py-7 sm:leading-[2.7]"
+                >
                     {ayahs.map((ayah) => {
                         return <Ayah key={ayah.number} ayah={ayah} />;
                     })}
