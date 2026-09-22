@@ -1,0 +1,49 @@
+import { BookOpen, House } from "lucide-react";
+import Link from "next/link";
+import type { ReactNode } from "react";
+
+import { Button } from "@/components/ui/button";
+
+export default function QuranLayout({ children }: { children: ReactNode }) {
+    return (
+        <section className="flex h-dvh flex-col overflow-hidden bg-background">
+            <header className="z-10 shrink-0 border-b bg-background/95 backdrop-blur">
+                <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
+                    <Link
+                        href="/quran"
+                        className="flex min-w-0 items-center gap-3 rounded-md outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                            <BookOpen aria-hidden="true" className="size-5" />
+                        </span>
+                        <span className="min-w-0">
+                            <span className="block truncate text-sm font-semibold tracking-wide text-foreground">
+                                Quran Reader
+                            </span>
+                            <span className="hidden text-xs text-muted-foreground sm:block">
+                                Read and reflect
+                            </span>
+                        </span>
+                    </Link>
+                    <nav
+                        aria-label="Quran navigation"
+                        className="flex items-center gap-2"
+                    >
+                        <Button asChild size="icon" variant="ghost">
+                            <Link aria-label="Home" href="/">
+                                <House aria-hidden="true" className="size-4" />
+                            </Link>
+                        </Button>
+                        <Button asChild size="sm" variant="ghost">
+                            <Link href="/quran">Surah index</Link>
+                        </Button>
+                        <Button asChild size="sm">
+                            <Link href="/quran/page/1">Start reading</Link>
+                        </Button>
+                    </nav>
+                </div>
+            </header>
+            <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
+        </section>
+    );
+}

@@ -10,19 +10,23 @@ export default async function Quran({
     const { number } = await params;
 
     return (
-        <div className="flex flex-col h-screen">
+        <div className="flex h-full min-h-0 flex-col">
             <QuranPage page={number} />
 
-            <div className="flex justify-between items-center p-4 border-t">
-                <Button variant="outline" disabled={number <= 1}>
-                    <Link href={`/quran/page/${Number(number) - 1}`}>
-                        Previous
-                    </Link>
-                </Button>
-                <span className="text-sm font-medium">Page {number}</span>
-                <Button variant="outline" disabled={number >= 604}>
-                    <Link href={`/quran/page/${Number(number) + 1}`}>Next</Link>
-                </Button>
+            <div className="border-t">
+                <div className="mx-auto flex max-w-5xl items-center justify-between p-4">
+                    <Button variant="outline" disabled={number <= 1}>
+                        <Link href={`/quran/page/${Number(number) - 1}`}>
+                            Previous
+                        </Link>
+                    </Button>
+                    <span className="text-sm font-medium">Page {number}</span>
+                    <Button variant="outline" disabled={number >= 604}>
+                        <Link href={`/quran/page/${Number(number) + 1}`}>
+                            Next
+                        </Link>
+                    </Button>
+                </div>
             </div>
         </div>
     );
