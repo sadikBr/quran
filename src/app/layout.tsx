@@ -3,6 +3,8 @@ import { Fira_Code, Merriweather, Oxanium } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { SettingsProvider } from "@/features/settings/settings-provider";
+import { ThemeProvider } from "@/components/theme-provider";
+import getPreferences from "@/features/settings/server/get-preferences";
 
 const oxanium = Oxanium({
     variable: "--font-sans",
@@ -24,20 +26,29 @@ export const metadata: Metadata = {
     description: "App to read Quran and track your memorization",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const preferences = await getPreferences();
+
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body
                 className={`${oxanium.variable} ${firaCode.variable} ${merriweather.variable} antialiased`}
             >
-                <SettingsProvider>
-                    <Toaster />
-                    {children}
-                </SettingsProvider>
+                <ThemeProvider
+                    attribute="class"
+                    enableSystem
+                    defaultTheme={preferences.theme}
+                    disableTransitionOnChange
+                >
+                    <SettingsProvider>
+                        <Toaster />
+                        {children}
+                    </SettingsProvider>
+                </ThemeProvider>
             </body>
         </html>
     );
