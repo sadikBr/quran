@@ -32,7 +32,7 @@ export default function SurahFrame({ surah }: { surah: SurahType }) {
                 </p>
 
                 <div className="text-center">
-                    <h2 className="surah-name">
+                    <h2 className="surah-name text-7xl">
                         {getArabicNumber(surah.number)}
                     </h2>
                     <h2 className="ayah text-xl">{surah.englishName}</h2>

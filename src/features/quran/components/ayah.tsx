@@ -4,7 +4,7 @@ import type { AyahType } from "../types";
 
 export default function Ayah({ ayah }: { ayah: AyahType }) {
     return (
-        <span className="ayah leading-relaxed text-2xl space-x-2">
+        <span className="ayah leading-relaxed text-3xl space-x-2">
             <span className={cn(ayah.sajda ? "text-primary" : "")}>
                 {ayah.text}
             </span>
