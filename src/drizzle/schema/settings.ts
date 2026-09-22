@@ -17,7 +17,7 @@ export const userSettings = pgTable("user_settings", {
     translationEdition: text("translation_edition")
         .notNull()
         .default("en.sahih"),
-    showTranslation: boolean("show_translation").notNull().default(true),
+    showTranslation: boolean("show_translation").notNull().default(false),
 
     createdAt,
     updatedAt,

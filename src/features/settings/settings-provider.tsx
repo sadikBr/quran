@@ -6,9 +6,15 @@ import { DEFAULT_PREFERENCES, type Preferences } from "./preferences";
 
 const SettingsContext = createContext<Preferences | undefined>(undefined);
 
-export function SettingsProvider({ children }: { children: ReactNode }) {
+export function SettingsProvider({
+    children,
+    preferences = DEFAULT_PREFERENCES,
+}: {
+    children: ReactNode;
+    preferences?: Preferences;
+}) {
     return (
-        <SettingsContext.Provider value={DEFAULT_PREFERENCES}>
+        <SettingsContext.Provider value={preferences}>
             {children}
         </SettingsContext.Provider>
     );

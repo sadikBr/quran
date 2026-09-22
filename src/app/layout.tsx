@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Fira_Code, Merriweather, Oxanium } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-import { SettingsProvider } from "@/features/settings/settings-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import getPreferences from "@/features/settings/server/get-preferences";
+import { SettingsProvider } from "@/features/settings/settings-provider";
 
 const oxanium = Oxanium({
     variable: "--font-sans",
@@ -44,7 +44,7 @@ export default async function RootLayout({
                     defaultTheme={preferences.theme}
                     disableTransitionOnChange
                 >
-                    <SettingsProvider>
+                    <SettingsProvider preferences={preferences}>
                         <Toaster />
                         {children}
                     </SettingsProvider>
