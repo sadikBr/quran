@@ -4,15 +4,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
 import { auth } from "@/features/auth/auth";
 import getPreferences from "@/features/settings/server/get-preferences";
+import PreferenceCard from "@/features/settings/components/settings-card";
 
 export default async function SettingsPage() {
     const session = await auth.api.getSession({
@@ -41,8 +35,7 @@ export default async function SettingsPage() {
                                 Settings
                             </p>
                             <p className="text-xs text-muted-foreground">
-                                {/*Signed in as {session.user.name}*/}
-                                Signed in as Brahim SADIK
+                                Signed in as {session.user.name}
                             </p>
                         </div>
                     </div>
@@ -98,41 +91,5 @@ export default async function SettingsPage() {
                 </section>
             </div>
         </main>
-    );
-}
-
-function PreferenceCard({
-    icon: Icon,
-    title,
-    description,
-    label,
-    value,
-}: {
-    icon: typeof Palette;
-    title: string;
-    description: string;
-    label: string;
-    value: string;
-}) {
-    return (
-        <Card className="gap-4 bg-card/80">
-            <CardHeader className="px-5">
-                <span className="mb-1 flex size-9 items-center justify-center rounded-md bg-accent text-accent-foreground">
-                    <Icon aria-hidden="true" className="size-5" />
-                </span>
-                <CardTitle>{title}</CardTitle>
-                <CardDescription className="leading-6">
-                    {description}
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="px-5">
-                <div className="rounded-md border bg-background/60 px-3 py-2">
-                    <p className="text-xs text-muted-foreground">{label}</p>
-                    <p className="mt-1 font-mono text-sm text-foreground">
-                        {value}
-                    </p>
-                </div>
-            </CardContent>
-        </Card>
     );
 }
