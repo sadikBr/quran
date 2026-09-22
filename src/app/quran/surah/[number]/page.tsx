@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Surah from "@/features/quran/components/surah";
 import getSurahData from "@/features/quran/server/get-surah";
 import QuranInfo from "@/lib/quran-info";
+import getPreferences from "@/features/settings/server/get-preferences";
 
 export default async function SurahPage({
     params,
@@ -18,9 +19,11 @@ export default async function SurahPage({
         notFound();
     }
 
+    const preferences = await getPreferences();
+
     const requests = [
-        getSurahData(number, "quran-simple"),
-        getSurahData(number, "en.sahih"),
+        getSurahData(number, preferences.arabicEdition),
+        getSurahData(number, preferences.translationEdition),
     ];
 
     const [surahData, translatedSurahData] = await Promise.all(requests);
@@ -32,6 +35,7 @@ export default async function SurahPage({
                     surah={surahData.surahMeta}
                     ayahs={surahData.ayahs}
                     translatedAyahs={translatedSurahData.ayahs}
+                    showTranslation={preferences.showTranslation}
                 />
             </div>
         </div>

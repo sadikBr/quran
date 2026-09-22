@@ -20,19 +20,17 @@ export default function QuranPageNavigation({ page }: { page: number }) {
     return (
         <div className="border-t">
             <div className="mx-auto flex max-w-5xl items-center justify-between p-4">
-                <Button
-                    variant="outline"
-                    asChild
-                    disabled={page <= QuranInfo.minPageNumber}
-                >
-                    {page <= QuranInfo.minPageNumber ? (
-                        "Previous"
-                    ) : (
+                {page <= QuranInfo.minPageNumber ? (
+                    <Button disabled variant="outline">
+                        Previous
+                    </Button>
+                ) : (
+                    <Button asChild variant="outline">
                         <Link href={`/quran/page/${Number(page) - 1}`}>
                             Previous
                         </Link>
-                    )}
-                </Button>
+                    </Button>
+                )}
                 <form onSubmit={submitForm}>
                     <Input
                         type="number"
@@ -45,19 +43,17 @@ export default function QuranPageNavigation({ page }: { page: number }) {
                         className="w-18"
                     />
                 </form>
-                <Button
-                    variant="outline"
-                    asChild
-                    disabled={page >= QuranInfo.maxPageNumber}
-                >
-                    {page >= QuranInfo.maxPageNumber ? (
-                        "Next"
-                    ) : (
+                {page >= QuranInfo.maxPageNumber ? (
+                    <Button disabled variant="outline">
+                        Next
+                    </Button>
+                ) : (
+                    <Button asChild variant="outline">
                         <Link href={`/quran/page/${Number(page) + 1}`}>
                             Next
                         </Link>
-                    )}
-                </Button>
+                    </Button>
+                )}
             </div>
         </div>
     );
