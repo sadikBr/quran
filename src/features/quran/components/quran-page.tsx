@@ -15,10 +15,11 @@ export default async function QuranPage({ page }: { page: number }) {
 
     const preferences = await getPreferences();
 
-    const requests = [
-        getQuranPageData(page, preferences.arabicEdition),
-        getQuranPageData(page, preferences.translationEdition),
-    ];
+    const requests = [getQuranPageData(page, preferences.arabicEdition)];
+
+    if (preferences.showTranslation) {
+        requests.push(getQuranPageData(page, preferences.translationEdition));
+    }
 
     const [pageData, translatedPageData] = await Promise.all(requests);
 
@@ -29,9 +30,11 @@ export default async function QuranPage({ page }: { page: number }) {
                 const ayahs = pageData.data.ayahs.filter(
                     (ayah) => ayah.surah.number === surah.number,
                 );
-                const translatedAyahs = translatedPageData.data.ayahs.filter(
-                    (ayah) => ayah.surah.number === surah.number,
-                );
+                const translatedAyahs = preferences.showTranslation
+                    ? translatedPageData.data.ayahs.filter(
+                          (ayah) => ayah.surah.number === surah.number,
+                      )
+                    : [];
 
                 return (
                     <Surah

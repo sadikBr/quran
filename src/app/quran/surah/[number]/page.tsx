@@ -21,10 +21,11 @@ export default async function SurahPage({
 
     const preferences = await getPreferences();
 
-    const requests = [
-        getSurahData(number, preferences.arabicEdition),
-        getSurahData(number, preferences.translationEdition),
-    ];
+    const requests = [getSurahData(number, preferences.arabicEdition)];
+
+    if (preferences.showTranslation) {
+        requests.push(getSurahData(number, preferences.translationEdition));
+    }
 
     const [surahData, translatedSurahData] = await Promise.all(requests);
 
@@ -34,7 +35,11 @@ export default async function SurahPage({
                 <Surah
                     surah={surahData.surahMeta}
                     ayahs={surahData.ayahs}
-                    translatedAyahs={translatedSurahData.ayahs}
+                    translatedAyahs={
+                        preferences.showTranslation
+                            ? translatedSurahData.ayahs
+                            : []
+                    }
                     showTranslation={preferences.showTranslation}
                 />
             </div>
