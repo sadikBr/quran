@@ -126,7 +126,11 @@ export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
 
             {surahsToDisplay.length > 0 ? (
                 surahsToDisplay.map((surah) => (
-                    <SurahFrame key={surah.number} surah={surah} />
+                    <SurahFrame
+                        key={surah.number}
+                        surah={surah}
+                        activateLink={true}
+                    />
                 ))
             ) : (
                 <div

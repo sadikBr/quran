@@ -1,7 +1,7 @@
 const QuranInfo = {
-    minPageNumber: 0,
+    minPageNumber: 1,
     maxPageNumber: 604,
-    minSurahNumber: 0,
+    minSurahNumber: 1,
     maxSurahNumber: 114,
 };
 

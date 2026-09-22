@@ -11,7 +11,9 @@ export default function Surah({
 }) {
     return (
         <div className="rtl">
-            {ayahs[0].numberInSurah === 1 && <SurahFrame surah={surah} />}
+            {ayahs[0].numberInSurah === 1 && (
+                <SurahFrame surah={surah} activateLink={false} />
+            )}
             <div className="space-x-2 text-center">
                 {ayahs.map((ayah) => {
                     return <Ayah key={ayah.number} ayah={ayah} />;
