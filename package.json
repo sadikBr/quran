@@ -7,6 +7,7 @@
         "build": "next build",
         "start": "next start",
         "lint": "biome check",
+        "lint-fix-unsafe": "biome check --write --unsafe",
         "format": "biome format --write",
         "db:push": "drizzle-kit push"
     },

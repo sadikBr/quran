@@ -1,10 +1,11 @@
 import "server-only";
 
 import type { SurahType } from "../types";
+import fetchQuranCloud from "./fetch-quran-cloud";
 
 export default async function getSurahsMeta(): Promise<SurahType[]> {
-    const url = "https://api.alquran.cloud/v1/meta";
-    const response = await fetch(url);
-    const data = await response.json();
+    const data = await fetchQuranCloud<{
+        data: { surahs: { references: SurahType[] } };
+    }>("/meta");
     return data.data.surahs.references;
 }

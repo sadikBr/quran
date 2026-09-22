@@ -1,19 +1,17 @@
 import "server-only";
 
 import type { AyahType, SurahType } from "../types";
+import fetchQuranCloud from "./fetch-quran-cloud";
 
 export default async function getSurahData(
     number: string,
     edition: string = "quran-simple",
 ) {
-    const url = `https://api.alquran.cloud/v1/surah/${number}/${edition}`;
-    const response = await fetch(url);
-    const data = await response.json();
+    const data = await fetchQuranCloud<{
+        data: SurahType & { ayahs: AyahType[]; edition: unknown };
+    }>(`/surah/${number}/${edition}`);
 
-    const ayahs: AyahType[] = data.data.ayahs;
-    delete data.data.ayahs;
-    delete data.data.edition;
-    const surahMeta: SurahType = data.data;
+    const { ayahs, edition: _edition, ...surahMeta } = data.data;
 
     return { ayahs, surahMeta };
 }
