@@ -1,8 +1,8 @@
+import { notFound } from "next/navigation";
 import QuranInfo from "@/lib/quran-info";
 import getQuranPageData from "../server/get-quran-page-data";
 import type { PageData } from "../types";
 import Surah from "./surah";
-import { notFound } from "next/navigation";
 
 export default async function QuranPage({ page }: { page: number }) {
     if (

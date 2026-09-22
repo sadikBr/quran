@@ -1,7 +1,7 @@
+import { notFound } from "next/navigation";
 import Surah from "@/features/quran/components/surah";
 import getSurahData from "@/features/quran/server/get-surah";
 import QuranInfo from "@/lib/quran-info";
-import { notFound } from "next/navigation";
 
 export default async function SurahPage({
     params,
