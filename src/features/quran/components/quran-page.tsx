@@ -1,12 +1,9 @@
-import { PageData } from "@/types";
+import getQuranPageData from "../server/get-quran-page-data";
+import type { PageData } from "../types";
 import Surah from "./surah";
 
 export default async function QuranPage({ page }: { page: number }) {
-    const url = `http://localhost:3000/api/v1/page/${page}/quran-simple`;
-
-    const response = await fetch(url);
-
-    const pageData: PageData = await response.json();
+    const pageData: PageData = await getQuranPageData(page, "quran-simple");
 
     return (
         <div className="flex-1 p-8 overflow-auto flex flex-col gap-4">

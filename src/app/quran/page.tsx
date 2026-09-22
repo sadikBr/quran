@@ -1,9 +1,9 @@
-import SurahFrame from "@/components/quran-renderer/surah-frame";
-import { SurahType } from "@/types";
+import SurahFrame from "@/features/quran/components/surah-frame";
+import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
+import type { SurahType } from "@/features/quran/types";
 
 export default async function IndexPage() {
-    const response = await fetch("http://localhost:3000/api/v1/surahs-meta");
-    const surahs: SurahType[] = await response.json();
+    const surahs: SurahType[] = await getSurahsMeta();
 
     return (
         <div className="p-4 max-w-lg mx-auto">

@@ -1,9 +1,10 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -20,9 +21,7 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { authClient } from "@/features/auth/auth-client";
 
 const formSchema = z
     .object({

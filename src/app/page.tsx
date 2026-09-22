@@ -1,9 +1,8 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import Link from "next/link";
 import SignOutButton from "@/components/signout-button";
+import { Button } from "@/components/ui/button";
+import { auth } from "@/features/auth/auth";
 
 export default async function Home() {
     const session = await auth.api.getSession({

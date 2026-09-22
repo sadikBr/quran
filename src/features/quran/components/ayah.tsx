@@ -1,6 +1,6 @@
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
-import { AyahType } from "@/types";
+import type { AyahType } from "../types";
 
 export default function Ayah({ ayah }: { ayah: AyahType }) {
     return (

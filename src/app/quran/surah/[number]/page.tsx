@@ -1,5 +1,5 @@
-import Surah from "@/components/quran-renderer/surah";
-import { AyahType, SurahType } from "@/types";
+import Surah from "@/features/quran/components/surah";
+import getSurahData from "@/features/quran/server/get-surah";
 
 export default async function SurahPage({
     params,
@@ -7,10 +7,7 @@ export default async function SurahPage({
     params: Promise<{ number: string }>;
 }) {
     const { number } = await params;
-    const response = await fetch(
-        `http://localhost:3000/api/v1/surah/${number}/quran-simple`,
-    );
-    const { surahMeta, ayahs } = await response.json();
+    const { surahMeta, ayahs } = await getSurahData(number, "quran-simple");
 
     return (
         <div className="p-8">

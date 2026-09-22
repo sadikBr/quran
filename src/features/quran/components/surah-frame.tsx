@@ -1,7 +1,7 @@
+import Link from "next/link";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
-import { SurahType } from "@/types";
-import Link from "next/link";
+import type { SurahType } from "../types";
 
 export default function SurahFrame({ surah }: { surah: SurahType }) {
     return (

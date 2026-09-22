@@ -1,6 +1,6 @@
-import QuranPage from "@/components/quran-renderer/quran-page";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import QuranPage from "@/features/quran/components/quran-page";
 
 export default async function Quran({
     params,
