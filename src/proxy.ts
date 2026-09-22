@@ -6,7 +6,8 @@ export async function proxy(request: NextRequest) {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
-    const isProtected = request.url.includes("settings");
+    const pathname = new URL(request.url).pathname;
+    const isProtected = ["/dashboard", "/settings"].includes(pathname);
 
     if (session && !isProtected) {
         return NextResponse.redirect(new URL("/", request.url));
@@ -20,5 +21,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/settings", "/sign-in", "/sign-up"],
+    matcher: ["/dashboard", "/settings", "/sign-in", "/sign-up"],
 };
