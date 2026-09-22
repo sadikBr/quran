@@ -66,7 +66,6 @@ export default function SignUpPage() {
                         router.push("/dashboard");
                     },
                     onError: (ctx) => {
-                        console.log(ctx.error);
                         toast(
                             "Something went wrong. You submitted the following values:",
                             {

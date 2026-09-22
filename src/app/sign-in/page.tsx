@@ -52,7 +52,6 @@ export default function SignInPage() {
                         router.push("/dashboard");
                     },
                     onError: (ctx) => {
-                        console.log(ctx.error);
                         toast(
                             `Something went wrong ${ctx.error.message}. You submitted the following values:`,
                             {
