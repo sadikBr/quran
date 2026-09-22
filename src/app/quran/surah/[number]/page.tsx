@@ -18,12 +18,21 @@ export default async function SurahPage({
         notFound();
     }
 
-    const { surahMeta, ayahs } = await getSurahData(number, "quran-simple");
+    const requests = [
+        getSurahData(number, "quran-simple"),
+        getSurahData(number, "en.sahih"),
+    ];
+
+    const [surahData, translatedSurahData] = await Promise.all(requests);
 
     return (
         <div className="h-full overflow-y-auto">
             <div className="mx-auto max-w-5xl p-4">
-                <Surah surah={surahMeta} ayahs={ayahs} />
+                <Surah
+                    surah={surahData.surahMeta}
+                    ayahs={surahData.ayahs}
+                    translatedAyahs={translatedSurahData.ayahs}
+                />
             </div>
         </div>
     );
