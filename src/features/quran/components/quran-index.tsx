@@ -100,7 +100,7 @@ export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
                     }
                     onClick={() => updateFilter(RevelationType.Meccan)}
                 >
-                    مكية
+                    Meccan
                 </Button>
                 <Button
                     variant={
@@ -114,7 +114,7 @@ export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
                     }
                     onClick={() => updateFilter(RevelationType.Medinan)}
                 >
-                    مدنية
+                    Medinan
                 </Button>
             </div>
 
