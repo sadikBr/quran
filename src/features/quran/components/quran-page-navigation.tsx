@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
@@ -30,12 +30,52 @@ export default function QuranPageNavigation({
     readingMode: ReadingMode;
 }) {
     const [inputValue, setInputValue] = useState(currentNumber.toString());
+    const [isNavigating, setIsNavigating] = useState(false);
     const router = useRouter();
     const { label, min, max } = navigationDetails[readingMode];
 
     useEffect(() => {
         setInputValue(currentNumber.toString());
+        setIsNavigating(false);
     }, [currentNumber]);
+
+    function navigateTo(number: number) {
+        setIsNavigating(true);
+        router.push(`/quran/${readingMode}/${number}`);
+    }
+
+    useEffect(() => {
+        function handleKeyDown(event: KeyboardEvent) {
+            if (
+                event.altKey ||
+                event.ctrlKey ||
+                event.metaKey ||
+                event.shiftKey ||
+                !(event.target instanceof HTMLElement) ||
+                event.target.closest(
+                    'input, textarea, select, [contenteditable="true"]',
+                )
+            ) {
+                return;
+            }
+
+            if (event.key === "ArrowLeft" && currentNumber > min) {
+                event.preventDefault();
+                setIsNavigating(true);
+                router.push(`/quran/${readingMode}/${currentNumber - 1}`);
+            }
+
+            if (event.key === "ArrowRight" && currentNumber < max) {
+                event.preventDefault();
+                setIsNavigating(true);
+                router.push(`/quran/${readingMode}/${currentNumber + 1}`);
+            }
+        }
+
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [currentNumber, max, min, readingMode, router]);
 
     function getHref(number: number) {
         return `/quran/${readingMode}/${number}`;
@@ -51,14 +91,18 @@ export default function QuranPageNavigation({
             return;
         }
 
-        router.push(getHref(number));
+        navigateTo(number);
     }
 
     return (
         <nav
-            className="shrink-0 border-t border-primary/15 bg-background/95 backdrop-blur-sm"
+            className="relative shrink-0 border-t border-primary/15 bg-background/95 backdrop-blur-sm"
             aria-label={`${label} navigation`}
+            aria-busy={isNavigating}
         >
+            {isNavigating && (
+                <span className="absolute inset-x-0 top-0 h-px animate-pulse bg-primary" />
+            )}
             <div className="mx-auto flex h-18 max-w-5xl items-center justify-between gap-3 px-4 sm:h-20">
                 {currentNumber <= min ? (
                     <Button
@@ -75,7 +119,22 @@ export default function QuranPageNavigation({
                         variant="ghost"
                         className="min-w-25 justify-start"
                     >
-                        <Link href={getHref(Number(currentNumber) - 1)}>
+                        <Link
+                            href={getHref(Number(currentNumber) - 1)}
+                            onClick={(event) => {
+                                if (
+                                    event.metaKey ||
+                                    event.ctrlKey ||
+                                    event.shiftKey ||
+                                    event.altKey
+                                ) {
+                                    return;
+                                }
+
+                                event.preventDefault();
+                                navigateTo(currentNumber - 1);
+                            }}
+                        >
                             <ArrowLeft aria-hidden="true" />
                             Previous
                         </Link>
@@ -105,7 +164,14 @@ export default function QuranPageNavigation({
                         aria-label={`Go to ${label.toLowerCase()}`}
                     />
                     <span className="px-1.5 text-xs text-muted-foreground">
-                        / {max}
+                        {isNavigating ? (
+                            <LoaderCircle
+                                aria-hidden="true"
+                                className="size-3.5 animate-spin text-primary"
+                            />
+                        ) : (
+                            `/ ${max}`
+                        )}
                     </span>
                 </form>
                 {currentNumber >= max ? (
@@ -123,7 +189,22 @@ export default function QuranPageNavigation({
                         variant="ghost"
                         className="min-w-25 justify-end"
                     >
-                        <Link href={getHref(Number(currentNumber) + 1)}>
+                        <Link
+                            href={getHref(Number(currentNumber) + 1)}
+                            onClick={(event) => {
+                                if (
+                                    event.metaKey ||
+                                    event.ctrlKey ||
+                                    event.shiftKey ||
+                                    event.altKey
+                                ) {
+                                    return;
+                                }
+
+                                event.preventDefault();
+                                navigateTo(currentNumber + 1);
+                            }}
+                        >
                             Next
                             <ArrowRight aria-hidden="true" />
                         </Link>
