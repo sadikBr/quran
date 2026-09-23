@@ -1,10 +1,5 @@
 import type { Metadata } from "next";
-import {
-    Fira_Code,
-    Merriweather,
-    Noto_Naskh_Arabic,
-    Oxanium,
-} from "next/font/google";
+import { Amiri, Fira_Code, Merriweather, Oxanium } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import ContentProtection from "@/components/content-protection";
@@ -28,9 +23,10 @@ const merriweather = Merriweather({
     subsets: ["latin"],
 });
 
-const notoNaskhArabic = Noto_Naskh_Arabic({
-    variable: "--font-arabic",
+const amiri = Amiri({
+    variable: "--font-tafsir",
     subsets: ["arabic"],
+    weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -48,7 +44,7 @@ export default async function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body
-                className={`${oxanium.variable} ${firaCode.variable} ${merriweather.variable} ${notoNaskhArabic.variable} antialiased`}
+                className={`${oxanium.variable} ${firaCode.variable} ${merriweather.variable} ${amiri.variable} antialiased`}
             >
                 <ThemeProvider
                     attribute="class"

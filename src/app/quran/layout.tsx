@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
 
 export default function QuranLayout({
     children,
@@ -9,8 +10,10 @@ export default function QuranLayout({
 }) {
     return (
         <section className="h-dvh select-none overflow-hidden bg-background">
-            {children}
-            {ayah}
+            <QuranAudioProvider>
+                {children}
+                {ayah}
+            </QuranAudioProvider>
         </section>
     );
 }

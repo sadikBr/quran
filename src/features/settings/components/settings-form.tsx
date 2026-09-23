@@ -5,10 +5,22 @@ import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import type { Edition } from "@/features/quran/types";
 import type { Preferences, ReadingMode, Theme } from "../preferences";
 import updatePreferences from "../server/update-preferences";
 import PreferenceCard from "./settings-card";
+import SettingField from "./settings-field";
+import SettingsSection from "./settings-section";
 
 export default function SettingsForm({
     preferences,
@@ -25,6 +37,12 @@ export default function SettingsForm({
     const { setTheme } = useTheme();
     const [values, setValues] = useState(preferences);
     const [isSaving, setIsSaving] = useState(false);
+    const arabicTextEditions = arabicEditions.filter(
+        (edition) => edition.format !== "audio",
+    );
+    const arabicAudioEditions = arabicEditions.filter(
+        (edition) => edition.format === "audio",
+    );
 
     function updateValue<Key extends keyof Preferences>(
         key: Key,
@@ -69,21 +87,30 @@ export default function SettingsForm({
                             description="Choose how the application looks across every page."
                         >
                             <SettingField label="Theme" htmlFor="theme">
-                                <select
-                                    id="theme"
+                                <Select
                                     value={values.theme}
-                                    onChange={(event) =>
-                                        updateValue(
-                                            "theme",
-                                            event.target.value as Theme,
-                                        )
+                                    onValueChange={(value) =>
+                                        updateValue("theme", value as Theme)
                                     }
-                                    className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 >
-                                    <option value="system">System</option>
-                                    <option value="light">Light</option>
-                                    <option value="dark">Dark</option>
-                                </select>
+                                    <SelectTrigger
+                                        id="theme"
+                                        className="w-full"
+                                    >
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="system">
+                                            System
+                                        </SelectItem>
+                                        <SelectItem value="light">
+                                            Light
+                                        </SelectItem>
+                                        <SelectItem value="dark">
+                                            Dark
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </SettingField>
                         </PreferenceCard>
                     </SettingsSection>
@@ -100,20 +127,30 @@ export default function SettingsForm({
                                 label="Reading mode"
                                 htmlFor="readingMode"
                             >
-                                <select
-                                    id="readingMode"
+                                <Select
                                     value={values.readingMode}
-                                    onChange={(event) =>
+                                    onValueChange={(value) =>
                                         updateValue(
                                             "readingMode",
-                                            event.target.value as ReadingMode,
+                                            value as ReadingMode,
                                         )
                                     }
-                                    className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 >
-                                    <option value="page">Read by page</option>
-                                    <option value="surah">Read by surah</option>
-                                </select>
+                                    <SelectTrigger
+                                        id="readingMode"
+                                        className="w-full"
+                                    >
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="page">
+                                            Read by page
+                                        </SelectItem>
+                                        <SelectItem value="surah">
+                                            Read by surah
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </SettingField>
                         </PreferenceCard>
 
@@ -121,28 +158,26 @@ export default function SettingsForm({
                             title="Show translation"
                             description="Display English beneath the Arabic text."
                         >
-                            <label
-                                htmlFor="show-translation"
-                                className="flex cursor-pointer items-center justify-between gap-3 rounded-md border bg-background/60 px-3 py-2.5"
-                            >
-                                <span className="text-sm font-medium">
+                            <div className="flex items-center justify-between gap-3 rounded-md border bg-background/60 px-3 py-2.5">
+                                <label
+                                    htmlFor="show-translation"
+                                    className="cursor-pointer text-sm font-medium"
+                                >
                                     {values.showTranslation
                                         ? "Shown"
                                         : "Hidden"}
-                                </span>
-                                <input
+                                </label>
+                                <Checkbox
                                     id="show-translation"
-                                    type="checkbox"
                                     checked={values.showTranslation}
-                                    onChange={(event) =>
+                                    onCheckedChange={(checked) =>
                                         updateValue(
                                             "showTranslation",
-                                            event.target.checked,
+                                            checked === true,
                                         )
                                     }
-                                    className="size-4 accent-primary"
                                 />
-                            </label>
+                            </div>
                         </PreferenceCard>
                     </SettingsSection>
                 </div>
@@ -153,29 +188,61 @@ export default function SettingsForm({
                 >
                     <PreferenceCard
                         title="Arabic edition"
-                        description="The Quran text edition used in the reader."
+                        description="Choose Quran text or an audio recitation. Audio editions enable ayah playback."
                     >
                         <SettingField label="Edition" htmlFor="arabic-edition">
-                            <select
-                                id="arabic-edition"
+                            <Select
                                 value={values.arabicEdition}
-                                onChange={(event) =>
-                                    updateValue(
-                                        "arabicEdition",
-                                        event.target.value,
-                                    )
+                                onValueChange={(value) =>
+                                    updateValue("arabicEdition", value)
                                 }
-                                className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
-                                {arabicEditions.map((edition) => (
-                                    <option
-                                        key={edition.identifier}
-                                        value={edition.identifier}
-                                    >
-                                        {edition.englishName || edition.name}
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger
+                                    id="arabic-edition"
+                                    className="w-full"
+                                >
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent position="popper">
+                                    <SelectGroup>
+                                        <SelectLabel>Quran text</SelectLabel>
+                                        {arabicTextEditions.map((edition) => (
+                                            <SelectItem
+                                                key={edition.identifier}
+                                                value={edition.identifier}
+                                            >
+                                                {edition.englishName ||
+                                                    edition.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                    {arabicAudioEditions.length > 0 && (
+                                        <SelectGroup>
+                                            <SelectLabel>
+                                                Audio recitations
+                                            </SelectLabel>
+                                            {arabicAudioEditions.map(
+                                                (edition) => (
+                                                    <SelectItem
+                                                        key={edition.identifier}
+                                                        value={
+                                                            edition.identifier
+                                                        }
+                                                    >
+                                                        <span>
+                                                            {edition.englishName ||
+                                                                edition.name}
+                                                        </span>
+                                                        <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.625rem] font-semibold tracking-wide text-primary uppercase">
+                                                            Audio
+                                                        </span>
+                                                    </SelectItem>
+                                                ),
+                                            )}
+                                        </SelectGroup>
+                                    )}
+                                </SelectContent>
+                            </Select>
                         </SettingField>
                     </PreferenceCard>
 
@@ -187,26 +254,30 @@ export default function SettingsForm({
                             label="English edition"
                             htmlFor="translation-edition"
                         >
-                            <select
-                                id="translation-edition"
+                            <Select
                                 value={values.translationEdition}
-                                onChange={(event) =>
-                                    updateValue(
-                                        "translationEdition",
-                                        event.target.value,
-                                    )
+                                onValueChange={(value) =>
+                                    updateValue("translationEdition", value)
                                 }
-                                className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
-                                {translationEditions.map((edition) => (
-                                    <option
-                                        key={edition.identifier}
-                                        value={edition.identifier}
-                                    >
-                                        {edition.englishName || edition.name}
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger
+                                    id="translation-edition"
+                                    className="w-full"
+                                >
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent position="popper">
+                                    {translationEditions.map((edition) => (
+                                        <SelectItem
+                                            key={edition.identifier}
+                                            value={edition.identifier}
+                                        >
+                                            {edition.englishName ||
+                                                edition.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </SettingField>
                     </PreferenceCard>
 
@@ -215,26 +286,30 @@ export default function SettingsForm({
                         description="Choose the commentary that will be used when you explore an ayah."
                     >
                         <SettingField label="Tafsir" htmlFor="tafsir-edition">
-                            <select
-                                id="tafsir-edition"
+                            <Select
                                 value={values.tafsirEdition}
-                                onChange={(event) =>
-                                    updateValue(
-                                        "tafsirEdition",
-                                        event.target.value,
-                                    )
+                                onValueChange={(value) =>
+                                    updateValue("tafsirEdition", value)
                                 }
-                                className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
-                                {tafsirEditions.map((edition) => (
-                                    <option
-                                        key={edition.identifier}
-                                        value={edition.identifier}
-                                    >
-                                        {edition.englishName || edition.name}
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger
+                                    id="tafsir-edition"
+                                    className="w-full"
+                                >
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent position="popper">
+                                    {tafsirEditions.map((edition) => (
+                                        <SelectItem
+                                            key={edition.identifier}
+                                            value={edition.identifier}
+                                        >
+                                            {edition.englishName ||
+                                                edition.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </SettingField>
                     </PreferenceCard>
                 </SettingsSection>
@@ -249,51 +324,5 @@ export default function SettingsForm({
                 </Button>
             </div>
         </form>
-    );
-}
-
-function SettingsSection({
-    eyebrow,
-    title,
-    children,
-}: {
-    eyebrow: string;
-    title: string;
-    children: React.ReactNode;
-}) {
-    return (
-        <section>
-            <p className="text-xs font-semibold tracking-[0.18em] text-primary">
-                {eyebrow}
-            </p>
-            <h2 className="mt-2 text-lg font-semibold tracking-tight">
-                {title}
-            </h2>
-            <div className="mt-5 divide-y border-y border-primary/15">
-                {children}
-            </div>
-        </section>
-    );
-}
-
-function SettingField({
-    label,
-    htmlFor,
-    children,
-}: {
-    label: string;
-    htmlFor: string;
-    children: React.ReactNode;
-}) {
-    return (
-        <div>
-            <label
-                htmlFor={htmlFor}
-                className="mb-2 block text-xs font-medium text-muted-foreground"
-            >
-                {label}
-            </label>
-            {children}
-        </div>
     );
 }

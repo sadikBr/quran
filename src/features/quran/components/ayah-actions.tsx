@@ -6,10 +6,13 @@ import {
     BookOpenText,
     Copy,
     NotebookPen,
+    Pause,
+    Play,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useQuranAudio } from "./quran-audio-provider";
 
 const actions = [
     {
@@ -31,6 +34,8 @@ export default function AyahActions({
     tafsirText,
     tafsirEditionName,
     tafsirDirection,
+    audioStreams,
+    globalAyahNumber,
     closeOnCopy = false,
 }: {
     surahName: string;
@@ -39,10 +44,15 @@ export default function AyahActions({
     tafsirText: string;
     tafsirEditionName: string;
     tafsirDirection: string;
+    audioStreams: string[];
+    globalAyahNumber: number;
     closeOnCopy?: boolean;
 }) {
     const router = useRouter();
     const [isTafsirVisible, setIsTafsirVisible] = useState(false);
+    const { activeAyahNumber, isPlaying, toggleAudio } = useQuranAudio();
+    const isPlayingThisAyah =
+        activeAyahNumber === globalAyahNumber && isPlaying;
 
     async function copyArabicText() {
         try {
@@ -90,12 +100,29 @@ export default function AyahActions({
                         </span>
                     </div>
                 </header>
+                <figure className="mt-7 rounded-xl bg-muted/50 px-5 py-4 sm:px-6 sm:py-5">
+                    <figcaption className="flex items-center justify-between gap-3 text-xs font-semibold tracking-[0.14em] text-primary">
+                        <span>QURAN</span>
+                        <span className="text-muted-foreground">
+                            AYAH {ayahNumber}
+                        </span>
+                    </figcaption>
+                    <p
+                        dir="rtl"
+                        className="ayah mt-3 text-center text-xl leading-loose text-foreground sm:text-2xl sm:leading-[2.1]"
+                    >
+                        {arabicText}
+                    </p>
+                </figure>
                 <article className="mt-8">
+                    <p className="text-xs font-semibold tracking-[0.16em] text-primary">
+                        TAFSIR
+                    </p>
                     <p
                         dir={tafsirDirection}
-                        className={`border-s-2 border-primary/60 py-1 pe-5 ps-5 text-card-foreground sm:pe-7 sm:ps-7 ${
+                        className={`mt-5 border-s-2 border-primary/60 py-1 pe-5 ps-5 text-card-foreground sm:pe-7 sm:ps-7 ${
                             tafsirDirection === "rtl"
-                                ? "font-[family-name:var(--font-arabic)] text-xl leading-[2.15] sm:text-2xl sm:leading-[2.2]"
+                                ? "font-(family-name:--font-tafsir) text-justify text-xl leading-loose sm:text-2xl sm:leading-[2.05]"
                                 : "font-serif text-lg leading-9 sm:text-xl sm:leading-10"
                         }`}
                     >
@@ -133,21 +160,47 @@ export default function AyahActions({
             </p>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <button
-                    type="button"
-                    onClick={copyArabicText}
-                    className="group rounded-xl bg-primary p-5 text-left text-primary-foreground transition-transform hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                    <span className="flex size-9 items-center justify-center rounded-lg bg-primary-foreground/15">
-                        <Copy aria-hidden="true" className="size-4" />
-                    </span>
-                    <span className="mt-5 block">
-                        <span className="font-medium">Copy Arabic text</span>
-                        <span className="mt-1 block text-sm leading-5 text-primary-foreground/75">
-                            Copy the text from your selected Quran edition.
+                {audioStreams.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={() =>
+                            toggleAudio(globalAyahNumber, audioStreams)
+                        }
+                        className="relative overflow-hidden rounded-xl bg-primary p-5 text-left text-primary-foreground transition-transform hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:col-span-2"
+                    >
+                        <span className="absolute -top-8 -right-6 size-28 rounded-full bg-primary-foreground/10" />
+                        <span className="relative flex items-center gap-4">
+                            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15 ring-1 ring-primary-foreground/20">
+                                {isPlayingThisAyah ? (
+                                    <Pause
+                                        aria-hidden="true"
+                                        className="size-4 fill-current"
+                                    />
+                                ) : (
+                                    <Play
+                                        aria-hidden="true"
+                                        className="ml-0.5 size-4 fill-current"
+                                    />
+                                )}
+                            </span>
+                            <span className="min-w-0 flex-1">
+                                <span className="text-xs font-semibold tracking-[0.14em] text-primary-foreground/70">
+                                    RECITATION
+                                </span>
+                                <span className="mt-1 block font-medium">
+                                    {isPlayingThisAyah
+                                        ? "Pause recitation"
+                                        : "Listen to ayah"}
+                                </span>
+                                <span className="mt-1 block text-sm text-primary-foreground/75">
+                                    {isPlayingThisAyah
+                                        ? "Recitation is playing."
+                                        : "Play this ayah using your selected recitation."}
+                                </span>
+                            </span>
                         </span>
-                    </span>
-                </button>
+                    </button>
+                )}
                 <button
                     type="button"
                     onClick={() => setIsTafsirVisible(true)}
@@ -163,6 +216,23 @@ export default function AyahActions({
                         <span className="mt-1 block text-sm leading-5 text-muted-foreground">
                             Explore commentary from your selected tafsir
                             edition.
+                        </span>
+                    </span>
+                </button>
+                <button
+                    type="button"
+                    onClick={copyArabicText}
+                    className="group rounded-xl border bg-card p-5 text-left transition-transform hover:-translate-y-0.5 hover:border-primary/40 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                    <span className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                        <Copy aria-hidden="true" className="size-4" />
+                    </span>
+                    <span className="mt-5 block">
+                        <span className="font-medium text-card-foreground">
+                            Copy Arabic text
+                        </span>
+                        <span className="mt-1 block text-sm leading-5 text-muted-foreground">
+                            Copy the text from your selected Quran edition.
                         </span>
                     </span>
                 </button>

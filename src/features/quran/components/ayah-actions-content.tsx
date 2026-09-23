@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import getPreferences from "@/features/settings/server/get-preferences";
+import getAyahAudioStreams from "../helpers/get-ayah-audio-streams";
 import getAyah from "../server/get-ayah";
 import getSurahData from "../server/get-surah";
 import AyahActions from "./ayah-actions";
@@ -36,6 +37,8 @@ export default async function AyahActionsContent({
                 tafsirAyah.edition.englishName || tafsirAyah.edition.name
             }
             tafsirDirection={tafsirAyah.edition.direction}
+            audioStreams={getAyahAudioStreams(ayah)}
+            globalAyahNumber={ayah.number}
             closeOnCopy={closeOnCopy}
         />
     );

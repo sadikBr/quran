@@ -2,31 +2,11 @@
 
 import { Pause, Play } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState } from "react";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
+import getAyahAudioStreams from "../helpers/get-ayah-audio-streams";
 import type { AyahType } from "../types";
-
-function hasAudio(ayah: AyahType) {
-    return (
-        ayah.audio !== undefined ||
-        (ayah.audioSecondary !== undefined && ayah.audioSecondary.length > 0)
-    );
-}
-
-function getAvailableStreams(ayah: AyahType) {
-    const streams: string[] = [];
-
-    if (ayah.audio !== undefined && ayah.audio.length > 0) {
-        streams.push(ayah.audio);
-    }
-
-    if (ayah.audioSecondary !== undefined && ayah.audioSecondary.length > 0) {
-        streams.push(...ayah.audioSecondary);
-    }
-
-    return streams;
-}
+import { useQuranAudio } from "./quran-audio-provider";
 
 export default function Ayah({
     ayah,
@@ -59,38 +39,22 @@ export default function Ayah({
 }
 
 function AyahPlayer({ ayah }: { ayah: AyahType }) {
-    const streams = getAvailableStreams(ayah);
-    const audioRef = useRef<HTMLAudioElement>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
+    const streams = getAyahAudioStreams(ayah);
+    const { activeAyahNumber, isPlaying, toggleAudio } = useQuranAudio();
 
-    async function togglePlayback() {
-        const audio = audioRef.current;
+    if (streams.length === 0) return null;
 
-        if (!audio) return;
-
-        if (audio.paused) {
-            try {
-                await audio.play();
-            } catch {
-                setIsPlaying(false);
-            }
-            return;
-        }
-
-        audio.pause();
-    }
-
-    if (!hasAudio(ayah)) return null;
+    const isPlayingThisAyah = activeAyahNumber === ayah.number && isPlaying;
 
     return (
         <>
             <button
                 type="button"
-                onClick={togglePlayback}
+                onClick={() => toggleAudio(ayah.number, streams)}
                 className="inline-flex size-6 translate-y-[-0.05em] items-center justify-center rounded-full border border-primary/30 bg-primary/8 align-middle text-primary transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                aria-label={`${isPlaying ? "Pause" : "Play"} ayah ${ayah.numberInSurah}`}
+                aria-label={`${isPlayingThisAyah ? "Pause" : "Play"} ayah ${ayah.numberInSurah}`}
             >
-                {isPlaying ? (
+                {isPlayingThisAyah ? (
                     <Pause className="size-3 fill-current" aria-hidden="true" />
                 ) : (
                     <Play
@@ -99,18 +63,6 @@ function AyahPlayer({ ayah }: { ayah: AyahType }) {
                     />
                 )}
             </button>{" "}
-            {/* biome-ignore lint/a11y/useMediaCaption: The recitation is operated through the labelled play button. */}
-            <audio
-                ref={audioRef}
-                className="hidden"
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-                onEnded={() => setIsPlaying(false)}
-            >
-                {streams.map((stream) => (
-                    <source key={stream} src={stream} type="audio/mpeg" />
-                ))}
-            </audio>
         </>
     );
 }
