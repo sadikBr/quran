@@ -6,10 +6,12 @@ import fetchQuranCloud from "./fetch-quran-cloud";
 
 export default async function getAyah(
     globalAyahNumber: number,
+    editionIdentifier?: string,
 ): Promise<AyahData> {
-    const preferences = await getPreferences();
+    const preferences = editionIdentifier ? null : await getPreferences();
+    const edition = editionIdentifier ?? preferences?.tafsirEdition;
     const response = await fetchQuranCloud<{ data: AyahData }>(
-        `/ayah/${globalAyahNumber}/${preferences.tafsirEdition}`,
+        `/ayah/${globalAyahNumber}/${edition}`,
     );
 
     return response.data;

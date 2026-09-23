@@ -5,6 +5,7 @@ import {
     Bookmark,
     BookOpenText,
     Copy,
+    LoaderCircle,
     NotebookPen,
     Pause,
     Play,
@@ -12,6 +13,15 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import getTafsirAyah from "../server/get-tafsir-ayah";
+import type { Edition } from "../types";
 import { useQuranAudio } from "./quran-audio-provider";
 
 const actions = [
@@ -33,9 +43,12 @@ export default function AyahActions({
     arabicText,
     tafsirText,
     tafsirEditionName,
+    tafsirEditionIdentifier,
     tafsirDirection,
     audioStreams,
     globalAyahNumber,
+    tafsirEditions,
+    canChooseTafsir,
     closeOnCopy = false,
 }: {
     surahName: string;
@@ -43,13 +56,25 @@ export default function AyahActions({
     arabicText: string;
     tafsirText: string;
     tafsirEditionName: string;
+    tafsirEditionIdentifier: string;
     tafsirDirection: string;
     audioStreams: string[];
     globalAyahNumber: number;
+    tafsirEditions: Edition[];
+    canChooseTafsir: boolean;
     closeOnCopy?: boolean;
 }) {
     const router = useRouter();
     const [isTafsirVisible, setIsTafsirVisible] = useState(false);
+    const [selectedTafsirIdentifier, setSelectedTafsirIdentifier] = useState(
+        tafsirEditionIdentifier,
+    );
+    const [selectedTafsir, setSelectedTafsir] = useState({
+        text: tafsirText,
+        editionName: tafsirEditionName,
+        direction: tafsirDirection,
+    });
+    const [isChangingTafsir, setIsChangingTafsir] = useState(false);
     const { activeAyahNumber, isPlaying, toggleAudio } = useQuranAudio();
     const isPlayingThisAyah =
         activeAyahNumber === globalAyahNumber && isPlaying;
@@ -64,6 +89,29 @@ export default function AyahActions({
             }
         } catch {
             toast.error("Unable to copy the Arabic text");
+        }
+    }
+
+    async function changeTafsirEdition(editionIdentifier: string) {
+        if (editionIdentifier === selectedTafsirIdentifier) return;
+
+        setIsChangingTafsir(true);
+
+        try {
+            const ayah = await getTafsirAyah(
+                globalAyahNumber,
+                editionIdentifier,
+            );
+            setSelectedTafsirIdentifier(editionIdentifier);
+            setSelectedTafsir({
+                text: ayah.text,
+                editionName: ayah.edition.englishName || ayah.edition.name,
+                direction: ayah.edition.direction,
+            });
+        } catch {
+            toast.error("We could not load that tafsir edition");
+        } finally {
+            setIsChangingTafsir(false);
         }
     }
 
@@ -95,9 +143,42 @@ export default function AyahActions({
                     </div>
                     <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                         <span>Selected edition</span>
-                        <span className="rounded-md bg-muted px-2 py-1 font-medium text-foreground">
-                            {tafsirEditionName}
-                        </span>
+                        {canChooseTafsir ? (
+                            <Select
+                                value={selectedTafsirIdentifier}
+                                onValueChange={changeTafsirEdition}
+                                disabled={isChangingTafsir}
+                            >
+                                <SelectTrigger
+                                    aria-label="Choose tafsir edition"
+                                    size="sm"
+                                    className="min-w-45 bg-muted/60 text-xs"
+                                >
+                                    <SelectValue placeholder="Choose tafsir edition" />
+                                    {isChangingTafsir && (
+                                        <LoaderCircle
+                                            aria-hidden="true"
+                                            className="size-3.5 animate-spin text-primary"
+                                        />
+                                    )}
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {tafsirEditions.map((edition) => (
+                                        <SelectItem
+                                            key={edition.identifier}
+                                            value={edition.identifier}
+                                        >
+                                            {edition.englishName ||
+                                                edition.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        ) : (
+                            <span className="rounded-md bg-muted px-2 py-1 font-medium text-foreground">
+                                {selectedTafsir.editionName}
+                            </span>
+                        )}
                     </div>
                 </header>
                 <figure className="mt-7 rounded-xl bg-muted/50 px-5 py-4 sm:px-6 sm:py-5">
@@ -114,19 +195,31 @@ export default function AyahActions({
                         {arabicText}
                     </p>
                 </figure>
-                <article className="mt-8">
+                <article
+                    className="mt-8 transition-opacity"
+                    aria-busy={isChangingTafsir}
+                >
                     <p className="text-xs font-semibold tracking-[0.16em] text-primary">
                         TAFSIR
                     </p>
+                    {isChangingTafsir && (
+                        <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                            <LoaderCircle
+                                aria-hidden="true"
+                                className="size-3.5 animate-spin text-primary"
+                            />
+                            Loading tafsir…
+                        </p>
+                    )}
                     <p
-                        dir={tafsirDirection}
-                        className={`mt-5 border-s-2 border-primary/60 py-1 pe-5 ps-5 text-card-foreground sm:pe-7 sm:ps-7 ${
-                            tafsirDirection === "rtl"
+                        dir={selectedTafsir.direction}
+                        className={`mt-5 border-s-2 border-primary/60 py-1 pe-5 ps-5 text-card-foreground transition-opacity sm:pe-7 sm:ps-7 ${
+                            selectedTafsir.direction === "rtl"
                                 ? "font-(family-name:--font-tafsir) text-justify text-xl leading-loose sm:text-2xl sm:leading-[2.05]"
                                 : "font-serif text-lg leading-9 sm:text-xl sm:leading-10"
-                        }`}
+                        } ${isChangingTafsir ? "opacity-35" : ""}`}
                     >
-                        {tafsirText}
+                        {selectedTafsir.text}
                     </p>
                 </article>
             </div>
