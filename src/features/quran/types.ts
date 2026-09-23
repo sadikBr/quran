@@ -13,6 +13,8 @@ export interface Data {
 
 export interface AyahType {
     number: number;
+    audio?: string;
+    audioSecondary?: string[];
     text: string;
     surah: SurahType;
     numberInSurah: number;
