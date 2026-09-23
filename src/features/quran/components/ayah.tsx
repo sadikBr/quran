@@ -28,7 +28,13 @@ function getAvailableStreams(ayah: AyahType) {
     return streams;
 }
 
-export default function Ayah({ ayah }: { ayah: AyahType }) {
+export default function Ayah({
+    ayah,
+    surahNumber,
+}: {
+    ayah: AyahType;
+    surahNumber: number;
+}) {
     return (
         <span className="ayah inline rounded-sm text-3xl leading-[inherit] text-foreground transition-colors hover:bg-primary/10 dark:hover:bg-primary/15 sm:text-4xl">
             <span
@@ -41,7 +47,7 @@ export default function Ayah({ ayah }: { ayah: AyahType }) {
             </span>{" "}
             <AyahPlayer ayah={ayah} />
             <Link
-                href={`/quran/ayah/${ayah.surah.number}/${ayah.numberInSurah}`}
+                href={`/quran/ayah/${surahNumber}/${ayah.numberInSurah}`}
                 scroll={false}
                 className="frame inline-block rounded-sm align-[0.08em] text-sidebar-accent transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label={`Open actions for ayah ${ayah.numberInSurah}`}

@@ -25,7 +25,13 @@ export default function Surah({
                     className="mt-5 border-y border-primary/15 py-5 text-center leading-[2.5] sm:py-7 sm:leading-[2.7]"
                 >
                     {ayahs.map((ayah) => {
-                        return <Ayah key={ayah.number} ayah={ayah} />;
+                        return (
+                            <Ayah
+                                key={ayah.number}
+                                ayah={ayah}
+                                surahNumber={surah.number}
+                            />
+                        );
                     })}
                 </div>
             </div>
