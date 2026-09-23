@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Settings, UserRound } from "lucide-react";
+import { LayoutDashboard, LogOut, Settings, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { authClient } from "@/features/auth/auth-client";
@@ -72,6 +72,12 @@ export default function UserMenu({
                     </p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                    <Link href="/dashboard">
+                        <LayoutDashboard aria-hidden="true" />
+                        Dashboard
+                    </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                     <Link href="/profile">
                         <UserRound aria-hidden="true" />
