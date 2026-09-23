@@ -1,4 +1,5 @@
 import "server-only";
+
 import type { Edition, EditionData } from "../types";
 import fetchQuranCloud from "./fetch-quran-cloud";
 

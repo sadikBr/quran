@@ -37,7 +37,7 @@ export default function AyahActionsModal({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="ayah-actions-title"
-                className="relative z-10 w-full max-w-lg rounded-2xl border bg-background p-5 shadow-2xl sm:p-6"
+                className="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto rounded-2xl border bg-background p-5 shadow-2xl sm:p-7"
             >
                 <button
                     ref={closeButtonRef}

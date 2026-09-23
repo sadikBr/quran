@@ -32,6 +32,10 @@ export interface AyahType {
     sajda: boolean;
 }
 
+export interface AyahData extends AyahType {
+    edition: Edition;
+}
+
 export interface SurahType {
     number: number;
     name: string;
