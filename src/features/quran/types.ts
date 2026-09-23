@@ -4,6 +4,12 @@ export interface PageData {
     data: Data;
 }
 
+export interface EditionData {
+    code: number;
+    status: string;
+    data: Edition[];
+}
+
 export interface Data {
     number: number;
     ayahs: AyahType[];

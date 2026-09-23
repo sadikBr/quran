@@ -1,9 +1,8 @@
 import { relations } from "drizzle-orm";
 import { boolean, pgEnum, pgTable, text } from "drizzle-orm/pg-core";
-
+import { THEMES } from "@/features/settings/preferences";
 import { createdAt, updatedAt } from "../helpers";
 import { user } from "./auth-schema";
-import { THEMES } from "@/features/settings/preferences";
 
 export const Theme = pgEnum("theme", THEMES);
 

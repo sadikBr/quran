@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { AyahType, SurahType } from "../types";
+import type { AyahType, Edition, SurahType } from "../types";
 import fetchQuranCloud from "./fetch-quran-cloud";
 
 export default async function getSurahData(
@@ -8,10 +8,10 @@ export default async function getSurahData(
     edition: string = "quran-simple",
 ) {
     const data = await fetchQuranCloud<{
-        data: SurahType & { ayahs: AyahType[]; edition: unknown };
+        data: SurahType & { ayahs: AyahType[]; edition: Edition };
     }>(`/surah/${number}/${edition}`);
 
-    const { ayahs, edition: _edition, ...surahMeta } = data.data;
+    const { ayahs, edition: editionData, ...surahMeta } = data.data;
 
-    return { ayahs, surahMeta };
+    return { ayahs, edition: editionData, surahMeta };
 }

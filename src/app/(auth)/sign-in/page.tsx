@@ -1,7 +1,8 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { useRouter } from "next/navigation";
+import { ArrowRight, BookOpen } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -29,7 +30,6 @@ const formSchema = z.object({
 });
 
 export default function SignInPage() {
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
 
     const form = useForm({
@@ -49,29 +49,15 @@ export default function SignInPage() {
                         setLoading(true);
                     },
                     onSuccess: (_ctx) => {
-                        router.push("/dashboard");
+                        window.location.assign("/dashboard");
                     },
                     onError: (ctx) => {
-                        toast(
-                            `Something went wrong ${ctx.error.message}. You submitted the following values:`,
-                            {
-                                description: (
-                                    <pre className="mt-2 overflow-x-auto rounded-md p-4">
-                                        <code>
-                                            {JSON.stringify(value, null, 2)}
-                                        </code>
-                                    </pre>
-                                ),
-                                position: "top-left",
-                                classNames: {
-                                    content: "flex flex-col gap-2",
-                                },
-                                style: {
-                                    "--border-radius":
-                                        "calc(var(--radius)  + 4px)",
-                                } as React.CSSProperties,
-                            },
-                        );
+                        setLoading(false);
+                        toast.error("We couldn't sign you in.", {
+                            description:
+                                ctx.error.message ||
+                                "Please check your email and password, then try again.",
+                        });
                     },
                 },
             );
@@ -79,15 +65,23 @@ export default function SignInPage() {
     });
 
     return (
-        <div className="w-screen h-screen flex items-center justify-center">
-            <Card className="w-full sm:max-w-md">
-                <CardHeader>
-                    <CardTitle>Welcome Back</CardTitle>
-                    <CardDescription>
-                        Keep the progress of your Quran journey going!
+        <main className="flex min-h-dvh items-center justify-center px-4 py-24 sm:px-6">
+            <Card className="w-full max-w-md gap-0 border-primary/15 bg-card/90 py-0 shadow-lg backdrop-blur-sm">
+                <CardHeader className="border-b border-primary/10 px-6 pt-7 pb-6 sm:px-8">
+                    <span className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <BookOpen aria-hidden="true" className="size-5" />
+                    </span>
+                    <p className="text-xs font-semibold tracking-[0.18em] text-primary">
+                        WELCOME BACK
+                    </p>
+                    <CardTitle className="text-2xl tracking-tight">
+                        Continue your reading.
+                    </CardTitle>
+                    <CardDescription className="leading-6">
+                        Sign in to return to your saved reading preferences.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-6 py-6 sm:px-8">
                     <form
                         id="signin-form"
                         onSubmit={(e) => {
@@ -172,8 +166,8 @@ export default function SignInPage() {
                         </FieldGroup>
                     </form>
                 </CardContent>
-                <CardFooter>
-                    <Field orientation="horizontal">
+                <CardFooter className="flex-col items-stretch gap-5 border-t border-primary/10 px-6 py-6 sm:px-8">
+                    <Field orientation="horizontal" className="justify-end">
                         <Button
                             type="button"
                             variant="outline"
@@ -183,10 +177,20 @@ export default function SignInPage() {
                         </Button>
                         <Button type="submit" form="signin-form">
                             {loading ? "Signing In..." : "Sign In"}
+                            <ArrowRight aria-hidden="true" />
                         </Button>
                     </Field>
+                    <p className="text-center text-sm text-muted-foreground">
+                        New to Quran Reader?{" "}
+                        <Link
+                            href="/sign-up"
+                            className="font-medium text-primary underline-offset-4 hover:underline"
+                        >
+                            Create an account
+                        </Link>
+                    </p>
                 </CardFooter>
             </Card>
-        </div>
+        </main>
     );
 }

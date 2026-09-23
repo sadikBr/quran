@@ -1,7 +1,8 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { useRouter } from "next/navigation";
+import { ArrowRight, BookOpen } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -39,7 +40,6 @@ const formSchema = z
     });
 
 export default function SignUpPage() {
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
 
     const form = useForm({
@@ -63,29 +63,15 @@ export default function SignUpPage() {
                         setLoading(true);
                     },
                     onSuccess: (_ctx) => {
-                        router.push("/dashboard");
+                        window.location.assign("/dashboard");
                     },
                     onError: (ctx) => {
-                        toast(
-                            "Something went wrong. You submitted the following values:",
-                            {
-                                description: (
-                                    <pre className="mt-2 overflow-x-auto rounded-md p-4">
-                                        <code>
-                                            {JSON.stringify(value, null, 2)}
-                                        </code>
-                                    </pre>
-                                ),
-                                position: "top-left",
-                                classNames: {
-                                    content: "flex flex-col gap-2",
-                                },
-                                style: {
-                                    "--border-radius":
-                                        "calc(var(--radius)  + 4px)",
-                                } as React.CSSProperties,
-                            },
-                        );
+                        setLoading(false);
+                        toast.error("We couldn't create your account.", {
+                            description:
+                                ctx.error.message ||
+                                "Please review your details and try again.",
+                        });
                     },
                 },
             );
@@ -93,16 +79,23 @@ export default function SignUpPage() {
     });
 
     return (
-        <div className="w-screen h-screen flex items-center justify-center">
-            <Card className="w-full sm:max-w-md">
-                <CardHeader>
-                    <CardTitle>Create a New Account</CardTitle>
-                    <CardDescription>
-                        Want to start reading and memorizing the Quran? Join us
-                        and track your progress!
+        <main className="flex min-h-dvh items-center justify-center px-4 py-24 sm:px-6">
+            <Card className="w-full max-w-lg gap-0 border-primary/15 bg-card/90 py-0 shadow-lg backdrop-blur-sm">
+                <CardHeader className="border-b border-primary/10 px-6 pt-7 pb-6 sm:px-8">
+                    <span className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <BookOpen aria-hidden="true" className="size-5" />
+                    </span>
+                    <p className="text-xs font-semibold tracking-[0.18em] text-primary">
+                        BEGIN YOUR JOURNEY
+                    </p>
+                    <CardTitle className="text-2xl tracking-tight">
+                        Create your reading space.
+                    </CardTitle>
+                    <CardDescription className="leading-6">
+                        Save your preferences and make the Quran reader yours.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-6 py-6 sm:px-8">
                     <form
                         id="signup-form"
                         onSubmit={(e) => {
@@ -296,8 +289,8 @@ export default function SignUpPage() {
                         </FieldGroup>
                     </form>
                 </CardContent>
-                <CardFooter>
-                    <Field orientation="horizontal">
+                <CardFooter className="flex-col items-stretch gap-5 border-t border-primary/10 px-6 py-6 sm:px-8">
+                    <Field orientation="horizontal" className="justify-end">
                         <Button
                             type="button"
                             variant="outline"
@@ -307,10 +300,20 @@ export default function SignUpPage() {
                         </Button>
                         <Button type="submit" form="signup-form">
                             {loading ? "Signing Up..." : "Sign Up"}
+                            <ArrowRight aria-hidden="true" />
                         </Button>
                     </Field>
+                    <p className="text-center text-sm text-muted-foreground">
+                        Already have an account?{" "}
+                        <Link
+                            href="/sign-in"
+                            className="font-medium text-primary underline-offset-4 hover:underline"
+                        >
+                            Sign in
+                        </Link>
+                    </p>
                 </CardFooter>
             </Card>
-        </div>
+        </main>
     );
 }

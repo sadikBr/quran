@@ -1,4 +1,4 @@
-import type { AyahType, SurahType } from "../types";
+import type { AyahType, Edition, SurahType } from "../types";
 import Ayah from "./ayah";
 import SurahFrame from "./surah-frame";
 
@@ -7,11 +7,13 @@ export default function Surah({
     ayahs,
     translatedAyahs,
     showTranslation,
+    translationEdition,
 }: {
     surah: SurahType;
     ayahs: AyahType[];
     translatedAyahs: AyahType[];
     showTranslation: boolean;
+    translationEdition?: Edition;
 }) {
     return (
         <>
@@ -42,7 +44,9 @@ export default function Surah({
                             English translation
                         </h2>
                         <p className="text-xs text-muted-foreground">
-                            Saheeh International
+                            {translationEdition?.englishName ??
+                                translationEdition?.name ??
+                                "Translation"}
                         </p>
                     </div>
                     <div className="mt-5 space-y-3 text-base leading-8 text-card-foreground/90 sm:text-[1.05rem]">

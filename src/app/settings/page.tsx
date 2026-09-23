@@ -1,12 +1,13 @@
-import { BookOpen, Languages, Palette, SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
+import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
+import SettingsForm from "@/features/settings/components/settings-form";
 import getPreferences from "@/features/settings/server/get-preferences";
-import PreferenceCard from "@/features/settings/components/settings-card";
 
 export default async function SettingsPage() {
     const session = await auth.api.getSession({
@@ -17,7 +18,19 @@ export default async function SettingsPage() {
         redirect("/sign-in");
     }
 
-    const preferences = await getPreferences();
+    const [preferences, editions] = await Promise.all([
+        getPreferences(),
+        getAvailableQuranEditions(),
+    ]);
+
+    const arabicEditions = editions.filter(
+        (edition) => edition.type === "quran" && edition.language === "ar",
+    );
+
+    const translationEditions = editions.filter(
+        (edition) =>
+            edition.type === "translation" && edition.language === "en",
+    );
 
     return (
         <main className="min-h-dvh bg-background p-4 sm:p-8">
@@ -52,42 +65,15 @@ export default async function SettingsPage() {
                         Make the reader yours.
                     </h1>
                     <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">
-                        These are your current reading preferences. Editable
-                        controls and saved settings will be available here soon.
+                        Choose how the reader looks and which Quran editions you
+                        want to read.
                     </p>
 
-                    <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                        <PreferenceCard
-                            icon={Palette}
-                            title="Appearance"
-                            description="Choose how the application looks across every page."
-                            label="Current theme"
-                            value={preferences.theme}
-                        />
-                        <PreferenceCard
-                            icon={BookOpen}
-                            title="Arabic edition"
-                            description="The Quran text edition used in the reader."
-                            label="Current edition"
-                            value={preferences.arabicEdition}
-                        />
-                        <PreferenceCard
-                            icon={Languages}
-                            title="Translation"
-                            description="Set the English translation shown with the Arabic text."
-                            label="Current edition"
-                            value={preferences.translationEdition}
-                        />
-                        <PreferenceCard
-                            icon={SlidersHorizontal}
-                            title="Reading display"
-                            description="Control whether translations appear below each surah."
-                            label="Translations"
-                            value={
-                                preferences.showTranslation ? "Shown" : "Hidden"
-                            }
-                        />
-                    </div>
+                    <SettingsForm
+                        preferences={preferences}
+                        arabicEditions={arabicEditions}
+                        translationEditions={translationEditions}
+                    />
                 </section>
             </div>
         </main>

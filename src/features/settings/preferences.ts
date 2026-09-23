@@ -1,3 +1,5 @@
+import z from "zod";
+
 export const THEMES = ["system", "light", "dark"] as const;
 
 export type Theme = (typeof THEMES)[number];
@@ -15,3 +17,10 @@ export const DEFAULT_PREFERENCES: Preferences = {
     translationEdition: "en.sahih",
     showTranslation: false,
 };
+
+export const preferencesZodSchema = z.object({
+    theme: z.enum(THEMES),
+    arabicEdition: z.string().min(1),
+    translationEdition: z.string().min(1),
+    showTranslation: z.boolean(),
+});

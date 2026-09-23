@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
+import getPreferences from "@/features/settings/server/get-preferences";
 import QuranInfo from "@/lib/quran-info";
 import getQuranPageData from "../server/get-quran-page-data";
 import Surah from "./surah";
-import getPreferences from "@/features/settings/server/get-preferences";
 
 export default async function QuranPage({ page }: { page: number }) {
     if (
@@ -43,6 +43,7 @@ export default async function QuranPage({ page }: { page: number }) {
                         ayahs={ayahs}
                         translatedAyahs={translatedAyahs}
                         showTranslation={preferences.showTranslation}
+                        translationEdition={translatedPageData?.data.edition}
                     />
                 );
             })}

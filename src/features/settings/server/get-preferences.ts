@@ -1,11 +1,11 @@
 import "server-only";
 
-import { DEFAULT_PREFERENCES, type Preferences } from "../preferences";
-import { auth } from "@/features/auth/auth";
-import { headers } from "next/headers";
-import { userSettings } from "@/drizzle/schema";
-import db from "@/drizzle/db";
 import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
+import db from "@/drizzle/db";
+import { userSettings } from "@/drizzle/schema";
+import { auth } from "@/features/auth/auth";
+import { DEFAULT_PREFERENCES, type Preferences } from "../preferences";
 
 export default async function getPreferences(): Promise<Preferences> {
     var session = await auth.api.getSession({

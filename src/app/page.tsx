@@ -37,9 +37,9 @@ export default async function Home() {
                 <header className="flex h-20 items-center justify-between gap-4">
                     <Link
                         href="/"
-                        className="flex items-center gap-3 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                        <span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                        <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:-rotate-3">
                             <BookOpen aria-hidden="true" className="size-5" />
                         </span>
                         <span className="text-sm font-semibold tracking-wide">

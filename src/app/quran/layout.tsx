@@ -11,9 +11,9 @@ export default function QuranLayout({ children }: { children: ReactNode }) {
                 <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
                     <Link
                         href="/quran"
-                        className="flex min-w-0 items-center gap-3 rounded-md outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring"
+                        className="group flex min-w-0 items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:-rotate-3">
                             <BookOpen aria-hidden="true" className="size-5" />
                         </span>
                         <span className="min-w-0">
