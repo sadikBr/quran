@@ -1,9 +1,8 @@
 import { ArrowRight, BookOpen, ChartNoAxesCombined, Heart } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
-
-import SignOutButton from "@/components/signout-button";
 import { Button } from "@/components/ui/button";
+import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
@@ -78,12 +77,10 @@ export default async function Home() {
                     </Link>
 
                     {session ? (
-                        <div className="flex items-center gap-2">
-                            <span className="hidden text-sm text-muted-foreground sm:block">
-                                Salaam, {session.user.name}
-                            </span>
-                            <SignOutButton />
-                        </div>
+                        <UserMenu
+                            name={session.user.name}
+                            image={session.user.image}
+                        />
                     ) : (
                         <div className="flex items-center gap-2">
                             <Button asChild size="sm" variant="ghost">

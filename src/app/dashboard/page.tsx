@@ -9,6 +9,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
@@ -80,6 +81,10 @@ export default async function DashboardPage() {
                             Quran Reader
                         </span>
                     </Link>
+                    <UserMenu
+                        name={session.user.name}
+                        image={session.user.image}
+                    />
                 </header>
 
                 <section className="py-10 sm:py-14">

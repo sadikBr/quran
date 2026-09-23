@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
 import SettingsForm from "@/features/settings/components/settings-form";
@@ -50,22 +51,10 @@ export default async function SettingsPage() {
                         </span>
                         Quran Reader
                     </Link>
-                    <div className="flex items-center gap-3">
-                        <div className="hidden text-right sm:block">
-                            <p className="text-xs font-semibold tracking-wide text-muted-foreground">
-                                PERSONAL READER
-                            </p>
-                            <p className="mt-0.5 text-sm font-medium">
-                                {session.user.name}
-                            </p>
-                        </div>
-                        <span className="flex size-9 items-center justify-center rounded-lg border bg-card/70 text-primary shadow-sm">
-                            <SlidersHorizontal
-                                aria-hidden="true"
-                                className="size-4"
-                            />
-                        </span>
-                    </div>
+                    <UserMenu
+                        name={session.user.name}
+                        image={session.user.image}
+                    />
                 </header>
 
                 <section className="py-10 sm:py-14">
