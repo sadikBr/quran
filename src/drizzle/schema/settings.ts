@@ -1,10 +1,11 @@
 import { relations } from "drizzle-orm";
 import { boolean, pgEnum, pgTable, text } from "drizzle-orm/pg-core";
-import { THEMES } from "@/features/settings/preferences";
+import { READING_MODES, THEMES } from "@/features/settings/preferences";
 import { createdAt, updatedAt } from "../helpers";
 import { user } from "./auth-schema";
 
 export const Theme = pgEnum("theme", THEMES);
+export const ReadingMode = pgEnum("reading_mode", READING_MODES);
 
 export const userSettings = pgTable("user_settings", {
     userId: text("user_id")
@@ -17,6 +18,7 @@ export const userSettings = pgTable("user_settings", {
         .notNull()
         .default("en.sahih"),
     showTranslation: boolean("show_translation").notNull().default(false),
+    readingMode: ReadingMode("reading_mode").notNull().default("page"),
 
     createdAt,
     updatedAt,

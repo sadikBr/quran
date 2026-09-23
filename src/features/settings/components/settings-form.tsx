@@ -7,7 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import type { Edition } from "@/features/quran/types";
-import type { Preferences, Theme } from "../preferences";
+import type { Preferences, ReadingMode, Theme } from "../preferences";
 import updatePreferences from "../server/update-preferences";
 import PreferenceCard from "./settings-card";
 
@@ -78,6 +78,29 @@ export default function SettingsForm({
                             <option value="system">System</option>
                             <option value="light">Light</option>
                             <option value="dark">Dark</option>
+                        </select>
+                    </SettingField>
+                </PreferenceCard>
+
+                <PreferenceCard
+                    icon={Palette}
+                    title="Reading Mode"
+                    description="Choose the way you would like to read the quran."
+                >
+                    <SettingField label="Reading Mode" htmlFor="readingMode">
+                        <select
+                            id="readingMode"
+                            value={values.readingMode}
+                            onChange={(event) =>
+                                updateValue(
+                                    "readingMode",
+                                    event.target.value as ReadingMode,
+                                )
+                            }
+                            className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                            <option value="page">Read by page</option>
+                            <option value="surah">Read by surah</option>
                         </select>
                     </SettingField>
                 </PreferenceCard>

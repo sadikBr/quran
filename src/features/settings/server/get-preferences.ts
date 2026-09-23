@@ -31,5 +31,6 @@ export default async function getPreferences(): Promise<Preferences> {
         arabicEdition: settings.arabicEdition,
         translationEdition: settings.translationEdition,
         showTranslation: settings.showTranslation,
+        readingMode: settings.readingMode,
     };
 }

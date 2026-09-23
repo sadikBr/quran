@@ -18,9 +18,7 @@ export default function Surah({
     return (
         <>
             <div className="rtl">
-                {ayahs[0].numberInSurah === 1 && (
-                    <SurahFrame surah={surah} activateLink={false} />
-                )}
+                {ayahs[0].numberInSurah === 1 && <SurahFrame surah={surah} />}
                 <div
                     dir="rtl"
                     lang="ar"

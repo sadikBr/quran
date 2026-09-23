@@ -5,6 +5,8 @@ import Link from "next/link";
 import SignOutButton from "@/components/signout-button";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
+import getReadingHref from "@/features/quran/helpers/get-reading-href";
+import getPreferences from "@/features/settings/server/get-preferences";
 
 const features = [
     {
@@ -30,6 +32,9 @@ export default async function Home() {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
+
+    const preferences = await getPreferences();
+    const href = getReadingHref(1, preferences);
 
     return (
         <main className="min-h-dvh overflow-hidden bg-background bg-[radial-gradient(ellipse_80%_45%_at_50%_0%,oklch(0.9_0.05_74.9889/0.42),transparent_70%)]">
@@ -80,7 +85,7 @@ export default async function Home() {
                         </p>
                         <div className="mt-8 flex flex-wrap gap-3">
                             <Button asChild size="lg">
-                                <Link href="/quran/page/1">
+                                <Link href={href}>
                                     Start reading
                                     <ArrowRight aria-hidden="true" />
                                 </Link>

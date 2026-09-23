@@ -11,7 +11,7 @@ export default async function Quran({
     return (
         <div className="flex h-full min-h-0 flex-col">
             <QuranPage page={number} />
-            <QuranPageNavigation page={number} />
+            <QuranPageNavigation currentNumber={number} readingMode="page" />
         </div>
     );
 }

@@ -12,6 +12,8 @@ import { redirect } from "next/navigation";
 import SignOutButton from "@/components/signout-button";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
+import getPreferences from "@/features/settings/server/get-preferences";
+import getReadingHref from "@/features/quran/helpers/get-reading-href";
 
 const upcomingFeatures = [
     {
@@ -35,6 +37,8 @@ export default async function DashboardPage() {
     if (!session) {
         redirect("/sign-in");
     }
+
+    const preferences = await getPreferences();
 
     return (
         <main className="min-h-dvh bg-background p-4 sm:p-8">
@@ -90,7 +94,7 @@ export default async function DashboardPage() {
                         </div>
                         <div className="mt-5 flex shrink-0 flex-wrap gap-3 sm:mt-0">
                             <Button asChild>
-                                <Link href="/quran/page/1">
+                                <Link href={getReadingHref(1, preferences)}>
                                     Start reading
                                     <ArrowRight aria-hidden="true" />
                                 </Link>

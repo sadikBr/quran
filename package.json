@@ -10,7 +10,8 @@
         "lint-fix-unsafe": "biome check --write --unsafe",
         "format": "biome format --write",
         "db:push": "drizzle-kit push",
-        "db:generate": "drizzle-kit generate"
+        "db:generate": "drizzle-kit generate",
+        "db:migrate": "drizzle-kit migrate"
     },
     "dependencies": {
         "@radix-ui/react-label": "^2.1.8",

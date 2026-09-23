@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useSettings } from "@/features/settings/settings-provider";
+import getReadingHref from "../helpers/get-reading-href";
 import type { SurahType } from "../types";
 import SurahFrame from "./surah-frame";
 
@@ -30,6 +32,7 @@ export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
     const [revelationTypeFilter, setRevelationTypeFilter] =
         useState<RevelationType>();
     const [searchFilter, setSearchFilter] = useState<string>("");
+    const preferences = useSettings();
 
     const surahsToDisplay = useMemo(() => {
         var filteredSurahs = [...surahs];
@@ -129,7 +132,7 @@ export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
                     <SurahFrame
                         key={surah.number}
                         surah={surah}
-                        activateLink={true}
+                        href={getReadingHref(surah.number, preferences)}
                     />
                 ))
             ) : (
