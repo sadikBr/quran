@@ -2,14 +2,12 @@ import {
     ArrowRight,
     BookOpen,
     ChartNoAxesCombined,
-    Settings,
     Target,
 } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import SignOutButton from "@/components/signout-button";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
@@ -82,15 +80,6 @@ export default async function DashboardPage() {
                             Quran Reader
                         </span>
                     </Link>
-                    <div className="flex items-center gap-2">
-                        <Button asChild size="sm" variant="outline">
-                            <Link href="/settings">
-                                <Settings aria-hidden="true" />
-                                Settings
-                            </Link>
-                        </Button>
-                        <SignOutButton />
-                    </div>
                 </header>
 
                 <section className="py-10 sm:py-14">
