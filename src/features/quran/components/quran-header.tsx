@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 
 export default function QuranHeader({
     startReadingHref,
+    startReadingLabel = "Start reading",
     showSurahIndex,
 }: {
     startReadingHref?: string;
+    startReadingLabel?: string;
     showSurahIndex?: boolean;
 }) {
     return (
@@ -39,7 +41,9 @@ export default function QuranHeader({
                     )}
                     {startReadingHref && (
                         <Button asChild size="sm">
-                            <Link href={startReadingHref}>Start reading</Link>
+                            <Link href={startReadingHref}>
+                                {startReadingLabel}
+                            </Link>
                         </Button>
                     )}
                 </nav>

@@ -5,7 +5,8 @@ import Link from "next/link";
 import SignOutButton from "@/components/signout-button";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
-import getReadingHref from "@/features/quran/helpers/get-reading-href";
+import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
+import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 
 const features = [
@@ -24,7 +25,8 @@ const features = [
     {
         icon: ChartNoAxesCombined,
         title: "Track your progress",
-        description: "Memorization goals and review progress are coming soon.",
+        description:
+            "Keep your reading journey close at hand in your personal dashboard.",
     },
 ];
 
@@ -33,8 +35,31 @@ export default async function Home() {
         headers: await headers(),
     });
 
-    const preferences = await getPreferences();
-    const href = getReadingHref(1, preferences);
+    const [preferences, readingProgress] = await Promise.all([
+        getPreferences(),
+        getReadingProgress(),
+    ]);
+    const savedNumber =
+        preferences.readingMode === "page"
+            ? readingProgress.lastPageNumber
+            : readingProgress.lastSurahNumber;
+    const href = `/quran/${preferences.readingMode}/${savedNumber ?? 1}`;
+    let continueReadingLabel = "Start reading";
+
+    if (savedNumber !== null) {
+        continueReadingLabel = `Continue from page ${savedNumber}`;
+
+        if (preferences.readingMode === "surah") {
+            const surahs = await getSurahsMeta().catch(() => []);
+            const surahName = surahs.find(
+                (surah) => surah.number === savedNumber,
+            )?.englishName;
+
+            continueReadingLabel = surahName
+                ? `Continue with ${surahName}`
+                : "Continue reading";
+        }
+    }
 
     return (
         <main className="min-h-dvh overflow-hidden bg-background bg-[radial-gradient(ellipse_80%_45%_at_50%_0%,oklch(0.9_0.05_74.9889/0.42),transparent_70%)]">
@@ -83,22 +108,48 @@ export default async function Home() {
                             Read the Quran at your own pace, find any surah with
                             ease, and build a meaningful daily practice.
                         </p>
-                        <div className="mt-8 flex flex-wrap gap-3">
-                            <Button asChild size="lg">
-                                <Link href={href}>
-                                    Start reading
-                                    <ArrowRight aria-hidden="true" />
-                                </Link>
-                            </Button>
-                            <Button asChild size="lg" variant="outline">
-                                <Link href="/quran">Browse surahs</Link>
-                            </Button>
-                            {session && (
-                                <Button asChild size="lg" variant="ghost">
-                                    <Link href="/dashboard">My dashboard</Link>
+                        {session ? (
+                            <div className="mt-8">
+                                <Button asChild size="lg">
+                                    <Link href="/dashboard">
+                                        My dashboard
+                                        <ArrowRight aria-hidden="true" />
+                                    </Link>
                                 </Button>
-                            )}
-                        </div>
+                                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                                    <Link
+                                        href={href}
+                                        className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-primary focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    >
+                                        {continueReadingLabel}
+                                    </Link>
+                                    <span
+                                        aria-hidden="true"
+                                        className="text-border"
+                                    >
+                                        ·
+                                    </span>
+                                    <Link
+                                        href="/quran"
+                                        className="transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    >
+                                        Browse surahs
+                                    </Link>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mt-8 flex flex-wrap gap-3">
+                                <Button asChild size="lg">
+                                    <Link href={href}>
+                                        Start reading
+                                        <ArrowRight aria-hidden="true" />
+                                    </Link>
+                                </Button>
+                                <Button asChild size="lg" variant="outline">
+                                    <Link href="/quran">Browse surahs</Link>
+                                </Button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="mt-16 grid gap-4 md:grid-cols-3">

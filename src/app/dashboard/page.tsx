@@ -12,8 +12,9 @@ import { redirect } from "next/navigation";
 import SignOutButton from "@/components/signout-button";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
+import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
+import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
-import getReadingHref from "@/features/quran/helpers/get-reading-href";
 
 const upcomingFeatures = [
     {
@@ -38,7 +39,33 @@ export default async function DashboardPage() {
         redirect("/sign-in");
     }
 
-    const preferences = await getPreferences();
+    const [preferences, readingProgress] = await Promise.all([
+        getPreferences(),
+        getReadingProgress(),
+    ]);
+    const savedNumber =
+        preferences.readingMode === "page"
+            ? readingProgress.lastPageNumber
+            : readingProgress.lastSurahNumber;
+    const currentNumber = savedNumber ?? 1;
+    const readingLabel = preferences.readingMode === "page" ? "page" : "surah";
+    const continueReadingHref = `/quran/${preferences.readingMode}/${currentNumber}`;
+    let readingHeading = `Begin with ${readingLabel} ${currentNumber}.`;
+
+    if (savedNumber !== null) {
+        readingHeading = `Continue from ${readingLabel} ${currentNumber}.`;
+
+        if (preferences.readingMode === "surah") {
+            const surahs = await getSurahsMeta().catch(() => []);
+            const surahName = surahs.find(
+                (surah) => surah.number === savedNumber,
+            )?.englishName;
+
+            readingHeading = surahName
+                ? `Continue with ${surahName}.`
+                : "Continue reading.";
+        }
+    }
 
     return (
         <main className="min-h-dvh bg-background p-4 sm:p-8">
@@ -85,17 +112,20 @@ export default async function DashboardPage() {
                                 CONTINUE YOUR READING
                             </p>
                             <h2 className="mt-2 text-2xl font-semibold">
-                                Begin with the Quran.
+                                {readingHeading}
                             </h2>
                             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-                                Browse the surah index or open the first page to
-                                begin a focused reading session.
+                                {savedNumber
+                                    ? "Pick up exactly where you left off in your preferred reading mode."
+                                    : "Start your reading journey in your preferred reading mode."}
                             </p>
                         </div>
                         <div className="mt-5 flex shrink-0 flex-wrap gap-3 sm:mt-0">
                             <Button asChild>
-                                <Link href={getReadingHref(1, preferences)}>
-                                    Start reading
+                                <Link href={continueReadingHref}>
+                                    {savedNumber
+                                        ? "Continue reading"
+                                        : "Start reading"}
                                     <ArrowRight aria-hidden="true" />
                                 </Link>
                             </Button>

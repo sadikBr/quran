@@ -1,49 +1,23 @@
-import type { Palette } from "lucide-react";
 import type { ReactNode } from "react";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
 
 export default function PreferenceCard({
-    icon: Icon,
     title,
     description,
-    label,
-    value,
     children,
 }: {
-    icon: typeof Palette;
     title: string;
     description: string;
-    label?: string;
-    value?: string;
-    children?: ReactNode;
+    children: ReactNode;
 }) {
     return (
-        <Card className="gap-4 bg-card/80">
-            <CardHeader className="px-5">
-                <span className="mb-1 flex size-9 items-center justify-center rounded-md bg-accent text-accent-foreground">
-                    <Icon aria-hidden="true" className="size-5" />
-                </span>
-                <CardTitle>{title}</CardTitle>
-                <CardDescription className="leading-6">
+        <section className="grid gap-3 py-5 first:pt-0 sm:grid-cols-[minmax(0,1fr)_11rem] sm:items-center sm:gap-8">
+            <div>
+                <h2 className="font-medium text-foreground">{title}</h2>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
                     {description}
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="px-5">
-                {children ?? (
-                    <div className="rounded-md border bg-background/60 px-3 py-2">
-                        <p className="text-xs text-muted-foreground">{label}</p>
-                        <p className="mt-1 font-mono text-sm text-foreground">
-                            {value}
-                        </p>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
+                </p>
+            </div>
+            <div>{children}</div>
+        </section>
     );
 }

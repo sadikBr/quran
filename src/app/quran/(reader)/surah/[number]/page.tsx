@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import QuranPageNavigation from "@/features/quran/components/quran-page-navigation";
 import Surah from "@/features/quran/components/surah";
 import getSurahData from "@/features/quran/server/get-surah";
+import ReadingProgressTracker from "@/features/reading-progress/components/reading-progress-tracker";
 import getPreferences from "@/features/settings/server/get-preferences";
 import QuranInfo from "@/lib/quran-info";
 
@@ -33,6 +34,7 @@ export default async function SurahPage({
 
     return (
         <div className="flex h-full min-h-0 flex-col">
+            <ReadingProgressTracker locationType="surah" number={surahNumber} />
             <div className="flex-1 overflow-y-auto">
                 <div className="mx-auto max-w-5xl p-4">
                     <Surah

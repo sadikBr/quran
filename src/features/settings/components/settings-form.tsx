@@ -1,6 +1,5 @@
 "use client";
 
-import { BookOpen, Languages, Palette, SlidersHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useState } from "react";
@@ -51,157 +50,199 @@ export default function SettingsForm({
 
     return (
         <form
-            className="mt-8"
+            className="mt-12"
             onSubmit={(event) => {
                 event.preventDefault();
                 savePreferences();
             }}
         >
-            <div className="grid gap-4 sm:grid-cols-2">
-                <PreferenceCard
-                    icon={Palette}
-                    title="Appearance"
-                    description="Choose how the application looks across every page."
-                >
-                    <SettingField label="Theme" htmlFor="theme">
-                        <select
-                            id="theme"
-                            value={values.theme}
-                            onChange={(event) =>
-                                updateValue(
-                                    "theme",
-                                    event.target.value as Theme,
-                                )
-                            }
-                            className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                            <option value="system">System</option>
-                            <option value="light">Light</option>
-                            <option value="dark">Dark</option>
-                        </select>
-                    </SettingField>
-                </PreferenceCard>
-
-                <PreferenceCard
-                    icon={Palette}
-                    title="Reading Mode"
-                    description="Choose the way you would like to read the quran."
-                >
-                    <SettingField label="Reading Mode" htmlFor="readingMode">
-                        <select
-                            id="readingMode"
-                            value={values.readingMode}
-                            onChange={(event) =>
-                                updateValue(
-                                    "readingMode",
-                                    event.target.value as ReadingMode,
-                                )
-                            }
-                            className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                            <option value="page">Read by page</option>
-                            <option value="surah">Read by surah</option>
-                        </select>
-                    </SettingField>
-                </PreferenceCard>
-
-                <PreferenceCard
-                    icon={BookOpen}
-                    title="Arabic edition"
-                    description="The Quran text edition used in the reader."
-                >
-                    <SettingField label="Edition" htmlFor="arabic-edition">
-                        <select
-                            id="arabic-edition"
-                            value={values.arabicEdition}
-                            onChange={(event) =>
-                                updateValue("arabicEdition", event.target.value)
-                            }
-                            className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                            {arabicEditions.map((edition) => (
-                                <option
-                                    key={edition.identifier}
-                                    value={edition.identifier}
-                                >
-                                    {edition.englishName || edition.name}
-                                </option>
-                            ))}
-                        </select>
-                    </SettingField>
-                </PreferenceCard>
-
-                <PreferenceCard
-                    icon={Languages}
-                    title="Translation"
-                    description="Set the English translation shown with the Arabic text."
-                >
-                    <SettingField
-                        label="English edition"
-                        htmlFor="translation-edition"
+            <div className="grid gap-12 lg:grid-cols-2 lg:gap-x-16">
+                <div className="space-y-12">
+                    <SettingsSection
+                        eyebrow="APPEARANCE"
+                        title="A comfortable environment"
                     >
-                        <select
-                            id="translation-edition"
-                            value={values.translationEdition}
-                            onChange={(event) =>
-                                updateValue(
-                                    "translationEdition",
-                                    event.target.value,
-                                )
-                            }
-                            className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        <PreferenceCard
+                            title="Theme"
+                            description="Choose how the application looks across every page."
                         >
-                            {translationEditions.map((edition) => (
-                                <option
-                                    key={edition.identifier}
-                                    value={edition.identifier}
+                            <SettingField label="Theme" htmlFor="theme">
+                                <select
+                                    id="theme"
+                                    value={values.theme}
+                                    onChange={(event) =>
+                                        updateValue(
+                                            "theme",
+                                            event.target.value as Theme,
+                                        )
+                                    }
+                                    className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 >
-                                    {edition.englishName || edition.name}
-                                </option>
-                            ))}
-                        </select>
-                    </SettingField>
-                </PreferenceCard>
+                                    <option value="system">System</option>
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                </select>
+                            </SettingField>
+                        </PreferenceCard>
+                    </SettingsSection>
 
-                <PreferenceCard
-                    icon={SlidersHorizontal}
-                    title="Reading display"
-                    description="Control whether translations appear below each surah."
-                >
-                    <label
-                        htmlFor="show-translation"
-                        className="flex cursor-pointer items-center justify-between gap-4 rounded-md border bg-background/60 px-3 py-2.5"
+                    <SettingsSection
+                        eyebrow="READING FLOW"
+                        title="Follow your own pace"
                     >
-                        <span>
-                            <span className="block text-sm font-medium">
-                                Show translation
-                            </span>
-                            <span className="block text-xs text-muted-foreground">
-                                Display English beneath the Arabic text.
-                            </span>
-                        </span>
-                        <input
-                            id="show-translation"
-                            type="checkbox"
-                            checked={values.showTranslation}
-                            onChange={(event) =>
-                                updateValue(
-                                    "showTranslation",
-                                    event.target.checked,
-                                )
-                            }
-                            className="size-4 accent-primary"
-                        />
-                    </label>
-                </PreferenceCard>
+                        <PreferenceCard
+                            title="Reading mode"
+                            description="Choose the way you would like to move through the Quran."
+                        >
+                            <SettingField
+                                label="Reading mode"
+                                htmlFor="readingMode"
+                            >
+                                <select
+                                    id="readingMode"
+                                    value={values.readingMode}
+                                    onChange={(event) =>
+                                        updateValue(
+                                            "readingMode",
+                                            event.target.value as ReadingMode,
+                                        )
+                                    }
+                                    className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                    <option value="page">Read by page</option>
+                                    <option value="surah">Read by surah</option>
+                                </select>
+                            </SettingField>
+                        </PreferenceCard>
+
+                        <PreferenceCard
+                            title="Show translation"
+                            description="Display English beneath the Arabic text."
+                        >
+                            <label
+                                htmlFor="show-translation"
+                                className="flex cursor-pointer items-center justify-between gap-3 rounded-md border bg-background/60 px-3 py-2.5"
+                            >
+                                <span className="text-sm font-medium">
+                                    {values.showTranslation
+                                        ? "Shown"
+                                        : "Hidden"}
+                                </span>
+                                <input
+                                    id="show-translation"
+                                    type="checkbox"
+                                    checked={values.showTranslation}
+                                    onChange={(event) =>
+                                        updateValue(
+                                            "showTranslation",
+                                            event.target.checked,
+                                        )
+                                    }
+                                    className="size-4 accent-primary"
+                                />
+                            </label>
+                        </PreferenceCard>
+                    </SettingsSection>
+                </div>
+
+                <SettingsSection
+                    eyebrow="QURAN TEXT"
+                    title="Choose your editions"
+                >
+                    <PreferenceCard
+                        title="Arabic edition"
+                        description="The Quran text edition used in the reader."
+                    >
+                        <SettingField label="Edition" htmlFor="arabic-edition">
+                            <select
+                                id="arabic-edition"
+                                value={values.arabicEdition}
+                                onChange={(event) =>
+                                    updateValue(
+                                        "arabicEdition",
+                                        event.target.value,
+                                    )
+                                }
+                                className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                {arabicEditions.map((edition) => (
+                                    <option
+                                        key={edition.identifier}
+                                        value={edition.identifier}
+                                    >
+                                        {edition.englishName || edition.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </SettingField>
+                    </PreferenceCard>
+
+                    <PreferenceCard
+                        title="English translation"
+                        description="Set the translation shown alongside the Arabic text."
+                    >
+                        <SettingField
+                            label="English edition"
+                            htmlFor="translation-edition"
+                        >
+                            <select
+                                id="translation-edition"
+                                value={values.translationEdition}
+                                onChange={(event) =>
+                                    updateValue(
+                                        "translationEdition",
+                                        event.target.value,
+                                    )
+                                }
+                                className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                {translationEditions.map((edition) => (
+                                    <option
+                                        key={edition.identifier}
+                                        value={edition.identifier}
+                                    >
+                                        {edition.englishName || edition.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </SettingField>
+                    </PreferenceCard>
+                </SettingsSection>
             </div>
 
-            <div className="mt-6 flex justify-end border-t pt-6">
+            <div className="mt-4 flex flex-col gap-4 border-t border-primary/15 pt-7 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm leading-6 text-muted-foreground">
+                    Changes will apply to your next reading session.
+                </p>
                 <Button type="submit" disabled={isSaving}>
                     {isSaving ? "Saving…" : "Save preferences"}
                 </Button>
             </div>
         </form>
+    );
+}
+
+function SettingsSection({
+    eyebrow,
+    title,
+    children,
+}: {
+    eyebrow: string;
+    title: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <section>
+            <p className="text-xs font-semibold tracking-[0.18em] text-primary">
+                {eyebrow}
+            </p>
+            <h2 className="mt-2 text-lg font-semibold tracking-tight">
+                {title}
+            </h2>
+            <div className="mt-5 divide-y border-y border-primary/15">
+                {children}
+            </div>
+        </section>
     );
 }
 

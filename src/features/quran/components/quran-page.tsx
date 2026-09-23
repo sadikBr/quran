@@ -6,7 +6,7 @@ import Surah from "./surah";
 
 export default async function QuranPage({ page }: { page: number }) {
     if (
-        isNaN(page) ||
+        Number.isNaN(page) ||
         page < QuranInfo.minPageNumber ||
         page > QuranInfo.maxPageNumber
     ) {
