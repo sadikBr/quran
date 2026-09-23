@@ -14,10 +14,12 @@ export default function SettingsForm({
     preferences,
     arabicEditions,
     translationEditions,
+    tafsirEditions,
 }: {
     preferences: Preferences;
     arabicEditions: Edition[];
     translationEditions: Edition[];
+    tafsirEditions: Edition[];
 }) {
     const router = useRouter();
     const { setTheme } = useTheme();
@@ -197,6 +199,34 @@ export default function SettingsForm({
                                 className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
                                 {translationEditions.map((edition) => (
+                                    <option
+                                        key={edition.identifier}
+                                        value={edition.identifier}
+                                    >
+                                        {edition.englishName || edition.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </SettingField>
+                    </PreferenceCard>
+
+                    <PreferenceCard
+                        title="Tafsir edition"
+                        description="Choose the commentary that will be used when you explore an ayah."
+                    >
+                        <SettingField label="Tafsir" htmlFor="tafsir-edition">
+                            <select
+                                id="tafsir-edition"
+                                value={values.tafsirEdition}
+                                onChange={(event) =>
+                                    updateValue(
+                                        "tafsirEdition",
+                                        event.target.value,
+                                    )
+                                }
+                                className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                {tafsirEditions.map((edition) => (
                                     <option
                                         key={edition.identifier}
                                         value={edition.identifier}

@@ -17,6 +17,7 @@ export const userSettings = pgTable("user_settings", {
     translationEdition: text("translation_edition")
         .notNull()
         .default("en.sahih"),
+    tafsirEdition: text("tafsir_edition").notNull().default("ar.muyassar"),
     showTranslation: boolean("show_translation").notNull().default(false),
     readingMode: ReadingMode("reading_mode").notNull().default("page"),
 

@@ -31,6 +31,10 @@ export default async function SettingsPage() {
             edition.type === "translation" && edition.language === "en",
     );
 
+    const tafsirEditions = editions.filter(
+        (edition) => edition.type === "tafsir",
+    );
+
     return (
         <main className="min-h-dvh overflow-hidden bg-background bg-[radial-gradient(ellipse_80%_45%_at_50%_0%,oklch(0.9_0.05_74.9889/0.42),transparent_70%)]">
             <div className="mx-auto max-w-5xl px-4">
@@ -86,6 +90,7 @@ export default async function SettingsPage() {
                         preferences={preferences}
                         arabicEditions={arabicEditions}
                         translationEditions={translationEditions}
+                        tafsirEditions={tafsirEditions}
                     />
                 </section>
             </div>

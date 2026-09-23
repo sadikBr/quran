@@ -30,6 +30,7 @@ export default async function getPreferences(): Promise<Preferences> {
         theme: settings.theme,
         arabicEdition: settings.arabicEdition,
         translationEdition: settings.translationEdition,
+        tafsirEdition: settings.tafsirEdition,
         showTranslation: settings.showTranslation,
         readingMode: settings.readingMode,
     };
