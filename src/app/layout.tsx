@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fira_Code, Merriweather, Oxanium } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import ContentProtection from "@/components/content-protection";
 import { ThemeProvider } from "@/components/theme-provider";
 import ThemePreferenceSync from "@/features/settings/components/theme-preference-sync";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -46,6 +47,7 @@ export default async function RootLayout({
                     disableTransitionOnChange
                 >
                     <SettingsProvider preferences={preferences}>
+                        <ContentProtection />
                         <ThemePreferenceSync />
                         <Toaster
                             closeButton

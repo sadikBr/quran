@@ -214,6 +214,15 @@
     }
     body {
         @apply bg-background text-foreground;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    input,
+    textarea,
+    [contenteditable="true"] {
+        -webkit-user-select: text;
+        user-select: text;
     }
 }
 
@@ -246,6 +255,8 @@
 
 .ayah {
     font-family: Ayah, sans-serif;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .frame {

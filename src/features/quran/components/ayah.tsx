@@ -1,6 +1,7 @@
 "use client";
 
 import { Pause, Play } from "lucide-react";
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
@@ -29,7 +30,7 @@ function getAvailableStreams(ayah: AyahType) {
 
 export default function Ayah({ ayah }: { ayah: AyahType }) {
     return (
-        <span className="ayah inline cursor-pointer rounded-sm text-3xl leading-[inherit] text-foreground transition-colors hover:bg-primary/10 dark:hover:bg-primary/15 sm:text-4xl">
+        <span className="ayah inline rounded-sm text-3xl leading-[inherit] text-foreground transition-colors hover:bg-primary/10 dark:hover:bg-primary/15 sm:text-4xl">
             <span
                 className={cn(
                     ayah.sajda &&
@@ -39,9 +40,14 @@ export default function Ayah({ ayah }: { ayah: AyahType }) {
                 {ayah.text}
             </span>{" "}
             <AyahPlayer ayah={ayah} />
-            <span className="frame inline-block align-[0.08em] text-sidebar-accent">
+            <Link
+                href={`/quran/ayah/${ayah.surah.number}/${ayah.numberInSurah}`}
+                scroll={false}
+                className="frame inline-block rounded-sm align-[0.08em] text-sidebar-accent transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={`Open actions for ayah ${ayah.numberInSurah}`}
+            >
                 {getArabicNumber(ayah.numberInSurah)}
-            </span>{" "}
+            </Link>{" "}
         </span>
     );
 }
