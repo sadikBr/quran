@@ -12,6 +12,9 @@ export default function SurahFrame({
     href?: string;
 }) {
     const isMeccan = surah.revelationType === "Meccan";
+    const backgroundImage = isMeccan
+        ? "/meccan-surah-panorama-transparent.png"
+        : "/medinan-surah-background.png";
 
     const content = (
         <>
@@ -58,15 +61,26 @@ export default function SurahFrame({
     return (
         <div
             className={cn(
-                "mb-3 overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow",
+                "relative mb-3 overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow",
                 href && "hover:shadow-md",
             )}
         >
+            <span
+                aria-hidden="true"
+                className={cn(
+                    "pointer-events-none absolute inset-0 bg-bottom-right bg-no-repeat opacity-8 dark:opacity-12",
+                    isMeccan ? "bg-primary/3" : "bg-accent/20",
+                )}
+                style={{
+                    backgroundImage: `url(${backgroundImage})`,
+                    backgroundSize: "100% auto",
+                }}
+            />
             {href ? (
                 <Link
                     href={href}
                     className={cn(
-                        "group flex items-center gap-4 px-4 py-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                        "group relative z-10 flex items-center gap-4 px-4 py-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                         isMeccan ? "hover:bg-primary/5" : "hover:bg-accent/40",
                     )}
                 >
@@ -75,7 +89,7 @@ export default function SurahFrame({
             ) : (
                 <div
                     className={cn(
-                        "flex items-center gap-4 px-4 py-4",
+                        "relative z-10 flex items-center gap-4 px-4 py-4",
                         isMeccan ? "bg-primary/5" : "bg-accent/30",
                     )}
                 >
