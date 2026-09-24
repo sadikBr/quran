@@ -35,7 +35,9 @@ export default async function SettingsPage() {
     const arabicEditions = editions.filter(
         (edition) =>
             edition.language === "ar" &&
-            (edition.type === "quran" || edition.format === "audio"),
+            (edition.type === "quran" ||
+                edition.type === "versebyverse" ||
+                edition.type === "surahbysurah"),
     );
 
     const translationEditions = editions.filter(

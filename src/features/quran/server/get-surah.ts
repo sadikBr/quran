@@ -8,10 +8,21 @@ export default async function getSurahData(
     edition: string = "quran-simple",
 ) {
     const data = await fetchQuranCloud<{
-        data: SurahType & { ayahs: AyahType[]; edition: Edition };
+        data: SurahType & {
+            ayahs: AyahType[];
+            edition: Edition;
+            audio?: string;
+            audioSecondary?: string[];
+        };
     }>(`/surah/${number}/${edition}`);
 
-    const { ayahs, edition: editionData, ...surahMeta } = data.data;
+    const {
+        ayahs,
+        edition: editionData,
+        audio,
+        audioSecondary,
+        ...surahMeta
+    } = data.data;
 
-    return { ayahs, edition: editionData, surahMeta };
+    return { ayahs, edition: editionData, surahMeta, audio, audioSecondary };
 }

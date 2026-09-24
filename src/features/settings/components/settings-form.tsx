@@ -17,11 +17,20 @@ import {
 } from "@/components/ui/select";
 import type { Edition } from "@/features/quran/types";
 import { useSettings } from "@/features/settings/settings-provider";
-import type { Preferences, ReadingMode, Theme } from "../preferences";
+import {
+    DEFAULT_PREFERENCES,
+    type Preferences,
+    type ReadingMode,
+    type Theme,
+} from "../preferences";
 import updatePreferences from "../server/update-preferences";
 import PreferenceCard from "./settings-card";
 import SettingField from "./settings-field";
 import SettingsSection from "./settings-section";
+
+function isArabicEditionAvailable(edition: Edition, readingMode: ReadingMode) {
+    return edition.type !== "surahbysurah" || readingMode === "surah";
+}
 
 export default function SettingsForm({
     preferences,
@@ -37,12 +46,31 @@ export default function SettingsForm({
     const router = useRouter();
     const { setTheme } = useTheme();
     const { setPreferences, theme: syncedTheme } = useSettings();
-    const [values, setValues] = useState(preferences);
+    const [values, setValues] = useState(() => {
+        const selectedArabicEdition = arabicEditions.find(
+            (edition) => edition.identifier === preferences.arabicEdition,
+        );
+
+        return {
+            ...preferences,
+            arabicEdition:
+                selectedArabicEdition &&
+                isArabicEditionAvailable(
+                    selectedArabicEdition,
+                    preferences.readingMode,
+                )
+                    ? preferences.arabicEdition
+                    : DEFAULT_PREFERENCES.arabicEdition,
+        };
+    });
     const [isSaving, setIsSaving] = useState(false);
-    const arabicTextEditions = arabicEditions.filter(
+    const availableArabicEditions = arabicEditions.filter((edition) =>
+        isArabicEditionAvailable(edition, values.readingMode),
+    );
+    const arabicTextEditions = availableArabicEditions.filter(
         (edition) => edition.format !== "audio",
     );
-    const arabicAudioEditions = arabicEditions.filter(
+    const arabicAudioEditions = availableArabicEditions.filter(
         (edition) => edition.format === "audio",
     );
     const selectClassName =
@@ -61,6 +89,30 @@ export default function SettingsForm({
         value: Preferences[Key],
     ) {
         setValues((currentValues) => ({ ...currentValues, [key]: value }));
+    }
+
+    function updateReadingMode(readingMode: ReadingMode) {
+        setValues((currentValues) => {
+            const selectedArabicEdition = arabicEditions.find(
+                (edition) => edition.identifier === currentValues.arabicEdition,
+            );
+            const fallbackArabicEdition =
+                arabicEditions.find(
+                    (edition) =>
+                        edition.identifier ===
+                        DEFAULT_PREFERENCES.arabicEdition,
+                )?.identifier ?? currentValues.arabicEdition;
+
+            return {
+                ...currentValues,
+                readingMode,
+                arabicEdition:
+                    selectedArabicEdition &&
+                    isArabicEditionAvailable(selectedArabicEdition, readingMode)
+                        ? currentValues.arabicEdition
+                        : fallbackArabicEdition,
+            };
+        });
     }
 
     async function savePreferences() {
@@ -143,10 +195,7 @@ export default function SettingsForm({
                                 <Select
                                     value={values.readingMode}
                                     onValueChange={(value) =>
-                                        updateValue(
-                                            "readingMode",
-                                            value as ReadingMode,
-                                        )
+                                        updateReadingMode(value as ReadingMode)
                                     }
                                 >
                                     <SelectTrigger
@@ -273,7 +322,10 @@ export default function SettingsForm({
                                                                 edition.name}
                                                         </span>
                                                         <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.625rem] font-semibold tracking-wide text-primary uppercase">
-                                                            Audio
+                                                            {edition.type ===
+                                                            "surahbysurah"
+                                                                ? "Surah audio"
+                                                                : "Audio"}
                                                         </span>
                                                     </SelectItem>
                                                 ),

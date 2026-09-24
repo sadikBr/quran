@@ -25,7 +25,7 @@ type QuranAudioContextValue = {
 };
 
 export type QuranAudioQueueItem = {
-    ayahNumber: number;
+    ayahNumber: number | null;
     streams: string[];
 };
 

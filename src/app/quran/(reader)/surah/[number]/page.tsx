@@ -36,12 +36,16 @@ export default async function SurahPage({
 
     const [surahData, translatedSurahData] = await Promise.all(requests);
     const surahs = await surahsPromise;
-    const audioQueue = surahData.ayahs
-        .map((ayah) => ({
-            ayahNumber: ayah.number,
-            streams: getAyahAudioStreams(ayah),
-        }))
-        .filter((ayah) => ayah.streams.length > 0);
+    const surahAudioStreams = getAyahAudioStreams(surahData);
+    const audioQueue =
+        surahAudioStreams.length > 0
+            ? [{ ayahNumber: null, streams: surahAudioStreams }]
+            : surahData.ayahs
+                  .map((ayah) => ({
+                      ayahNumber: ayah.number,
+                      streams: getAyahAudioStreams(ayah),
+                  }))
+                  .filter((ayah) => ayah.streams.length > 0);
 
     return (
         <div className="flex h-full min-h-0 flex-col">
