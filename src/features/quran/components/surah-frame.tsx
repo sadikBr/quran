@@ -13,8 +13,8 @@ export default function SurahFrame({
 }) {
     const isMeccan = surah.revelationType === "Meccan";
     const backgroundImage = isMeccan
-        ? "/meccan-surah-panorama-transparent.png"
-        : "/medinan-surah-background.png";
+        ? "/meccan-surah-background-v2.webp"
+        : "/medinan-surah-background-v2.webp";
 
     const content = (
         <>
@@ -68,12 +68,12 @@ export default function SurahFrame({
             <span
                 aria-hidden="true"
                 className={cn(
-                    "pointer-events-none absolute inset-0 bg-bottom-right bg-no-repeat opacity-8 dark:opacity-12",
+                    "pointer-events-none absolute inset-0 bg-[position:center_58%] bg-no-repeat opacity-[0.2] dark:opacity-[0.55] md:bg-bottom",
                     isMeccan ? "bg-primary/3" : "bg-accent/20",
                 )}
                 style={{
                     backgroundImage: `url(${backgroundImage})`,
-                    backgroundSize: "100% auto",
+                    backgroundSize: "cover",
                 }}
             />
             {href ? (
