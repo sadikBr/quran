@@ -91,6 +91,28 @@ function TafsirReadingPane({
     );
 }
 
+export type AyahActionsProps = {
+    surahName: string;
+    ayahNumber: number;
+    arabicText: string;
+    tafsirText: string;
+    tafsirEditionName: string;
+    tafsirEditionIdentifier: string;
+    tafsirDirection: string;
+    audioStreams: string[];
+    globalAyahNumber: number;
+    surahNumber: number;
+    pageNumber: number;
+    tafsirEditions: Edition[];
+    canChooseTafsir: boolean;
+    canSaveAyah: boolean;
+    initialBookmarked: boolean;
+    initialReflection: string;
+    plainArabicText: string;
+    closeOnCopy?: boolean;
+    onSavedAyahChange?: () => void;
+};
+
 export default function AyahActions({
     surahName,
     ayahNumber,
@@ -110,26 +132,8 @@ export default function AyahActions({
     initialReflection,
     plainArabicText,
     closeOnCopy = false,
-}: {
-    surahName: string;
-    ayahNumber: number;
-    arabicText: string;
-    tafsirText: string;
-    tafsirEditionName: string;
-    tafsirEditionIdentifier: string;
-    tafsirDirection: string;
-    audioStreams: string[];
-    globalAyahNumber: number;
-    surahNumber: number;
-    pageNumber: number;
-    tafsirEditions: Edition[];
-    canChooseTafsir: boolean;
-    canSaveAyah: boolean;
-    initialBookmarked: boolean;
-    initialReflection: string;
-    plainArabicText: string;
-    closeOnCopy?: boolean;
-}) {
+    onSavedAyahChange,
+}: AyahActionsProps) {
     const router = useRouter();
     const [isTafsirVisible, setIsTafsirVisible] = useState(false);
     const [selectedTafsirIdentifier, setSelectedTafsirIdentifier] = useState(
@@ -229,6 +233,7 @@ export default function AyahActions({
         toast.success(
             nextBookmarkedState ? "Ayah bookmarked" : "Bookmark removed",
         );
+        onSavedAyahChange?.();
     }
 
     function openReflection() {
@@ -258,6 +263,7 @@ export default function AyahActions({
         setReflection(savedValue);
         setReflectionDraft(savedValue);
         toast.success(savedValue ? "Reflection saved" : "Reflection removed");
+        onSavedAyahChange?.();
     }
 
     if (isReflectionVisible) {

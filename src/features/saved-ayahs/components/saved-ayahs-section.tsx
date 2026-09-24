@@ -6,6 +6,7 @@ import {
     BookOpen,
     ChevronLeft,
     ChevronRight,
+    Ellipsis,
     NotebookPen,
     Search,
 } from "lucide-react";
@@ -23,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import type { ReadingMode } from "@/features/settings/preferences";
 import type { SavedAyah } from "../types";
+import SavedAyahActions from "./saved-ayah-actions";
 
 const AYAH_ITEMS_PER_PAGE = 5;
 
@@ -46,6 +48,7 @@ export default function SavedAyahsSection({
     const [query, setQuery] = useState("");
     const [surahFilter, setSurahFilter] = useState("all");
     const [requestedPage, setRequestedPage] = useState(1);
+    const [activeAyah, setActiveAyah] = useState<SavedAyah | null>(null);
     const surahs = useMemo(
         () =>
             Array.from(
@@ -214,83 +217,94 @@ export default function SavedAyahsSection({
                             return (
                                 <article
                                     key={ayah.globalAyahNumber}
-                                    className="group py-1"
+                                    className="group px-1 py-6 sm:px-3 sm:py-7"
                                 >
-                                    <Link
-                                        href={href}
-                                        className="grid min-w-0 gap-3 rounded-lg px-2 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[9rem_minmax(0,1fr)_auto] sm:items-center sm:gap-5 sm:px-3"
-                                    >
-                                        <div className="flex min-w-0 items-center gap-2 sm:block">
-                                            <div className="flex min-w-0 items-center gap-2">
-                                                <span className="truncate text-sm font-semibold text-primary">
-                                                    {ayah.surahName}
-                                                </span>
+                                    <div className="flex flex-wrap items-center justify-between gap-3">
+                                        <div className="flex min-w-0 items-center gap-2.5">
+                                            <span className="truncate text-sm font-semibold text-primary">
+                                                {ayah.surahName}
+                                            </span>
+                                            <span
+                                                aria-hidden="true"
+                                                className="size-1 rounded-full bg-primary/30"
+                                            />
+                                            <span className="shrink-0 text-xs text-muted-foreground">
+                                                Ayah {ayah.ayahNumber}
+                                            </span>
+                                            {ayah.isBookmarked && (
                                                 <span
-                                                    aria-hidden="true"
-                                                    className="text-muted-foreground"
+                                                    title="Bookmarked"
+                                                    className="text-primary"
                                                 >
-                                                    ·
-                                                </span>
-                                                <span className="shrink-0 text-xs text-muted-foreground">
-                                                    Ayah {ayah.ayahNumber}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-2 sm:mt-2">
-                                                {ayah.isBookmarked && (
-                                                    <span
-                                                        title="Bookmarked"
-                                                        className="text-primary"
-                                                    >
-                                                        <Bookmark
-                                                            aria-hidden="true"
-                                                            className="size-3 fill-current"
-                                                        />
-                                                        <span className="sr-only">
-                                                            Bookmarked
-                                                        </span>
+                                                    <Bookmark
+                                                        aria-hidden="true"
+                                                        className="size-3 fill-current"
+                                                    />
+                                                    <span className="sr-only">
+                                                        Bookmarked
                                                     </span>
-                                                )}
-                                                {ayah.reflection && (
-                                                    <span
-                                                        title="Has a reflection"
-                                                        className="text-accent-foreground"
-                                                    >
-                                                        <NotebookPen
-                                                            aria-hidden="true"
-                                                            className="size-3"
-                                                        />
-                                                        <span className="sr-only">
-                                                            Has a reflection
-                                                        </span>
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p
-                                                dir="rtl"
-                                                lang="ar"
-                                                className="ayah line-clamp-2 text-right text-xl leading-[1.75] text-foreground sm:text-2xl"
-                                            >
-                                                {ayah.arabicText}
-                                            </p>
+                                                </span>
+                                            )}
                                             {ayah.reflection && (
-                                                <p className="mt-1.5 truncate text-xs text-muted-foreground">
-                                                    <span className="text-primary/70">
-                                                        Reflection:{" "}
+                                                <span
+                                                    title="Has a reflection"
+                                                    className="text-accent-foreground"
+                                                >
+                                                    <NotebookPen
+                                                        aria-hidden="true"
+                                                        className="size-3.5"
+                                                    />
+                                                    <span className="sr-only">
+                                                        Has a reflection
                                                     </span>
-                                                    {ayah.reflection}
-                                                </p>
+                                                </span>
                                             )}
                                         </div>
-                                        <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-primary sm:justify-self-end">
-                                            Open
-                                            <ArrowRight
-                                                aria-hidden="true"
-                                                className="size-4 transition-transform group-hover:translate-x-0.5"
-                                            />
-                                        </span>
+                                        <div className="flex items-center gap-1">
+                                            <Button
+                                                asChild
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-primary hover:text-primary"
+                                            >
+                                                <Link href={href}>
+                                                    Open in reader
+                                                    <ArrowRight aria-hidden="true" />
+                                                </Link>
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setActiveAyah(ayah)
+                                                }
+                                                aria-label={`Open actions for ${ayah.surahName}, ayah ${ayah.ayahNumber}`}
+                                            >
+                                                <Ellipsis aria-hidden="true" />
+                                                Actions
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <Link
+                                        href={href}
+                                        className="mt-4 block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    >
+                                        <p
+                                            dir="rtl"
+                                            lang="ar"
+                                            className="ayah line-clamp-2 text-right text-2xl leading-[1.9] text-foreground transition-colors group-hover:text-foreground/80 sm:text-[1.7rem]"
+                                        >
+                                            {ayah.arabicText}
+                                        </p>
                                     </Link>
+                                    {ayah.reflection && (
+                                        <div className="mt-4 border-l-2 border-primary/25 pl-4">
+                                            <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
+                                                {ayah.reflection}
+                                            </p>
+                                        </div>
+                                    )}
                                 </article>
                             );
                         })}
@@ -339,6 +353,12 @@ export default function SavedAyahsSection({
                         )}
                     </div>
                 </div>
+            )}
+            {activeAyah && (
+                <SavedAyahActions
+                    ayah={activeAyah}
+                    onCloseAction={() => setActiveAyah(null)}
+                />
             )}
         </section>
     );

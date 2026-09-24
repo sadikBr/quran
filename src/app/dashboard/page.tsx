@@ -13,6 +13,7 @@ import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
+import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import SavedAyahsSection from "@/features/saved-ayahs/components/saved-ayahs-section";
@@ -147,10 +148,12 @@ export default async function DashboardPage() {
                         </div>
                     </section>
 
-                    <SavedAyahsSection
-                        savedAyahs={savedAyahs}
-                        readingMode={preferences.readingMode}
-                    />
+                    <QuranAudioProvider>
+                        <SavedAyahsSection
+                            savedAyahs={savedAyahs}
+                            readingMode={preferences.readingMode}
+                        />
+                    </QuranAudioProvider>
 
                     <section className="mt-16" aria-labelledby="coming-soon">
                         <div className="max-w-xl">
