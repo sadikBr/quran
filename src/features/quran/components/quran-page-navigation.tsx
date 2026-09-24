@@ -5,13 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-} from "@/components/ui/select";
+    Combobox,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxInput,
+    ComboboxItem,
+    ComboboxList,
+    ComboboxTrigger,
+} from "@/components/ui/combobox";
+import { Input } from "@/components/ui/input";
 import type { ReadingMode } from "@/features/settings/preferences";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import QuranInfo from "@/lib/quran-info";
@@ -29,6 +32,16 @@ const navigationDetails = {
         max: QuranInfo.maxSurahNumber,
     },
 } as const;
+
+function normalizeSurahSearch(value: string) {
+    return value
+        .normalize("NFKD")
+        .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]/g, "")
+        .replace(/ـ/g, "")
+        .replace(/[أإآٱ]/g, "ا")
+        .replace(/ى/g, "ي")
+        .toLocaleLowerCase();
+}
 
 export default function QuranPageNavigation({
     currentNumber,
@@ -151,14 +164,38 @@ export default function QuranPageNavigation({
                     </Button>
                 )}
                 {readingMode === "surah" && surahs && surahs.length > 0 ? (
-                    <Select
-                        value={currentNumber.toString()}
+                    <Combobox
+                        items={surahs}
+                        value={
+                            surahs.find(
+                                (surah) => surah.number === currentNumber,
+                            ) ?? null
+                        }
                         disabled={isNavigating}
-                        onValueChange={(value) => navigateTo(Number(value))}
+                        onValueChange={(surah) => {
+                            if (surah) navigateTo(surah.number);
+                        }}
+                        itemToStringValue={(surah) => surah.number.toString()}
+                        itemToStringLabel={(surah) =>
+                            `${surah.name} ${surah.englishName} ${surah.englishNameTranslation}`
+                        }
+                        isItemEqualToValue={(surah, selectedSurah) =>
+                            surah.number === selectedSurah.number
+                        }
+                        filter={(surah, query) => {
+                            const searchableText = normalizeSurahSearch(
+                                `${surah.name} ${surah.englishName} ${surah.englishNameTranslation} ${surah.number}`,
+                            );
+
+                            return searchableText.includes(
+                                normalizeSurahSearch(query.trim()),
+                            );
+                        }}
+                        autoHighlight
                     >
-                        <SelectTrigger
+                        <ComboboxTrigger
                             aria-label="Go to surah"
-                            className="h-11 w-52 border-primary/15 bg-card/75 px-3 shadow-xs hover:bg-card sm:w-64"
+                            className="flex h-11 w-52 items-center rounded-lg border border-primary/15 bg-card/75 px-3 shadow-xs hover:bg-card sm:w-64"
                         >
                             <span className="flex min-w-0 flex-1 items-center gap-3">
                                 <span className="hidden text-xs font-semibold tracking-[0.12em] text-primary uppercase sm:block">
@@ -175,36 +212,51 @@ export default function QuranPageNavigation({
                                     {getArabicNumber(currentNumber)}
                                 </span>
                             </span>
-                        </SelectTrigger>
-                        <SelectContent
-                            position="popper"
+                        </ComboboxTrigger>
+                        <ComboboxContent
                             side="top"
-                            className="w-80 max-h-80 rounded-xl border-primary/15 bg-popover/95 p-2 shadow-xl backdrop-blur"
+                            align="center"
+                            aria-label="Select a surah"
+                            className="w-[min(22rem,calc(100vw-2rem))] min-w-0 rounded-xl bg-popover/98 p-1 shadow-xl ring-primary/10 backdrop-blur-md"
                         >
-                            {surahs.map((surah) => (
-                                <SelectItem
-                                    key={surah.number}
-                                    value={surah.number.toString()}
-                                    className="rounded-lg py-2.5 pr-8 focus:bg-primary/8 focus:text-foreground"
-                                >
-                                    <div className="flex min-w-0 items-center gap-3 pr-2">
-                                        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[0.65rem] font-semibold text-primary">
-                                            {surah.number}
-                                        </span>
-                                        <div className="min-w-0">
-                                            <p className="surah-name truncate text-2xl leading-none text-foreground">
-                                                {getArabicNumber(surah.number)}
-                                            </p>
-                                            <p className="mt-1 truncate text-xs text-muted-foreground">
-                                                {surah.englishName} ·{" "}
-                                                {surah.englishNameTranslation}
-                                            </p>
+                            <ComboboxInput
+                                placeholder="Search surahs…"
+                                className="w-auto"
+                                showTrigger={false}
+                            />
+                            <ComboboxEmpty>
+                                No matching surahs found.
+                            </ComboboxEmpty>
+                            <ComboboxList className="max-h-72 p-1">
+                                {(surah: SurahType) => (
+                                    <ComboboxItem
+                                        key={surah.number}
+                                        value={surah}
+                                        className="rounded-lg px-2 py-2.5 pr-9 data-highlighted:bg-primary/8 data-highlighted:text-foreground"
+                                    >
+                                        <div className="flex min-w-0 items-center gap-3 pr-2">
+                                            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[0.65rem] font-semibold text-primary">
+                                                {surah.number}
+                                            </span>
+                                            <div className="min-w-0">
+                                                <p className="surah-name truncate text-2xl leading-none text-foreground">
+                                                    {getArabicNumber(
+                                                        surah.number,
+                                                    )}
+                                                </p>
+                                                <p className="mt-1 truncate text-xs text-muted-foreground">
+                                                    {surah.englishName} ·{" "}
+                                                    {
+                                                        surah.englishNameTranslation
+                                                    }
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                                    </ComboboxItem>
+                                )}
+                            </ComboboxList>
+                        </ComboboxContent>
+                    </Combobox>
                 ) : (
                     <form
                         onSubmit={submitForm}

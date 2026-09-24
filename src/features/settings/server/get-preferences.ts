@@ -5,6 +5,8 @@ import { headers } from "next/headers";
 import db from "@/drizzle/db";
 import { userSettings } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
+import { normalizeEditionPreferences } from "../edition-compatibility";
 import { DEFAULT_PREFERENCES, type Preferences } from "../preferences";
 
 export default async function getPreferences(): Promise<Preferences> {
@@ -26,7 +28,7 @@ export default async function getPreferences(): Promise<Preferences> {
         return { ...DEFAULT_PREFERENCES };
     }
 
-    return {
+    const preferences: Preferences = {
         theme: settings.theme,
         arabicEdition: settings.arabicEdition,
         translationEdition: settings.translationEdition,
@@ -35,4 +37,11 @@ export default async function getPreferences(): Promise<Preferences> {
         readingMode: settings.readingMode,
         continuousRecitation: settings.continuousRecitation,
     };
+
+    try {
+        const editions = await getAvailableQuranEditions();
+        return normalizeEditionPreferences(preferences, editions);
+    } catch {
+        return preferences;
+    }
 }

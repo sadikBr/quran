@@ -14,15 +14,9 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import getTafsirAyah from "../server/get-tafsir-ayah";
 import type { Edition } from "../types";
+import EditionCombobox from "./edition-combobox";
 import { useQuranAudio } from "./quran-audio-provider";
 
 const actions = [
@@ -208,36 +202,15 @@ export default function AyahActions({
                     <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                         <span className="font-medium">Edition</span>
                         {canChooseTafsir ? (
-                            <Select
+                            <EditionCombobox
+                                ariaLabel="Choose tafsir edition"
+                                editions={tafsirEditions}
                                 value={selectedTafsirIdentifier}
                                 onValueChange={changeTafsirEdition}
                                 disabled={isChangingTafsir}
-                            >
-                                <SelectTrigger
-                                    aria-label="Choose tafsir edition"
-                                    size="sm"
-                                    className="min-w-45 bg-muted/60 text-xs"
-                                >
-                                    <SelectValue placeholder="Choose tafsir edition" />
-                                    {isChangingTafsir && (
-                                        <LoaderCircle
-                                            aria-hidden="true"
-                                            className="size-3.5 animate-spin text-primary"
-                                        />
-                                    )}
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {tafsirEditions.map((edition) => (
-                                        <SelectItem
-                                            key={edition.identifier}
-                                            value={edition.identifier}
-                                        >
-                                            {edition.englishName ||
-                                                edition.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                placeholder="Search tafsir editions…"
+                                className="min-w-45 bg-muted/60 text-xs"
+                            />
                         ) : (
                             <span className="rounded-md bg-muted px-2 py-1 font-medium text-foreground">
                                 {selectedTafsir.editionName}

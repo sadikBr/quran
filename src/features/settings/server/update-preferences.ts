@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import db from "@/drizzle/db";
 import { userSettings } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
+import { areEditionsCompatible } from "../edition-compatibility";
 import { preferencesZodSchema } from "../preferences";
 
 type UpdatePreferencesResult =
@@ -36,6 +38,16 @@ export default async function updatePreferences(
     const preferencesToSave = parsedPreferences.data;
 
     try {
+        const editions = await getAvailableQuranEditions();
+
+        if (!areEditionsCompatible(preferencesToSave, editions)) {
+            return {
+                success: false,
+                message:
+                    "One or more selected editions are not compatible with this reading mode.",
+            };
+        }
+
         await db
             .insert(userSettings)
             .values({

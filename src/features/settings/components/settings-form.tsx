@@ -9,14 +9,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
     Select,
     SelectContent,
-    SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import EditionCombobox from "@/features/quran/components/edition-combobox";
 import type { Edition } from "@/features/quran/types";
 import { useSettings } from "@/features/settings/settings-provider";
+import { isArabicEditionCompatible } from "../edition-compatibility";
 import {
     DEFAULT_PREFERENCES,
     type Preferences,
@@ -27,10 +27,6 @@ import updatePreferences from "../server/update-preferences";
 import PreferenceCard from "./settings-card";
 import SettingField from "./settings-field";
 import SettingsSection from "./settings-section";
-
-function isArabicEditionAvailable(edition: Edition, readingMode: ReadingMode) {
-    return edition.type !== "surahbysurah" || readingMode === "surah";
-}
 
 export default function SettingsForm({
     preferences,
@@ -55,7 +51,7 @@ export default function SettingsForm({
             ...preferences,
             arabicEdition:
                 selectedArabicEdition &&
-                isArabicEditionAvailable(
+                isArabicEditionCompatible(
                     selectedArabicEdition,
                     preferences.readingMode,
                 )
@@ -65,13 +61,7 @@ export default function SettingsForm({
     });
     const [isSaving, setIsSaving] = useState(false);
     const availableArabicEditions = arabicEditions.filter((edition) =>
-        isArabicEditionAvailable(edition, values.readingMode),
-    );
-    const arabicTextEditions = availableArabicEditions.filter(
-        (edition) => edition.format !== "audio",
-    );
-    const arabicAudioEditions = availableArabicEditions.filter(
-        (edition) => edition.format === "audio",
+        isArabicEditionCompatible(edition, values.readingMode),
     );
     const selectClassName =
         "w-full border-0 bg-muted/55 shadow-none hover:bg-muted/75 focus-visible:ring-1";
@@ -108,7 +98,10 @@ export default function SettingsForm({
                 readingMode,
                 arabicEdition:
                     selectedArabicEdition &&
-                    isArabicEditionAvailable(selectedArabicEdition, readingMode)
+                    isArabicEditionCompatible(
+                        selectedArabicEdition,
+                        readingMode,
+                    )
                         ? currentValues.arabicEdition
                         : fallbackArabicEdition,
             };
@@ -279,62 +272,36 @@ export default function SettingsForm({
                         description="Choose Quran text or an audio recitation. Audio editions enable ayah playback."
                     >
                         <SettingField label="Edition" htmlFor="arabic-edition">
-                            <Select
+                            <EditionCombobox
+                                id="arabic-edition"
+                                editions={availableArabicEditions}
                                 value={values.arabicEdition}
                                 onValueChange={(value) =>
                                     updateValue("arabicEdition", value)
                                 }
-                            >
-                                <SelectTrigger
-                                    id="arabic-edition"
-                                    className={selectClassName}
-                                >
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent position="popper">
-                                    <SelectGroup>
-                                        <SelectLabel>Quran text</SelectLabel>
-                                        {arabicTextEditions.map((edition) => (
-                                            <SelectItem
-                                                key={edition.identifier}
-                                                value={edition.identifier}
-                                            >
-                                                {edition.englishName ||
-                                                    edition.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                    {arabicAudioEditions.length > 0 && (
-                                        <SelectGroup>
-                                            <SelectLabel>
-                                                Audio recitations
-                                            </SelectLabel>
-                                            {arabicAudioEditions.map(
-                                                (edition) => (
-                                                    <SelectItem
-                                                        key={edition.identifier}
-                                                        value={
-                                                            edition.identifier
-                                                        }
-                                                    >
-                                                        <span>
-                                                            {edition.englishName ||
-                                                                edition.name}
-                                                        </span>
-                                                        <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.625rem] font-semibold tracking-wide text-primary uppercase">
-                                                            {edition.type ===
-                                                            "surahbysurah"
-                                                                ? "Surah audio"
-                                                                : "Audio"}
-                                                        </span>
-                                                    </SelectItem>
-                                                ),
-                                            )}
-                                        </SelectGroup>
-                                    )}
-                                </SelectContent>
-                            </Select>
+                                placeholder="Search reciters and editions…"
+                                className={selectClassName}
+                                groupBy={(edition) => {
+                                    if (edition.type === "surahbysurah")
+                                        return "Whole-surah audio";
+                                    if (edition.format === "audio")
+                                        return "Ayah-by-ayah audio";
+                                    return "Quran text";
+                                }}
+                                getBadge={(edition) => {
+                                    if (edition.type === "surahbysurah")
+                                        return "Surah audio";
+                                    if (edition.format === "audio")
+                                        return "Ayah audio";
+                                    return "Text";
+                                }}
+                            />
                         </SettingField>
+                        <p className="text-xs leading-5 text-muted-foreground">
+                            {values.readingMode === "surah"
+                                ? "Surah mode supports Quran text, ayah-by-ayah recitations, and whole-surah recitations."
+                                : "Page mode only shows editions that can follow individual ayahs."}
+                        </p>
                     </PreferenceCard>
 
                     <PreferenceCard
@@ -345,30 +312,16 @@ export default function SettingsForm({
                             label="English edition"
                             htmlFor="translation-edition"
                         >
-                            <Select
+                            <EditionCombobox
+                                id="translation-edition"
+                                editions={translationEditions}
                                 value={values.translationEdition}
                                 onValueChange={(value) =>
                                     updateValue("translationEdition", value)
                                 }
-                            >
-                                <SelectTrigger
-                                    id="translation-edition"
-                                    className={selectClassName}
-                                >
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent position="popper">
-                                    {translationEditions.map((edition) => (
-                                        <SelectItem
-                                            key={edition.identifier}
-                                            value={edition.identifier}
-                                        >
-                                            {edition.englishName ||
-                                                edition.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                placeholder="Search translations…"
+                                className={selectClassName}
+                            />
                         </SettingField>
                     </PreferenceCard>
 
@@ -377,30 +330,16 @@ export default function SettingsForm({
                         description="Choose the commentary that will be used when you explore an ayah."
                     >
                         <SettingField label="Tafsir" htmlFor="tafsir-edition">
-                            <Select
+                            <EditionCombobox
+                                id="tafsir-edition"
+                                editions={tafsirEditions}
                                 value={values.tafsirEdition}
                                 onValueChange={(value) =>
                                     updateValue("tafsirEdition", value)
                                 }
-                            >
-                                <SelectTrigger
-                                    id="tafsir-edition"
-                                    className={selectClassName}
-                                >
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent position="popper">
-                                    {tafsirEditions.map((edition) => (
-                                        <SelectItem
-                                            key={edition.identifier}
-                                            value={edition.identifier}
-                                        >
-                                            {edition.englishName ||
-                                                edition.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                placeholder="Search tafsir editions…"
+                                className={selectClassName}
+                            />
                         </SettingField>
                     </PreferenceCard>
                 </SettingsSection>
