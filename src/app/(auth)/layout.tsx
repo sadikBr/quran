@@ -2,12 +2,13 @@ import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import PageBackground from "@/components/page-background";
+import StickyAppHeader from "@/components/sticky-app-header";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
     return (
-        <div className="relative isolate min-h-dvh overflow-hidden bg-background">
+        <div className="relative isolate min-h-dvh overflow-x-clip bg-background">
             <PageBackground />
-            <header className="absolute inset-x-0 top-0 z-10 px-4">
+            <StickyAppHeader className="px-4">
                 <div className="mx-auto flex h-20 w-full max-w-5xl items-center">
                     <Link
                         href="/"
@@ -19,7 +20,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                         Quran Reader
                     </Link>
                 </div>
-            </header>
+            </StickyAppHeader>
             {children}
         </div>
     );

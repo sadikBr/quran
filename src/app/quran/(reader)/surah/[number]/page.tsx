@@ -46,12 +46,15 @@ export default async function SurahPage({
     return (
         <div className="flex h-full min-h-0 flex-col">
             <ReadingProgressTracker locationType="surah" number={surahNumber} />
-            <QuranAudioQueue
-                queue={audioQueue}
-                continuousRecitation={preferences.continuousRecitation}
-            />
             <div className="flex-1 overflow-y-auto">
                 <div className="mx-auto max-w-5xl p-4">
+                    <QuranAudioQueue
+                        queue={audioQueue}
+                        continuousRecitation={preferences.continuousRecitation}
+                        showReadAll
+                        scope="surah"
+                        className="mb-3"
+                    />
                     <Surah
                         surah={surahData.surahMeta}
                         ayahs={surahData.ayahs}

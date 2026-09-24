@@ -9,6 +9,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import PageBackground from "@/components/page-background";
+import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
@@ -68,10 +69,10 @@ export default async function DashboardPage() {
     }
 
     return (
-        <main className="relative isolate min-h-dvh overflow-hidden bg-background">
+        <main className="relative isolate min-h-dvh overflow-x-clip bg-background">
             <PageBackground />
             <div className="mx-auto max-w-5xl px-4">
-                <header className="flex h-20 items-center justify-between gap-4">
+                <StickyAppHeader className="-mx-4 px-4">
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
@@ -87,7 +88,7 @@ export default async function DashboardPage() {
                         name={session.user.name}
                         image={session.user.image}
                     />
-                </header>
+                </StickyAppHeader>
 
                 <section className="py-10 sm:py-14">
                     <div>

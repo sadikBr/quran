@@ -2,6 +2,7 @@ import { ArrowRight, BookOpen, ChartNoAxesCombined, Heart } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import PageBackground from "@/components/page-background";
+import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
@@ -62,10 +63,10 @@ export default async function Home() {
     }
 
     return (
-        <main className="relative isolate min-h-dvh overflow-hidden bg-background">
+        <main className="relative isolate min-h-dvh overflow-x-clip bg-background">
             <PageBackground />
             <div className="mx-auto flex min-h-dvh max-w-5xl flex-col px-4">
-                <header className="flex h-20 items-center justify-between gap-4">
+                <StickyAppHeader className="-mx-4 px-4">
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
@@ -93,7 +94,7 @@ export default async function Home() {
                             </Button>
                         </div>
                     )}
-                </header>
+                </StickyAppHeader>
 
                 <section className="flex flex-1 flex-col py-14 sm:py-20">
                     <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-center lg:gap-16">

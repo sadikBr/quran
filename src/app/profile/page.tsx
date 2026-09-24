@@ -3,9 +3,10 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import PageBackground from "@/components/page-background";
+import StickyAppHeader from "@/components/sticky-app-header";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
-import ProfileForm from "@/features/auth/components/profile-form";
+import ProfileForm from "@/components/profile-form";
 
 export default async function ProfilePage() {
     const session = await auth.api.getSession({
@@ -17,10 +18,10 @@ export default async function ProfilePage() {
     }
 
     return (
-        <main className="relative isolate min-h-dvh overflow-hidden bg-background">
+        <main className="relative isolate min-h-dvh overflow-x-clip bg-background">
             <PageBackground />
             <div className="mx-auto max-w-5xl px-4">
-                <header className="flex h-20 items-center justify-between gap-4">
+                <StickyAppHeader className="-mx-4 px-4">
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md text-sm font-semibold tracking-wide outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
@@ -34,7 +35,7 @@ export default async function ProfilePage() {
                         name={session.user.name}
                         image={session.user.image}
                     />
-                </header>
+                </StickyAppHeader>
 
                 <section className="py-10 sm:py-14">
                     <span className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
