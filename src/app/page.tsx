@@ -1,4 +1,10 @@
-import { ArrowRight, BookOpen, ChartNoAxesCombined, Heart } from "lucide-react";
+import {
+    ArrowRight,
+    BookOpen,
+    BookText,
+    Headphones,
+    Languages,
+} from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import PageBackground from "@/components/page-background";
@@ -9,25 +15,29 @@ import { auth } from "@/features/auth/auth";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
+import QuranInfo from "@/lib/quran-info";
 
-const features = [
+const readerTools = [
     {
         icon: BookOpen,
-        title: "Read without friction",
+        eyebrow: "Your place is remembered",
+        title: "Leave and return without losing the thread.",
         description:
-            "Move through the Quran by page or surah in a focused, uncluttered reading view.",
+            "Read page by page or surah by surah, then continue from exactly where you stopped.",
     },
     {
-        icon: Heart,
-        title: "Return in your own time",
+        icon: Headphones,
+        eyebrow: "Recitation, when you want it",
+        title: "Listen alongside the words.",
         description:
-            "A calm place for the moments you make for daily reading and reflection.",
+            "Play one ayah or keep listening through the surah with your preferred recitation.",
     },
     {
-        icon: ChartNoAxesCombined,
-        title: "Keep your place",
+        icon: Languages,
+        eyebrow: "Meaning within reach",
+        title: "Open translation and tafsir without leaving the reader.",
         description:
-            "Your dashboard remembers where you stopped, ready for the next time you return.",
+            "Keep the Arabic at the center and bring supporting meaning into view only when needed.",
     },
 ];
 
@@ -44,29 +54,32 @@ export default async function Home() {
         preferences.readingMode === "page"
             ? readingProgress.lastPageNumber
             : readingProgress.lastSurahNumber;
-    const href = `/quran/${preferences.readingMode}/${savedNumber ?? 1}`;
-    let continueReadingLabel = "Start reading";
+    const currentNumber = savedNumber ?? 1;
+    const href = `/quran/${preferences.readingMode}/${currentNumber}`;
+    let continueReadingLabel = "Begin reading";
+    let readingPlace =
+        preferences.readingMode === "page"
+            ? `Page ${currentNumber}`
+            : `Surah ${currentNumber}`;
+
+    if (preferences.readingMode === "surah") {
+        const surahs = await getSurahsMeta().catch(() => []);
+        const surah = surahs.find((item) => item.number === currentNumber);
+
+        if (surah) {
+            readingPlace = surah.englishName;
+        }
+    }
 
     if (savedNumber !== null) {
-        continueReadingLabel = `Continue from page ${savedNumber}`;
-
-        if (preferences.readingMode === "surah") {
-            const surahs = await getSurahsMeta().catch(() => []);
-            const surahName = surahs.find(
-                (surah) => surah.number === savedNumber,
-            )?.englishName;
-
-            continueReadingLabel = surahName
-                ? `Continue with ${surahName}`
-                : "Continue reading";
-        }
+        continueReadingLabel = "Continue reading";
     }
 
     return (
         <main className="relative isolate min-h-dvh overflow-x-clip bg-background">
             <PageBackground />
-            <div className="mx-auto flex min-h-dvh max-w-5xl flex-col px-4">
-                <StickyAppHeader className="-mx-4 px-4">
+            <div className="mx-auto flex min-h-dvh max-w-6xl flex-col px-4 sm:px-6">
+                <StickyAppHeader className="-mx-4 px-4 text-foreground transition-colors data-[scrolled=true]:text-foreground sm:-mx-6 sm:px-6 dark:text-white">
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
@@ -74,7 +87,7 @@ export default async function Home() {
                         <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:-rotate-3">
                             <BookOpen aria-hidden="true" className="size-5" />
                         </span>
-                        <span className="text-sm font-semibold tracking-wide">
+                        <span className="hidden text-sm font-semibold tracking-wide sm:inline">
                             Quran Reader
                         </span>
                     </Link>
@@ -86,7 +99,7 @@ export default async function Home() {
                             continueReadingHref={href}
                         />
                     ) : (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 sm:gap-2">
                             <Button asChild size="sm" variant="ghost">
                                 <Link href="/sign-in">Sign in</Link>
                             </Button>
@@ -97,115 +110,151 @@ export default async function Home() {
                     )}
                 </StickyAppHeader>
 
-                <section className="flex flex-1 flex-col py-14 sm:py-20">
-                    <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-center lg:gap-16">
-                        <div className="max-w-3xl">
-                            <p className="mb-6 text-xs font-semibold tracking-[0.22em] text-primary">
-                                QURAN READER
+                <section className="relative left-1/2 min-h-[35rem] w-screen -translate-x-1/2 text-foreground sm:min-h-[39rem] lg:min-h-[42rem] dark:text-white">
+                    <div
+                        aria-hidden="true"
+                        className="absolute inset-x-0 -top-20 bottom-0 overflow-hidden"
+                    >
+                        <span className="absolute inset-0 bg-[url('/meccan-home-light-v1.webp')] bg-cover bg-position-[center_60%] sm:bg-bottom dark:hidden" />
+                        <span className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,246,0.9)_0%,rgba(255,252,246,0.62)_48%,rgba(255,252,246,0.12)_100%)] max-lg:bg-[linear-gradient(180deg,rgba(255,252,246,0.22)_0%,rgba(255,252,246,0.6)_44%,rgba(255,252,246,0.94)_100%)] dark:hidden" />
+                        <span className="absolute inset-0 hidden bg-[url('/meccan-surah-background-v2.webp')] bg-cover bg-position-[center_60%] sm:bg-bottom dark:block" />
+                        <span className="absolute inset-0 hidden bg-[linear-gradient(90deg,rgba(12,11,10,0.94)_0%,rgba(12,11,10,0.7)_48%,rgba(12,11,10,0.18)_100%)] max-lg:bg-[linear-gradient(180deg,rgba(12,11,10,0.38)_0%,rgba(12,11,10,0.68)_42%,rgba(12,11,10,0.96)_100%)] dark:block" />
+                        <span className="absolute inset-0 hidden bg-[radial-gradient(circle_at_72%_20%,rgba(255,255,255,0.08),transparent_32%)] dark:block" />
+                    </div>
+                    <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-x-0 bottom-0 z-1 h-28 bg-linear-to-t from-background via-background/70 to-transparent sm:h-40"
+                    />
+
+                    <div className="relative z-10 mx-auto flex min-h-[35rem] w-full max-w-6xl flex-col justify-between px-4 py-6 sm:min-h-[39rem] sm:px-6 sm:py-10 lg:min-h-[42rem] lg:py-14">
+                        <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between sm:gap-6">
+                            <p className="max-w-48 text-[0.65rem] font-semibold tracking-[0.2em] text-foreground/65 uppercase sm:max-w-none dark:text-white/65">
+                                A quiet place to read, listen, and reflect
                             </p>
-                            <h1 className="max-w-3xl text-4xl font-semibold leading-[1.08] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-                                Return to the Quran in your own time.
-                            </h1>
-                            <p className="mt-7 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-                                A calm reading space for the moments you set
-                                aside to read, reflect, and continue your
-                                journey.
+                            <p
+                                dir="rtl"
+                                lang="ar"
+                                className="ayah max-w-xs self-end text-right text-2xl leading-[1.7] text-foreground/85 sm:self-auto sm:text-3xl lg:text-4xl dark:text-white/90"
+                            >
+                                وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا
                             </p>
-                            {session ? (
-                                <div className="mt-9">
-                                    <Button asChild size="lg">
-                                        <Link href="/dashboard">
-                                            My dashboard
-                                            <ArrowRight aria-hidden="true" />
-                                        </Link>
-                                    </Button>
-                                    <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                                        <Link
-                                            href={href}
-                                            className="font-medium text-foreground underline decoration-primary/35 underline-offset-4 transition-colors hover:decoration-primary focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                        >
-                                            {continueReadingLabel}
-                                        </Link>
-                                        <span
-                                            aria-hidden="true"
-                                            className="text-primary/50"
-                                        >
-                                            ·
-                                        </span>
-                                        <Link
-                                            href="/quran"
-                                            className="transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                        >
-                                            Browse surahs
-                                        </Link>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="mt-9 flex flex-wrap gap-3">
-                                    <Button asChild size="lg">
-                                        <Link href={href}>
-                                            Start reading
-                                            <ArrowRight aria-hidden="true" />
-                                        </Link>
-                                    </Button>
-                                    <Button asChild size="lg" variant="ghost">
-                                        <Link href="/quran">Browse surahs</Link>
-                                    </Button>
-                                </div>
-                            )}
                         </div>
 
-                        <div
-                            aria-hidden="true"
-                            className="relative mx-auto hidden aspect-square w-full max-w-80 lg:block"
-                        >
-                            <div className="absolute inset-0 rounded-full bg-primary/4.5" />
-                            <div className="absolute inset-5 rounded-full border border-primary/15" />
-                            <div className="absolute inset-14 rounded-full border border-primary/20" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="flex size-24 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_20px_50px_-20px_hsl(var(--primary))]">
-                                    <BookOpen className="size-10" />
-                                </span>
+                        <div className="max-w-2xl pt-16">
+                            <p className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                <span className="h-px w-8 bg-primary" />
+                                Read without the noise
+                            </p>
+                            <h1 className="text-4xl font-semibold leading-[1.04] tracking-tight text-balance sm:text-6xl lg:text-7xl">
+                                Make room for the Quran.
+                            </h1>
+                            <p className="mt-6 max-w-xl text-base leading-7 text-foreground/70 sm:text-lg sm:leading-8 dark:text-white/70">
+                                A focused reader that keeps the Arabic clear,
+                                remembers your place, and brings recitation,
+                                translation, and tafsir close when you need
+                                them.
+                            </p>
+
+                            <div className="mt-8 flex flex-wrap gap-3">
+                                <Button
+                                    asChild
+                                    size="lg"
+                                    className="h-12 rounded-full px-7 shadow-lg shadow-black/20"
+                                >
+                                    <Link href={href}>
+                                        {continueReadingLabel}
+                                        <ArrowRight aria-hidden="true" />
+                                    </Link>
+                                </Button>
+                                <Button
+                                    asChild
+                                    size="lg"
+                                    variant="ghost"
+                                    className="h-12 rounded-full border border-foreground/15 bg-background/20 px-7 text-foreground hover:bg-background/40 hover:text-foreground dark:border-white/15 dark:bg-white/8 dark:text-white dark:hover:bg-white/14 dark:hover:text-white"
+                                >
+                                    <Link href="/quran">Explore the Quran</Link>
+                                </Button>
                             </div>
-                            <span className="absolute top-7 left-1/2 -translate-x-1/2 bg-background/70 px-3 py-1 text-[0.65rem] font-semibold tracking-[0.18em] text-primary uppercase">
-                                Read
-                            </span>
-                            <span className="absolute bottom-7 left-1/2 -translate-x-1/2 bg-background/70 px-3 py-1 text-[0.65rem] font-semibold tracking-[0.18em] text-primary uppercase">
-                                Reflect
-                            </span>
+                        </div>
+
+                        <div className="mt-12 mb-12 flex flex-wrap gap-x-10 gap-y-5 text-foreground/65 sm:mb-16 lg:mb-20 dark:text-white/70">
+                            <div>
+                                <p className="text-[0.62rem] font-semibold tracking-[0.16em] uppercase">
+                                    {savedNumber === null
+                                        ? "Your starting place"
+                                        : "Continue from"}
+                                </p>
+                                <p className="mt-1 text-sm font-semibold text-foreground dark:text-white">
+                                    {readingPlace}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-[0.62rem] font-semibold tracking-[0.16em] uppercase">
+                                    Reading mode
+                                </p>
+                                <p className="mt-1 text-sm font-semibold text-foreground capitalize dark:text-white">
+                                    {preferences.readingMode} by{" "}
+                                    {preferences.readingMode}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-[0.62rem] font-semibold tracking-[0.16em] uppercase">
+                                    Complete text
+                                </p>
+                                <p className="mt-1 text-sm font-semibold text-foreground dark:text-white">
+                                    {QuranInfo.maxSurahNumber} surahs ·{" "}
+                                    {QuranInfo.maxPageNumber} pages
+                                </p>
+                            </div>
                         </div>
                     </div>
+                </section>
 
-                    <section
-                        className="mt-20 sm:mt-28"
-                        aria-labelledby="home-features"
-                    >
-                        <div className="max-w-xl">
-                            <p className="text-xs font-semibold tracking-[0.18em] text-primary">
-                                DESIGNED FOR RETURNING
+                <section
+                    aria-labelledby="reader-tools"
+                    className="py-20 sm:py-28"
+                >
+                    <div>
+                        <div className="mx-auto max-w-2xl text-center">
+                            <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
+                                Made for returning
                             </p>
                             <h2
-                                id="home-features"
-                                className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl"
+                                id="reader-tools"
+                                className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-balance sm:text-4xl"
                             >
-                                A reader that stays out of your way.
+                                Everything useful. Nothing between you and the
+                                page.
                             </h2>
+                            <p className="mx-auto mt-5 max-w-xl leading-7 text-muted-foreground">
+                                The reader stays simple by default and reveals
+                                more only when you ask for it.
+                            </p>
                         </div>
-                        <div className="mt-9 grid gap-8 md:grid-cols-3 md:gap-10">
-                            {features.map(
-                                ({ icon: Icon, title, description }) => (
-                                    <article key={title} className="flex gap-4">
-                                        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
+
+                        <div className="mt-14 grid gap-12 md:grid-cols-3 md:gap-10 lg:gap-14">
+                            {readerTools.map(
+                                ({
+                                    icon: Icon,
+                                    eyebrow,
+                                    title,
+                                    description,
+                                }) => (
+                                    <article key={title} className="text-left">
+                                        <span className="text-primary">
                                             <Icon
                                                 aria-hidden="true"
-                                                className="size-5"
+                                                className="size-6"
                                             />
                                         </span>
                                         <div>
-                                            <h3 className="font-semibold text-foreground">
+                                            <p className="mt-5 text-[0.65rem] font-semibold tracking-[0.16em] text-primary uppercase">
+                                                {eyebrow}
+                                            </p>
+                                            <h3 className="mt-2 text-xl font-semibold leading-snug tracking-tight">
                                                 {title}
                                             </h3>
-                                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                            <p className="mt-3 text-sm leading-7 text-muted-foreground">
                                                 {description}
                                             </p>
                                         </div>
@@ -213,7 +262,27 @@ export default async function Home() {
                                 ),
                             )}
                         </div>
-                    </section>
+                    </div>
+                </section>
+
+                <section className="mx-auto mb-12 max-w-2xl py-12 text-center sm:py-16">
+                    <BookText
+                        aria-hidden="true"
+                        className="mx-auto size-7 text-primary"
+                    />
+                    <h2 className="mt-5 text-2xl font-semibold tracking-tight sm:text-3xl">
+                        Ready when you are.
+                    </h2>
+                    <p className="mx-auto mt-3 max-w-lg leading-7 text-muted-foreground">
+                        Begin with the first page or choose a surah that is
+                        already on your mind.
+                    </p>
+                    <Button asChild className="mt-7 rounded-full px-6">
+                        <Link href="/quran">
+                            Browse all surahs
+                            <ArrowRight aria-hidden="true" />
+                        </Link>
+                    </Button>
                 </section>
             </div>
         </main>

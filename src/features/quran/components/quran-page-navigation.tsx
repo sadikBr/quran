@@ -82,13 +82,13 @@ export default function QuranPageNavigation({
                 return;
             }
 
-            if (event.key === "ArrowLeft" && currentNumber > min) {
+            if (event.key === "ArrowRight" && currentNumber > min) {
                 event.preventDefault();
                 setIsNavigating(true);
                 router.push(`/quran/${readingMode}/${currentNumber - 1}`);
             }
 
-            if (event.key === "ArrowRight" && currentNumber < max) {
+            if (event.key === "ArrowLeft" && currentNumber < max) {
                 event.preventDefault();
                 setIsNavigating(true);
                 router.push(`/quran/${readingMode}/${currentNumber + 1}`);
@@ -127,14 +127,14 @@ export default function QuranPageNavigation({
                 <span className="absolute inset-x-0 top-0 h-px animate-pulse bg-primary" />
             )}
             <div className="mx-auto flex h-18 max-w-5xl items-center justify-between gap-3 px-4 sm:h-20">
-                {currentNumber <= min ? (
+                {currentNumber >= max ? (
                     <Button
                         disabled
                         variant="ghost"
                         className="min-w-25 justify-start text-muted-foreground"
                     >
                         <ArrowLeft aria-hidden="true" />
-                        Previous
+                        Next
                     </Button>
                 ) : (
                     <Button
@@ -143,7 +143,7 @@ export default function QuranPageNavigation({
                         className="min-w-25 justify-start"
                     >
                         <Link
-                            href={getHref(Number(currentNumber) - 1)}
+                            href={getHref(Number(currentNumber) + 1)}
                             onClick={(event) => {
                                 if (
                                     event.metaKey ||
@@ -155,11 +155,11 @@ export default function QuranPageNavigation({
                                 }
 
                                 event.preventDefault();
-                                navigateTo(currentNumber - 1);
+                                navigateTo(currentNumber + 1);
                             }}
                         >
                             <ArrowLeft aria-hidden="true" />
-                            Previous
+                            Next
                         </Link>
                     </Button>
                 )}
@@ -295,13 +295,13 @@ export default function QuranPageNavigation({
                         </span>
                     </form>
                 )}
-                {currentNumber >= max ? (
+                {currentNumber <= min ? (
                     <Button
                         disabled
                         variant="ghost"
                         className="min-w-25 justify-end text-muted-foreground"
                     >
-                        Next
+                        Previous
                         <ArrowRight aria-hidden="true" />
                     </Button>
                 ) : (
@@ -311,7 +311,7 @@ export default function QuranPageNavigation({
                         className="min-w-25 justify-end"
                     >
                         <Link
-                            href={getHref(Number(currentNumber) + 1)}
+                            href={getHref(Number(currentNumber) - 1)}
                             onClick={(event) => {
                                 if (
                                     event.metaKey ||
@@ -323,10 +323,10 @@ export default function QuranPageNavigation({
                                 }
 
                                 event.preventDefault();
-                                navigateTo(currentNumber + 1);
+                                navigateTo(currentNumber - 1);
                             }}
                         >
-                            Next
+                            Previous
                             <ArrowRight aria-hidden="true" />
                         </Link>
                     </Button>

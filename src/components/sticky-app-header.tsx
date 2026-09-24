@@ -24,9 +24,11 @@ export default function StickyAppHeader({
 
     return (
         <header
+            data-scrolled={hasScrolled}
             className={cn(
-                "sticky top-0 z-20 flex h-20 items-center justify-between gap-4 transition-[background-color,backdrop-filter] duration-200",
-                hasScrolled && "bg-background/85 backdrop-blur-sm",
+                "sticky top-0 z-20 isolate flex h-20 items-center justify-between gap-4",
+                hasScrolled &&
+                    "before:absolute before:inset-y-0 before:left-1/2 before:-z-10 before:w-screen before:-translate-x-1/2 before:bg-background/85 before:backdrop-blur-md before:content-['']",
                 className,
             )}
         >
