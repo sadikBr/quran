@@ -1,6 +1,6 @@
 "use client";
 
-import { SearchX } from "lucide-react";
+import { Search, SearchX, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,49 +81,67 @@ export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
 
     return (
         <div className="mx-auto h-full max-w-5xl overflow-y-auto p-4">
-            <div className="flex text-xl font-bold items-end justify-end gap-4 mb-4">
-                <div className="flex flex-col gap-2 flex-1">
-                    <Label htmlFor="search-filter">Search Filter</Label>
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative w-full max-w-xl">
+                    <Label htmlFor="search-filter" className="sr-only">
+                        Search surahs
+                    </Label>
+                    <Search
+                        aria-hidden="true"
+                        className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground"
+                    />
                     <Input
                         id="search-filter"
                         value={searchFilter}
                         onChange={(e) => setSearchFilter(e.target.value)}
-                        placeholder="Filter ..."
+                        placeholder="Search by name or meaning"
+                        className="h-11 border-0 bg-muted/55 pl-10 shadow-none placeholder:text-muted-foreground/75 focus-visible:bg-muted/75 focus-visible:ring-1"
                     />
                 </div>
-                <Button
-                    variant={
-                        revelationTypeFilter === RevelationType.Meccan
-                            ? "default"
-                            : "outline"
-                    }
-                    className="px-8 py-4"
-                    aria-pressed={
-                        revelationTypeFilter === RevelationType.Meccan
-                    }
-                    onClick={() => updateFilter(RevelationType.Meccan)}
-                >
-                    Meccan
-                </Button>
-                <Button
-                    variant={
-                        revelationTypeFilter === RevelationType.Medinan
-                            ? "default"
-                            : "outline"
-                    }
-                    className="px-8 py-4"
-                    aria-pressed={
-                        revelationTypeFilter === RevelationType.Medinan
-                    }
-                    onClick={() => updateFilter(RevelationType.Medinan)}
-                >
-                    Medinan
-                </Button>
+                <fieldset className="flex self-start rounded-full border-0 bg-muted/55 p-1 sm:self-auto">
+                    <legend className="sr-only">
+                        Filter by revelation type
+                    </legend>
+                    <button
+                        type="button"
+                        className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                            revelationTypeFilter === RevelationType.Meccan
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground"
+                        }`}
+                        aria-pressed={
+                            revelationTypeFilter === RevelationType.Meccan
+                        }
+                        onClick={() => updateFilter(RevelationType.Meccan)}
+                    >
+                        Meccan
+                    </button>
+                    <button
+                        type="button"
+                        className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                            revelationTypeFilter === RevelationType.Medinan
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground"
+                        }`}
+                        aria-pressed={
+                            revelationTypeFilter === RevelationType.Medinan
+                        }
+                        onClick={() => updateFilter(RevelationType.Medinan)}
+                    >
+                        Medinan
+                    </button>
+                </fieldset>
             </div>
 
             {(revelationTypeFilter !== undefined || searchFilter !== "") && (
-                <Button onClick={clearFilters} variant="link" className="my-2">
-                    Clear Filter
+                <Button
+                    onClick={clearFilters}
+                    variant="ghost"
+                    size="sm"
+                    className="-mt-3 mb-4 gap-1.5 px-1 text-muted-foreground hover:bg-transparent hover:text-foreground"
+                >
+                    <X aria-hidden="true" className="size-3.5" />
+                    Clear filters
                 </Button>
             )}
 

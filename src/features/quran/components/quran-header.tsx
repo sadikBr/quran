@@ -1,6 +1,5 @@
-import { BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 export default function QuranHeader({
     startReadingHref,
@@ -12,39 +11,47 @@ export default function QuranHeader({
     showSurahIndex?: boolean;
 }) {
     return (
-        <header className="z-10 shrink-0 border-b bg-background/95 backdrop-blur">
-            <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
+        <header className="z-10 shrink-0 bg-background/85 backdrop-blur-sm">
+            <div className="mx-auto flex h-20 max-w-5xl items-center justify-between gap-4 px-4">
                 <Link
                     href="/"
-                    className="group flex min-w-0 items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
+                    className="group flex min-w-0 items-center gap-3 rounded-md text-sm font-semibold tracking-wide outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:-rotate-3">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform group-hover:-rotate-3">
                         <BookOpen aria-hidden="true" className="size-5" />
                     </span>
-                    <span className="min-w-0">
-                        <span className="block truncate text-sm font-semibold tracking-wide text-foreground">
-                            Quran Reader
-                        </span>
-                        <span className="hidden text-xs text-muted-foreground sm:block">
-                            Read and reflect
-                        </span>
+                    <span className="truncate text-foreground">
+                        Quran Reader
                     </span>
                 </Link>
                 <nav
                     aria-label="Quran navigation"
-                    className="flex items-center gap-2"
+                    className="flex shrink-0 items-center gap-3 text-sm"
                 >
                     {showSurahIndex && (
-                        <Button asChild size="sm" variant="ghost">
-                            <Link href="/quran">Surah index</Link>
-                        </Button>
+                        <Link
+                            href="/quran"
+                            className="text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                            Surah index
+                        </Link>
+                    )}
+                    {showSurahIndex && startReadingHref && (
+                        <span aria-hidden="true" className="text-border">
+                            ·
+                        </span>
                     )}
                     {startReadingHref && (
-                        <Button asChild size="sm">
-                            <Link href={startReadingHref}>
-                                {startReadingLabel}
-                            </Link>
-                        </Button>
+                        <Link
+                            href={startReadingHref}
+                            className="group inline-flex items-center gap-1.5 font-semibold text-primary transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                            {startReadingLabel}
+                            <ArrowRight
+                                aria-hidden="true"
+                                className="size-3.5 transition-transform group-hover:translate-x-0.5"
+                            />
+                        </Link>
                     )}
                 </nav>
             </div>
