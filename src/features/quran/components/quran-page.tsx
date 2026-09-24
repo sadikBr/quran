@@ -5,6 +5,7 @@ import getAyahAudioStreams from "../helpers/get-ayah-audio-streams";
 import getQuranPageData from "../server/get-quran-page-data";
 import QuranAudioQueue from "./quran-audio-queue";
 import Surah from "./surah";
+import TajweedLegend from "./tajweed-legend";
 
 export default async function QuranPage({ page }: { page: number }) {
     if (
@@ -30,19 +31,21 @@ export default async function QuranPage({ page }: { page: number }) {
             streams: getAyahAudioStreams(ayah),
         }))
         .filter((ayah) => ayah.streams.length > 0);
+    const showTajweedLegend =
+        pageData.data.edition.identifier === "quran-tajweed";
 
     return (
         <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-0 overflow-auto p-4">
-            <QuranAudioQueue
-                queue={audioQueue}
-                continuousRecitation={preferences.continuousRecitation}
-                showReadAll
-                className={
-                    pageData.data.ayahs[0]?.numberInSurah === 1
-                        ? "mb-3"
-                        : undefined
-                }
-            />
+            {(showTajweedLegend || audioQueue.length > 0) && (
+                <div className="mb-3 flex items-center justify-end gap-2">
+                    {showTajweedLegend && <TajweedLegend />}
+                    <QuranAudioQueue
+                        queue={audioQueue}
+                        continuousRecitation={preferences.continuousRecitation}
+                        showReadAll
+                    />
+                </div>
+            )}
             {Object.keys(pageData.data.surahs).map((surahNumber) => {
                 const surah = pageData.data.surahs[surahNumber];
                 const ayahs = pageData.data.ayahs.filter(

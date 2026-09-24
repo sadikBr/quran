@@ -51,7 +51,7 @@ export default function QuranAudioQueue({
 
     return (
         <div
-            className={`relative ml-auto flex w-fit items-center gap-1 overflow-hidden rounded-full bg-muted/55 p-1 pl-2 ${className ?? ""}`}
+            className={`relative flex w-fit items-center gap-1 overflow-hidden rounded-full bg-muted/55 p-1 pl-2 ${className ?? ""}`}
         >
             {queueStatus !== "idle" && progress > 0 && (
                 <span

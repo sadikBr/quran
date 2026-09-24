@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import getAyahAudioStreams from "../helpers/get-ayah-audio-streams";
 import type { AyahType } from "../types";
 import { useQuranAudio } from "./quran-audio-provider";
+import TajweedText from "./tajweed-text";
 
 export default function Ayah({
     ayah,
@@ -67,7 +68,7 @@ export default function Ayah({
                         "text-primary underline decoration-primary/40 decoration-2 underline-offset-8",
                 )}
             >
-                {ayah.text}
+                <TajweedText text={ayah.text} />
             </span>{" "}
             <AyahPlayer ayah={ayah} />
             <span className="relative inline-block align-[0.08em]">

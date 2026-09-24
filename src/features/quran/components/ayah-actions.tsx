@@ -19,6 +19,7 @@ import getTafsirAyah from "../server/get-tafsir-ayah";
 import type { Edition } from "../types";
 import EditionCombobox from "./edition-combobox";
 import { useQuranAudio } from "./quran-audio-provider";
+import TajweedText, { getPlainQuranText } from "./tajweed-text";
 
 const actions = [
     {
@@ -148,7 +149,7 @@ export default function AyahActions({
 
     async function copyArabicText() {
         try {
-            await navigator.clipboard.writeText(arabicText);
+            await navigator.clipboard.writeText(getPlainQuranText(arabicText));
             toast.success("Arabic text copied");
 
             if (closeOnCopy) {
@@ -238,7 +239,7 @@ export default function AyahActions({
                         dir="rtl"
                         className="ayah mt-3 text-center text-xl leading-loose text-foreground sm:text-2xl sm:leading-[2.1]"
                     >
-                        {arabicText}
+                        <TajweedText text={arabicText} />
                     </p>
                 </figure>
                 <article
