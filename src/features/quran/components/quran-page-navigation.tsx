@@ -3,7 +3,7 @@
 import { ArrowLeft, ArrowRight, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Combobox,
@@ -33,6 +33,13 @@ const navigationDetails = {
     },
 } as const;
 
+const SWIPE_DISTANCE = 72;
+const SWIPE_DIRECTION_RATIO = 1.35;
+const SWIPE_MAX_DURATION = 900;
+const SCREEN_EDGE_GUARD = 24;
+const SWIPE_EXCLUDED_TARGETS =
+    'a, button, input, textarea, select, nav, audio, video, [role="button"], [role="dialog"], [role="listbox"], [role="menu"], [contenteditable="true"]';
+
 function normalizeSurahSearch(value: string) {
     return value
         .normalize("NFKD")
@@ -54,6 +61,13 @@ export default function QuranPageNavigation({
 }) {
     const [inputValue, setInputValue] = useState(currentNumber.toString());
     const [isNavigating, setIsNavigating] = useState(false);
+    const touchState = useRef<{
+        startX: number;
+        startY: number;
+        lastX: number;
+        lastY: number;
+        startedAt: number;
+    } | null>(null);
     const router = useRouter();
     const { label, min, max } = navigationDetails[readingMode];
 
@@ -98,6 +112,111 @@ export default function QuranPageNavigation({
         window.addEventListener("keydown", handleKeyDown);
 
         return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [currentNumber, max, min, readingMode, router]);
+
+    useEffect(() => {
+        function resetTouchState() {
+            touchState.current = null;
+        }
+
+        function handleTouchStart(event: TouchEvent) {
+            if (
+                isNavigating ||
+                event.touches.length !== 1 ||
+                !(event.target instanceof HTMLElement) ||
+                event.target.closest(SWIPE_EXCLUDED_TARGETS)
+            ) {
+                resetTouchState();
+                return;
+            }
+
+            const touch = event.touches[0];
+
+            if (
+                touch.clientX <= SCREEN_EDGE_GUARD ||
+                touch.clientX >= window.innerWidth - SCREEN_EDGE_GUARD
+            ) {
+                resetTouchState();
+                return;
+            }
+
+            touchState.current = {
+                startX: touch.clientX,
+                startY: touch.clientY,
+                lastX: touch.clientX,
+                lastY: touch.clientY,
+                startedAt: performance.now(),
+            };
+        }
+
+        function handleTouchMove(event: TouchEvent) {
+            if (!touchState.current || event.touches.length !== 1) return;
+
+            const touch = event.touches[0];
+            touchState.current.lastX = touch.clientX;
+            touchState.current.lastY = touch.clientY;
+        }
+
+        function handleTouchEnd(event: TouchEvent) {
+            const gesture = touchState.current;
+            resetTouchState();
+
+            if (!gesture || isNavigating) return;
+
+            const finalTouch = event.changedTouches[0];
+            const endX = finalTouch?.clientX ?? gesture.lastX;
+            const endY = finalTouch?.clientY ?? gesture.lastY;
+            const horizontalDistance = endX - gesture.startX;
+            const verticalDistance = endY - gesture.startY;
+            const duration = performance.now() - gesture.startedAt;
+
+            if (
+                Math.abs(horizontalDistance) < SWIPE_DISTANCE ||
+                Math.abs(horizontalDistance) <
+                    Math.abs(verticalDistance) * SWIPE_DIRECTION_RATIO ||
+                duration > SWIPE_MAX_DURATION
+            ) {
+                return;
+            }
+
+            const targetNumber =
+                horizontalDistance < 0 ? currentNumber - 1 : currentNumber + 1;
+
+            if (targetNumber < min || targetNumber > max) return;
+
+            setIsNavigating(true);
+            router.push(`/quran/${readingMode}/${targetNumber}`);
+        }
+
+        window.addEventListener("touchstart", handleTouchStart, {
+            passive: true,
+        });
+        window.addEventListener("touchmove", handleTouchMove, {
+            passive: true,
+        });
+        window.addEventListener("touchend", handleTouchEnd, {
+            passive: true,
+        });
+        window.addEventListener("touchcancel", resetTouchState, {
+            passive: true,
+        });
+
+        return () => {
+            window.removeEventListener("touchstart", handleTouchStart);
+            window.removeEventListener("touchmove", handleTouchMove);
+            window.removeEventListener("touchend", handleTouchEnd);
+            window.removeEventListener("touchcancel", resetTouchState);
+        };
+    }, [currentNumber, isNavigating, max, min, readingMode, router]);
+
+    useEffect(() => {
+        if (currentNumber > min) {
+            router.prefetch(`/quran/${readingMode}/${currentNumber - 1}`);
+        }
+
+        if (currentNumber < max) {
+            router.prefetch(`/quran/${readingMode}/${currentNumber + 1}`);
+        }
     }, [currentNumber, max, min, readingMode, router]);
 
     function getHref(number: number) {
