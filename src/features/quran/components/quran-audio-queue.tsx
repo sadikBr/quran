@@ -48,6 +48,7 @@ export default function QuranAudioQueue({
     const queueStatus = getQueueStatus(queue);
     const isLoading = queueStatus === "loading";
     const hasError = queueStatus === "error";
+    const isPaused = queueStatus === "paused";
 
     return (
         <div
@@ -95,7 +96,9 @@ export default function QuranAudioQueue({
                               ? `Loading ${scope} recitation`
                               : isPlaying
                                 ? `Pause ${scope} recitation`
-                                : "Read all ayahs"
+                                : isPaused
+                                  ? `Continue ${scope} recitation`
+                                  : "Read all ayahs"
                     }
                 >
                     <span className="flex size-5 items-center justify-center rounded-full bg-primary-foreground/18 transition-transform group-hover:scale-110">
@@ -128,7 +131,9 @@ export default function QuranAudioQueue({
                               ? "Retry"
                               : isPlaying
                                 ? "Pause"
-                                : "Read all"}
+                                : isPaused
+                                  ? "Continue"
+                                  : "Read all"}
                     </span>
                 </Button>
             </div>

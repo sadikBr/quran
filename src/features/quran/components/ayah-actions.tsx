@@ -31,12 +31,15 @@ import TajweedText, { getPlainQuranText } from "./tajweed-text";
 function TafsirReadingPane({
     text,
     isLoading,
+    direction,
 }: {
     text: string;
     isLoading: boolean;
+    direction: string;
 }) {
     const tafsirScrollRef = useRef<HTMLDivElement>(null);
     const [hasMoreTafsir, setHasMoreTafsir] = useState(false);
+    const isRightToLeft = direction === "rtl";
 
     useEffect(() => {
         const tafsirElement = tafsirScrollRef.current;
@@ -63,31 +66,105 @@ function TafsirReadingPane({
     }, []);
 
     return (
-        <div className="relative mt-3 rounded-xl bg-muted/30 px-4 sm:px-5">
+        <div className="relative mt-4 overflow-hidden rounded-xl border border-primary/10 bg-muted/20">
             <div
                 ref={tafsirScrollRef}
-                className="max-h-[min(42dvh,32rem)] overflow-y-auto"
+                className="max-h-[min(42dvh,32rem)] overflow-y-auto overscroll-contain px-5 sm:px-6"
             >
                 <p
-                    dir="rtl"
-                    lang="ar"
-                    className={`pt-5 pb-12 font-(family-name:--font-tafsir) text-justify text-lg leading-[2.05] text-card-foreground/90 transition-opacity sm:pt-6 sm:text-xl sm:leading-[2.15] ${
-                        isLoading ? "opacity-35" : ""
-                    }`}
-                    style={{ textAlignLast: "right" }}
+                    dir={isRightToLeft ? "rtl" : "ltr"}
+                    lang={isRightToLeft ? "ar" : undefined}
+                    className={`pt-6 pb-16 text-justify text-card-foreground/90 transition-opacity sm:pt-7 ${
+                        isRightToLeft
+                            ? "font-(family-name:--font-tafsir) text-lg leading-[2.05] sm:text-xl sm:leading-[2.15]"
+                            : "font-serif text-base leading-8 sm:text-lg sm:leading-9"
+                    } ${isLoading ? "opacity-35" : ""}`}
+                    style={{ textAlignLast: isRightToLeft ? "right" : "left" }}
                 >
                     {text}
                 </p>
             </div>
             {hasMoreTafsir && (
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-16 items-end justify-center rounded-b-xl bg-linear-to-t from-muted via-muted/90 to-transparent pb-2">
-                    <span className="flex items-center gap-1 text-[0.65rem] font-semibold tracking-[0.12em] text-primary">
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-12 items-center justify-center border-t border-primary/10 bg-background/85 backdrop-blur-sm">
+                    <span className="flex items-center gap-1.5 text-[0.65rem] font-semibold tracking-[0.12em] text-primary uppercase">
                         Continue reading
                         <ChevronDown aria-hidden="true" className="size-3" />
                     </span>
                 </div>
             )}
         </div>
+    );
+}
+
+function QuranAyahPreview({
+    text,
+    ayahNumber,
+}: {
+    text: string;
+    ayahNumber: number;
+}) {
+    const textRef = useRef<HTMLParagraphElement>(null);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isCollapsible, setIsCollapsible] = useState(false);
+
+    useEffect(() => {
+        if (isExpanded) return;
+
+        const textElement = textRef.current;
+        if (!textElement) return;
+
+        const updateOverflow = () => {
+            setIsCollapsible(
+                textElement.scrollHeight > textElement.clientHeight + 2,
+            );
+        };
+        const resizeObserver = new ResizeObserver(updateOverflow);
+
+        updateOverflow();
+        resizeObserver.observe(textElement);
+
+        return () => resizeObserver.disconnect();
+    }, [isExpanded]);
+
+    return (
+        <figure className="mt-6 rounded-xl border border-primary/10 bg-primary/4 px-5 py-4 sm:px-6 sm:py-5">
+            <figcaption className="flex items-center justify-between gap-3 text-xs font-semibold tracking-[0.14em] text-primary">
+                <span>QURAN</span>
+                <span className="text-muted-foreground">AYAH {ayahNumber}</span>
+            </figcaption>
+            <div className="relative">
+                <p
+                    ref={textRef}
+                    dir="rtl"
+                    style={
+                        isCollapsible && !isExpanded
+                            ? {
+                                  maskImage:
+                                      "linear-gradient(to bottom, black 65%, transparent)",
+                              }
+                            : undefined
+                    }
+                    className={`ayah mt-3 text-center text-xl leading-loose text-foreground sm:text-2xl sm:leading-[2.1] ${
+                        isExpanded ? "" : "max-h-36 overflow-hidden sm:max-h-40"
+                    }`}
+                >
+                    <TajweedText text={text} />
+                </p>
+            </div>
+            {isCollapsible && (
+                <button
+                    type="button"
+                    onClick={() => setIsExpanded((expanded) => !expanded)}
+                    className="mx-auto mt-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                    {isExpanded ? "Show less" : "Show full ayah"}
+                    <ChevronDown
+                        aria-hidden="true"
+                        className={`size-3.5 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                    />
+                </button>
+            )}
+        </figure>
     );
 }
 
@@ -110,7 +187,7 @@ export type AyahActionsProps = {
     initialReflection: string;
     plainArabicText: string;
     closeOnCopy?: boolean;
-    onSavedAyahChange?: () => void;
+    onSavedAyahChangeAction?: () => void;
 };
 
 export default function AyahActions({
@@ -132,7 +209,7 @@ export default function AyahActions({
     initialReflection,
     plainArabicText,
     closeOnCopy = false,
-    onSavedAyahChange,
+    onSavedAyahChangeAction,
 }: AyahActionsProps) {
     const router = useRouter();
     const [isTafsirVisible, setIsTafsirVisible] = useState(false);
@@ -233,7 +310,7 @@ export default function AyahActions({
         toast.success(
             nextBookmarkedState ? "Ayah bookmarked" : "Bookmark removed",
         );
-        onSavedAyahChange?.();
+        onSavedAyahChangeAction?.();
     }
 
     function openReflection() {
@@ -263,7 +340,7 @@ export default function AyahActions({
         setReflection(savedValue);
         setReflectionDraft(savedValue);
         toast.success(savedValue ? "Reflection saved" : "Reflection removed");
-        onSavedAyahChange?.();
+        onSavedAyahChangeAction?.();
     }
 
     if (isReflectionVisible) {
@@ -368,10 +445,18 @@ export default function AyahActions({
                     Ayah actions
                 </button>
                 <header className="mt-6 pr-9">
-                    <p className="text-xs font-semibold tracking-[0.16em] text-primary">
-                        TAFSIR
-                    </p>
-                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-3">
+                        <span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <BookOpenText
+                                aria-hidden="true"
+                                className="size-4"
+                            />
+                        </span>
+                        <p className="text-xs font-semibold tracking-[0.16em] text-primary">
+                            TAFSIR READING
+                        </p>
+                    </div>
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
                         <h1
                             id="ayah-actions-title"
                             className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
@@ -382,8 +467,17 @@ export default function AyahActions({
                             Ayah {ayahNumber}
                         </span>
                     </div>
-                    <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                        <span className="font-medium">Edition</span>
+                </header>
+                <div className="mt-5 flex flex-col gap-2 border-y border-primary/10 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p className="text-[0.65rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+                            Commentary edition
+                        </p>
+                        <p className="mt-0.5 text-sm font-medium text-foreground">
+                            {selectedTafsir.editionName}
+                        </p>
+                    </div>
+                    <div className="shrink-0">
                         {canChooseTafsir ? (
                             <EditionCombobox
                                 ariaLabel="Choose tafsir edition"
@@ -392,40 +486,32 @@ export default function AyahActions({
                                 onValueChange={changeTafsirEdition}
                                 disabled={isChangingTafsir}
                                 placeholder="Search tafsir editions…"
-                                className="min-w-45 bg-muted/60 text-xs"
+                                className="w-full min-w-45 border-0 bg-muted/55 text-xs shadow-none sm:w-auto"
                             />
                         ) : (
-                            <span className="rounded-md bg-muted px-2 py-1 font-medium text-foreground">
-                                {selectedTafsir.editionName}
+                            <span className="text-xs text-muted-foreground">
+                                Default edition
                             </span>
                         )}
                     </div>
-                </header>
-                <figure className="mt-6 rounded-xl bg-muted/50 px-5 py-4 sm:px-6 sm:py-5">
-                    <figcaption className="flex items-center justify-between gap-3 text-xs font-semibold tracking-[0.14em] text-primary">
-                        <span>QURAN</span>
-                        <span className="text-muted-foreground">
-                            AYAH {ayahNumber}
-                        </span>
-                    </figcaption>
-                    <p
-                        dir="rtl"
-                        className="ayah mt-3 text-center text-xl leading-loose text-foreground sm:text-2xl sm:leading-[2.1]"
-                    >
-                        <TajweedText text={arabicText} />
-                    </p>
-                </figure>
+                </div>
+                <QuranAyahPreview text={arabicText} ayahNumber={ayahNumber} />
                 <article
-                    className="mt-7 transition-opacity"
+                    className="mt-8 transition-opacity"
                     aria-busy={isChangingTafsir}
                 >
-                    <div className="flex items-center gap-3">
-                        <p className="text-xs font-semibold tracking-[0.16em] text-primary">
-                            TAFSIR
-                        </p>
+                    <div className="flex items-end gap-3">
+                        <div>
+                            <p className="text-xs font-semibold tracking-[0.16em] text-primary">
+                                COMMENTARY
+                            </p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Interpretation and context for this ayah
+                            </p>
+                        </div>
                         <span
                             aria-hidden="true"
-                            className="h-px flex-1 bg-primary/10"
+                            className="mb-1 h-px flex-1 bg-primary/10"
                         />
                     </div>
                     {isChangingTafsir && (
@@ -441,6 +527,7 @@ export default function AyahActions({
                         key={selectedTafsirIdentifier}
                         text={selectedTafsir.text}
                         isLoading={isChangingTafsir}
+                        direction={selectedTafsir.direction}
                     />
                 </article>
             </div>

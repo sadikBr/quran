@@ -78,7 +78,7 @@ export default function SavedAyahActions({
                 {data ? (
                     <AyahActions
                         {...data}
-                        onSavedAyahChange={() => router.refresh()}
+                        onSavedAyahChangeAction={() => router.refresh()}
                     />
                 ) : loadFailed ? (
                     <div className="py-14 text-center">
