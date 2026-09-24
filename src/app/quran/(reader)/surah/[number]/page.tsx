@@ -50,9 +50,9 @@ export default async function SurahPage({
     const showTajweedLegend = surahData.edition.identifier === "quran-tajweed";
 
     return (
-        <div className="flex h-full min-h-0 flex-col">
+        <div className="flex h-full min-h-0 flex-col overflow-hidden">
             <ReadingProgressTracker locationType="surah" number={surahNumber} />
-            <div className="flex-1 overflow-y-auto">
+            <div data-quran-swipe-content className="flex-1 overflow-y-auto">
                 <div className="mx-auto max-w-5xl p-4">
                     {(showTajweedLegend || audioQueue.length > 0) && (
                         <div className="mb-3 flex items-center justify-end gap-2">

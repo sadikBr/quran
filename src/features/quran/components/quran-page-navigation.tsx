@@ -37,6 +37,8 @@ const SWIPE_DISTANCE = 72;
 const SWIPE_DIRECTION_RATIO = 1.35;
 const SWIPE_MAX_DURATION = 900;
 const SCREEN_EDGE_GUARD = 24;
+const SWIPE_INTENT_DISTANCE = 10;
+const SWIPE_DRAG_LIMIT = 112;
 const SWIPE_EXCLUDED_TARGETS =
     'a, button, input, textarea, select, nav, audio, video, [role="button"], [role="dialog"], [role="listbox"], [role="menu"], [contenteditable="true"]';
 
@@ -67,17 +69,24 @@ export default function QuranPageNavigation({
         lastX: number;
         lastY: number;
         startedAt: number;
+        intent: "pending" | "horizontal" | "vertical";
+        content: HTMLElement | null;
     } | null>(null);
+    const motionResetTimer = useRef<number | null>(null);
+    const motionContent = useRef<HTMLElement | null>(null);
+    const isNavigatingRef = useRef(false);
     const router = useRouter();
     const { label, min, max } = navigationDetails[readingMode];
 
     useEffect(() => {
         setInputValue(currentNumber.toString());
         setIsNavigating(false);
+        isNavigatingRef.current = false;
     }, [currentNumber]);
 
     function navigateTo(number: number) {
         setIsNavigating(true);
+        isNavigatingRef.current = true;
         router.push(`/quran/${readingMode}/${number}`);
     }
 
@@ -99,12 +108,14 @@ export default function QuranPageNavigation({
             if (event.key === "ArrowRight" && currentNumber > min) {
                 event.preventDefault();
                 setIsNavigating(true);
+                isNavigatingRef.current = true;
                 router.push(`/quran/${readingMode}/${currentNumber - 1}`);
             }
 
             if (event.key === "ArrowLeft" && currentNumber < max) {
                 event.preventDefault();
                 setIsNavigating(true);
+                isNavigatingRef.current = true;
                 router.push(`/quran/${readingMode}/${currentNumber + 1}`);
             }
         }
@@ -115,13 +126,48 @@ export default function QuranPageNavigation({
     }, [currentNumber, max, min, readingMode, router]);
 
     useEffect(() => {
+        const prefersReducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        function clearMotionResetTimer() {
+            if (motionResetTimer.current !== null) {
+                window.clearTimeout(motionResetTimer.current);
+                motionResetTimer.current = null;
+            }
+        }
+
+        function restoreContent(content: HTMLElement | null, animate: boolean) {
+            if (!content) return;
+
+            content.style.transition =
+                animate && !prefersReducedMotion
+                    ? "transform 180ms ease-out, opacity 180ms ease-out"
+                    : "none";
+            content.style.transform = "translate3d(0, 0, 0)";
+            content.style.opacity = "1";
+            content.style.willChange = "auto";
+
+            clearMotionResetTimer();
+            motionResetTimer.current = window.setTimeout(
+                () => {
+                    content.style.removeProperty("transition");
+                    content.style.removeProperty("transform");
+                    content.style.removeProperty("opacity");
+                    content.style.removeProperty("will-change");
+                    motionResetTimer.current = null;
+                },
+                animate && !prefersReducedMotion ? 200 : 0,
+            );
+        }
+
         function resetTouchState() {
             touchState.current = null;
         }
 
         function handleTouchStart(event: TouchEvent) {
             if (
-                isNavigating ||
+                isNavigatingRef.current ||
                 event.touches.length !== 1 ||
                 !(event.target instanceof HTMLElement) ||
                 event.target.closest(SWIPE_EXCLUDED_TARGETS)
@@ -131,6 +177,10 @@ export default function QuranPageNavigation({
             }
 
             const touch = event.touches[0];
+            const content = document.querySelector<HTMLElement>(
+                "[data-quran-swipe-content]",
+            );
+            motionContent.current = content;
 
             if (
                 touch.clientX <= SCREEN_EDGE_GUARD ||
@@ -140,12 +190,16 @@ export default function QuranPageNavigation({
                 return;
             }
 
+            restoreContent(content, false);
+
             touchState.current = {
                 startX: touch.clientX,
                 startY: touch.clientY,
                 lastX: touch.clientX,
                 lastY: touch.clientY,
                 startedAt: performance.now(),
+                intent: "pending",
+                content,
             };
         }
 
@@ -153,15 +207,59 @@ export default function QuranPageNavigation({
             if (!touchState.current || event.touches.length !== 1) return;
 
             const touch = event.touches[0];
-            touchState.current.lastX = touch.clientX;
-            touchState.current.lastY = touch.clientY;
+            const gesture = touchState.current;
+            gesture.lastX = touch.clientX;
+            gesture.lastY = touch.clientY;
+
+            const horizontalDistance = touch.clientX - gesture.startX;
+            const verticalDistance = touch.clientY - gesture.startY;
+
+            if (
+                gesture.intent === "pending" &&
+                Math.max(
+                    Math.abs(horizontalDistance),
+                    Math.abs(verticalDistance),
+                ) >= SWIPE_INTENT_DISTANCE
+            ) {
+                gesture.intent =
+                    Math.abs(horizontalDistance) >
+                    Math.abs(verticalDistance) * SWIPE_DIRECTION_RATIO
+                        ? "horizontal"
+                        : "vertical";
+            }
+
+            if (
+                gesture.intent !== "horizontal" ||
+                !gesture.content ||
+                prefersReducedMotion
+            ) {
+                return;
+            }
+
+            const isAtBoundary =
+                (horizontalDistance < 0 && currentNumber <= min) ||
+                (horizontalDistance > 0 && currentNumber >= max);
+            const dragResistance = isAtBoundary ? 0.12 : 0.42;
+            const offset = Math.max(
+                -SWIPE_DRAG_LIMIT,
+                Math.min(SWIPE_DRAG_LIMIT, horizontalDistance * dragResistance),
+            );
+            const progress = Math.min(
+                Math.abs(horizontalDistance) / SWIPE_DISTANCE,
+                1,
+            );
+
+            gesture.content.style.transition = "none";
+            gesture.content.style.transform = `translate3d(${offset}px, 0, 0)`;
+            gesture.content.style.opacity = `${1 - progress * 0.08}`;
+            gesture.content.style.willChange = "transform, opacity";
         }
 
         function handleTouchEnd(event: TouchEvent) {
             const gesture = touchState.current;
             resetTouchState();
 
-            if (!gesture || isNavigating) return;
+            if (!gesture || isNavigatingRef.current) return;
 
             const finalTouch = event.changedTouches[0];
             const endX = finalTouch?.clientX ?? gesture.lastX;
@@ -174,18 +272,46 @@ export default function QuranPageNavigation({
                 Math.abs(horizontalDistance) < SWIPE_DISTANCE ||
                 Math.abs(horizontalDistance) <
                     Math.abs(verticalDistance) * SWIPE_DIRECTION_RATIO ||
-                duration > SWIPE_MAX_DURATION
+                duration > SWIPE_MAX_DURATION ||
+                gesture.intent === "vertical"
             ) {
+                restoreContent(gesture.content, true);
                 return;
             }
 
             const targetNumber =
                 horizontalDistance < 0 ? currentNumber - 1 : currentNumber + 1;
 
-            if (targetNumber < min || targetNumber > max) return;
+            if (targetNumber < min || targetNumber > max) {
+                restoreContent(gesture.content, true);
+                return;
+            }
+
+            if (gesture.content && !prefersReducedMotion) {
+                const exitOffset =
+                    Math.sign(horizontalDistance) *
+                    Math.min(window.innerWidth * 0.18, 160);
+
+                gesture.content.style.transition =
+                    "transform 180ms ease-out, opacity 180ms ease-out";
+                gesture.content.style.transform = `translate3d(${exitOffset}px, 0, 0)`;
+                gesture.content.style.opacity = "0.72";
+            }
 
             setIsNavigating(true);
+            isNavigatingRef.current = true;
             router.push(`/quran/${readingMode}/${targetNumber}`);
+
+            clearMotionResetTimer();
+            motionResetTimer.current = window.setTimeout(() => {
+                restoreContent(gesture.content, true);
+            }, 900);
+        }
+
+        function handleTouchCancel() {
+            const content = touchState.current?.content ?? null;
+            resetTouchState();
+            restoreContent(content, true);
         }
 
         window.addEventListener("touchstart", handleTouchStart, {
@@ -197,7 +323,7 @@ export default function QuranPageNavigation({
         window.addEventListener("touchend", handleTouchEnd, {
             passive: true,
         });
-        window.addEventListener("touchcancel", resetTouchState, {
+        window.addEventListener("touchcancel", handleTouchCancel, {
             passive: true,
         });
 
@@ -205,9 +331,21 @@ export default function QuranPageNavigation({
             window.removeEventListener("touchstart", handleTouchStart);
             window.removeEventListener("touchmove", handleTouchMove);
             window.removeEventListener("touchend", handleTouchEnd);
-            window.removeEventListener("touchcancel", resetTouchState);
+            window.removeEventListener("touchcancel", handleTouchCancel);
+            const content = motionContent.current;
+
+            if (content) {
+                content.style.removeProperty("transition");
+                content.style.removeProperty("transform");
+                content.style.removeProperty("opacity");
+                content.style.removeProperty("will-change");
+            }
+
+            motionContent.current = null;
+            resetTouchState();
+            clearMotionResetTimer();
         };
-    }, [currentNumber, isNavigating, max, min, readingMode, router]);
+    }, [currentNumber, max, min, readingMode, router]);
 
     useEffect(() => {
         if (currentNumber > min) {

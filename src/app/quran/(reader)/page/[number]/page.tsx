@@ -11,9 +11,14 @@ export default async function Quran({
     const pageNumber = Number(number);
 
     return (
-        <div className="flex h-full min-h-0 flex-col">
+        <div className="flex h-full min-h-0 flex-col overflow-hidden">
             <ReadingProgressTracker locationType="page" number={pageNumber} />
-            <QuranPage page={pageNumber} />
+            <div
+                data-quran-swipe-content
+                className="flex min-h-0 flex-1 flex-col"
+            >
+                <QuranPage page={pageNumber} />
+            </div>
             <QuranPageNavigation
                 currentNumber={pageNumber}
                 readingMode="page"
