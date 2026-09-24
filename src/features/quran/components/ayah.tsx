@@ -1,6 +1,6 @@
 "use client";
 
-import { Ellipsis, Pause, Play } from "lucide-react";
+import { Ellipsis, LoaderCircle, Pause, Play, RefreshCcw } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { getArabicNumber } from "@/lib/arabic-numbers";
@@ -17,15 +17,35 @@ export default function Ayah({
     surahNumber: number;
 }) {
     const ayahRef = useRef<HTMLSpanElement>(null);
-    const { activeAyahNumber, isPlaying } = useQuranAudio();
-    const isActiveAyah = activeAyahNumber === ayah.number && isPlaying;
+    const { activeAyahNumber, playbackStatus } = useQuranAudio();
+    const isActiveAyah =
+        activeAyahNumber === ayah.number &&
+        playbackStatus !== "idle" &&
+        playbackStatus !== "error";
     const actionsHref = `/quran/ayah/${surahNumber}/${ayah.numberInSurah}`;
 
     useEffect(() => {
         if (!isActiveAyah) return;
 
-        ayahRef.current?.scrollIntoView({
-            behavior: "smooth",
+        const element = ayahRef.current;
+        if (!element) return;
+
+        const bounds = element.getBoundingClientRect();
+        const comfortableTop = 112;
+        const comfortableBottom = window.innerHeight - 128;
+
+        if (
+            bounds.top >= comfortableTop &&
+            bounds.bottom <= comfortableBottom
+        ) {
+            return;
+        }
+
+        element.scrollIntoView({
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+                .matches
+                ? "auto"
+                : "smooth",
             block: "center",
             inline: "nearest",
         });
@@ -74,26 +94,76 @@ export default function Ayah({
 
 function AyahPlayer({ ayah }: { ayah: AyahType }) {
     const streams = getAyahAudioStreams(ayah);
-    const { activeAyahNumber, isPlaying, toggleAudio } = useQuranAudio();
+    const {
+        activeAyahNumber,
+        isPlaying,
+        playbackStatus,
+        progress,
+        retryAudio,
+        toggleAudio,
+    } = useQuranAudio();
 
     if (streams.length === 0) return null;
 
-    const isPlayingThisAyah = activeAyahNumber === ayah.number && isPlaying;
+    const isCurrentAyah = activeAyahNumber === ayah.number;
+    const isPlayingThisAyah = isCurrentAyah && isPlaying;
+    const isLoadingThisAyah = isCurrentAyah && playbackStatus === "loading";
+    const hasPlaybackError = isCurrentAyah && playbackStatus === "error";
+    const progressOffset = 75.4 * (1 - Math.min(Math.max(progress, 0), 1));
+    const actionLabel = hasPlaybackError
+        ? "Retry"
+        : isPlayingThisAyah
+          ? "Pause"
+          : "Play";
 
     return (
         <>
             <span className="relative inline-flex translate-y-[-0.05em] align-middle">
+                {isCurrentAyah && progress > 0 && !hasPlaybackError && (
+                    <svg
+                        aria-hidden="true"
+                        viewBox="0 0 28 28"
+                        className="pointer-events-none absolute -inset-0.5 size-8 -rotate-90 text-primary pointer-coarse:size-11"
+                    >
+                        <circle
+                            cx="14"
+                            cy="14"
+                            r="12"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeDasharray="75.4"
+                            strokeDashoffset={progressOffset}
+                            className="transition-[stroke-dashoffset] duration-300 ease-linear"
+                        />
+                    </svg>
+                )}
                 <button
                     type="button"
-                    onClick={() => toggleAudio(ayah.number, streams)}
+                    disabled={isLoadingThisAyah}
+                    onClick={() =>
+                        hasPlaybackError
+                            ? retryAudio()
+                            : toggleAudio(ayah.number, streams)
+                    }
                     className={cn(
-                        "inline-flex size-6 items-center justify-center rounded-full border border-primary/30 bg-primary/8 text-primary transition-[background-color,border-color,color,box-shadow] duration-300 hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                        "relative inline-flex size-7 items-center justify-center rounded-full border border-primary/30 bg-primary/8 text-primary transition-[background-color,border-color,color,box-shadow] duration-300 hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-wait pointer-coarse:size-10",
                         isPlayingThisAyah &&
                             "border-primary bg-primary/15 shadow-[0_0_0_3px_hsl(var(--primary)/0.1)]",
+                        hasPlaybackError &&
+                            "border-destructive/40 bg-destructive/8 text-destructive hover:border-destructive hover:bg-destructive hover:text-destructive-foreground",
                     )}
-                    aria-label={`${isPlayingThisAyah ? "Pause" : "Play"} ayah ${ayah.numberInSurah}`}
+                    aria-label={`${actionLabel} ayah ${ayah.numberInSurah}`}
                 >
-                    {isPlayingThisAyah ? (
+                    {isLoadingThisAyah ? (
+                        <LoaderCircle
+                            className="size-3 animate-spin"
+                            aria-hidden="true"
+                        />
+                    ) : hasPlaybackError ? (
+                        <RefreshCcw className="size-3" aria-hidden="true" />
+                    ) : isPlayingThisAyah ? (
                         <Pause
                             className="size-3 fill-current"
                             aria-hidden="true"

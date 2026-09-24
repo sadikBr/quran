@@ -13,16 +13,27 @@ import { toast } from "sonner";
 
 type QuranAudioContextValue = {
     activeAyahNumber: number | null;
+    playbackStatus: QuranAudioStatus;
+    progress: number;
     isPlaying: boolean;
     toggleAudio: (ayahNumber: number, streams: string[]) => Promise<void>;
+    retryAudio: () => Promise<void>;
     setReaderQueue: (
         queue: QuranAudioQueueItem[],
         continuousRecitation: boolean,
     ) => void;
     isQueuePlaying: (queue: QuranAudioQueueItem[]) => boolean;
+    getQueueStatus: (queue: QuranAudioQueueItem[]) => QuranAudioStatus;
     restartQueue: (queue: QuranAudioQueueItem[]) => void;
     toggleQueue: (queue: QuranAudioQueueItem[]) => Promise<void>;
 };
+
+export type QuranAudioStatus =
+    | "idle"
+    | "loading"
+    | "playing"
+    | "paused"
+    | "error";
 
 export type QuranAudioQueueItem = {
     ayahNumber: number | null;
@@ -50,7 +61,10 @@ export default function QuranAudioProvider({
         null,
     );
     const [activeStreams, setActiveStreams] = useState<string[]>([]);
-    const [isPlaying, setIsPlaying] = useState(false);
+    const [playbackStatus, setPlaybackStatus] =
+        useState<QuranAudioStatus>("idle");
+    const [progress, setProgress] = useState(0);
+    const isPlaying = playbackStatus === "playing";
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -58,21 +72,46 @@ export default function QuranAudioProvider({
         if (!audio || activeStreams.length === 0) return;
 
         audio.load();
+        setPlaybackStatus("loading");
+        setProgress(0);
 
         if (!shouldPlayRef.current) return;
 
         shouldPlayRef.current = false;
         void audio.play().catch(() => {
-            setIsPlaying(false);
-            toast.error("Unable to play this recitation");
+            setPlaybackStatus("error");
+            toast.error("Unable to play this recitation", {
+                id: "quran-audio-error",
+            });
         });
     }, [activeStreams]);
 
     const playAyah = useCallback((item: QuranAudioQueueItem) => {
         shouldPlayRef.current = true;
+        setPlaybackStatus("loading");
+        setProgress(0);
         setActiveAyahNumber(item.ayahNumber);
         setActiveStreams(item.streams);
     }, []);
+
+    const retryAudio = useCallback(async () => {
+        const audio = audioRef.current;
+
+        if (!audio || activeStreams.length === 0) return;
+
+        setPlaybackStatus("loading");
+        setProgress(0);
+        audio.load();
+
+        try {
+            await audio.play();
+        } catch {
+            setPlaybackStatus("error");
+            toast.error("Unable to play this recitation", {
+                id: "quran-audio-error",
+            });
+        }
+    }, [activeStreams]);
 
     const playQueue = useCallback(
         (queue: QuranAudioQueueItem[], index = 0) => {
@@ -95,10 +134,13 @@ export default function QuranAudioProvider({
             if (activeAyahNumber === ayahNumber) {
                 if (audio.paused) {
                     try {
+                        setPlaybackStatus("loading");
                         await audio.play();
                     } catch {
-                        setIsPlaying(false);
-                        toast.error("Unable to play this recitation");
+                        setPlaybackStatus("error");
+                        toast.error("Unable to play this recitation", {
+                            id: "quran-audio-error",
+                        });
                     }
                     return;
                 }
@@ -140,6 +182,12 @@ export default function QuranAudioProvider({
         [isPlaying],
     );
 
+    const getQueueStatus = useCallback(
+        (queue: QuranAudioQueueItem[]) =>
+            playbackQueueRef.current?.queue === queue ? playbackStatus : "idle",
+        [playbackStatus],
+    );
+
     const toggleQueue = useCallback(
         async (queue: QuranAudioQueueItem[]) => {
             const audio = audioRef.current;
@@ -149,10 +197,13 @@ export default function QuranAudioProvider({
             if (playbackQueueRef.current?.queue === queue) {
                 if (audio.paused) {
                     try {
+                        setPlaybackStatus("loading");
                         await audio.play();
                     } catch {
-                        setIsPlaying(false);
-                        toast.error("Unable to play this recitation");
+                        setPlaybackStatus("error");
+                        toast.error("Unable to play this recitation", {
+                            id: "quran-audio-error",
+                        });
                     }
                     return;
                 }
@@ -177,10 +228,14 @@ export default function QuranAudioProvider({
         <QuranAudioContext.Provider
             value={{
                 activeAyahNumber,
+                playbackStatus,
+                progress,
                 isPlaying,
                 toggleAudio,
+                retryAudio,
                 setReaderQueue,
                 isQueuePlaying,
+                getQueueStatus,
                 restartQueue,
                 toggleQueue,
             }}
@@ -190,8 +245,26 @@ export default function QuranAudioProvider({
             <audio
                 ref={audioRef}
                 className="hidden"
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
+                onLoadStart={() => setPlaybackStatus("loading")}
+                onWaiting={() => setPlaybackStatus("loading")}
+                onPlaying={() => setPlaybackStatus("playing")}
+                onPause={() =>
+                    setPlaybackStatus((status) =>
+                        status === "error" ||
+                        status === "idle" ||
+                        status === "loading"
+                            ? status
+                            : "paused",
+                    )
+                }
+                onTimeUpdate={(event) => {
+                    const audio = event.currentTarget;
+                    setProgress(
+                        Number.isFinite(audio.duration) && audio.duration > 0
+                            ? audio.currentTime / audio.duration
+                            : 0,
+                    );
+                }}
                 onEnded={() => {
                     const playbackQueue = playbackQueueRef.current;
 
@@ -204,11 +277,14 @@ export default function QuranAudioProvider({
                     }
 
                     playbackQueueRef.current = null;
-                    setIsPlaying(false);
+                    setPlaybackStatus("idle");
+                    setProgress(1);
                 }}
                 onError={() => {
-                    setIsPlaying(false);
-                    toast.error("Unable to play this recitation");
+                    setPlaybackStatus("error");
+                    toast.error("Unable to play this recitation", {
+                        id: "quran-audio-error",
+                    });
                 }}
             >
                 {activeStreams.map((stream) => (

@@ -6,8 +6,11 @@ import { useQuranAudio } from "./quran-audio-provider";
 import TranslationAyahLink from "./translation-ayah-link";
 
 export default function TranslationAyah({ ayah }: { ayah: AyahType }) {
-    const { activeAyahNumber, isPlaying } = useQuranAudio();
-    const isActiveAyah = activeAyahNumber === ayah.number && isPlaying;
+    const { activeAyahNumber, playbackStatus } = useQuranAudio();
+    const isActiveAyah =
+        activeAyahNumber === ayah.number &&
+        playbackStatus !== "idle" &&
+        playbackStatus !== "error";
 
     return (
         <p

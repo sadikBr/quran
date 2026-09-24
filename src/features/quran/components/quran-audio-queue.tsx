@@ -1,6 +1,13 @@
 "use client";
 
-import { AudioLines, Pause, Play, RotateCcw } from "lucide-react";
+import {
+    AudioLines,
+    LoaderCircle,
+    Pause,
+    Play,
+    RefreshCcw,
+    RotateCcw,
+} from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import type { QuranAudioQueueItem } from "./quran-audio-provider";
@@ -19,8 +26,15 @@ export default function QuranAudioQueue({
     scope?: "page" | "surah";
     className?: string;
 }) {
-    const { isQueuePlaying, restartQueue, setReaderQueue, toggleQueue } =
-        useQuranAudio();
+    const {
+        getQueueStatus,
+        isQueuePlaying,
+        progress,
+        restartQueue,
+        retryAudio,
+        setReaderQueue,
+        toggleQueue,
+    } = useQuranAudio();
 
     useEffect(() => {
         setReaderQueue(queue, continuousRecitation);
@@ -31,11 +45,21 @@ export default function QuranAudioQueue({
     if (!showReadAll || queue.length === 0) return null;
 
     const isPlaying = isQueuePlaying(queue);
+    const queueStatus = getQueueStatus(queue);
+    const isLoading = queueStatus === "loading";
+    const hasError = queueStatus === "error";
 
     return (
         <div
-            className={`ml-auto flex w-fit items-center gap-1 rounded-full bg-muted/55 p-1 pl-2 ${className ?? ""}`}
+            className={`relative ml-auto flex w-fit items-center gap-1 overflow-hidden rounded-full bg-muted/55 p-1 pl-2 ${className ?? ""}`}
         >
+            {queueStatus !== "idle" && progress > 0 && (
+                <span
+                    aria-hidden="true"
+                    className="absolute inset-x-0 bottom-0 h-0.5 origin-left bg-primary transition-transform duration-300 ease-linear"
+                    style={{ transform: `scaleX(${progress})` }}
+                />
+            )}
             <span className="flex items-center gap-1.5 px-1.5 text-muted-foreground text-xs">
                 <AudioLines
                     className="size-3.5 text-primary"
@@ -50,7 +74,7 @@ export default function QuranAudioQueue({
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="size-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    className="size-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary pointer-coarse:size-10"
                     onClick={() => restartQueue(queue)}
                     aria-label={`Restart ${scope} recitation`}
                 >
@@ -59,16 +83,33 @@ export default function QuranAudioQueue({
                 <Button
                     type="button"
                     size="sm"
-                    className="group h-8 rounded-full bg-primary px-3 text-primary-foreground shadow-[0_5px_16px_-8px_hsl(var(--primary))] hover:bg-primary/90"
-                    onClick={() => toggleQueue(queue)}
+                    disabled={isLoading}
+                    className="group h-8 rounded-full bg-primary px-3 text-primary-foreground shadow-[0_5px_16px_-8px_hsl(var(--primary))] hover:bg-primary/90 disabled:cursor-wait pointer-coarse:h-10 pointer-coarse:px-4"
+                    onClick={() =>
+                        hasError ? retryAudio() : toggleQueue(queue)
+                    }
                     aria-label={
-                        isPlaying
-                            ? `Pause ${scope} recitation`
-                            : "Read all ayahs"
+                        hasError
+                            ? `Retry ${scope} recitation`
+                            : isLoading
+                              ? `Loading ${scope} recitation`
+                              : isPlaying
+                                ? `Pause ${scope} recitation`
+                                : "Read all ayahs"
                     }
                 >
                     <span className="flex size-5 items-center justify-center rounded-full bg-primary-foreground/18 transition-transform group-hover:scale-110">
-                        {isPlaying ? (
+                        {isLoading ? (
+                            <LoaderCircle
+                                className="size-2.5 animate-spin"
+                                aria-hidden="true"
+                            />
+                        ) : hasError ? (
+                            <RefreshCcw
+                                className="size-2.5"
+                                aria-hidden="true"
+                            />
+                        ) : isPlaying ? (
                             <Pause
                                 className="size-2.5 fill-current"
                                 aria-hidden="true"
@@ -80,7 +121,15 @@ export default function QuranAudioQueue({
                             />
                         )}
                     </span>
-                    <span>{isPlaying ? "Pause" : "Read all"}</span>
+                    <span>
+                        {isLoading
+                            ? "Loading"
+                            : hasError
+                              ? "Retry"
+                              : isPlaying
+                                ? "Pause"
+                                : "Read all"}
+                    </span>
                 </Button>
             </div>
         </div>

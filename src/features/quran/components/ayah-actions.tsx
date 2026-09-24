@@ -10,6 +10,7 @@ import {
     NotebookPen,
     Pause,
     Play,
+    RefreshCcw,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -133,9 +134,17 @@ export default function AyahActions({
         direction: tafsirDirection,
     });
     const [isChangingTafsir, setIsChangingTafsir] = useState(false);
-    const { activeAyahNumber, isPlaying, toggleAudio } = useQuranAudio();
-    const isPlayingThisAyah =
-        activeAyahNumber === globalAyahNumber && isPlaying;
+    const {
+        activeAyahNumber,
+        isPlaying,
+        playbackStatus,
+        retryAudio,
+        toggleAudio,
+    } = useQuranAudio();
+    const isCurrentAyah = activeAyahNumber === globalAyahNumber;
+    const isPlayingThisAyah = isCurrentAyah && isPlaying;
+    const isLoadingThisAyah = isCurrentAyah && playbackStatus === "loading";
+    const hasPlaybackError = isCurrentAyah && playbackStatus === "error";
 
     async function copyArabicText() {
         try {
@@ -294,14 +303,27 @@ export default function AyahActions({
                 {audioStreams.length > 0 && (
                     <button
                         type="button"
+                        disabled={isLoadingThisAyah}
                         onClick={() =>
-                            toggleAudio(globalAyahNumber, audioStreams)
+                            hasPlaybackError
+                                ? retryAudio()
+                                : toggleAudio(globalAyahNumber, audioStreams)
                         }
-                        className="rounded-xl bg-primary px-5 py-4 text-left text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:col-span-2"
+                        className="rounded-xl bg-primary px-5 py-4 text-left text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-wait sm:col-span-2"
                     >
                         <span className="flex items-center gap-4">
                             <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15 ring-1 ring-primary-foreground/20">
-                                {isPlayingThisAyah ? (
+                                {isLoadingThisAyah ? (
+                                    <LoaderCircle
+                                        aria-hidden="true"
+                                        className="size-4 animate-spin"
+                                    />
+                                ) : hasPlaybackError ? (
+                                    <RefreshCcw
+                                        aria-hidden="true"
+                                        className="size-4"
+                                    />
+                                ) : isPlayingThisAyah ? (
                                     <Pause
                                         aria-hidden="true"
                                         className="size-4 fill-current"
@@ -318,14 +340,22 @@ export default function AyahActions({
                                     RECITATION
                                 </span>
                                 <span className="mt-1 block font-medium">
-                                    {isPlayingThisAyah
-                                        ? "Pause recitation"
-                                        : "Listen to ayah"}
+                                    {isLoadingThisAyah
+                                        ? "Loading recitation"
+                                        : hasPlaybackError
+                                          ? "Retry recitation"
+                                          : isPlayingThisAyah
+                                            ? "Pause recitation"
+                                            : "Listen to ayah"}
                                 </span>
                                 <span className="mt-1 block text-sm text-primary-foreground/75">
-                                    {isPlayingThisAyah
-                                        ? "Recitation is playing."
-                                        : "Play this ayah using your selected recitation."}
+                                    {isLoadingThisAyah
+                                        ? "Preparing your selected recitation."
+                                        : hasPlaybackError
+                                          ? "Playback failed. Tap to try again."
+                                          : isPlayingThisAyah
+                                            ? "Recitation is playing."
+                                            : "Play this ayah using your selected recitation."}
                                 </span>
                             </span>
                         </span>
