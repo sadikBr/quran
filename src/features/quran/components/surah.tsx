@@ -1,7 +1,7 @@
 import type { AyahType, Edition, SurahType } from "../types";
 import Ayah from "./ayah";
 import SurahFrame from "./surah-frame";
-import TranslationAyahLink from "./translation-ayah-link";
+import TranslationAyah from "./translation-ayah";
 
 export default function Surah({
     surah,
@@ -62,16 +62,7 @@ export default function Surah({
                     </div>
                     <div className="mt-5 space-y-1 text-[0.95rem] leading-7 text-foreground/85 sm:text-base sm:leading-8">
                         {translatedAyahs.map((ayah) => (
-                            <p
-                                key={ayah.number}
-                                className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/45"
-                            >
-                                <TranslationAyahLink
-                                    ayahNumber={ayah.number}
-                                    numberInSurah={ayah.numberInSurah}
-                                />
-                                {ayah.text}
-                            </p>
+                            <TranslationAyah key={ayah.number} ayah={ayah} />
                         ))}
                     </div>
                 </section>
