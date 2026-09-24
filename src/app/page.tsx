@@ -157,7 +157,7 @@ export default async function Home() {
                             aria-hidden="true"
                             className="relative mx-auto hidden aspect-square w-full max-w-80 lg:block"
                         >
-                            <div className="absolute inset-0 rounded-full bg-primary/[0.045]" />
+                            <div className="absolute inset-0 rounded-full bg-primary/4.5" />
                             <div className="absolute inset-5 rounded-full border border-primary/15" />
                             <div className="absolute inset-14 rounded-full border border-primary/20" />
                             <div className="absolute inset-0 flex items-center justify-center">
