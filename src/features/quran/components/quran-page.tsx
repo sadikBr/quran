@@ -32,11 +32,16 @@ export default async function QuranPage({ page }: { page: number }) {
         .filter((ayah) => ayah.streams.length > 0);
 
     return (
-        <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-2 overflow-auto p-4">
+        <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-0 overflow-auto p-4">
             <QuranAudioQueue
                 queue={audioQueue}
                 continuousRecitation={preferences.continuousRecitation}
                 showReadAll
+                className={
+                    pageData.data.ayahs[0]?.numberInSurah === 1
+                        ? "mb-3"
+                        : undefined
+                }
             />
             {Object.keys(pageData.data.surahs).map((surahNumber) => {
                 const surah = pageData.data.surahs[surahNumber];

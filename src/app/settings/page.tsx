@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import PageBackground from "@/components/page-background";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
@@ -39,7 +40,8 @@ export default async function SettingsPage() {
     );
 
     return (
-        <main className="min-h-dvh overflow-hidden bg-background bg-[radial-gradient(ellipse_80%_45%_at_50%_0%,oklch(0.9_0.05_74.9889/0.42),transparent_70%)]">
+        <main className="relative isolate min-h-dvh overflow-hidden bg-background">
+            <PageBackground />
             <div className="mx-auto max-w-5xl px-4">
                 <header className="flex h-20 items-center justify-between gap-4">
                     <Link

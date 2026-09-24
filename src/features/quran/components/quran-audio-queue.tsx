@@ -10,10 +10,12 @@ export default function QuranAudioQueue({
     queue,
     continuousRecitation,
     showReadAll = false,
+    className,
 }: {
     queue: QuranAudioQueueItem[];
     continuousRecitation: boolean;
     showReadAll?: boolean;
+    className?: string;
 }) {
     const { isQueuePlaying, restartQueue, setReaderQueue, toggleQueue } =
         useQuranAudio();
@@ -29,24 +31,22 @@ export default function QuranAudioQueue({
     const isPlaying = isQueuePlaying(queue);
 
     return (
-        <div className="flex items-center justify-between gap-4 rounded-xl bg-primary/[0.055] px-3 py-2.5 sm:px-4">
-            <div className="flex items-center gap-2.5 text-muted-foreground text-sm">
-                <span className="flex size-7 items-center justify-center rounded-full bg-primary/12 text-primary">
-                    <AudioLines className="size-3.5" aria-hidden="true" />
-                </span>
-                <div>
-                    <p className="font-medium text-foreground">
-                        Audio recitation
-                    </p>
-                    <p className="text-xs">Listen to this page</p>
-                </div>
-            </div>
-            <div className="flex items-center gap-1">
+        <div
+            className={`ml-auto flex items-center gap-1 rounded-full bg-muted/55 p-1 pl-2 ${className ?? ""}`}
+        >
+            <span className="flex items-center gap-1.5 px-1.5 text-muted-foreground text-xs">
+                <AudioLines
+                    className="size-3.5 text-primary"
+                    aria-hidden="true"
+                />
+                <span className="hidden sm:inline">Page recitation</span>
+            </span>
+            <div className="flex items-center gap-0.5">
                 <Button
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="size-9 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    className="size-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
                     onClick={() => restartQueue(queue)}
                     aria-label="Restart page recitation"
                 >
@@ -55,7 +55,7 @@ export default function QuranAudioQueue({
                 <Button
                     type="button"
                     size="sm"
-                    className="group h-9 rounded-full bg-primary px-3.5 text-primary-foreground shadow-[0_5px_16px_-8px_hsl(var(--primary))] hover:bg-primary/90"
+                    className="group h-8 rounded-full bg-primary px-3 text-primary-foreground shadow-[0_5px_16px_-8px_hsl(var(--primary))] hover:bg-primary/90"
                     onClick={() => toggleQueue(queue)}
                     aria-label={
                         isPlaying ? "Pause page recitation" : "Read all ayahs"

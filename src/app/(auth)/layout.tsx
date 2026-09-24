@@ -1,10 +1,12 @@
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import PageBackground from "@/components/page-background";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
     return (
-        <div className="relative min-h-dvh overflow-hidden bg-background bg-[radial-gradient(ellipse_80%_45%_at_50%_0%,oklch(0.9_0.05_74.9889/0.42),transparent_70%)]">
+        <div className="relative isolate min-h-dvh overflow-hidden bg-background">
+            <PageBackground />
             <header className="absolute inset-x-0 top-0 z-10 px-4">
                 <div className="mx-auto flex h-20 w-full max-w-5xl items-center">
                     <Link

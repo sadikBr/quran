@@ -1,6 +1,7 @@
 import type { AyahType, Edition, SurahType } from "../types";
 import Ayah from "./ayah";
 import SurahFrame from "./surah-frame";
+import TranslationAyahLink from "./translation-ayah-link";
 
 export default function Surah({
     surah,
@@ -22,7 +23,8 @@ export default function Surah({
                 <div
                     dir="rtl"
                     lang="ar"
-                    className="mt-3 py-5 text-justify leading-[2.5] sm:py-7 sm:leading-[2.7]"
+                    className="mt-0 py-2 text-justify leading-[2.5] sm:py-3 sm:leading-[2.7]"
+                    style={{ textAlignLast: "center" }}
                 >
                     {ayahs.map((ayah) => {
                         return (
@@ -38,27 +40,36 @@ export default function Surah({
             {showTranslation && (
                 <section
                     aria-labelledby={`translation-${surah.number}`}
-                    className="ltr mt-8 mb-10 rounded-xl border bg-card/70 p-5 shadow-sm sm:p-6"
+                    className="ltr mt-8 mb-10"
                 >
-                    <div className="flex items-baseline justify-between gap-4 border-b pb-4">
-                        <h2
-                            id={`translation-${surah.number}`}
-                            className="text-sm font-semibold tracking-wide text-card-foreground"
-                        >
-                            English translation
-                        </h2>
-                        <p className="text-xs text-muted-foreground">
+                    <div className="flex items-center justify-between gap-4">
+                        <div>
+                            <p className="text-[0.65rem] font-semibold tracking-[0.18em] text-primary uppercase">
+                                Translation
+                            </p>
+                            <h2
+                                id={`translation-${surah.number}`}
+                                className="mt-1 text-lg font-semibold tracking-tight text-foreground"
+                            >
+                                English translation
+                            </h2>
+                        </div>
+                        <p className="rounded-full bg-muted/55 px-3 py-1.5 text-xs text-muted-foreground">
                             {translationEdition?.englishName ??
                                 translationEdition?.name ??
                                 "Translation"}
                         </p>
                     </div>
-                    <div className="mt-5 space-y-3 text-base leading-8 text-card-foreground/90 sm:text-[1.05rem]">
+                    <div className="mt-5 space-y-1 text-[0.95rem] leading-7 text-foreground/85 sm:text-base sm:leading-8">
                         {translatedAyahs.map((ayah) => (
-                            <p key={ayah.number} className="relative pl-8">
-                                <span className="absolute left-0 top-1 text-xs font-semibold text-primary">
-                                    {ayah.numberInSurah}
-                                </span>
+                            <p
+                                key={ayah.number}
+                                className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/45"
+                            >
+                                <TranslationAyahLink
+                                    ayahNumber={ayah.number}
+                                    numberInSurah={ayah.numberInSurah}
+                                />
                                 {ayah.text}
                             </p>
                         ))}

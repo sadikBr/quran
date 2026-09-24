@@ -8,6 +8,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import PageBackground from "@/components/page-background";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
@@ -67,9 +68,10 @@ export default async function DashboardPage() {
     }
 
     return (
-        <main className="min-h-dvh bg-background p-4 sm:p-8">
-            <div className="mx-auto max-w-5xl">
-                <header className="flex items-center justify-between gap-4 border-b pb-5">
+        <main className="relative isolate min-h-dvh overflow-hidden bg-background">
+            <PageBackground />
+            <div className="mx-auto max-w-5xl px-4">
+                <header className="flex h-20 items-center justify-between gap-4">
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
@@ -88,73 +90,95 @@ export default async function DashboardPage() {
                 </header>
 
                 <section className="py-10 sm:py-14">
-                    <p className="text-sm font-semibold tracking-[0.18em] text-primary">
-                        YOUR DASHBOARD
-                    </p>
-                    <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                        Welcome back, {session.user.name}.
-                    </h1>
-                    <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">
-                        Your reading space is ready whenever you are. Progress
-                        and memorization tools will appear here as they are
-                        added.
-                    </p>
-
-                    <div className="mt-8 rounded-2xl border bg-card p-6 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-8">
-                        <div>
-                            <p className="text-sm font-semibold text-primary">
-                                CONTINUE YOUR READING
-                            </p>
-                            <h2 className="mt-2 text-2xl font-semibold">
-                                {readingHeading}
-                            </h2>
-                            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-                                {savedNumber
-                                    ? "Pick up exactly where you left off in your preferred reading mode."
-                                    : "Start your reading journey in your preferred reading mode."}
-                            </p>
-                        </div>
-                        <div className="mt-5 flex shrink-0 flex-wrap gap-3 sm:mt-0">
-                            <Button asChild>
-                                <Link href={continueReadingHref}>
-                                    {savedNumber
-                                        ? "Continue reading"
-                                        : "Start reading"}
-                                    <ArrowRight aria-hidden="true" />
-                                </Link>
-                            </Button>
-                            <Button asChild variant="outline">
-                                <Link href="/quran">Browse surahs</Link>
-                            </Button>
-                        </div>
+                    <div>
+                        <p className="text-sm font-semibold tracking-[0.18em] text-primary">
+                            YOUR DASHBOARD
+                        </p>
+                        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                            Welcome back, {session.user.name}.
+                        </h1>
+                        <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">
+                            Return to the Quran at your own pace. Your reading
+                            space is ready whenever you are.
+                        </p>
                     </div>
 
-                    <section className="mt-10" aria-labelledby="coming-soon">
-                        <h2 id="coming-soon" className="text-lg font-semibold">
-                            Coming next
-                        </h2>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                            Features planned for your personal dashboard.
-                        </p>
-                        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <section className="mt-10 bg-muted/45 px-5 py-6 sm:px-7 sm:py-7">
+                        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+                            <div className="flex gap-4">
+                                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                    <BookOpen
+                                        aria-hidden="true"
+                                        className="size-5"
+                                    />
+                                </span>
+                                <div>
+                                    <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                        Your reading place
+                                    </p>
+                                    <h2 className="mt-1.5 text-2xl font-semibold tracking-tight">
+                                        {readingHeading}
+                                    </h2>
+                                    <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                                        {savedNumber
+                                            ? "Pick up exactly where you left off in your preferred reading mode."
+                                            : "Start your reading journey in your preferred reading mode."}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex shrink-0 flex-wrap gap-3">
+                                <Button asChild>
+                                    <Link href={continueReadingHref}>
+                                        {savedNumber
+                                            ? "Continue reading"
+                                            : "Start reading"}
+                                        <ArrowRight aria-hidden="true" />
+                                    </Link>
+                                </Button>
+                                <Button asChild variant="ghost">
+                                    <Link href="/quran">Browse surahs</Link>
+                                </Button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="mt-16" aria-labelledby="coming-soon">
+                        <div className="max-w-xl">
+                            <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                On the horizon
+                            </p>
+                            <h2
+                                id="coming-soon"
+                                className="mt-2 text-xl font-semibold tracking-tight"
+                            >
+                                Your practice will grow with you.
+                            </h2>
+                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                These tools are being prepared for your personal
+                                reading journey.
+                            </p>
+                        </div>
+                        <div className="mt-8 grid gap-8 sm:grid-cols-2 sm:gap-12">
                             {upcomingFeatures.map(
                                 ({ icon: Icon, title, description }) => (
-                                    <article
-                                        key={title}
-                                        className="rounded-xl border border-dashed bg-card/60 p-5"
-                                    >
-                                        <span className="mb-4 flex size-9 items-center justify-center rounded-md bg-accent text-accent-foreground">
+                                    <article key={title} className="flex gap-4">
+                                        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
                                             <Icon
                                                 aria-hidden="true"
                                                 className="size-5"
                                             />
                                         </span>
-                                        <h3 className="font-semibold">
-                                            {title}
-                                        </h3>
-                                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                            {description}
-                                        </p>
+                                        <div>
+                                            <p className="text-[0.65rem] font-semibold tracking-[0.16em] text-primary uppercase">
+                                                In development
+                                            </p>
+                                            <h3 className="mt-1 font-semibold">
+                                                {title}
+                                            </h3>
+                                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                                {description}
+                                            </p>
+                                        </div>
                                     </article>
                                 ),
                             )}

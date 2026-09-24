@@ -43,6 +43,8 @@ export default function SettingsForm({
     const arabicAudioEditions = arabicEditions.filter(
         (edition) => edition.format === "audio",
     );
+    const selectClassName =
+        "w-full border-0 bg-muted/55 shadow-none hover:bg-muted/75 focus-visible:ring-1";
 
     function updateValue<Key extends keyof Preferences>(
         key: Key,
@@ -95,7 +97,7 @@ export default function SettingsForm({
                                 >
                                     <SelectTrigger
                                         id="theme"
-                                        className="w-full"
+                                        className={selectClassName}
                                     >
                                         <SelectValue />
                                     </SelectTrigger>
@@ -138,7 +140,7 @@ export default function SettingsForm({
                                 >
                                     <SelectTrigger
                                         id="readingMode"
-                                        className="w-full"
+                                        className={selectClassName}
                                     >
                                         <SelectValue />
                                     </SelectTrigger>
@@ -158,7 +160,7 @@ export default function SettingsForm({
                             title="Show translation"
                             description="Display English beneath the Arabic text."
                         >
-                            <div className="flex items-center justify-between gap-3 rounded-md border bg-background/60 px-3 py-2.5">
+                            <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/45 px-3 py-2.5">
                                 <label
                                     htmlFor="show-translation"
                                     className="cursor-pointer text-sm font-medium"
@@ -184,7 +186,7 @@ export default function SettingsForm({
                             title="Continuous recitation"
                             description="After an ayah finishes, continue with the next ayah in your current reading view."
                         >
-                            <div className="flex items-center justify-between gap-3 rounded-md border bg-background/60 px-3 py-2.5">
+                            <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/45 px-3 py-2.5">
                                 <label
                                     htmlFor="continuous-recitation"
                                     className="cursor-pointer text-sm font-medium"
@@ -225,7 +227,7 @@ export default function SettingsForm({
                             >
                                 <SelectTrigger
                                     id="arabic-edition"
-                                    className="w-full"
+                                    className={selectClassName}
                                 >
                                     <SelectValue />
                                 </SelectTrigger>
@@ -288,7 +290,7 @@ export default function SettingsForm({
                             >
                                 <SelectTrigger
                                     id="translation-edition"
-                                    className="w-full"
+                                    className={selectClassName}
                                 >
                                     <SelectValue />
                                 </SelectTrigger>
@@ -320,7 +322,7 @@ export default function SettingsForm({
                             >
                                 <SelectTrigger
                                     id="tafsir-edition"
-                                    className="w-full"
+                                    className={selectClassName}
                                 >
                                     <SelectValue />
                                 </SelectTrigger>
@@ -341,7 +343,7 @@ export default function SettingsForm({
                 </SettingsSection>
             </div>
 
-            <div className="mt-4 flex flex-col gap-4 border-t border-primary/15 pt-7 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-6 text-muted-foreground">
                     Changes will apply to your next reading session.
                 </p>

@@ -15,9 +15,7 @@ export default function SettingsSection({
             <h2 className="mt-2 text-lg font-semibold tracking-tight">
                 {title}
             </h2>
-            <div className="mt-5 divide-y border-y border-primary/15">
-                {children}
-            </div>
+            <div className="mt-6 space-y-7">{children}</div>
         </section>
     );
 }

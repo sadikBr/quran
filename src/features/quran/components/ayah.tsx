@@ -16,7 +16,10 @@ export default function Ayah({
     surahNumber: number;
 }) {
     return (
-        <span className="ayah inline rounded-sm text-3xl leading-[inherit] text-foreground transition-colors hover:bg-primary/10 dark:hover:bg-primary/15 sm:text-4xl">
+        <span
+            id={`ayah-${ayah.number}`}
+            className="ayah inline scroll-mt-6 rounded-sm text-3xl leading-[inherit] text-foreground transition-colors hover:bg-primary/10 dark:hover:bg-primary/15 sm:text-4xl"
+        >
             <span
                 className={cn(
                     ayah.sajda &&
