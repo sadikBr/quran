@@ -4,11 +4,14 @@ import {
     ArrowRight,
     Bookmark,
     BookOpen,
+    ChevronLeft,
+    ChevronRight,
     NotebookPen,
     Search,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
     Combobox,
     ComboboxContent,
@@ -20,6 +23,8 @@ import {
 import { Input } from "@/components/ui/input";
 import type { ReadingMode } from "@/features/settings/preferences";
 import type { SavedAyah } from "../types";
+
+const AYAH_ITEMS_PER_PAGE = 5;
 
 function normalizeSearch(value: string) {
     return value
@@ -40,6 +45,7 @@ export default function SavedAyahsSection({
 }) {
     const [query, setQuery] = useState("");
     const [surahFilter, setSurahFilter] = useState("all");
+    const [requestedPage, setRequestedPage] = useState(1);
     const surahs = useMemo(
         () =>
             Array.from(
@@ -71,6 +77,16 @@ export default function SavedAyahsSection({
             );
         });
     }, [query, savedAyahs, surahFilter]);
+    const pageCount = Math.max(
+        1,
+        Math.ceil(filteredAyahs.length / AYAH_ITEMS_PER_PAGE),
+    );
+    const currentPage = Math.min(requestedPage, pageCount);
+    const firstVisibleIndex = (currentPage - 1) * AYAH_ITEMS_PER_PAGE;
+    const visibleAyahs = filteredAyahs.slice(
+        firstVisibleIndex,
+        firstVisibleIndex + AYAH_ITEMS_PER_PAGE,
+    );
 
     return (
         <section className="mt-16" aria-labelledby="saved-ayahs-title">
@@ -105,9 +121,10 @@ export default function SavedAyahsSection({
                             <Input
                                 id="saved-ayah-search"
                                 value={query}
-                                onChange={(event) =>
-                                    setQuery(event.target.value)
-                                }
+                                onChange={(event) => {
+                                    setQuery(event.target.value);
+                                    setRequestedPage(1);
+                                }}
                                 placeholder="Search saved ayahs…"
                                 className="border-0 bg-muted/55 pl-9 shadow-none"
                             />
@@ -120,11 +137,12 @@ export default function SavedAyahsSection({
                                         surah.number.toString() === surahFilter,
                                 ) ?? null
                             }
-                            onValueChange={(surah) =>
+                            onValueChange={(surah) => {
                                 setSurahFilter(
                                     surah ? surah.number.toString() : "all",
-                                )
-                            }
+                                );
+                                setRequestedPage(1);
+                            }}
                             itemToStringLabel={(surah) =>
                                 `${surah.number}. ${surah.name}`
                             }
@@ -184,73 +202,142 @@ export default function SavedAyahsSection({
                     No saved ayahs match this search.
                 </p>
             ) : (
-                <div className="divide-y divide-primary/10">
-                    {filteredAyahs.map((ayah) => {
-                        const locationNumber =
-                            readingMode === "page"
-                                ? ayah.pageNumber
-                                : ayah.surahNumber;
-                        const href = `/quran/${readingMode}/${locationNumber}#ayah-${ayah.globalAyahNumber}`;
+                <div>
+                    <div className="divide-y divide-primary/10">
+                        {visibleAyahs.map((ayah) => {
+                            const locationNumber =
+                                readingMode === "page"
+                                    ? ayah.pageNumber
+                                    : ayah.surahNumber;
+                            const href = `/quran/${readingMode}/${locationNumber}#ayah-${ayah.globalAyahNumber}`;
 
-                        return (
-                            <article
-                                key={ayah.globalAyahNumber}
-                                className="group py-7"
-                            >
-                                <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
-                                            <span className="font-semibold text-primary">
-                                                {ayah.surahName}
-                                            </span>
-                                            <span aria-hidden="true">·</span>
-                                            <span>Ayah {ayah.ayahNumber}</span>
-                                            {ayah.isBookmarked && (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-primary/8 px-2 py-1 text-primary">
-                                                    <Bookmark
-                                                        aria-hidden="true"
-                                                        className="size-3 fill-current"
-                                                    />
-                                                    Bookmarked
-                                                </span>
-                                            )}
-                                            {ayah.reflection && (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-1 text-accent-foreground">
-                                                    <NotebookPen
-                                                        aria-hidden="true"
-                                                        className="size-3"
-                                                    />
-                                                    Reflection
-                                                </span>
-                                            )}
-                                        </div>
-                                        <p
-                                            dir="rtl"
-                                            lang="ar"
-                                            className="ayah mt-4 text-right text-2xl leading-[1.9] text-foreground sm:text-3xl"
-                                        >
-                                            {ayah.arabicText}
-                                        </p>
-                                        {ayah.reflection && (
-                                            <p className="mt-4 max-w-3xl border-l-2 border-primary/25 pl-4 text-sm leading-6 whitespace-pre-wrap text-muted-foreground">
-                                                {ayah.reflection}
-                                            </p>
-                                        )}
-                                    </div>
+                            return (
+                                <article
+                                    key={ayah.globalAyahNumber}
+                                    className="group py-1"
+                                >
                                     <Link
                                         href={href}
-                                        className="inline-flex shrink-0 items-center gap-2 self-start rounded-md px-1 py-1 text-sm font-medium text-primary outline-none transition-colors hover:text-primary/75 focus-visible:ring-2 focus-visible:ring-ring"
+                                        className="grid min-w-0 gap-3 rounded-lg px-2 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[9rem_minmax(0,1fr)_auto] sm:items-center sm:gap-5 sm:px-3"
                                     >
-                                        Open in reader
-                                        <ArrowRight
-                                            aria-hidden="true"
-                                            className="size-4 transition-transform group-hover:translate-x-0.5"
-                                        />
+                                        <div className="flex min-w-0 items-center gap-2 sm:block">
+                                            <div className="flex min-w-0 items-center gap-2">
+                                                <span className="truncate text-sm font-semibold text-primary">
+                                                    {ayah.surahName}
+                                                </span>
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="text-muted-foreground"
+                                                >
+                                                    ·
+                                                </span>
+                                                <span className="shrink-0 text-xs text-muted-foreground">
+                                                    Ayah {ayah.ayahNumber}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 sm:mt-2">
+                                                {ayah.isBookmarked && (
+                                                    <span
+                                                        title="Bookmarked"
+                                                        className="text-primary"
+                                                    >
+                                                        <Bookmark
+                                                            aria-hidden="true"
+                                                            className="size-3 fill-current"
+                                                        />
+                                                        <span className="sr-only">
+                                                            Bookmarked
+                                                        </span>
+                                                    </span>
+                                                )}
+                                                {ayah.reflection && (
+                                                    <span
+                                                        title="Has a reflection"
+                                                        className="text-accent-foreground"
+                                                    >
+                                                        <NotebookPen
+                                                            aria-hidden="true"
+                                                            className="size-3"
+                                                        />
+                                                        <span className="sr-only">
+                                                            Has a reflection
+                                                        </span>
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p
+                                                dir="rtl"
+                                                lang="ar"
+                                                className="ayah line-clamp-2 text-right text-xl leading-[1.75] text-foreground sm:text-2xl"
+                                            >
+                                                {ayah.arabicText}
+                                            </p>
+                                            {ayah.reflection && (
+                                                <p className="mt-1.5 truncate text-xs text-muted-foreground">
+                                                    <span className="text-primary/70">
+                                                        Reflection:{" "}
+                                                    </span>
+                                                    {ayah.reflection}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-primary sm:justify-self-end">
+                                            Open
+                                            <ArrowRight
+                                                aria-hidden="true"
+                                                className="size-4 transition-transform group-hover:translate-x-0.5"
+                                            />
+                                        </span>
                                     </Link>
-                                </div>
-                            </article>
-                        );
-                    })}
+                                </article>
+                            );
+                        })}
+                    </div>
+
+                    <div className="mt-3 flex flex-col gap-3 border-t border-primary/15 pt-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                        <p aria-live="polite">
+                            Showing {firstVisibleIndex + 1}–
+                            {Math.min(
+                                firstVisibleIndex + AYAH_ITEMS_PER_PAGE,
+                                filteredAyahs.length,
+                            )}{" "}
+                            of {filteredAyahs.length} saved{" "}
+                            {filteredAyahs.length === 1 ? "ayah" : "ayahs"}
+                        </p>
+                        {pageCount > 1 && (
+                            <div className="flex items-center gap-1">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={currentPage === 1}
+                                    onClick={() =>
+                                        setRequestedPage(currentPage - 1)
+                                    }
+                                >
+                                    <ChevronLeft aria-hidden="true" />
+                                    Previous
+                                </Button>
+                                <span className="px-2 font-medium text-foreground">
+                                    {currentPage} / {pageCount}
+                                </span>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={currentPage === pageCount}
+                                    onClick={() =>
+                                        setRequestedPage(currentPage + 1)
+                                    }
+                                >
+                                    Next
+                                    <ChevronRight aria-hidden="true" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
         </section>
