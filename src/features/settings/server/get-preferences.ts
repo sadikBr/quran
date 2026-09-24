@@ -33,5 +33,6 @@ export default async function getPreferences(): Promise<Preferences> {
         tafsirEdition: settings.tafsirEdition,
         showTranslation: settings.showTranslation,
         readingMode: settings.readingMode,
+        continuousRecitation: settings.continuousRecitation,
     };
 }

@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
+import QuranAudioQueue from "@/features/quran/components/quran-audio-queue";
 import QuranPageNavigation from "@/features/quran/components/quran-page-navigation";
 import Surah from "@/features/quran/components/surah";
+import getAyahAudioStreams from "@/features/quran/helpers/get-ayah-audio-streams";
 import getSurahData from "@/features/quran/server/get-surah";
 import ReadingProgressTracker from "@/features/reading-progress/components/reading-progress-tracker";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -31,10 +33,20 @@ export default async function SurahPage({
     }
 
     const [surahData, translatedSurahData] = await Promise.all(requests);
+    const audioQueue = surahData.ayahs
+        .map((ayah) => ({
+            ayahNumber: ayah.number,
+            streams: getAyahAudioStreams(ayah),
+        }))
+        .filter((ayah) => ayah.streams.length > 0);
 
     return (
         <div className="flex h-full min-h-0 flex-col">
             <ReadingProgressTracker locationType="surah" number={surahNumber} />
+            <QuranAudioQueue
+                queue={audioQueue}
+                continuousRecitation={preferences.continuousRecitation}
+            />
             <div className="flex-1 overflow-y-auto">
                 <div className="mx-auto max-w-5xl p-4">
                     <Surah

@@ -13,6 +13,7 @@ export interface Preferences {
     tafsirEdition: string;
     showTranslation: boolean;
     readingMode: ReadingMode;
+    continuousRecitation: boolean;
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -22,6 +23,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
     tafsirEdition: "ar.muyassar",
     showTranslation: false,
     readingMode: "page",
+    continuousRecitation: false,
 };
 
 export const preferencesZodSchema = z.object({
@@ -31,4 +33,5 @@ export const preferencesZodSchema = z.object({
     tafsirEdition: z.string().min(1),
     showTranslation: z.boolean(),
     readingMode: z.enum(READING_MODES),
+    continuousRecitation: z.boolean(),
 });

@@ -179,6 +179,32 @@ export default function SettingsForm({
                                 />
                             </div>
                         </PreferenceCard>
+
+                        <PreferenceCard
+                            title="Continuous recitation"
+                            description="After an ayah finishes, continue with the next ayah in your current reading view."
+                        >
+                            <div className="flex items-center justify-between gap-3 rounded-md border bg-background/60 px-3 py-2.5">
+                                <label
+                                    htmlFor="continuous-recitation"
+                                    className="cursor-pointer text-sm font-medium"
+                                >
+                                    {values.continuousRecitation
+                                        ? "Continue automatically"
+                                        : "Ayah by ayah"}
+                                </label>
+                                <Checkbox
+                                    id="continuous-recitation"
+                                    checked={values.continuousRecitation}
+                                    onCheckedChange={(checked) =>
+                                        updateValue(
+                                            "continuousRecitation",
+                                            checked === true,
+                                        )
+                                    }
+                                />
+                            </div>
+                        </PreferenceCard>
                     </SettingsSection>
                 </div>
 

@@ -20,6 +20,9 @@ export const userSettings = pgTable("user_settings", {
     tafsirEdition: text("tafsir_edition").notNull().default("ar.muyassar"),
     showTranslation: boolean("show_translation").notNull().default(false),
     readingMode: ReadingMode("reading_mode").notNull().default("page"),
+    continuousRecitation: boolean("continuous_recitation")
+        .notNull()
+        .default(false),
 
     createdAt,
     updatedAt,

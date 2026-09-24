@@ -22,7 +22,7 @@ export default function Surah({
                 <div
                     dir="rtl"
                     lang="ar"
-                    className="mt-5 border-y border-primary/15 py-5 text-center leading-[2.5] sm:py-7 sm:leading-[2.7]"
+                    className="mt-3 py-5 text-justify leading-[2.5] sm:py-7 sm:leading-[2.7]"
                 >
                     {ayahs.map((ayah) => {
                         return (
