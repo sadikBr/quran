@@ -44,6 +44,27 @@ const QuranAudioContext = createContext<QuranAudioContextValue | undefined>(
     undefined,
 );
 
+function queuesMatch(
+    first: QuranAudioQueueItem[],
+    second: QuranAudioQueueItem[],
+) {
+    if (first === second) return true;
+    if (first.length !== second.length) return false;
+
+    return first.every((item, index) => {
+        const otherItem = second[index];
+
+        return (
+            otherItem?.ayahNumber === item.ayahNumber &&
+            otherItem.streams.length === item.streams.length &&
+            item.streams.every(
+                (stream, streamIndex) =>
+                    stream === otherItem.streams[streamIndex],
+            )
+        );
+    });
+}
+
 export default function QuranAudioProvider({
     children,
 }: {
@@ -51,6 +72,7 @@ export default function QuranAudioProvider({
 }) {
     const audioRef = useRef<HTMLAudioElement>(null);
     const shouldPlayRef = useRef(false);
+    const latestPlayRequestRef = useRef(0);
     const readerQueueRef = useRef<QuranAudioQueueItem[]>([]);
     const continuousRecitationRef = useRef(false);
     const playbackQueueRef = useRef<{
@@ -61,6 +83,7 @@ export default function QuranAudioProvider({
         null,
     );
     const [activeStreams, setActiveStreams] = useState<string[]>([]);
+    const [playRequest, setPlayRequest] = useState(0);
     const [playbackStatus, setPlaybackStatus] =
         useState<QuranAudioStatus>("idle");
     const [progress, setProgress] = useState(0);
@@ -69,7 +92,7 @@ export default function QuranAudioProvider({
     useEffect(() => {
         const audio = audioRef.current;
 
-        if (!audio || activeStreams.length === 0) return;
+        if (!audio || activeStreams.length === 0 || playRequest === 0) return;
 
         audio.load();
         setPlaybackStatus("loading");
@@ -79,12 +102,28 @@ export default function QuranAudioProvider({
 
         shouldPlayRef.current = false;
         void audio.play().catch(() => {
+            if (latestPlayRequestRef.current !== playRequest) return;
+
             setPlaybackStatus("error");
             toast.error("Unable to play this recitation", {
                 id: "quran-audio-error",
             });
         });
-    }, [activeStreams]);
+    }, [activeStreams, playRequest]);
+
+    useEffect(() => {
+        if (playbackStatus !== "loading" || playRequest === 0) return;
+
+        const loadingTimeout = window.setTimeout(() => {
+            audioRef.current?.pause();
+            setPlaybackStatus("error");
+            toast.error("This recitation took too long to load", {
+                id: "quran-audio-error",
+            });
+        }, 15000);
+
+        return () => window.clearTimeout(loadingTimeout);
+    }, [playbackStatus, playRequest]);
 
     const playAyah = useCallback((item: QuranAudioQueueItem) => {
         shouldPlayRef.current = true;
@@ -92,25 +131,18 @@ export default function QuranAudioProvider({
         setProgress(0);
         setActiveAyahNumber(item.ayahNumber);
         setActiveStreams(item.streams);
+        latestPlayRequestRef.current += 1;
+        setPlayRequest(latestPlayRequestRef.current);
     }, []);
 
     const retryAudio = useCallback(async () => {
-        const audio = audioRef.current;
+        if (!audioRef.current || activeStreams.length === 0) return;
 
-        if (!audio || activeStreams.length === 0) return;
-
+        shouldPlayRef.current = true;
         setPlaybackStatus("loading");
         setProgress(0);
-        audio.load();
-
-        try {
-            await audio.play();
-        } catch {
-            setPlaybackStatus("error");
-            toast.error("Unable to play this recitation", {
-                id: "quran-audio-error",
-            });
-        }
+        latestPlayRequestRef.current += 1;
+        setPlayRequest(latestPlayRequestRef.current);
     }, [activeStreams]);
 
     const playQueue = useCallback(
@@ -168,23 +200,26 @@ export default function QuranAudioProvider({
         (queue: QuranAudioQueueItem[], continuousRecitation: boolean) => {
             readerQueueRef.current = queue;
             continuousRecitationRef.current = continuousRecitation;
-
-            if (queue.length === 0) {
-                playbackQueueRef.current = null;
-            }
         },
         [],
     );
 
     const isQueuePlaying = useCallback(
         (queue: QuranAudioQueueItem[]) =>
-            isPlaying && playbackQueueRef.current?.queue === queue,
+            isPlaying &&
+            Boolean(
+                playbackQueueRef.current &&
+                    queuesMatch(playbackQueueRef.current.queue, queue),
+            ),
         [isPlaying],
     );
 
     const getQueueStatus = useCallback(
         (queue: QuranAudioQueueItem[]) =>
-            playbackQueueRef.current?.queue === queue ? playbackStatus : "idle",
+            playbackQueueRef.current &&
+            queuesMatch(playbackQueueRef.current.queue, queue)
+                ? playbackStatus
+                : "idle",
         [playbackStatus],
     );
 
@@ -194,7 +229,10 @@ export default function QuranAudioProvider({
 
             if (!audio || queue.length === 0) return;
 
-            if (playbackQueueRef.current?.queue === queue) {
+            if (
+                playbackQueueRef.current &&
+                queuesMatch(playbackQueueRef.current.queue, queue)
+            ) {
                 if (audio.paused) {
                     try {
                         setPlaybackStatus("loading");
