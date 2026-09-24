@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { auth } from "@/features/auth/auth";
 import getPreferences from "@/features/settings/server/get-preferences";
+import { stripBasmalaPrefix } from "../helpers/basmala";
 import getAyahAudioStreams from "../helpers/get-ayah-audio-streams";
 import getAyah from "../server/get-ayah";
 import getAvailableQuranEditions from "../server/get-quran-edition";
@@ -31,6 +32,11 @@ export default async function AyahActionsContent({
         notFound();
     }
 
+    const arabicText =
+        ayah.numberInSurah === 1 && surahNumber !== 1
+            ? stripBasmalaPrefix(ayah.text)
+            : ayah.text;
+
     const [tafsirAyah, tafsirEditions] = await Promise.all([
         getAyah(ayah.number),
         session
@@ -44,7 +50,7 @@ export default async function AyahActionsContent({
         <AyahActions
             surahName={surahMeta.englishName}
             ayahNumber={ayahNumber}
-            arabicText={ayah.text}
+            arabicText={arabicText}
             tafsirText={tafsirAyah.text}
             tafsirEditionName={
                 tafsirAyah.edition.englishName || tafsirAyah.edition.name

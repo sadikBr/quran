@@ -1,5 +1,7 @@
+import { stripBasmalaPrefix } from "../helpers/basmala";
 import type { AyahType, Edition, SurahType } from "../types";
 import Ayah from "./ayah";
+import SurahBasmala from "./surah-basmala";
 import SurahFrame from "./surah-frame";
 import TranslationAyah from "./translation-ayah";
 
@@ -16,17 +18,34 @@ export default function Surah({
     showTranslation: boolean;
     translationEdition?: Edition;
 }) {
+    const beginsAtSurahStart = ayahs[0]?.numberInSurah === 1;
+    const fatihaAyah =
+        beginsAtSurahStart && surah.number === 1 ? ayahs[0] : undefined;
+    const readingAyahs = fatihaAyah
+        ? ayahs.slice(1)
+        : ayahs.map((ayah, index) =>
+              beginsAtSurahStart && index === 0
+                  ? { ...ayah, text: stripBasmalaPrefix(ayah.text) }
+                  : ayah,
+          );
+
     return (
         <>
             <div className="rtl">
-                {ayahs[0].numberInSurah === 1 && <SurahFrame surah={surah} />}
+                {beginsAtSurahStart && <SurahFrame surah={surah} />}
+                {beginsAtSurahStart && (
+                    <SurahBasmala
+                        surahNumber={surah.number}
+                        fatihaAyah={fatihaAyah}
+                    />
+                )}
                 <div
                     dir="rtl"
                     lang="ar"
                     className="mt-0 py-2 text-justify leading-[2.5] sm:py-3 sm:leading-[2.7]"
                     style={{ textAlignLast: "center" }}
                 >
-                    {ayahs.map((ayah) => {
+                    {readingAyahs.map((ayah) => {
                         return (
                             <Ayah
                                 key={ayah.number}

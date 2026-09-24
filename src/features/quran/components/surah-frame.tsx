@@ -61,7 +61,7 @@ export default function SurahFrame({
     return (
         <div
             className={cn(
-                "relative mb-3 overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow",
+                "relative mb-5 overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow",
                 href && "hover:shadow-md",
             )}
         >
