@@ -4,6 +4,7 @@ import QuranPageNavigation from "@/features/quran/components/quran-page-navigati
 import Surah from "@/features/quran/components/surah";
 import getAyahAudioStreams from "@/features/quran/helpers/get-ayah-audio-streams";
 import getSurahData from "@/features/quran/server/get-surah";
+import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import ReadingProgressTracker from "@/features/reading-progress/components/reading-progress-tracker";
 import getPreferences from "@/features/settings/server/get-preferences";
 import QuranInfo from "@/lib/quran-info";
@@ -25,6 +26,7 @@ export default async function SurahPage({
     }
 
     const preferences = await getPreferences();
+    const surahsPromise = getSurahsMeta().catch(() => []);
 
     const requests = [getSurahData(number, preferences.arabicEdition)];
 
@@ -33,6 +35,7 @@ export default async function SurahPage({
     }
 
     const [surahData, translatedSurahData] = await Promise.all(requests);
+    const surahs = await surahsPromise;
     const audioQueue = surahData.ayahs
         .map((ayah) => ({
             ayahNumber: ayah.number,
@@ -65,6 +68,7 @@ export default async function SurahPage({
             <QuranPageNavigation
                 currentNumber={surahNumber}
                 readingMode="surah"
+                surahs={surahs}
             />
         </div>
     );
