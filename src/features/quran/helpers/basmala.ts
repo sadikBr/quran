@@ -1,4 +1,6 @@
-const DISPLAY_BASMALA = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
+import { getArabicNumber } from "@/lib/arabic-numbers";
+
+const DISPLAY_BASMALA = 115; // this number maps to basmala using the .basmala css class
 
 const NORMALIZED_BASMALA = "بسماللهالرحمنالرحيم";
 const ARABIC_MARK = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\sـ]/;
@@ -9,7 +11,7 @@ function normalizeArabicCharacter(character: string) {
 }
 
 export function getBasmalaText() {
-    return DISPLAY_BASMALA;
+    return getArabicNumber(DISPLAY_BASMALA);
 }
 
 export function stripBasmalaPrefix(text: string) {

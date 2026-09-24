@@ -256,7 +256,8 @@
     direction: ltr;
 }
 
-.surah-name {
+.surah-name,
+.basmala {
     font-family: Surah, sans-serif;
 }
 

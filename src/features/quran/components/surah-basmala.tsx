@@ -17,11 +17,9 @@ export default function SurahBasmala({
             <div
                 dir="rtl"
                 lang="ar"
-                className="my-2 flex items-center justify-center text-3xl leading-[1.45] text-foreground sm:my-3 sm:text-4xl"
+                className="basmala -mb-4 flex items-center justify-center text-6xl leading-[1.45] text-foreground sm:text-7xl"
             >
-                <span className="ayah inline-block leading-[1.45]">
-                    {getBasmalaText()}
-                </span>
+                {getBasmalaText()}
             </div>
         );
     }
