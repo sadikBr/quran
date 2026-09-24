@@ -2,6 +2,7 @@
 
 import { Pause, Play } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
 import getAyahAudioStreams from "../helpers/get-ayah-audio-streams";
@@ -15,10 +16,29 @@ export default function Ayah({
     ayah: AyahType;
     surahNumber: number;
 }) {
+    const ayahRef = useRef<HTMLSpanElement>(null);
+    const { activeAyahNumber, isPlaying } = useQuranAudio();
+    const isActiveAyah = activeAyahNumber === ayah.number && isPlaying;
+
+    useEffect(() => {
+        if (!isActiveAyah) return;
+
+        ayahRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
+        });
+    }, [isActiveAyah]);
+
     return (
         <span
+            ref={ayahRef}
             id={`ayah-${ayah.number}`}
-            className="ayah inline scroll-mt-6 rounded-sm text-3xl leading-[inherit] text-foreground transition-colors hover:bg-primary/10 dark:hover:bg-primary/15 sm:text-4xl"
+            className={cn(
+                "ayah inline scroll-mt-6 rounded-sm text-3xl leading-[inherit] text-foreground transition-[background-color,box-shadow] duration-500 hover:bg-primary/10 dark:hover:bg-primary/15 sm:text-4xl",
+                isActiveAyah &&
+                    "bg-primary/10 shadow-[0_0_0_0.25rem_hsl(var(--primary)/0.08)] dark:bg-primary/15",
+            )}
         >
             <span
                 className={cn(
