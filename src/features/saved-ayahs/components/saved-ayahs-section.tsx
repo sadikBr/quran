@@ -274,15 +274,19 @@ export default function SavedAyahsSection({
                                             </Button>
                                             <Button
                                                 type="button"
-                                                variant="secondary"
-                                                size="sm"
+                                                variant="ghost"
+                                                size="icon-sm"
                                                 onClick={() =>
                                                     setActiveAyah(ayah)
                                                 }
+                                                className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                                                title="Ayah actions"
                                                 aria-label={`Open actions for ${ayah.surahName}, ayah ${ayah.ayahNumber}`}
                                             >
                                                 <Ellipsis aria-hidden="true" />
-                                                Actions
+                                                <span className="sr-only">
+                                                    Actions
+                                                </span>
                                             </Button>
                                         </div>
                                     </div>
