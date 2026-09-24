@@ -11,28 +11,22 @@ import {
     Pause,
     Play,
     RefreshCcw,
+    Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    updateBookmark,
+    updateReflection,
+} from "@/features/saved-ayahs/server/update-saved-ayah";
 import getTafsirAyah from "../server/get-tafsir-ayah";
 import type { Edition } from "../types";
 import EditionCombobox from "./edition-combobox";
 import { useQuranAudio } from "./quran-audio-provider";
 import TajweedText, { getPlainQuranText } from "./tajweed-text";
-
-const actions = [
-    {
-        icon: Bookmark,
-        title: "Bookmark this ayah",
-        description: "Save it to return to during a future reading session.",
-    },
-    {
-        icon: NotebookPen,
-        title: "Add a reflection",
-        description: "Keep a personal note alongside your reading.",
-    },
-];
 
 function TafsirReadingPane({
     text,
@@ -107,8 +101,14 @@ export default function AyahActions({
     tafsirDirection,
     audioStreams,
     globalAyahNumber,
+    surahNumber,
+    pageNumber,
     tafsirEditions,
     canChooseTafsir,
+    canSaveAyah,
+    initialBookmarked,
+    initialReflection,
+    plainArabicText,
     closeOnCopy = false,
 }: {
     surahName: string;
@@ -120,8 +120,14 @@ export default function AyahActions({
     tafsirDirection: string;
     audioStreams: string[];
     globalAyahNumber: number;
+    surahNumber: number;
+    pageNumber: number;
     tafsirEditions: Edition[];
     canChooseTafsir: boolean;
+    canSaveAyah: boolean;
+    initialBookmarked: boolean;
+    initialReflection: string;
+    plainArabicText: string;
     closeOnCopy?: boolean;
 }) {
     const router = useRouter();
@@ -135,6 +141,12 @@ export default function AyahActions({
         direction: tafsirDirection,
     });
     const [isChangingTafsir, setIsChangingTafsir] = useState(false);
+    const [isReflectionVisible, setIsReflectionVisible] = useState(false);
+    const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
+    const [reflection, setReflection] = useState(initialReflection);
+    const [reflectionDraft, setReflectionDraft] = useState(initialReflection);
+    const [isSavingBookmark, setIsSavingBookmark] = useState(false);
+    const [isSavingReflection, setIsSavingReflection] = useState(false);
     const {
         activeAyahNumber,
         isPlaying,
@@ -146,6 +158,14 @@ export default function AyahActions({
     const isPlayingThisAyah = isCurrentAyah && isPlaying;
     const isLoadingThisAyah = isCurrentAyah && playbackStatus === "loading";
     const hasPlaybackError = isCurrentAyah && playbackStatus === "error";
+    const savedAyahMetadata = {
+        globalAyahNumber,
+        surahNumber,
+        ayahNumber,
+        pageNumber,
+        surahName,
+        arabicText: plainArabicText,
+    };
 
     async function copyArabicText() {
         try {
@@ -181,6 +201,153 @@ export default function AyahActions({
         } finally {
             setIsChangingTafsir(false);
         }
+    }
+
+    async function toggleBookmark() {
+        if (!canSaveAyah) {
+            toast.error("Sign in to save bookmarks.");
+            return;
+        }
+
+        const nextBookmarkedState = !isBookmarked;
+        setIsBookmarked(nextBookmarkedState);
+        setIsSavingBookmark(true);
+
+        const result = await updateBookmark({
+            ...savedAyahMetadata,
+            isBookmarked: nextBookmarkedState,
+        });
+
+        setIsSavingBookmark(false);
+
+        if (!result.success) {
+            setIsBookmarked(!nextBookmarkedState);
+            toast.error(result.message);
+            return;
+        }
+
+        toast.success(
+            nextBookmarkedState ? "Ayah bookmarked" : "Bookmark removed",
+        );
+    }
+
+    function openReflection() {
+        if (!canSaveAyah) {
+            toast.error("Sign in to save private reflections.");
+            return;
+        }
+
+        setReflectionDraft(reflection);
+        setIsReflectionVisible(true);
+    }
+
+    async function saveReflection(value: string) {
+        setIsSavingReflection(true);
+        const result = await updateReflection({
+            ...savedAyahMetadata,
+            reflection: value,
+        });
+        setIsSavingReflection(false);
+
+        if (!result.success) {
+            toast.error(result.message);
+            return;
+        }
+
+        const savedValue = value.trim();
+        setReflection(savedValue);
+        setReflectionDraft(savedValue);
+        toast.success(savedValue ? "Reflection saved" : "Reflection removed");
+    }
+
+    if (isReflectionVisible) {
+        return (
+            <div className="pb-1">
+                <button
+                    type="button"
+                    onClick={() => setIsReflectionVisible(false)}
+                    className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                    <ArrowLeft aria-hidden="true" className="size-4" />
+                    Ayah actions
+                </button>
+                <header className="mt-6 pr-9">
+                    <p className="text-xs font-semibold tracking-[0.16em] text-primary">
+                        PRIVATE REFLECTION
+                    </p>
+                    <h1
+                        id="ayah-actions-title"
+                        className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+                    >
+                        {surahName}, ayah {ayahNumber}
+                    </h1>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                        This note is private to your account.
+                    </p>
+                </header>
+
+                <p
+                    dir="rtl"
+                    lang="ar"
+                    className="ayah mt-6 rounded-xl bg-muted/45 px-5 py-4 text-center text-xl leading-loose text-foreground sm:text-2xl"
+                >
+                    <TajweedText text={arabicText} />
+                </p>
+
+                <label
+                    htmlFor="ayah-reflection"
+                    className="mt-6 block text-sm font-medium text-foreground"
+                >
+                    Your reflection
+                </label>
+                <Textarea
+                    id="ayah-reflection"
+                    value={reflectionDraft}
+                    onChange={(event) =>
+                        setReflectionDraft(event.target.value.slice(0, 4000))
+                    }
+                    placeholder="Write what this ayah brings to mind…"
+                    rows={7}
+                    className="mt-2 resize-y bg-muted/35 leading-6"
+                    disabled={isSavingReflection}
+                />
+                <div className="mt-2 flex justify-end text-xs text-muted-foreground">
+                    {reflectionDraft.length} / 4000
+                </div>
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        {reflection && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                disabled={isSavingReflection}
+                                onClick={() => saveReflection("")}
+                                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            >
+                                <Trash2 aria-hidden="true" />
+                                Remove reflection
+                            </Button>
+                        )}
+                    </div>
+                    <Button
+                        type="button"
+                        disabled={
+                            isSavingReflection ||
+                            reflectionDraft.trim() === reflection
+                        }
+                        onClick={() => saveReflection(reflectionDraft)}
+                    >
+                        {isSavingReflection && (
+                            <LoaderCircle
+                                aria-hidden="true"
+                                className="animate-spin"
+                            />
+                        )}
+                        Save reflection
+                    </Button>
+                </div>
+            </div>
+        );
     }
 
     if (isTafsirVisible) {
@@ -396,36 +563,73 @@ export default function AyahActions({
                         </span>
                     </span>
                 </button>
+                <button
+                    type="button"
+                    disabled={isSavingBookmark}
+                    onClick={toggleBookmark}
+                    aria-pressed={isBookmarked}
+                    className="group flex items-start gap-3 rounded-lg p-4 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-wait"
+                >
+                    <span
+                        className={`flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                            isBookmarked
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground group-hover:bg-accent"
+                        }`}
+                    >
+                        {isSavingBookmark ? (
+                            <LoaderCircle
+                                aria-hidden="true"
+                                className="size-4 animate-spin"
+                            />
+                        ) : (
+                            <Bookmark
+                                aria-hidden="true"
+                                className={`size-4 ${isBookmarked ? "fill-current" : ""}`}
+                            />
+                        )}
+                    </span>
+                    <span className="block pt-0.5">
+                        <span className="font-medium text-card-foreground">
+                            {isBookmarked
+                                ? "Remove bookmark"
+                                : "Bookmark this ayah"}
+                        </span>
+                        <span className="mt-1 block text-sm leading-5 text-muted-foreground">
+                            {isBookmarked
+                                ? "This ayah is saved to your dashboard."
+                                : "Save it to return during a future reading session."}
+                        </span>
+                    </span>
+                </button>
+                <button
+                    type="button"
+                    onClick={openReflection}
+                    className="group flex items-start gap-3 rounded-lg p-4 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                    <span
+                        className={`flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                            reflection
+                                ? "bg-primary/12 text-primary"
+                                : "bg-muted text-muted-foreground group-hover:bg-accent"
+                        }`}
+                    >
+                        <NotebookPen aria-hidden="true" className="size-4" />
+                    </span>
+                    <span className="block pt-0.5">
+                        <span className="font-medium text-card-foreground">
+                            {reflection
+                                ? "Edit reflection"
+                                : "Add a reflection"}
+                        </span>
+                        <span className="mt-1 block text-sm leading-5 text-muted-foreground">
+                            {reflection
+                                ? "A private reflection is attached to this ayah."
+                                : "Keep a private note alongside your reading."}
+                        </span>
+                    </span>
+                </button>
             </div>
-
-            <section className="mt-7">
-                <p className="text-xs font-semibold tracking-[0.14em] text-muted-foreground">
-                    MORE TOOLS, COMING SOON
-                </p>
-                <div className="mt-3 space-y-1">
-                    {actions.map(({ icon: Icon, title, description }) => (
-                        <div
-                            key={title}
-                            className="flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-muted/40"
-                        >
-                            <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                                <Icon aria-hidden="true" className="size-3.5" />
-                            </span>
-                            <div className="min-w-0 flex-1">
-                                <p className="text-sm font-medium text-card-foreground">
-                                    {title}
-                                </p>
-                                <p className="mt-0.5 text-sm leading-5 text-muted-foreground">
-                                    {description}
-                                </p>
-                            </div>
-                            <span className="text-xs font-medium text-muted-foreground/65">
-                                Soon
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            </section>
         </div>
     );
 }

@@ -1,6 +1,6 @@
 # Quran
 
-A Quran reading and memorization application built with Next.js. The current application supports account authentication, browsing the surah index, reading individual surahs, and navigating the standard 604-page Quran layout.
+A Quran reading and memorization application built with Next.js. The current application supports account authentication, browsing the surah index, reading individual surahs, navigating the standard 604-page Quran layout, and saving private bookmarks and reflections.
 
 ## Stack
 
@@ -80,7 +80,7 @@ bun run db:push   # Push the Drizzle schema to PostgreSQL
 ## Planned work
 
 - Memorization progress and review scheduling
-- Bookmarks, goals, and reading history
+- Goals and reading history
 - Translation and audio selection
 - User dashboard and progress summaries
 - Admin task assignment and points

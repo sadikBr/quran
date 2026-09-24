@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { auth } from "@/features/auth/auth";
+import getSavedAyah from "@/features/saved-ayahs/server/get-saved-ayah";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { stripBasmalaPrefix } from "../helpers/basmala";
 import getAyahAudioStreams from "../helpers/get-ayah-audio-streams";
@@ -8,6 +9,7 @@ import getAyah from "../server/get-ayah";
 import getAvailableQuranEditions from "../server/get-quran-edition";
 import getSurahData from "../server/get-surah";
 import AyahActions from "./ayah-actions";
+import { getPlainQuranText } from "./tajweed-text";
 
 export default async function AyahActionsContent({
     surahNumber,
@@ -37,13 +39,14 @@ export default async function AyahActionsContent({
             ? stripBasmalaPrefix(ayah.text)
             : ayah.text;
 
-    const [tafsirAyah, tafsirEditions] = await Promise.all([
+    const [tafsirAyah, tafsirEditions, savedAyah] = await Promise.all([
         getAyah(ayah.number),
         session
             ? getAvailableQuranEditions().then((editions) =>
                   editions.filter((edition) => edition.type === "tafsir"),
               )
             : [],
+        session ? getSavedAyah(session.user.id, ayah.number) : null,
     ]);
 
     return (
@@ -59,8 +62,14 @@ export default async function AyahActionsContent({
             tafsirDirection={tafsirAyah.edition.direction}
             audioStreams={getAyahAudioStreams(ayah)}
             globalAyahNumber={ayah.number}
+            surahNumber={surahNumber}
+            pageNumber={ayah.page}
             tafsirEditions={tafsirEditions}
             canChooseTafsir={Boolean(session)}
+            canSaveAyah={Boolean(session)}
+            initialBookmarked={savedAyah?.isBookmarked ?? false}
+            initialReflection={savedAyah?.reflection ?? ""}
+            plainArabicText={getPlainQuranText(arabicText)}
             closeOnCopy={closeOnCopy}
         />
     );

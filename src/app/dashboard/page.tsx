@@ -15,6 +15,8 @@ import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
+import SavedAyahsSection from "@/features/saved-ayahs/components/saved-ayahs-section";
+import getSavedAyahs from "@/features/saved-ayahs/server/get-saved-ayahs";
 import getPreferences from "@/features/settings/server/get-preferences";
 
 const upcomingFeatures = [
@@ -40,9 +42,10 @@ export default async function DashboardPage() {
         redirect("/sign-in");
     }
 
-    const [preferences, readingProgress] = await Promise.all([
+    const [preferences, readingProgress, savedAyahs] = await Promise.all([
         getPreferences(),
         getReadingProgress(),
+        getSavedAyahs(session.user.id),
     ]);
     const savedNumber =
         preferences.readingMode === "page"
@@ -143,6 +146,11 @@ export default async function DashboardPage() {
                             </div>
                         </div>
                     </section>
+
+                    <SavedAyahsSection
+                        savedAyahs={savedAyahs}
+                        readingMode={preferences.readingMode}
+                    />
 
                     <section className="mt-16" aria-labelledby="coming-soon">
                         <div className="max-w-xl">
