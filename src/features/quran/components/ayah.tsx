@@ -1,6 +1,6 @@
 "use client";
 
-import { Pause, Play } from "lucide-react";
+import { Ellipsis, Pause, Play } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { getArabicNumber } from "@/lib/arabic-numbers";
@@ -19,6 +19,7 @@ export default function Ayah({
     const ayahRef = useRef<HTMLSpanElement>(null);
     const { activeAyahNumber, isPlaying } = useQuranAudio();
     const isActiveAyah = activeAyahNumber === ayah.number && isPlaying;
+    const actionsHref = `/quran/ayah/${surahNumber}/${ayah.numberInSurah}`;
 
     useEffect(() => {
         if (!isActiveAyah) return;
@@ -35,9 +36,9 @@ export default function Ayah({
             ref={ayahRef}
             id={`ayah-${ayah.number}`}
             className={cn(
-                "ayah inline scroll-mt-6 rounded-sm text-3xl leading-[inherit] text-foreground transition-[background-color,box-shadow] duration-500 hover:bg-primary/10 dark:hover:bg-primary/15 sm:text-4xl",
+                "ayah group/ayah inline scroll-mt-6 rounded-md text-3xl leading-[inherit] text-foreground transition-[color,box-shadow] duration-300 sm:text-4xl",
                 isActiveAyah &&
-                    "bg-primary/10 shadow-[0_0_0_0.25rem_hsl(var(--primary)/0.08)] dark:bg-primary/15",
+                    "bg-primary/[0.06] shadow-[inset_0_-1px_0_hsl(var(--primary)/0.4)] dark:bg-primary/[0.09]",
             )}
         >
             <span
@@ -49,14 +50,24 @@ export default function Ayah({
                 {ayah.text}
             </span>{" "}
             <AyahPlayer ayah={ayah} />
-            <Link
-                href={`/quran/ayah/${surahNumber}/${ayah.numberInSurah}`}
-                scroll={false}
-                className="frame inline-block rounded-sm align-[0.08em] text-sidebar-accent transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label={`Open actions for ayah ${ayah.numberInSurah}`}
-            >
-                {getArabicNumber(ayah.numberInSurah)}
-            </Link>{" "}
+            <span className="relative inline-block align-[0.08em]">
+                <Link
+                    href={actionsHref}
+                    scroll={false}
+                    className="frame relative inline-block rounded-sm text-sidebar-accent transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={`Open actions for ayah ${ayah.numberInSurah}`}
+                >
+                    <span className="transition-opacity duration-200 sm:group-hover/ayah:opacity-0 sm:group-focus-within/ayah:opacity-0">
+                        {getArabicNumber(ayah.numberInSurah)}
+                    </span>
+                    <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute top-[55%] left-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 scale-90 items-center justify-center rounded-full bg-primary/10 font-sans text-primary opacity-0 transition-[opacity,transform,background-color,color] duration-200 sm:group-hover/ayah:scale-100 sm:group-hover/ayah:opacity-100 sm:group-focus-within/ayah:scale-100 sm:group-focus-within/ayah:opacity-100"
+                    >
+                        <Ellipsis className="size-4" />
+                    </span>
+                </Link>
+            </span>{" "}
         </span>
     );
 }
