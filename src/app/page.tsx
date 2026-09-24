@@ -83,6 +83,7 @@ export default async function Home() {
                         <UserMenu
                             name={session.user.name}
                             image={session.user.image}
+                            continueReadingHref={href}
                         />
                     ) : (
                         <div className="flex items-center gap-2">

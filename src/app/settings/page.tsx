@@ -8,6 +8,7 @@ import StickyAppHeader from "@/components/sticky-app-header";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
+import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import SettingsForm from "@/features/settings/components/settings-form";
 import getPreferences from "@/features/settings/server/get-preferences";
 
@@ -20,10 +21,16 @@ export default async function SettingsPage() {
         redirect("/sign-in");
     }
 
-    const [preferences, editions] = await Promise.all([
+    const [preferences, editions, readingProgress] = await Promise.all([
         getPreferences(),
         getAvailableQuranEditions(),
+        getReadingProgress(),
     ]);
+    const savedNumber =
+        preferences.readingMode === "page"
+            ? readingProgress.lastPageNumber
+            : readingProgress.lastSurahNumber;
+    const continueReadingHref = `/quran/${preferences.readingMode}/${savedNumber ?? 1}`;
 
     const arabicEditions = editions.filter(
         (edition) =>
@@ -57,6 +64,7 @@ export default async function SettingsPage() {
                     <UserMenu
                         name={session.user.name}
                         image={session.user.image}
+                        continueReadingHref={continueReadingHref}
                     />
                 </StickyAppHeader>
 

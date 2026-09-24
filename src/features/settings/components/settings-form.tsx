@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,6 +16,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import type { Edition } from "@/features/quran/types";
+import { useSettings } from "@/features/settings/settings-provider";
 import type { Preferences, ReadingMode, Theme } from "../preferences";
 import updatePreferences from "../server/update-preferences";
 import PreferenceCard from "./settings-card";
@@ -35,6 +36,7 @@ export default function SettingsForm({
 }) {
     const router = useRouter();
     const { setTheme } = useTheme();
+    const { setPreferences, theme: syncedTheme } = useSettings();
     const [values, setValues] = useState(preferences);
     const [isSaving, setIsSaving] = useState(false);
     const arabicTextEditions = arabicEditions.filter(
@@ -45,6 +47,14 @@ export default function SettingsForm({
     );
     const selectClassName =
         "w-full border-0 bg-muted/55 shadow-none hover:bg-muted/75 focus-visible:ring-1";
+
+    useEffect(() => {
+        setValues((currentValues) =>
+            currentValues.theme === syncedTheme
+                ? currentValues
+                : { ...currentValues, theme: syncedTheme },
+        );
+    }, [syncedTheme]);
 
     function updateValue<Key extends keyof Preferences>(
         key: Key,
@@ -66,6 +76,7 @@ export default function SettingsForm({
         }
 
         setTheme(values.theme);
+        setPreferences(values);
         router.refresh();
         toast.success("Your reading preferences have been saved.");
     }

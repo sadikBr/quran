@@ -3,10 +3,12 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import PageBackground from "@/components/page-background";
+import ProfileForm from "@/components/profile-form";
 import StickyAppHeader from "@/components/sticky-app-header";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
-import ProfileForm from "@/components/profile-form";
+import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
+import getPreferences from "@/features/settings/server/get-preferences";
 
 export default async function ProfilePage() {
     const session = await auth.api.getSession({
@@ -16,6 +18,16 @@ export default async function ProfilePage() {
     if (!session) {
         redirect("/sign-in");
     }
+
+    const [preferences, readingProgress] = await Promise.all([
+        getPreferences(),
+        getReadingProgress(),
+    ]);
+    const savedNumber =
+        preferences.readingMode === "page"
+            ? readingProgress.lastPageNumber
+            : readingProgress.lastSurahNumber;
+    const continueReadingHref = `/quran/${preferences.readingMode}/${savedNumber ?? 1}`;
 
     return (
         <main className="relative isolate min-h-dvh overflow-x-clip bg-background">
@@ -34,6 +46,7 @@ export default async function ProfilePage() {
                     <UserMenu
                         name={session.user.name}
                         image={session.user.image}
+                        continueReadingHref={continueReadingHref}
                     />
                 </StickyAppHeader>
 

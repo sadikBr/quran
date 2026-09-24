@@ -87,6 +87,7 @@ export default async function DashboardPage() {
                     <UserMenu
                         name={session.user.name}
                         image={session.user.image}
+                        continueReadingHref={continueReadingHref}
                     />
                 </StickyAppHeader>
 
