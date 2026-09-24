@@ -36,9 +36,9 @@ export default function Ayah({
             ref={ayahRef}
             id={`ayah-${ayah.number}`}
             className={cn(
-                "ayah group/ayah me-[0.35em] inline scroll-mt-6 rounded-md text-3xl leading-[inherit] text-foreground transition-[color,box-shadow] duration-300 sm:text-4xl",
+                "ayah group/ayah me-[0.35em] inline scroll-mt-6 rounded-md text-3xl leading-[inherit] text-foreground transition-[background-color,color,box-shadow] duration-500 ease-out sm:text-4xl",
                 isActiveAyah &&
-                    "bg-primary/6 shadow-[inset_0_-1px_0_hsl(var(--primary)/0.4)] dark:bg-primary/9",
+                    "bg-primary/6 shadow-[inset_0_-1px_0_hsl(var(--primary)/0.45)] dark:bg-primary/9",
             )}
         >
             <span
@@ -82,24 +82,30 @@ function AyahPlayer({ ayah }: { ayah: AyahType }) {
 
     return (
         <>
-            <button
-                type="button"
-                onClick={() => toggleAudio(ayah.number, streams)}
-                className={cn(
-                    "inline-flex size-6 translate-y-[-0.05em] items-center justify-center rounded-full border border-primary/30 bg-primary/8 align-middle text-primary transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    isPlayingThisAyah && "border-primary bg-primary/15",
-                )}
-                aria-label={`${isPlayingThisAyah ? "Pause" : "Play"} ayah ${ayah.numberInSurah}`}
-            >
-                {isPlayingThisAyah ? (
-                    <Pause className="size-3 fill-current" aria-hidden="true" />
-                ) : (
-                    <Play
-                        className="ml-px size-3 fill-current"
-                        aria-hidden="true"
-                    />
-                )}
-            </button>{" "}
+            <span className="relative inline-flex translate-y-[-0.05em] align-middle">
+                <button
+                    type="button"
+                    onClick={() => toggleAudio(ayah.number, streams)}
+                    className={cn(
+                        "inline-flex size-6 items-center justify-center rounded-full border border-primary/30 bg-primary/8 text-primary transition-[background-color,border-color,color,box-shadow] duration-300 hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                        isPlayingThisAyah &&
+                            "border-primary bg-primary/15 shadow-[0_0_0_3px_hsl(var(--primary)/0.1)]",
+                    )}
+                    aria-label={`${isPlayingThisAyah ? "Pause" : "Play"} ayah ${ayah.numberInSurah}`}
+                >
+                    {isPlayingThisAyah ? (
+                        <Pause
+                            className="size-3 fill-current"
+                            aria-hidden="true"
+                        />
+                    ) : (
+                        <Play
+                            className="ml-px size-3 fill-current"
+                            aria-hidden="true"
+                        />
+                    )}
+                </button>
+            </span>{" "}
         </>
     );
 }
