@@ -18,14 +18,14 @@ export default async function QuranPage({ page }: { page: number }) {
 
     const preferences = await getPreferences();
 
-    const requests = [getQuranPageData(page, preferences.arabicEdition)];
-
-    if (preferences.showTranslation) {
-        requests.push(getQuranPageData(page, preferences.translationEdition));
-    }
-
-    const [pageData, translatedPageData] = await Promise.all(requests);
-    const audioQueue = pageData.data.ayahs
+    const [pageData, audioPageData, translatedPageData] = await Promise.all([
+        getQuranPageData(page, preferences.arabicEdition),
+        getQuranPageData(page, preferences.reciter),
+        preferences.showTranslation
+            ? getQuranPageData(page, preferences.translationEdition)
+            : Promise.resolve(null),
+    ]);
+    const audioQueue = audioPageData.data.ayahs
         .map((ayah) => ({
             ayahNumber: ayah.number,
             streams: getAyahAudioStreams(ayah),
@@ -48,13 +48,23 @@ export default async function QuranPage({ page }: { page: number }) {
             )}
             {Object.keys(pageData.data.surahs).map((surahNumber) => {
                 const surah = pageData.data.surahs[surahNumber];
-                const ayahs = pageData.data.ayahs.filter(
-                    (ayah) => ayah.surah.number === surah.number,
-                );
+                const ayahs = pageData.data.ayahs
+                    .filter((ayah) => ayah.surah.number === surah.number)
+                    .map((ayah) => {
+                        const audioAyah = audioPageData.data.ayahs.find(
+                            (item) => item.number === ayah.number,
+                        );
+
+                        return {
+                            ...ayah,
+                            audio: audioAyah?.audio,
+                            audioSecondary: audioAyah?.audioSecondary,
+                        };
+                    });
                 const translatedAyahs = preferences.showTranslation
-                    ? translatedPageData.data.ayahs.filter(
+                    ? (translatedPageData?.data.ayahs.filter(
                           (ayah) => ayah.surah.number === surah.number,
-                      )
+                      ) ?? [])
                     : [];
 
                 return (

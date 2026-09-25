@@ -25,11 +25,15 @@ export default async function getAyahActionsData(
         getPreferences(),
         auth.api.getSession({ headers: await headers() }),
     ]);
-    const { ayahs, surahMeta } = await getSurahData(
-        String(surahNumber),
-        preferences.arabicEdition,
-    );
+    const [textSurah, audioSurah] = await Promise.all([
+        getSurahData(String(surahNumber), preferences.arabicEdition),
+        getSurahData(String(surahNumber), preferences.reciter),
+    ]);
+    const { ayahs, surahMeta } = textSurah;
     const ayah = ayahs.find((item) => item.numberInSurah === ayahNumber);
+    const audioAyah = audioSurah.ayahs.find(
+        (item) => item.numberInSurah === ayahNumber,
+    );
 
     if (!ayah) return null;
 
@@ -57,7 +61,7 @@ export default async function getAyahActionsData(
             tafsirAyah.edition.englishName || tafsirAyah.edition.name,
         tafsirEditionIdentifier: tafsirAyah.edition.identifier,
         tafsirDirection: tafsirAyah.edition.direction,
-        audioStreams: getAyahAudioStreams(ayah),
+        audioStreams: audioAyah ? getAyahAudioStreams(audioAyah) : [],
         globalAyahNumber: ayah.number,
         surahNumber,
         pageNumber: ayah.page,

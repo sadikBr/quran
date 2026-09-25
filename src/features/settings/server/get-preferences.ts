@@ -31,6 +31,7 @@ export default async function getPreferences(): Promise<Preferences> {
     const preferences: Preferences = {
         theme: settings.theme,
         arabicEdition: settings.arabicEdition,
+        reciter: settings.reciter,
         translationEdition: settings.translationEdition,
         tafsirEdition: settings.tafsirEdition,
         showTranslation: settings.showTranslation,

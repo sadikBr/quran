@@ -9,6 +9,7 @@ export type ReadingMode = (typeof READING_MODES)[number];
 export interface Preferences {
     theme: Theme;
     arabicEdition: string;
+    reciter: string;
     translationEdition: string;
     tafsirEdition: string;
     showTranslation: boolean;
@@ -19,6 +20,7 @@ export interface Preferences {
 export const DEFAULT_PREFERENCES: Preferences = {
     theme: "light",
     arabicEdition: "quran-simple",
+    reciter: "ar.alafasy",
     translationEdition: "en.sahih",
     tafsirEdition: "ar.muyassar",
     showTranslation: false,
@@ -29,6 +31,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
 export const preferencesZodSchema = z.object({
     theme: z.enum(THEMES),
     arabicEdition: z.string().min(1),
+    reciter: z.string().min(1),
     translationEdition: z.string().min(1),
     tafsirEdition: z.string().min(1),
     showTranslation: z.boolean(),

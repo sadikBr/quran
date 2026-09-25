@@ -29,24 +29,29 @@ export default async function SurahPage({
     const preferences = await getPreferences();
     const surahsPromise = getSurahsMeta().catch(() => []);
 
-    const requests = [getSurahData(number, preferences.arabicEdition)];
-
-    if (preferences.showTranslation) {
-        requests.push(getSurahData(number, preferences.translationEdition));
-    }
-
-    const [surahData, translatedSurahData] = await Promise.all(requests);
+    const [surahData, audioSurahData, translatedSurahData] = await Promise.all([
+        getSurahData(number, preferences.arabicEdition),
+        getSurahData(number, preferences.reciter),
+        preferences.showTranslation
+            ? getSurahData(number, preferences.translationEdition)
+            : Promise.resolve(null),
+    ]);
     const surahs = await surahsPromise;
-    const surahAudioStreams = getAyahAudioStreams(surahData);
+    const surahAudioStreams = getAyahAudioStreams(audioSurahData);
     const audioQueue =
         surahAudioStreams.length > 0
             ? [{ ayahNumber: null, streams: surahAudioStreams }]
-            : surahData.ayahs
+            : audioSurahData.ayahs
                   .map((ayah) => ({
                       ayahNumber: ayah.number,
                       streams: getAyahAudioStreams(ayah),
                   }))
                   .filter((ayah) => ayah.streams.length > 0);
+    const ayahsWithAudio = surahData.ayahs.map((ayah, index) => ({
+        ...ayah,
+        audio: audioSurahData.ayahs[index]?.audio,
+        audioSecondary: audioSurahData.ayahs[index]?.audioSecondary,
+    }));
     const showTajweedLegend = surahData.edition.identifier === "quran-tajweed";
 
     return (
@@ -69,10 +74,10 @@ export default async function SurahPage({
                     )}
                     <Surah
                         surah={surahData.surahMeta}
-                        ayahs={surahData.ayahs}
+                        ayahs={ayahsWithAudio}
                         translatedAyahs={
                             preferences.showTranslation
-                                ? translatedSurahData.ayahs
+                                ? (translatedSurahData?.ayahs ?? [])
                                 : []
                         }
                         showTranslation={preferences.showTranslation}

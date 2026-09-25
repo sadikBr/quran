@@ -58,3 +58,35 @@ export interface Edition {
     type: string;
     direction: string;
 }
+
+export type HostType = "everyayah" | "mp3quran" | "islamic_network";
+
+export interface QuranJsonResponse {
+    note: string;
+    hosts: Record<HostType, Host>;
+    reciters: Reciter[];
+}
+
+export interface Host {
+    name: string;
+    home: string;
+    template: string;
+    indexing: string;
+    indexing_mode: string;
+    surah_pad: number;
+    ayah_pad: number;
+    cors: boolean;
+    accept_range: boolean;
+    license_status: string;
+    license: string;
+    license_url: string;
+}
+
+export interface Reciter {
+    id: string;
+    host: HostType;
+    name: string;
+    bitrate_kbps: 64;
+    scope: string;
+    url: string;
+}

@@ -16,7 +16,10 @@ import {
 import EditionCombobox from "@/features/quran/components/edition-combobox";
 import type { Edition } from "@/features/quran/types";
 import { useSettings } from "@/features/settings/settings-provider";
-import { isArabicEditionCompatible } from "../edition-compatibility";
+import {
+    isArabicTextEditionCompatible,
+    isReciterCompatible,
+} from "../edition-compatibility";
 import {
     DEFAULT_PREFERENCES,
     type Preferences,
@@ -31,11 +34,13 @@ import SettingsSection from "./settings-section";
 export default function SettingsForm({
     preferences,
     arabicEditions,
+    reciters,
     translationEditions,
     tafsirEditions,
 }: {
     preferences: Preferences;
     arabicEditions: Edition[];
+    reciters: Edition[];
     translationEditions: Edition[];
     tafsirEditions: Edition[];
 }) {
@@ -46,22 +51,30 @@ export default function SettingsForm({
         const selectedArabicEdition = arabicEditions.find(
             (edition) => edition.identifier === preferences.arabicEdition,
         );
+        const selectedReciter = reciters.find(
+            (edition) => edition.identifier === preferences.reciter,
+        );
 
         return {
             ...preferences,
             arabicEdition:
                 selectedArabicEdition &&
-                isArabicEditionCompatible(
-                    selectedArabicEdition,
-                    preferences.readingMode,
-                )
+                isArabicTextEditionCompatible(selectedArabicEdition)
                     ? preferences.arabicEdition
                     : DEFAULT_PREFERENCES.arabicEdition,
+            reciter:
+                selectedReciter &&
+                isReciterCompatible(selectedReciter, preferences.readingMode)
+                    ? preferences.reciter
+                    : DEFAULT_PREFERENCES.reciter,
         };
     });
     const [isSaving, setIsSaving] = useState(false);
-    const availableArabicEditions = arabicEditions.filter((edition) =>
-        isArabicEditionCompatible(edition, values.readingMode),
+    const availableArabicEditions = arabicEditions.filter(
+        isArabicTextEditionCompatible,
+    );
+    const availableReciters = reciters.filter((edition) =>
+        isReciterCompatible(edition, values.readingMode),
     );
     const selectClassName =
         "w-full border-0 bg-muted/55 shadow-none hover:bg-muted/75 focus-visible:ring-1";
@@ -83,27 +96,23 @@ export default function SettingsForm({
 
     function updateReadingMode(readingMode: ReadingMode) {
         setValues((currentValues) => {
-            const selectedArabicEdition = arabicEditions.find(
-                (edition) => edition.identifier === currentValues.arabicEdition,
+            const selectedReciter = reciters.find(
+                (edition) => edition.identifier === currentValues.reciter,
             );
-            const fallbackArabicEdition =
-                arabicEditions.find(
+            const fallbackReciter =
+                reciters.find(
                     (edition) =>
-                        edition.identifier ===
-                        DEFAULT_PREFERENCES.arabicEdition,
-                )?.identifier ?? currentValues.arabicEdition;
+                        edition.identifier === DEFAULT_PREFERENCES.reciter,
+                )?.identifier ?? currentValues.reciter;
 
             return {
                 ...currentValues,
                 readingMode,
-                arabicEdition:
-                    selectedArabicEdition &&
-                    isArabicEditionCompatible(
-                        selectedArabicEdition,
-                        readingMode,
-                    )
-                        ? currentValues.arabicEdition
-                        : fallbackArabicEdition,
+                reciter:
+                    selectedReciter &&
+                    isReciterCompatible(selectedReciter, readingMode)
+                        ? currentValues.reciter
+                        : fallbackReciter,
             };
         });
     }
@@ -269,7 +278,7 @@ export default function SettingsForm({
                 >
                     <PreferenceCard
                         title="Arabic edition"
-                        description="Choose Quran text or an audio recitation. Audio editions enable ayah playback."
+                        description="Choose the Arabic text style used throughout the reader."
                     >
                         <SettingField label="Edition" htmlFor="arabic-edition">
                             <EditionCombobox
@@ -279,28 +288,43 @@ export default function SettingsForm({
                                 onValueChange={(value) =>
                                     updateValue("arabicEdition", value)
                                 }
-                                placeholder="Search reciters and editions…"
+                                placeholder="Search text editions…"
                                 className={selectClassName}
-                                groupBy={(edition) => {
-                                    if (edition.type === "surahbysurah")
-                                        return "Whole-surah audio";
-                                    if (edition.format === "audio")
-                                        return "Ayah-by-ayah audio";
-                                    return "Quran text";
-                                }}
-                                getBadge={(edition) => {
-                                    if (edition.type === "surahbysurah")
-                                        return "Surah audio";
-                                    if (edition.format === "audio")
-                                        return "Ayah audio";
-                                    return "Text";
-                                }}
+                                getBadge={() => "Text"}
+                            />
+                        </SettingField>
+                    </PreferenceCard>
+
+                    <PreferenceCard
+                        title="Reciter"
+                        description="Choose the voice used for ayah playback and full recitation."
+                    >
+                        <SettingField label="Reciter" htmlFor="reciter">
+                            <EditionCombobox
+                                id="reciter"
+                                editions={availableReciters}
+                                value={values.reciter}
+                                onValueChange={(value) =>
+                                    updateValue("reciter", value)
+                                }
+                                placeholder="Search reciters…"
+                                className={selectClassName}
+                                groupBy={(edition) =>
+                                    edition.type === "surahbysurah"
+                                        ? "Whole-surah reciters"
+                                        : "Ayah-by-ayah reciters"
+                                }
+                                getBadge={(edition) =>
+                                    edition.type === "surahbysurah"
+                                        ? "Surah audio"
+                                        : "Ayah audio"
+                                }
                             />
                         </SettingField>
                         <p className="text-xs leading-5 text-muted-foreground">
                             {values.readingMode === "surah"
-                                ? "Surah mode supports Quran text, ayah-by-ayah recitations, and whole-surah recitations."
-                                : "Page mode only shows editions that can follow individual ayahs."}
+                                ? "Surah mode supports ayah-by-ayah and whole-surah reciters."
+                                : "Page mode uses reciters with audio for each ayah."}
                         </p>
                     </PreferenceCard>
 

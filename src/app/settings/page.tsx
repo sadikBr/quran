@@ -35,8 +35,15 @@ export default async function SettingsPage() {
     const arabicEditions = editions.filter(
         (edition) =>
             edition.language === "ar" &&
-            (edition.type === "quran" ||
-                edition.type === "versebyverse" ||
+            edition.format === "text" &&
+            edition.type === "quran",
+    );
+
+    const reciters = editions.filter(
+        (edition) =>
+            edition.language === "ar" &&
+            edition.format === "audio" &&
+            (edition.type === "versebyverse" ||
                 edition.type === "surahbysurah"),
     );
 
@@ -93,6 +100,7 @@ export default async function SettingsPage() {
                     <SettingsForm
                         preferences={preferences}
                         arabicEditions={arabicEditions}
+                        reciters={reciters}
                         translationEditions={translationEditions}
                         tafsirEditions={tafsirEditions}
                     />
