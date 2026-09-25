@@ -9,10 +9,7 @@ export default function SettingField({
 }) {
     return (
         <div>
-            <label
-                htmlFor={htmlFor}
-                className="mb-2 block text-xs font-medium text-muted-foreground"
-            >
+            <label htmlFor={htmlFor} className="sr-only">
                 {label}
             </label>
             {children}

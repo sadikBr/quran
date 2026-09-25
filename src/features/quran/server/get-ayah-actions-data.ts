@@ -8,7 +8,11 @@ import type { AyahActionsProps } from "../components/ayah-actions";
 import { getPlainQuranText } from "../components/tajweed-text";
 import { stripBasmalaPrefix } from "../helpers/basmala";
 import getRecitationStreams from "../helpers/get-recitation-streams";
-import { getWarshHafsAnchor } from "../helpers/map-warsh-ayahs";
+import {
+    getWarshAudioAyahNumbers,
+    getWarshHafsAnchor,
+    usesNativeWarshAyahNumbering,
+} from "../helpers/map-warsh-ayahs";
 import getAvailableReciters from "./get-available-reciter";
 import getAyah from "./get-ayah";
 import getAvailableQuranEditions from "./get-quran-edition";
@@ -39,12 +43,17 @@ export default async function getAyahActionsData(
     const warshVerse = warshChapter?.verses.find(
         (verse) => verse.id === ayahNumber,
     );
+    const reciter = reciters.find((item) => item.id === preferences.reciter);
+    const nativeWarshAudio = usesNativeWarshAyahNumbering(reciter);
     const hafsAyahNumber = warshVerse
         ? getWarshHafsAnchor(warshVerse, surahNumber)
         : ayahNumber;
+    const audioAyahNumber = warshVerse
+        ? nativeWarshAudio
+            ? warshVerse.id
+            : getWarshAudioAyahNumbers(warshVerse, surahNumber)[0]
+        : ayahNumber;
     const ayah = ayahs.find((item) => item.numberInSurah === hafsAyahNumber);
-    const reciter = reciters.find((item) => item.id === preferences.reciter);
-
     if (!ayah) return null;
 
     const arabicText = warshVerse
@@ -76,7 +85,7 @@ export default async function getAyahActionsData(
             reciter?.scope === "ayah"
                 ? getRecitationStreams(reciter, {
                       surahNumber,
-                      ayahNumber,
+                      ayahNumber: audioAyahNumber,
                       globalAyahNumber: ayah.number,
                   })
                 : [],

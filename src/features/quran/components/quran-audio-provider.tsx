@@ -73,6 +73,10 @@ export default function QuranAudioProvider({
     const audioRef = useRef<HTMLAudioElement>(null);
     const shouldPlayRef = useRef(false);
     const latestPlayRequestRef = useRef(0);
+    const pendingAyahRef = useRef<{
+        hasValue: boolean;
+        value: number | null;
+    }>({ hasValue: false, value: null });
     const readerQueueRef = useRef<QuranAudioQueueItem[]>([]);
     const continuousRecitationRef = useRef(false);
     const playbackQueueRef = useRef<{
@@ -127,9 +131,13 @@ export default function QuranAudioProvider({
 
     const playAyah = useCallback((item: QuranAudioQueueItem) => {
         shouldPlayRef.current = true;
+        pendingAyahRef.current = {
+            hasValue: true,
+            value: item.ayahNumber,
+        };
         setPlaybackStatus("loading");
         setProgress(0);
-        setActiveAyahNumber(item.ayahNumber);
+        setActiveAyahNumber(null);
         setActiveStreams(item.streams);
         latestPlayRequestRef.current += 1;
         setPlayRequest(latestPlayRequestRef.current);
@@ -285,7 +293,17 @@ export default function QuranAudioProvider({
                 className="hidden"
                 onLoadStart={() => setPlaybackStatus("loading")}
                 onWaiting={() => setPlaybackStatus("loading")}
-                onPlaying={() => setPlaybackStatus("playing")}
+                onPlaying={() => {
+                    if (pendingAyahRef.current.hasValue) {
+                        setActiveAyahNumber(pendingAyahRef.current.value);
+                        pendingAyahRef.current = {
+                            hasValue: false,
+                            value: null,
+                        };
+                    }
+
+                    setPlaybackStatus("playing");
+                }}
                 onPause={() =>
                     setPlaybackStatus((status) =>
                         status === "error" ||

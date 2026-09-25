@@ -11,12 +11,14 @@ export default function Surah({
     translatedAyahs,
     showTranslation,
     translationEdition,
+    highlightAyahs = true,
 }: {
     surah: SurahType;
     ayahs: AyahType[];
     translatedAyahs: AyahType[];
     showTranslation: boolean;
     translationEdition?: Edition;
+    highlightAyahs?: boolean;
 }) {
     const beginsAtSurahStart = ayahs[0]?.numberInSurah === 1;
     const hasUnnumberedFatihaBasmala =
@@ -45,6 +47,12 @@ export default function Surah({
                     <SurahBasmala
                         surahNumber={surah.number}
                         fatihaAyah={fatihaAyah}
+                        playbackAyahNumber={
+                            hasUnnumberedFatihaBasmala
+                                ? ayahs[0]?.audioNumber
+                                : undefined
+                        }
+                        highlightEnabled={highlightAyahs}
                     />
                 )}
                 <div
@@ -59,6 +67,7 @@ export default function Surah({
                                 key={`${ayah.number}-${ayah.numberInSurah}`}
                                 ayah={ayah}
                                 surahNumber={surah.number}
+                                highlightEnabled={highlightAyahs}
                             />
                         );
                     })}

@@ -13,14 +13,17 @@ import TajweedText from "./tajweed-text";
 export default function Ayah({
     ayah,
     surahNumber,
+    highlightEnabled = true,
 }: {
     ayah: AyahType;
     surahNumber: number;
+    highlightEnabled?: boolean;
 }) {
     const ayahRef = useRef<HTMLSpanElement>(null);
     const { activeAyahNumber, playbackStatus } = useQuranAudio();
     const playbackAyahNumber = ayah.audioNumber ?? ayah.number;
     const isActiveAyah =
+        highlightEnabled &&
         activeAyahNumber === playbackAyahNumber &&
         playbackStatus !== "idle" &&
         playbackStatus !== "error";

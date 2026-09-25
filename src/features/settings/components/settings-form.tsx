@@ -90,7 +90,7 @@ export default function SettingsForm({
         isReciterCompatible(reciter, values.readingMode, values.riwayah),
     );
     const selectClassName =
-        "w-full border-0 bg-muted/55 shadow-none hover:bg-muted/75 focus-visible:ring-1";
+        "h-11 w-full rounded-xl border-0 bg-muted/45 px-4 shadow-none transition-colors hover:bg-muted/70 focus-visible:ring-1 focus-visible:ring-primary/30";
 
     useEffect(() => {
         setValues((currentValues) =>
@@ -185,14 +185,14 @@ export default function SettingsForm({
 
     return (
         <form
-            className="mt-12"
+            className="mt-14"
             onSubmit={(event) => {
                 event.preventDefault();
                 savePreferences();
             }}
         >
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-x-16">
-                <div className="space-y-12">
+            <div className="space-y-16">
+                <div className="space-y-16">
                     <SettingsSection
                         eyebrow="APPEARANCE"
                         title="A comfortable environment"
@@ -299,7 +299,7 @@ export default function SettingsForm({
                             title="Show translation"
                             description="Display English beneath the Arabic text."
                         >
-                            <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/45 px-3 py-2.5">
+                            <div className="flex min-h-11 items-center justify-between gap-4 px-1">
                                 <label
                                     htmlFor="show-translation"
                                     className="cursor-pointer text-sm font-medium"
@@ -325,7 +325,7 @@ export default function SettingsForm({
                             title="Continuous recitation"
                             description="After an ayah finishes, continue with the next ayah in your current reading view."
                         >
-                            <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/45 px-3 py-2.5">
+                            <div className="flex min-h-11 items-center justify-between gap-4 px-1">
                                 <label
                                     htmlFor="continuous-recitation"
                                     className="cursor-pointer text-sm font-medium"
@@ -404,9 +404,12 @@ export default function SettingsForm({
                             />
                         </SettingField>
                         <p className="text-xs leading-5 text-muted-foreground">
-                            {values.readingMode === "surah"
-                                ? "Surah mode supports ayah-by-ayah and whole-surah reciters."
-                                : "Page mode uses reciters with audio for each ayah."}
+                            {values.riwayah === "warsh" &&
+                            values.readingMode === "page"
+                                ? "Warsh page mode supports full-page recitation only; individual ayah playback and highlighting are hidden because recording boundaries vary by source."
+                                : values.readingMode === "surah"
+                                  ? "Surah mode supports ayah-by-ayah and whole-surah reciters."
+                                  : "Page mode uses reciters with audio for each ayah."}
                         </p>
                     </PreferenceCard>
 
@@ -451,11 +454,15 @@ export default function SettingsForm({
                 </SettingsSection>
             </div>
 
-            <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-16 flex flex-col gap-5 pb-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-6 text-muted-foreground">
                     Changes will apply to your next reading session.
                 </p>
-                <Button type="submit" disabled={isSaving}>
+                <Button
+                    type="submit"
+                    disabled={isSaving}
+                    className="h-10 rounded-xl px-6 shadow-sm shadow-primary/10"
+                >
                     {isSaving ? "Saving…" : "Save preferences"}
                 </Button>
             </div>

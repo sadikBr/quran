@@ -4,7 +4,11 @@ import QuranPageNavigation from "@/features/quran/components/quran-page-navigati
 import Surah from "@/features/quran/components/surah";
 import TajweedLegend from "@/features/quran/components/tajweed-legend";
 import getRecitationStreams from "@/features/quran/helpers/get-recitation-streams";
-import mapWarshAyahs from "@/features/quran/helpers/map-warsh-ayahs";
+import mapWarshAyahs, {
+    getWarshAudioAyahNumbers,
+    getWarshPlaybackNumberForHafs,
+    usesNativeWarshAyahNumbering,
+} from "@/features/quran/helpers/map-warsh-ayahs";
 import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getSurahData from "@/features/quran/server/get-surah";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
@@ -44,8 +48,10 @@ export default async function SurahPage({
                 : Promise.resolve(null),
         ]);
     const surahs = await surahsPromise;
+    const reciter = reciters.find((item) => item.id === preferences.reciter);
+    const nativeWarshAudio = usesNativeWarshAyahNumbering(reciter);
     const displayedAyahs = warshChapter
-        ? mapWarshAyahs(surahData.ayahs, warshChapter)
+        ? mapWarshAyahs(surahData.ayahs, warshChapter, nativeWarshAudio)
         : surahData.ayahs;
     const displayedSurah = warshChapter
         ? {
@@ -53,7 +59,6 @@ export default async function SurahPage({
               numberOfAyahs: warshChapter.verses.length,
           }
         : surahData.surahMeta;
-    const reciter = reciters.find((item) => item.id === preferences.reciter);
     const surahStreams =
         reciter?.scope === "surah"
             ? getRecitationStreams(reciter, { surahNumber })
@@ -61,25 +66,73 @@ export default async function SurahPage({
     const audioQueue =
         surahStreams.length > 0
             ? [{ ayahNumber: null, streams: surahStreams }]
-            : displayedAyahs
-                  .filter((ayah) => !ayah.isBasmalaSentinel)
-                  .map((ayah) => ({
-                      ayahNumber: ayah.audioNumber ?? ayah.number,
-                      streams: reciter
-                          ? getRecitationStreams(reciter, {
-                                surahNumber,
-                                ayahNumber: ayah.numberInSurah,
-                                globalAyahNumber: ayah.number,
-                            })
-                          : [],
-                  }))
-                  .filter((ayah) => ayah.streams.length > 0);
+            : warshChapter
+              ? nativeWarshAudio
+                  ? displayedAyahs
+                        .map((ayah) => ({
+                            ayahNumber: ayah.audioNumber ?? ayah.number,
+                            streams: reciter
+                                ? getRecitationStreams(reciter, {
+                                      surahNumber,
+                                      ayahNumber: ayah.isBasmalaSentinel
+                                          ? 0
+                                          : ayah.numberInSurah,
+                                      globalAyahNumber: ayah.number,
+                                  })
+                                : [],
+                        }))
+                        .filter((ayah) => ayah.streams.length > 0)
+                  : surahData.ayahs
+                        .map((ayah) => {
+                            const playbackNumber =
+                                getWarshPlaybackNumberForHafs(
+                                    warshChapter,
+                                    ayah.numberInSurah,
+                                );
+
+                            return {
+                                ayahNumber: playbackNumber,
+                                streams:
+                                    reciter && playbackNumber !== null
+                                        ? getRecitationStreams(reciter, {
+                                              surahNumber,
+                                              ayahNumber: ayah.numberInSurah,
+                                              globalAyahNumber: ayah.number,
+                                          })
+                                        : [],
+                            };
+                        })
+                        .filter(
+                            (ayah) =>
+                                ayah.ayahNumber !== null &&
+                                ayah.streams.length > 0,
+                        )
+              : displayedAyahs
+                    .map((ayah) => ({
+                        ayahNumber: ayah.audioNumber ?? ayah.number,
+                        streams: reciter
+                            ? getRecitationStreams(reciter, {
+                                  surahNumber,
+                                  ayahNumber: ayah.numberInSurah,
+                                  globalAyahNumber: ayah.number,
+                              })
+                            : [],
+                    }))
+                    .filter((ayah) => ayah.streams.length > 0);
     const ayahsWithAudio = displayedAyahs.map((ayah) => {
+        const warshVerse = warshChapter?.verses.find(
+            (verse) => verse.id === ayah.numberInSurah,
+        );
+        const audioAyahNumber = warshVerse
+            ? nativeWarshAudio
+                ? warshVerse.id
+                : getWarshAudioAyahNumbers(warshVerse, surahNumber)[0]
+            : ayah.numberInSurah;
         const streams =
-            reciter?.scope === "ayah"
+            reciter?.scope === "ayah" && audioAyahNumber !== undefined
                 ? getRecitationStreams(reciter, {
                       surahNumber,
-                      ayahNumber: ayah.numberInSurah,
+                      ayahNumber: audioAyahNumber,
                       globalAyahNumber: ayah.number,
                   })
                 : [];
