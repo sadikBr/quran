@@ -14,7 +14,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import EditionCombobox from "@/features/quran/components/edition-combobox";
-import type { Edition } from "@/features/quran/types";
+import ReciterCombobox from "@/features/quran/components/reciter-combobox";
+import type { Edition, Reciter } from "@/features/quran/types";
 import { useSettings } from "@/features/settings/settings-provider";
 import {
     isArabicTextEditionCompatible,
@@ -40,7 +41,7 @@ export default function SettingsForm({
 }: {
     preferences: Preferences;
     arabicEditions: Edition[];
-    reciters: Edition[];
+    reciters: Reciter[];
     translationEditions: Edition[];
     tafsirEditions: Edition[];
 }) {
@@ -52,7 +53,7 @@ export default function SettingsForm({
             (edition) => edition.identifier === preferences.arabicEdition,
         );
         const selectedReciter = reciters.find(
-            (edition) => edition.identifier === preferences.reciter,
+            (reciter) => reciter.id === preferences.reciter,
         );
 
         return {
@@ -97,13 +98,12 @@ export default function SettingsForm({
     function updateReadingMode(readingMode: ReadingMode) {
         setValues((currentValues) => {
             const selectedReciter = reciters.find(
-                (edition) => edition.identifier === currentValues.reciter,
+                (reciter) => reciter.id === currentValues.reciter,
             );
             const fallbackReciter =
                 reciters.find(
-                    (edition) =>
-                        edition.identifier === DEFAULT_PREFERENCES.reciter,
-                )?.identifier ?? currentValues.reciter;
+                    (reciter) => reciter.id === DEFAULT_PREFERENCES.reciter,
+                )?.id ?? currentValues.reciter;
 
             return {
                 ...currentValues,
@@ -300,24 +300,24 @@ export default function SettingsForm({
                         description="Choose the voice used for ayah playback and full recitation."
                     >
                         <SettingField label="Reciter" htmlFor="reciter">
-                            <EditionCombobox
+                            <ReciterCombobox
                                 id="reciter"
-                                editions={availableReciters}
+                                reciters={availableReciters}
                                 value={values.reciter}
                                 onValueChange={(value) =>
                                     updateValue("reciter", value)
                                 }
                                 placeholder="Search reciters…"
                                 className={selectClassName}
-                                groupBy={(edition) =>
-                                    edition.type === "surahbysurah"
+                                groupBy={(reciter) =>
+                                    reciter.scope === "surah"
                                         ? "Whole-surah reciters"
                                         : "Ayah-by-ayah reciters"
                                 }
-                                getBadge={(edition) =>
-                                    edition.type === "surahbysurah"
-                                        ? "Surah audio"
-                                        : "Ayah audio"
+                                getBadge={(reciter) =>
+                                    reciter.bitrate_kbps
+                                        ? `${reciter.bitrate_kbps} kbps`
+                                        : reciter.host.replace("_", " ")
                                 }
                             />
                         </SettingField>

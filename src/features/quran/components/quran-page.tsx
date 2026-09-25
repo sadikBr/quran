@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import getPreferences from "@/features/settings/server/get-preferences";
 import QuranInfo from "@/lib/quran-info";
-import getAyahAudioStreams from "../helpers/get-ayah-audio-streams";
+import getRecitationStreams from "../helpers/get-recitation-streams";
+import getAvailableReciters from "../server/get-available-reciter";
 import getQuranPageData from "../server/get-quran-page-data";
 import QuranAudioQueue from "./quran-audio-queue";
 import Surah from "./surah";
@@ -18,17 +19,24 @@ export default async function QuranPage({ page }: { page: number }) {
 
     const preferences = await getPreferences();
 
-    const [pageData, audioPageData, translatedPageData] = await Promise.all([
+    const [pageData, { reciters }, translatedPageData] = await Promise.all([
         getQuranPageData(page, preferences.arabicEdition),
-        getQuranPageData(page, preferences.reciter),
+        getAvailableReciters(),
         preferences.showTranslation
             ? getQuranPageData(page, preferences.translationEdition)
             : Promise.resolve(null),
     ]);
-    const audioQueue = audioPageData.data.ayahs
+    const reciter = reciters.find((item) => item.id === preferences.reciter);
+    const audioQueue = pageData.data.ayahs
         .map((ayah) => ({
             ayahNumber: ayah.number,
-            streams: getAyahAudioStreams(ayah),
+            streams: reciter
+                ? getRecitationStreams(reciter, {
+                      surahNumber: ayah.surah.number,
+                      ayahNumber: ayah.numberInSurah,
+                      globalAyahNumber: ayah.number,
+                  })
+                : [],
         }))
         .filter((ayah) => ayah.streams.length > 0);
     const showTajweedLegend =
@@ -51,14 +59,18 @@ export default async function QuranPage({ page }: { page: number }) {
                 const ayahs = pageData.data.ayahs
                     .filter((ayah) => ayah.surah.number === surah.number)
                     .map((ayah) => {
-                        const audioAyah = audioPageData.data.ayahs.find(
-                            (item) => item.number === ayah.number,
-                        );
+                        const streams = reciter
+                            ? getRecitationStreams(reciter, {
+                                  surahNumber: ayah.surah.number,
+                                  ayahNumber: ayah.numberInSurah,
+                                  globalAyahNumber: ayah.number,
+                              })
+                            : [];
 
                         return {
                             ...ayah,
-                            audio: audioAyah?.audio,
-                            audioSecondary: audioAyah?.audioSecondary,
+                            audio: streams[0],
+                            audioSecondary: streams.slice(1),
                         };
                     });
                 const translatedAyahs = preferences.showTranslation

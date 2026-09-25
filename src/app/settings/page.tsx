@@ -7,6 +7,7 @@ import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
+import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import SettingsForm from "@/features/settings/components/settings-form";
@@ -21,11 +22,13 @@ export default async function SettingsPage() {
         redirect("/sign-in");
     }
 
-    const [preferences, editions, readingProgress] = await Promise.all([
-        getPreferences(),
-        getAvailableQuranEditions(),
-        getReadingProgress(),
-    ]);
+    const [preferences, editions, { reciters }, readingProgress] =
+        await Promise.all([
+            getPreferences(),
+            getAvailableQuranEditions(),
+            getAvailableReciters(),
+            getReadingProgress(),
+        ]);
     const savedNumber =
         preferences.readingMode === "page"
             ? readingProgress.lastPageNumber
@@ -37,14 +40,6 @@ export default async function SettingsPage() {
             edition.language === "ar" &&
             edition.format === "text" &&
             edition.type === "quran",
-    );
-
-    const reciters = editions.filter(
-        (edition) =>
-            edition.language === "ar" &&
-            edition.format === "audio" &&
-            (edition.type === "versebyverse" ||
-                edition.type === "surahbysurah"),
     );
 
     const translationEditions = editions.filter(

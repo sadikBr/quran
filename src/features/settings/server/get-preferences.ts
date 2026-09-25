@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import db from "@/drizzle/db";
 import { userSettings } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
 import { normalizeEditionPreferences } from "../edition-compatibility";
 import { DEFAULT_PREFERENCES, type Preferences } from "../preferences";
@@ -40,8 +41,11 @@ export default async function getPreferences(): Promise<Preferences> {
     };
 
     try {
-        const editions = await getAvailableQuranEditions();
-        return normalizeEditionPreferences(preferences, editions);
+        const [editions, { reciters }] = await Promise.all([
+            getAvailableQuranEditions(),
+            getAvailableReciters(),
+        ]);
+        return normalizeEditionPreferences(preferences, editions, reciters);
     } catch {
         return preferences;
     }

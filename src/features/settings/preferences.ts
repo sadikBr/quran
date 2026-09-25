@@ -20,7 +20,7 @@ export interface Preferences {
 export const DEFAULT_PREFERENCES: Preferences = {
     theme: "light",
     arabicEdition: "quran-simple",
-    reciter: "ar.alafasy",
+    reciter: "everyayah/Alafasy_64kbps",
     translationEdition: "en.sahih",
     tafsirEdition: "ar.muyassar",
     showTranslation: false,

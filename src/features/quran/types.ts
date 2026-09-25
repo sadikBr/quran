@@ -76,7 +76,7 @@ export interface Host {
     surah_pad: number;
     ayah_pad: number;
     cors: boolean;
-    accept_range: boolean;
+    accept_ranges: boolean;
     license_status: string;
     license: string;
     license_url: string;
@@ -86,7 +86,10 @@ export interface Reciter {
     id: string;
     host: HostType;
     name: string;
-    bitrate_kbps: 64;
-    scope: string;
+    bitrate_kbps?: number;
+    scope: "ayah" | "surah";
     url: string;
+    recitation?: string;
+    surah_total?: number;
+    surah_files?: number;
 }

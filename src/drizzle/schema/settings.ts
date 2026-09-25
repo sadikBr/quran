@@ -14,7 +14,7 @@ export const userSettings = pgTable("user_settings", {
 
     theme: Theme("theme").notNull().default("system"),
     arabicEdition: text("arabic_edition").notNull().default("quran-simple"),
-    reciter: text("reciter").notNull().default("ar.alafasy"),
+    reciter: text("reciter").notNull().default("everyayah/Alafasy_64kbps"),
     translationEdition: text("translation_edition")
         .notNull()
         .default("en.sahih"),

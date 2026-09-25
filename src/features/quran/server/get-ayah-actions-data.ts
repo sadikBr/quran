@@ -7,7 +7,8 @@ import getPreferences from "@/features/settings/server/get-preferences";
 import type { AyahActionsProps } from "../components/ayah-actions";
 import { getPlainQuranText } from "../components/tajweed-text";
 import { stripBasmalaPrefix } from "../helpers/basmala";
-import getAyahAudioStreams from "../helpers/get-ayah-audio-streams";
+import getRecitationStreams from "../helpers/get-recitation-streams";
+import getAvailableReciters from "./get-available-reciter";
 import getAyah from "./get-ayah";
 import getAvailableQuranEditions from "./get-quran-edition";
 import getSurahData from "./get-surah";
@@ -25,15 +26,12 @@ export default async function getAyahActionsData(
         getPreferences(),
         auth.api.getSession({ headers: await headers() }),
     ]);
-    const [textSurah, audioSurah] = await Promise.all([
+    const [{ ayahs, surahMeta }, { reciters }] = await Promise.all([
         getSurahData(String(surahNumber), preferences.arabicEdition),
-        getSurahData(String(surahNumber), preferences.reciter),
+        getAvailableReciters(),
     ]);
-    const { ayahs, surahMeta } = textSurah;
     const ayah = ayahs.find((item) => item.numberInSurah === ayahNumber);
-    const audioAyah = audioSurah.ayahs.find(
-        (item) => item.numberInSurah === ayahNumber,
-    );
+    const reciter = reciters.find((item) => item.id === preferences.reciter);
 
     if (!ayah) return null;
 
@@ -61,7 +59,14 @@ export default async function getAyahActionsData(
             tafsirAyah.edition.englishName || tafsirAyah.edition.name,
         tafsirEditionIdentifier: tafsirAyah.edition.identifier,
         tafsirDirection: tafsirAyah.edition.direction,
-        audioStreams: audioAyah ? getAyahAudioStreams(audioAyah) : [],
+        audioStreams:
+            reciter?.scope === "ayah"
+                ? getRecitationStreams(reciter, {
+                      surahNumber,
+                      ayahNumber,
+                      globalAyahNumber: ayah.number,
+                  })
+                : [],
         globalAyahNumber: ayah.number,
         surahNumber,
         pageNumber: ayah.page,

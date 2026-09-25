@@ -3,7 +3,8 @@ import QuranAudioQueue from "@/features/quran/components/quran-audio-queue";
 import QuranPageNavigation from "@/features/quran/components/quran-page-navigation";
 import Surah from "@/features/quran/components/surah";
 import TajweedLegend from "@/features/quran/components/tajweed-legend";
-import getAyahAudioStreams from "@/features/quran/helpers/get-ayah-audio-streams";
+import getRecitationStreams from "@/features/quran/helpers/get-recitation-streams";
+import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getSurahData from "@/features/quran/server/get-surah";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import ReadingProgressTracker from "@/features/reading-progress/components/reading-progress-tracker";
@@ -29,29 +30,50 @@ export default async function SurahPage({
     const preferences = await getPreferences();
     const surahsPromise = getSurahsMeta().catch(() => []);
 
-    const [surahData, audioSurahData, translatedSurahData] = await Promise.all([
+    const [surahData, { reciters }, translatedSurahData] = await Promise.all([
         getSurahData(number, preferences.arabicEdition),
-        getSurahData(number, preferences.reciter),
+        getAvailableReciters(),
         preferences.showTranslation
             ? getSurahData(number, preferences.translationEdition)
             : Promise.resolve(null),
     ]);
     const surahs = await surahsPromise;
-    const surahAudioStreams = getAyahAudioStreams(audioSurahData);
+    const reciter = reciters.find((item) => item.id === preferences.reciter);
+    const surahStreams =
+        reciter?.scope === "surah"
+            ? getRecitationStreams(reciter, { surahNumber })
+            : [];
     const audioQueue =
-        surahAudioStreams.length > 0
-            ? [{ ayahNumber: null, streams: surahAudioStreams }]
-            : audioSurahData.ayahs
+        surahStreams.length > 0
+            ? [{ ayahNumber: null, streams: surahStreams }]
+            : surahData.ayahs
                   .map((ayah) => ({
                       ayahNumber: ayah.number,
-                      streams: getAyahAudioStreams(ayah),
+                      streams: reciter
+                          ? getRecitationStreams(reciter, {
+                                surahNumber,
+                                ayahNumber: ayah.numberInSurah,
+                                globalAyahNumber: ayah.number,
+                            })
+                          : [],
                   }))
                   .filter((ayah) => ayah.streams.length > 0);
-    const ayahsWithAudio = surahData.ayahs.map((ayah, index) => ({
-        ...ayah,
-        audio: audioSurahData.ayahs[index]?.audio,
-        audioSecondary: audioSurahData.ayahs[index]?.audioSecondary,
-    }));
+    const ayahsWithAudio = surahData.ayahs.map((ayah) => {
+        const streams =
+            reciter?.scope === "ayah"
+                ? getRecitationStreams(reciter, {
+                      surahNumber,
+                      ayahNumber: ayah.numberInSurah,
+                      globalAyahNumber: ayah.number,
+                  })
+                : [];
+
+        return {
+            ...ayah,
+            audio: streams[0],
+            audioSecondary: streams.slice(1),
+        };
+    });
     const showTajweedLegend = surahData.edition.identifier === "quran-tajweed";
 
     return (

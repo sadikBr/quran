@@ -1,4 +1,4 @@
-import type { Edition } from "@/features/quran/types";
+import type { Edition, Reciter } from "@/features/quran/types";
 import {
     DEFAULT_PREFERENCES,
     type Preferences,
@@ -14,32 +14,24 @@ export function isArabicTextEditionCompatible(edition: Edition) {
 }
 
 export function isReciterCompatible(
-    edition: Edition,
+    reciter: Reciter,
     readingMode: ReadingMode,
 ) {
     return (
-        edition.language === "ar" &&
-        edition.format === "audio" &&
-        (edition.type === "versebyverse" ||
-            (readingMode === "surah" && edition.type === "surahbysurah"))
+        reciter.scope === "ayah" ||
+        (readingMode === "surah" && reciter.scope === "surah")
     );
 }
 
 export function normalizeEditionPreferences(
     preferences: Preferences,
     editions: Edition[],
+    reciters: Reciter[],
 ): Preferences {
     const arabicEdition = editions.find(
         (edition) => edition.identifier === preferences.arabicEdition,
     );
-    const reciter = editions.find(
-        (edition) => edition.identifier === preferences.reciter,
-    );
-    const preferredReciter =
-        arabicEdition &&
-        isReciterCompatible(arabicEdition, preferences.readingMode)
-            ? arabicEdition
-            : reciter;
+    const reciter = reciters.find((item) => item.id === preferences.reciter);
     const translationEdition = editions.find(
         (edition) => edition.identifier === preferences.translationEdition,
     );
@@ -54,9 +46,8 @@ export function normalizeEditionPreferences(
                 ? arabicEdition.identifier
                 : DEFAULT_PREFERENCES.arabicEdition,
         reciter:
-            preferredReciter &&
-            isReciterCompatible(preferredReciter, preferences.readingMode)
-                ? preferredReciter.identifier
+            reciter && isReciterCompatible(reciter, preferences.readingMode)
+                ? reciter.id
                 : DEFAULT_PREFERENCES.reciter,
         translationEdition:
             translationEdition?.type === "translation" &&
@@ -73,8 +64,13 @@ export function normalizeEditionPreferences(
 export function areEditionsCompatible(
     preferences: Preferences,
     editions: Edition[],
+    reciters: Reciter[],
 ) {
-    const normalized = normalizeEditionPreferences(preferences, editions);
+    const normalized = normalizeEditionPreferences(
+        preferences,
+        editions,
+        reciters,
+    );
 
     return (
         normalized.arabicEdition === preferences.arabicEdition &&

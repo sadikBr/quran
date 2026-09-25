@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import db from "@/drizzle/db";
 import { userSettings } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
 import { areEditionsCompatible } from "../edition-compatibility";
 import { preferencesZodSchema } from "../preferences";
@@ -38,9 +39,12 @@ export default async function updatePreferences(
     const preferencesToSave = parsedPreferences.data;
 
     try {
-        const editions = await getAvailableQuranEditions();
+        const [editions, { reciters }] = await Promise.all([
+            getAvailableQuranEditions(),
+            getAvailableReciters(),
+        ]);
 
-        if (!areEditionsCompatible(preferencesToSave, editions)) {
+        if (!areEditionsCompatible(preferencesToSave, editions, reciters)) {
             return {
                 success: false,
                 message:
