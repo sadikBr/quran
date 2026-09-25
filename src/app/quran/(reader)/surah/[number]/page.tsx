@@ -4,9 +4,11 @@ import QuranPageNavigation from "@/features/quran/components/quran-page-navigati
 import Surah from "@/features/quran/components/surah";
 import TajweedLegend from "@/features/quran/components/tajweed-legend";
 import getRecitationStreams from "@/features/quran/helpers/get-recitation-streams";
+import mapWarshAyahs from "@/features/quran/helpers/map-warsh-ayahs";
 import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getSurahData from "@/features/quran/server/get-surah";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
+import getWarshChapter from "@/features/quran/server/get-warsh-chapter";
 import ReadingProgressTracker from "@/features/reading-progress/components/reading-progress-tracker";
 import getPreferences from "@/features/settings/server/get-preferences";
 import QuranInfo from "@/lib/quran-info";
@@ -30,14 +32,27 @@ export default async function SurahPage({
     const preferences = await getPreferences();
     const surahsPromise = getSurahsMeta().catch(() => []);
 
-    const [surahData, { reciters }, translatedSurahData] = await Promise.all([
-        getSurahData(number, preferences.arabicEdition),
-        getAvailableReciters(),
-        preferences.showTranslation
-            ? getSurahData(number, preferences.translationEdition)
-            : Promise.resolve(null),
-    ]);
+    const [surahData, { reciters }, translatedSurahData, warshChapter] =
+        await Promise.all([
+            getSurahData(number, preferences.arabicEdition),
+            getAvailableReciters(),
+            preferences.showTranslation
+                ? getSurahData(number, preferences.translationEdition)
+                : Promise.resolve(null),
+            preferences.riwayah === "warsh"
+                ? getWarshChapter(surahNumber)
+                : Promise.resolve(null),
+        ]);
     const surahs = await surahsPromise;
+    const displayedAyahs = warshChapter
+        ? mapWarshAyahs(surahData.ayahs, warshChapter)
+        : surahData.ayahs;
+    const displayedSurah = warshChapter
+        ? {
+              ...surahData.surahMeta,
+              numberOfAyahs: warshChapter.verses.length,
+          }
+        : surahData.surahMeta;
     const reciter = reciters.find((item) => item.id === preferences.reciter);
     const surahStreams =
         reciter?.scope === "surah"
@@ -46,9 +61,10 @@ export default async function SurahPage({
     const audioQueue =
         surahStreams.length > 0
             ? [{ ayahNumber: null, streams: surahStreams }]
-            : surahData.ayahs
+            : displayedAyahs
+                  .filter((ayah) => !ayah.isBasmalaSentinel)
                   .map((ayah) => ({
-                      ayahNumber: ayah.number,
+                      ayahNumber: ayah.audioNumber ?? ayah.number,
                       streams: reciter
                           ? getRecitationStreams(reciter, {
                                 surahNumber,
@@ -58,7 +74,7 @@ export default async function SurahPage({
                           : [],
                   }))
                   .filter((ayah) => ayah.streams.length > 0);
-    const ayahsWithAudio = surahData.ayahs.map((ayah) => {
+    const ayahsWithAudio = displayedAyahs.map((ayah) => {
         const streams =
             reciter?.scope === "ayah"
                 ? getRecitationStreams(reciter, {
@@ -74,7 +90,9 @@ export default async function SurahPage({
             audioSecondary: streams.slice(1),
         };
     });
-    const showTajweedLegend = surahData.edition.identifier === "quran-tajweed";
+    const showTajweedLegend =
+        preferences.riwayah === "hafs" &&
+        surahData.edition.identifier === "quran-tajweed";
 
     return (
         <div className="flex h-full min-h-0 flex-col overflow-hidden">
@@ -95,7 +113,7 @@ export default async function SurahPage({
                         </div>
                     )}
                     <Surah
-                        surah={surahData.surahMeta}
+                        surah={displayedSurah}
                         ayahs={ayahsWithAudio}
                         translatedAyahs={
                             preferences.showTranslation

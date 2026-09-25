@@ -19,8 +19,9 @@ export default function Ayah({
 }) {
     const ayahRef = useRef<HTMLSpanElement>(null);
     const { activeAyahNumber, playbackStatus } = useQuranAudio();
+    const playbackAyahNumber = ayah.audioNumber ?? ayah.number;
     const isActiveAyah =
-        activeAyahNumber === ayah.number &&
+        activeAyahNumber === playbackAyahNumber &&
         playbackStatus !== "idle" &&
         playbackStatus !== "error";
     const actionsHref = `/quran/ayah/${surahNumber}/${ayah.numberInSurah}`;
@@ -95,6 +96,7 @@ export default function Ayah({
 
 function AyahPlayer({ ayah }: { ayah: AyahType }) {
     const streams = getAyahAudioStreams(ayah);
+    const playbackAyahNumber = ayah.audioNumber ?? ayah.number;
     const {
         activeAyahNumber,
         isPlaying,
@@ -106,7 +108,7 @@ function AyahPlayer({ ayah }: { ayah: AyahType }) {
 
     if (streams.length === 0) return null;
 
-    const isCurrentAyah = activeAyahNumber === ayah.number;
+    const isCurrentAyah = activeAyahNumber === playbackAyahNumber;
     const isPlayingThisAyah = isCurrentAyah && isPlaying;
     const isLoadingThisAyah = isCurrentAyah && playbackStatus === "loading";
     const hasPlaybackError = isCurrentAyah && playbackStatus === "error";
@@ -146,7 +148,7 @@ function AyahPlayer({ ayah }: { ayah: AyahType }) {
                     onClick={() =>
                         hasPlaybackError
                             ? retryAudio()
-                            : toggleAudio(ayah.number, streams)
+                            : toggleAudio(playbackAyahNumber, streams)
                     }
                     className={cn(
                         "relative inline-flex size-7 items-center justify-center rounded-full border border-primary/30 bg-primary/8 text-primary transition-[background-color,border-color,color,box-shadow] duration-300 hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-wait pointer-coarse:size-10",

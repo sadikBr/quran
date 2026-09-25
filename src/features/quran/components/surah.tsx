@@ -19,15 +19,23 @@ export default function Surah({
     translationEdition?: Edition;
 }) {
     const beginsAtSurahStart = ayahs[0]?.numberInSurah === 1;
+    const hasUnnumberedFatihaBasmala =
+        beginsAtSurahStart &&
+        surah.number === 1 &&
+        ayahs[0]?.isBasmalaSentinel === true;
     const fatihaAyah =
-        beginsAtSurahStart && surah.number === 1 ? ayahs[0] : undefined;
-    const readingAyahs = fatihaAyah
+        beginsAtSurahStart && surah.number === 1 && !hasUnnumberedFatihaBasmala
+            ? ayahs[0]
+            : undefined;
+    const readingAyahs = hasUnnumberedFatihaBasmala
         ? ayahs.slice(1)
-        : ayahs.map((ayah, index) =>
-              beginsAtSurahStart && index === 0
-                  ? { ...ayah, text: stripBasmalaPrefix(ayah.text) }
-                  : ayah,
-          );
+        : fatihaAyah
+          ? ayahs.slice(1)
+          : ayahs.map((ayah, index) =>
+                beginsAtSurahStart && index === 0
+                    ? { ...ayah, text: stripBasmalaPrefix(ayah.text) }
+                    : ayah,
+            );
 
     return (
         <>
@@ -48,7 +56,7 @@ export default function Surah({
                     {readingAyahs.map((ayah) => {
                         return (
                             <Ayah
-                                key={ayah.number}
+                                key={`${ayah.number}-${ayah.numberInSurah}`}
                                 ayah={ayah}
                                 surahNumber={surah.number}
                             />

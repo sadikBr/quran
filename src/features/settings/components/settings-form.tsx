@@ -25,6 +25,7 @@ import {
     DEFAULT_PREFERENCES,
     type Preferences,
     type ReadingMode,
+    type Riwayah,
     type Theme,
 } from "../preferences";
 import updatePreferences from "../server/update-preferences";
@@ -55,6 +56,13 @@ export default function SettingsForm({
         const selectedReciter = reciters.find(
             (reciter) => reciter.id === preferences.reciter,
         );
+        const fallbackReciter = reciters.find((reciter) =>
+            isReciterCompatible(
+                reciter,
+                preferences.readingMode,
+                preferences.riwayah,
+            ),
+        );
 
         return {
             ...preferences,
@@ -65,17 +73,21 @@ export default function SettingsForm({
                     : DEFAULT_PREFERENCES.arabicEdition,
             reciter:
                 selectedReciter &&
-                isReciterCompatible(selectedReciter, preferences.readingMode)
+                isReciterCompatible(
+                    selectedReciter,
+                    preferences.readingMode,
+                    preferences.riwayah,
+                )
                     ? preferences.reciter
-                    : DEFAULT_PREFERENCES.reciter,
+                    : (fallbackReciter?.id ?? DEFAULT_PREFERENCES.reciter),
         };
     });
     const [isSaving, setIsSaving] = useState(false);
     const availableArabicEditions = arabicEditions.filter(
         isArabicTextEditionCompatible,
     );
-    const availableReciters = reciters.filter((edition) =>
-        isReciterCompatible(edition, values.readingMode),
+    const availableReciters = reciters.filter((reciter) =>
+        isReciterCompatible(reciter, values.readingMode, values.riwayah),
     );
     const selectClassName =
         "w-full border-0 bg-muted/55 shadow-none hover:bg-muted/75 focus-visible:ring-1";
@@ -100,19 +112,55 @@ export default function SettingsForm({
             const selectedReciter = reciters.find(
                 (reciter) => reciter.id === currentValues.reciter,
             );
-            const fallbackReciter =
-                reciters.find(
-                    (reciter) => reciter.id === DEFAULT_PREFERENCES.reciter,
-                )?.id ?? currentValues.reciter;
+            const fallbackReciter = reciters.find((reciter) =>
+                isReciterCompatible(
+                    reciter,
+                    readingMode,
+                    currentValues.riwayah,
+                ),
+            );
 
             return {
                 ...currentValues,
                 readingMode,
                 reciter:
                     selectedReciter &&
-                    isReciterCompatible(selectedReciter, readingMode)
+                    isReciterCompatible(
+                        selectedReciter,
+                        readingMode,
+                        currentValues.riwayah,
+                    )
                         ? currentValues.reciter
-                        : fallbackReciter,
+                        : (fallbackReciter?.id ?? currentValues.reciter),
+            };
+        });
+    }
+
+    function updateRiwayah(riwayah: Riwayah) {
+        setValues((currentValues) => {
+            const selectedReciter = reciters.find(
+                (reciter) => reciter.id === currentValues.reciter,
+            );
+            const fallbackReciter = reciters.find((reciter) =>
+                isReciterCompatible(
+                    reciter,
+                    currentValues.readingMode,
+                    riwayah,
+                ),
+            );
+
+            return {
+                ...currentValues,
+                riwayah,
+                reciter:
+                    selectedReciter &&
+                    isReciterCompatible(
+                        selectedReciter,
+                        currentValues.readingMode,
+                        riwayah,
+                    )
+                        ? currentValues.reciter
+                        : (fallbackReciter?.id ?? currentValues.reciter),
             };
         });
     }
@@ -219,6 +267,35 @@ export default function SettingsForm({
                         </PreferenceCard>
 
                         <PreferenceCard
+                            title="Riwayah"
+                            description="Choose the Quranic transmission used for Arabic text and recitation."
+                        >
+                            <SettingField label="Riwayah" htmlFor="riwayah">
+                                <Select
+                                    value={values.riwayah}
+                                    onValueChange={(value) =>
+                                        updateRiwayah(value as Riwayah)
+                                    }
+                                >
+                                    <SelectTrigger
+                                        id="riwayah"
+                                        className={selectClassName}
+                                    >
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="hafs">
+                                            Hafs ‘an ‘Asim
+                                        </SelectItem>
+                                        <SelectItem value="warsh">
+                                            Warsh ‘an Nafi‘
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </SettingField>
+                        </PreferenceCard>
+
+                        <PreferenceCard
                             title="Show translation"
                             description="Display English beneath the Arabic text."
                         >
@@ -278,7 +355,11 @@ export default function SettingsForm({
                 >
                     <PreferenceCard
                         title="Arabic edition"
-                        description="Choose the Arabic text style used throughout the reader."
+                        description={
+                            values.riwayah === "warsh"
+                                ? "Warsh uses its dedicated Quran script; your Hafs edition remains saved for when you switch back."
+                                : "Choose the Arabic text style used throughout the reader."
+                        }
                     >
                         <SettingField label="Edition" htmlFor="arabic-edition">
                             <EditionCombobox
@@ -288,6 +369,7 @@ export default function SettingsForm({
                                 onValueChange={(value) =>
                                     updateValue("arabicEdition", value)
                                 }
+                                disabled={values.riwayah === "warsh"}
                                 placeholder="Search text editions…"
                                 className={selectClassName}
                                 getBadge={() => "Text"}

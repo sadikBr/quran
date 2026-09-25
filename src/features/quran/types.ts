@@ -19,6 +19,8 @@ export interface Data {
 
 export interface AyahType {
     number: number;
+    audioNumber?: number;
+    isBasmalaSentinel?: boolean;
     audio?: string;
     audioSecondary?: string[];
     text: string;
@@ -92,4 +94,15 @@ export interface Reciter {
     recitation?: string;
     surah_total?: number;
     surah_files?: number;
+}
+
+export interface WarshChapter {
+    id: number;
+    verses: WarshVerse[];
+}
+
+export interface WarshVerse {
+    id: number;
+    text: string;
+    number_in_hafs: number[];
 }

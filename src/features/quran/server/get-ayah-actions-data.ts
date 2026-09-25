@@ -8,10 +8,12 @@ import type { AyahActionsProps } from "../components/ayah-actions";
 import { getPlainQuranText } from "../components/tajweed-text";
 import { stripBasmalaPrefix } from "../helpers/basmala";
 import getRecitationStreams from "../helpers/get-recitation-streams";
+import { getWarshHafsAnchor } from "../helpers/map-warsh-ayahs";
 import getAvailableReciters from "./get-available-reciter";
 import getAyah from "./get-ayah";
 import getAvailableQuranEditions from "./get-quran-edition";
 import getSurahData from "./get-surah";
+import getWarshChapter from "./get-warsh-chapter";
 
 export type AyahActionsData = Omit<
     AyahActionsProps,
@@ -26,19 +28,30 @@ export default async function getAyahActionsData(
         getPreferences(),
         auth.api.getSession({ headers: await headers() }),
     ]);
-    const [{ ayahs, surahMeta }, { reciters }] = await Promise.all([
-        getSurahData(String(surahNumber), preferences.arabicEdition),
-        getAvailableReciters(),
-    ]);
-    const ayah = ayahs.find((item) => item.numberInSurah === ayahNumber);
+    const [{ ayahs, surahMeta }, { reciters }, warshChapter] =
+        await Promise.all([
+            getSurahData(String(surahNumber), preferences.arabicEdition),
+            getAvailableReciters(),
+            preferences.riwayah === "warsh"
+                ? getWarshChapter(surahNumber)
+                : Promise.resolve(null),
+        ]);
+    const warshVerse = warshChapter?.verses.find(
+        (verse) => verse.id === ayahNumber,
+    );
+    const hafsAyahNumber = warshVerse
+        ? getWarshHafsAnchor(warshVerse, surahNumber)
+        : ayahNumber;
+    const ayah = ayahs.find((item) => item.numberInSurah === hafsAyahNumber);
     const reciter = reciters.find((item) => item.id === preferences.reciter);
 
     if (!ayah) return null;
 
-    const arabicText =
-        ayah.numberInSurah === 1 && surahNumber !== 1
-            ? stripBasmalaPrefix(ayah.text)
-            : ayah.text;
+    const arabicText = warshVerse
+        ? warshVerse.text
+        : ayah.numberInSurah === 1 && surahNumber !== 1
+          ? stripBasmalaPrefix(ayah.text)
+          : ayah.text;
 
     const [tafsirAyah, tafsirEditions, savedAyah] = await Promise.all([
         getAyah(ayah.number),

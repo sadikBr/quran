@@ -1,11 +1,16 @@
 import { relations } from "drizzle-orm";
 import { boolean, pgEnum, pgTable, text } from "drizzle-orm/pg-core";
-import { READING_MODES, THEMES } from "@/features/settings/preferences";
+import {
+    READING_MODES,
+    RIWAYAHS,
+    THEMES,
+} from "@/features/settings/preferences";
 import { createdAt, updatedAt } from "../helpers";
 import { user } from "./auth-schema";
 
 export const Theme = pgEnum("theme", THEMES);
 export const ReadingMode = pgEnum("reading_mode", READING_MODES);
+export const Riwayah = pgEnum("riwayah", RIWAYAHS);
 
 export const userSettings = pgTable("user_settings", {
     userId: text("user_id")
@@ -13,6 +18,7 @@ export const userSettings = pgTable("user_settings", {
         .references(() => user.id, { onDelete: "cascade" }),
 
     theme: Theme("theme").notNull().default("system"),
+    riwayah: Riwayah("riwayah").notNull().default("hafs"),
     arabicEdition: text("arabic_edition").notNull().default("quran-simple"),
     reciter: text("reciter").notNull().default("everyayah/Alafasy_64kbps"),
     translationEdition: text("translation_edition")
