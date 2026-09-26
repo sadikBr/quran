@@ -3,6 +3,7 @@
         "header": {
             "brand": "Quran Reader",
             "navigation": "Quran navigation",
+            "search": "Search Quran",
             "surahIndex": "Surah index",
             "startReading": "Start reading",
             "continueReading": "Continue reading"
@@ -17,6 +18,31 @@
             "clearFilters": "Clear filters",
             "noResultsTitle": "No surahs found",
             "noResultsDescription": "Try a different search term or clear the active filters."
+        },
+        "search": {
+            "eyebrow": "QURAN SEARCH",
+            "title": "Find an ayah.",
+            "description": "Search the Arabic Quran or your selected English translation.",
+            "label": "Search the Quran",
+            "placeholder": "Type an Arabic word or an English phrase…",
+            "clear": "Clear search",
+            "promptTitle": "What are you looking for?",
+            "promptDescription": "Enter at least two letters to search the complete Quran.",
+            "loading": "Searching the Quran…",
+            "noResultsTitle": "No matching ayahs",
+            "noResultsDescription": "Try fewer words, a different spelling, or another phrase.",
+            "errorTitle": "Search is unavailable",
+            "errorDescription": "We could not search the Quran right now. Please try again.",
+            "retry": "Try again",
+            "results": "{count, plural, one {# matching ayah} other {# matching ayahs}}",
+            "limited": "Showing the first {count, number} results.",
+            "ayah": "Ayah {number, number}",
+            "page": "Page {number, number}",
+            "arabicMatch": "Arabic text",
+            "translationMatch": "Translation",
+            "usingEditions": "Searching {arabic} and {translation}",
+            "backToSurahs": "Back to surahs",
+            "openResult": "Open {surah}, ayah {ayah, number} in the reader"
         },
         "navigation": {
             "page": "Page",

@@ -4,6 +4,7 @@ import {
     BookText,
     Headphones,
     Languages,
+    Search,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -230,6 +231,20 @@ export default async function Home() {
                                 >
                                     <Link href="/quran">
                                         {t("hero.explore")}
+                                    </Link>
+                                </Button>
+                                <Button
+                                    asChild
+                                    size="lg"
+                                    variant="ghost"
+                                    className="h-12 rounded-full px-5 text-foreground/75 hover:bg-background/35 hover:text-foreground dark:text-white/75 dark:hover:bg-white/10 dark:hover:text-white"
+                                >
+                                    <Link href="/quran/search">
+                                        <Search
+                                            aria-hidden="true"
+                                            className="size-4"
+                                        />
+                                        {t("hero.search")}
                                     </Link>
                                 </Button>
                             </div>

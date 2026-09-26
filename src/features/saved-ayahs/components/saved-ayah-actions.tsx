@@ -68,7 +68,7 @@ export default function SavedAyahActions({
                 aria-modal="true"
                 aria-labelledby={data ? "ayah-actions-title" : undefined}
                 aria-label={data ? undefined : t("modal.title")}
-                className="relative z-10 flex max-h-[min(94dvh,52rem)] w-full max-w-2xl min-w-0 flex-col overflow-hidden rounded-t-[1.75rem] bg-background/98 shadow-[0_32px_90px_-24px_hsl(var(--foreground)/0.5)] ring-1 ring-border/60 backdrop-blur-xl sm:max-h-[calc(100dvh-2rem)] sm:rounded-[1.75rem]"
+                className="relative z-10 flex max-h-[min(94dvh,52rem)] w-full max-w-2xl min-w-0 flex-col overflow-hidden rounded-t-[0.25rem] bg-background/98 shadow-[0_32px_90px_-24px_hsl(var(--foreground)/0.5)] ring-1 ring-border/60 backdrop-blur-xl sm:max-h-[calc(100dvh-2rem)] sm:rounded-[1.75rem]"
             >
                 <button
                     ref={closeButtonRef}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, Search } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -37,6 +37,18 @@ export default function QuranHeader({
                     aria-label={t("header.navigation")}
                     className="flex shrink-0 items-center gap-3 text-sm"
                 >
+                    <Link
+                        href="/quran/search"
+                        className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                        <Search aria-hidden="true" className="size-4" />
+                        <span className="hidden sm:inline">
+                            {t("header.search")}
+                        </span>
+                        <span className="sr-only sm:hidden">
+                            {t("header.search")}
+                        </span>
+                    </Link>
                     {showSurahIndex && (
                         <Link
                             href="/quran"
@@ -45,7 +57,7 @@ export default function QuranHeader({
                             {t("header.surahIndex")}
                         </Link>
                     )}
-                    {showSurahIndex && startReadingHref && (
+                    {(showSurahIndex || startReadingHref) && (
                         <span aria-hidden="true" className="text-border">
                             ·
                         </span>

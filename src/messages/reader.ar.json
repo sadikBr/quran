@@ -3,6 +3,7 @@
         "header": {
             "brand": "قارئ القرآن",
             "navigation": "التنقّل بين صفحات القرآن",
+            "search": "البحث",
             "surahIndex": "السور",
             "startReading": "ابدأ القراءة",
             "continueReading": "أكمل القراءة"
@@ -17,6 +18,31 @@
             "clearFilters": "إلغاء التصفية",
             "noResultsTitle": "لا توجد سورة مطابقة",
             "noResultsDescription": "جرّب اسمًا آخر، أو ألغِ خيارات التصفية."
+        },
+        "search": {
+            "eyebrow": "البحث في القرآن",
+            "title": "ابحث عن آية.",
+            "description": "ابحث في النص العربي أو في الترجمة الإنجليزية التي اخترتها.",
+            "label": "البحث في القرآن",
+            "placeholder": "اكتب كلمة عربية أو عبارة إنجليزية…",
+            "clear": "مسح البحث",
+            "promptTitle": "ما الآية التي تبحث عنها؟",
+            "promptDescription": "اكتب حرفين على الأقل للبحث في القرآن كاملًا.",
+            "loading": "جارٍ البحث في القرآن…",
+            "noResultsTitle": "لم نجد آية مطابقة",
+            "noResultsDescription": "جرّب كلمات أقل، أو كتابة أخرى، أو عبارة مختلفة.",
+            "errorTitle": "تعذّر البحث الآن",
+            "errorDescription": "لم نتمكّن من البحث في القرآن. أعد المحاولة.",
+            "retry": "إعادة المحاولة",
+            "results": "{count, plural, zero {لا نتائج} one {نتيجة واحدة} two {نتيجتان} few {# نتائج} many {# نتيجة} other {# نتيجة}}",
+            "limited": "نعرض أول {count, number} نتيجة.",
+            "ayah": "الآية {number, number}",
+            "page": "الصفحة {number, number}",
+            "arabicMatch": "النص العربي",
+            "translationMatch": "الترجمة",
+            "usingEditions": "يجري البحث في {arabic} و{translation}",
+            "backToSurahs": "العودة إلى السور",
+            "openResult": "فتح سورة {surah}، الآية {ayah, number} في القارئ"
         },
         "navigation": {
             "page": "الصفحة",
