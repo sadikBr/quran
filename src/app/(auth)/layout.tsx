@@ -1,17 +1,28 @@
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { createTranslator } from "next-intl";
 import type { ReactNode } from "react";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
+import getPreferences from "@/features/settings/server/get-preferences";
+import { getMessages } from "@/i18n/config";
 
-export default function AuthLayout({ children }: { children: ReactNode }) {
-    const locale = useLocale();
-    const t = useTranslations("Common");
+export default async function AuthLayout({
+    children,
+}: {
+    children: ReactNode;
+}) {
+    const preferences = await getPreferences();
+    const messages = await getMessages(preferences.language);
+    const t = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Common",
+    });
     return (
         <div
-            lang={locale}
-            dir={locale === "ar" ? "rtl" : "ltr"}
+            lang={preferences.language}
+            dir={preferences.language === "ar" ? "rtl" : "ltr"}
             className="relative isolate min-h-dvh overflow-x-clip bg-background"
         >
             <PageBackground />

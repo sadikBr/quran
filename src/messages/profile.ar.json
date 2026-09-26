@@ -1,84 +1,84 @@
 {
     "Profile": {
         "page": {
-            "eyebrow": "ملفك الشخصي",
-            "title": "تفاصيل حسابك.",
-            "description": "حدّث الاسم والصورة المستخدمين في مساحة القراءة الشخصية.",
+            "eyebrow": "حسابك",
+            "title": "بيانات الحساب",
+            "description": "حدّث اسمك وصورتك، وأدِر أمان حسابك وجلساته.",
             "memberSince": "عضو منذ {date}",
-            "emailVerified": "البريد الإلكتروني موثّق",
-            "emailNotVerified": "البريد الإلكتروني غير موثّق"
+            "emailVerified": "البريد الإلكتروني مؤكَّد",
+            "emailNotVerified": "البريد الإلكتروني غير مؤكَّد"
         },
         "aside": {
-            "chooseImage": "اختر صورة الملف الشخصي",
-            "eyebrow": "الملف الشخصي للحساب",
-            "description": "انقر على الصورة لتغييرها. تبقى تفاصيلك خاصة بمساحة قراءتك."
+            "chooseImage": "تغيير الصورة الشخصية",
+            "eyebrow": "صورتك الشخصية",
+            "description": "اضغط على الصورة لتغييرها. لا تظهر بياناتك إلا في حسابك."
         },
         "personal": {
-            "title": "التفاصيل الشخصية",
-            "description": "اختر كيفية ظهور هويتك في قارئ القرآن.",
-            "displayName": "اسم العرض",
+            "title": "المعلومات الشخصية",
+            "description": "اختر الاسم والصورة اللذين يظهران في حسابك.",
+            "displayName": "الاسم الظاهر",
             "profileImage": "صورة الملف الشخصي",
-            "imageUploaded": "تم رفع الصورة من جهازك",
-            "removeImage": "إزالة",
+            "imageUploaded": "صورة مرفوعة من جهازك",
+            "removeImage": "حذف الصورة",
             "imageUrlPlaceholder": "https://example.com/photo.jpg",
-            "imageHelp": "انقر على صورتك لرفع صورة، أو ألصق رابط صورة هنا.",
-            "save": "حفظ التفاصيل",
+            "imageHelp": "اضغط على صورتك لرفع أخرى، أو ألصق رابطًا لصورة.",
+            "save": "حفظ التغييرات",
             "saving": "جارٍ الحفظ…"
         },
         "access": {
-            "title": "الدخول إلى الحساب",
-            "description": "حافظ على تحديث بيانات الاتصال وكلمة المرور.",
+            "title": "أمان الحساب",
+            "description": "حدّث بريدك الإلكتروني وكلمة مرورك عند الحاجة.",
             "email": "البريد الإلكتروني",
-            "updateEmail": "تحديث البريد الإلكتروني",
+            "updateEmail": "حفظ البريد الجديد",
             "updating": "جارٍ التحديث…",
             "passwordTitle": "كلمة المرور",
-            "passwordDescription": "استخدم كلمة مرور قوية وفريدة. سيؤدي تحديثها إلى تسجيل الخروج من جلساتك الأخرى.",
+            "passwordDescription": "اختر كلمة مرور قوية لا تستخدمها في موضع آخر. عند تغييرها، ستُنهى جلساتك الأخرى.",
             "currentPassword": "كلمة المرور الحالية",
             "newPassword": "كلمة المرور الجديدة",
-            "updatePassword": "تحديث كلمة المرور"
+            "updatePassword": "حفظ كلمة المرور الجديدة"
         },
         "sessions": {
-            "title": "الجلسات النشطة",
-            "description": "راجع الأجهزة التي سُجّل الدخول إلى حسابك منها وأزل أي جلسة لا تعرفها.",
-            "loading": "جارٍ تحميل الجلسات النشطة…",
+            "title": "الأجهزة المسجّل دخولها",
+            "description": "راجع الأجهزة المتصلة بحسابك، وأنهِ أي جلسة لا تعرفها.",
+            "loading": "جارٍ جلب الجلسات…",
             "empty": "لا توجد جلسات نشطة.",
             "currentDetails": "هذا الجهاز · {date}",
-            "otherDetails": "تم تسجيل الدخول · {date}",
-            "current": "الحالية",
-            "signingOut": "جارٍ تسجيل الخروج…",
-            "signOut": "تسجيل الخروج"
+            "otherDetails": "آخر دخول · {date}",
+            "current": "هذا الجهاز",
+            "signingOut": "جارٍ إنهاء الجلسة…",
+            "signOut": "إنهاء الجلسة"
         },
         "devices": {
             "unknown": "جهاز غير معروف",
-            "webBrowser": "متصفح ويب",
+            "webBrowser": "متصفح غير معروف",
             "browserOnSystem": "{browser} على {system}"
         },
         "delete": {
-            "title": "حذف الحساب",
-            "description": "سيؤدي هذا إلى حذف ملفك الشخصي وتفضيلاتك وتقدّم القراءة المحفوظ نهائيًا. لا يمكن التراجع عن ذلك.",
+            "title": "إغلاق الحساب",
+            "description": "سيُحذف حسابك نهائيًّا، بما فيه تفضيلاتك وموضع قراءتك ومحفوظاتك. ولا يمكن التراجع عن ذلك.",
             "currentPassword": "كلمة المرور الحالية",
-            "confirmation": "اكتب DELETE للتأكيد",
+            "confirmation": "اكتب DELETE لتأكيد الحذف",
             "deleting": "جارٍ حذف الحساب…",
-            "submit": "حذف الحساب نهائيًا"
+            "submit": "حذف حسابي نهائيًّا"
         },
         "feedback": {
-            "sessionsLoadFailed": "تعذّر تحميل جلساتك النشطة",
-            "nameRequired": "يرجى إدخال اسمك",
-            "profileUpdateFailed": "تعذّر تحديث ملفك الشخصي",
-            "profileUpdated": "تم تحديث الملف الشخصي",
-            "imageFileRequired": "يرجى اختيار ملف صورة",
-            "imageTooLarge": "يرجى اختيار صورة يقل حجمها عن 1 ميغابايت",
-            "imageReadFailed": "تعذّرت قراءة هذه الصورة",
-            "emailUnchanged": "هذا هو بريدك الإلكتروني الحالي بالفعل",
-            "emailUpdateFailed": "تعذّر تحديث بريدك الإلكتروني",
-            "emailUpdated": "تم تحديث البريد الإلكتروني",
-            "passwordTooShort": "يجب أن تتكوّن كلمة المرور الجديدة من 8 أحرف على الأقل",
-            "passwordUpdateFailed": "تعذّر تحديث كلمة المرور",
-            "passwordUpdated": "تم تحديث كلمة المرور وتسجيل الخروج من الجلسات الأخرى.",
-            "deleteConfirmationRequired": "اكتب «DELETE» لتأكيد حذف الحساب",
-            "deleteFailed": "تعذّر حذف حسابك",
+            "sessionsLoadFailed": "تعذّر جلب جلسات حسابك",
+            "nameRequired": "اكتب اسمك أولًا",
+            "profileUpdateFailed": "لم نتمكّن من تحديث بياناتك",
+            "profileUpdated": "حُفظت تغييراتك",
+            "imageFileRequired": "اختر ملف صورة أولًا",
+            "imageTooLarge": "اختر صورة يقل حجمها عن ميغابايت واحد",
+            "imageReadFailed": "تعذّرت قراءة ملف الصورة",
+            "emailUnchanged": "هذا بريدك الإلكتروني الحالي",
+            "emailUpdateFailed": "لم نتمكّن من تحديث البريد الإلكتروني",
+            "emailUpdated": "حُفظ البريد الإلكتروني الجديد",
+            "passwordTooShort": "ينبغي ألا تقل كلمة المرور الجديدة عن ثمانية أحرف",
+            "passwordUpdateFailed": "لم نتمكّن من تغيير كلمة المرور",
+            "passwordUpdated": "تغيّرت كلمة المرور، وأُغلقت جلساتك الأخرى.",
+            "deleteConfirmationRequired": "اكتب «DELETE» لتأكيد حذف حسابك",
+            "deleteFailed": "لم نتمكّن من حذف حسابك",
             "sessionRevokeFailed": "تعذّر إنهاء هذه الجلسة",
-            "sessionRevoked": "تم تسجيل الخروج من الجلسة"
+            "sessionRevoked": "أُنهيت الجلسة بنجاح"
         }
     }
 }

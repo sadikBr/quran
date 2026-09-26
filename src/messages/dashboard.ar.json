@@ -1,66 +1,66 @@
 {
     "Dashboard": {
-        "eyebrow": "لوحة المتابعة",
-        "welcome": "مرحبًا بعودتك، {name}.",
-        "introduction": "عُد إلى القرآن على مهلٍ وبالوتيرة التي تناسبك. مساحتك للقراءة جاهزة متى شئت.",
+        "eyebrow": "مساحتك",
+        "welcome": "أهلًا بعودتك يا {name}.",
+        "introduction": "خذ من القرآن ما تيسّر لك، وعلى مهل. كل ما حفظته من مواضع وخواطر ينتظرك هنا.",
         "reading": {
-            "eyebrow": "موضع قراءتك",
+            "eyebrow": "آخر موضع قرأته",
             "page": "الصفحة",
             "surah": "السورة",
             "beginWith": "ابدأ من {type} {number, number}.",
-            "continueFrom": "تابع من {type} {number, number}.",
-            "continueWith": "تابع مع {surah}.",
-            "continueGeneric": "تابع القراءة.",
-            "resumeDescription": "واصل من الموضع الذي توقفت عنده في نمط القراءة المفضّل لديك.",
-            "startDescription": "ابدأ رحلتك مع القرآن بنمط القراءة المفضّل لديك.",
-            "continueReading": "تابع القراءة",
+            "continueFrom": "أكمل من {type} {number, number}.",
+            "continueWith": "أكمل سورة {surah}.",
+            "continueGeneric": "أكمل وردك.",
+            "resumeDescription": "عُد مباشرةً إلى الموضع الذي توقفت عنده، وبنمط القراءة الذي اخترته.",
+            "startDescription": "اختر طريقتك في القراءة، وابدأ من حيث تحب.",
+            "continueReading": "أكمل القراءة",
             "startReading": "ابدأ القراءة",
-            "browseSurahs": "تصفّح السور"
+            "browseSurahs": "فهرس السور"
         },
         "upcoming": {
-            "eyebrow": "في الطريق",
-            "title": "ستنمو ممارستك معك.",
-            "description": "نعمل على إعداد هذه الأدوات لتدعم رحلتك الشخصية مع القرآن.",
-            "inDevelopment": "قيد التطوير",
+            "eyebrow": "قريبًا",
+            "title": "أدوات تعينك على المداومة.",
+            "description": "نُعِدّ مزيدًا من الأدوات التي تساعدك على تثبيت وردك ومتابعة تقدّمك.",
+            "inDevelopment": "قيد الإعداد",
             "memorizationGoals": {
                 "title": "أهداف الحفظ",
-                "description": "حدّد هدفًا يوميًا وابنِ عادة حفظ ثابتة ومتوازنة."
+                "description": "ضع لنفسك وردًا يوميًّا، وداوم على الحفظ بخطوات يسيرة."
             },
             "progressInsights": {
-                "title": "إحصاءات التقدّم",
-                "description": "اطّلع على تقدّمك في القراءة والحفظ بنظرة واحدة."
+                "title": "متابعة التقدّم",
+                "description": "تابع ما أنجزته في القراءة والحفظ بوضوح."
             }
         },
         "saved": {
-            "eyebrow": "مجموعتك",
-            "title": "الآيات المحفوظة",
-            "description": "عُد إلى علاماتك وخواطرك الخاصة من جلسات القراءة.",
-            "searchLabel": "ابحث في الآيات المحفوظة",
-            "searchPlaceholder": "ابحث في الآيات المحفوظة…",
-            "filterLabel": "صفِّ حسب السورة",
+            "eyebrow": "محفوظاتك",
+            "title": "آيات حفظتها",
+            "description": "اجمع هنا الآيات التي لامستك، وعُد إلى خواطرك متى شئت.",
+            "searchLabel": "البحث في محفوظاتك",
+            "searchPlaceholder": "ابحث في الآيات…",
+            "filterLabel": "اختيار سورة",
             "allSurahs": "جميع السور",
-            "noMatchingSurahs": "لم نعثر على سورة محفوظة مطابقة.",
-            "emptyTitle": "لا توجد آيات محفوظة بعد",
-            "emptyDescription": "افتح إجراءات أي آية أثناء القراءة لحفظها أو كتابة خاطرة خاصة.",
-            "noSearchResults": "لا توجد آيات محفوظة تطابق هذا البحث.",
+            "noMatchingSurahs": "لا توجد سورة مطابقة ضمن محفوظاتك.",
+            "emptyTitle": "لم تحفظ أي آية بعد",
+            "emptyDescription": "افتح خيارات أي آية أثناء القراءة لتحفظها أو تدوّن خاطرة حولها.",
+            "noSearchResults": "لا توجد آيات تطابق بحثك.",
             "ayah": "الآية {number, number}",
             "bookmarked": "محفوظة",
-            "hasReflection": "لها خاطرة",
-            "openReader": "افتح في القارئ",
-            "actions": "الإجراءات",
-            "actionTitle": "إجراءات الآية",
-            "openActions": "افتح إجراءات {surah}، الآية {number, number}",
-            "summary": "عرض {start, number}–{end, number} من أصل {count, number} {count, plural, one {آية محفوظة} other {آيات محفوظة}}",
+            "hasReflection": "مرفقة بخاطرة",
+            "openReader": "عرض في القارئ",
+            "actions": "الخيارات",
+            "actionTitle": "خيارات الآية",
+            "openActions": "فتح خيارات سورة {surah}، الآية {number, number}",
+            "summary": "تظهر الآيات من {start, number} إلى {end, number}، من أصل {count, number} {count, plural, one {آية محفوظة} other {آيات محفوظة}}",
             "previous": "السابق",
             "next": "التالي",
             "pageIndicator": "{current, number} / {total, number}"
         },
         "modal": {
-            "close": "أغلق إجراءات الآية",
-            "title": "إجراءات الآية",
-            "loadFailedTitle": "تعذّر تحميل إجراءات هذه الآية.",
-            "loadFailedDescription": "أغلق هذه النافذة ثم حاول مرة أخرى.",
-            "loading": "جارٍ تحميل إجراءات الآية…"
+            "close": "إغلاق خيارات الآية",
+            "title": "خيارات الآية",
+            "loadFailedTitle": "تعذّر فتح خيارات هذه الآية.",
+            "loadFailedDescription": "أغلق النافذة ثم أعد المحاولة.",
+            "loading": "جارٍ إعداد خيارات الآية…"
         }
     }
 }
