@@ -222,7 +222,7 @@ function SurahTitle({
 }) {
     if (locale === "ar") {
         return (
-            <span className="surah-name text-5xl font-normal leading-none tracking-normal text-foreground sm:text-6xl">
+            <span className="surah-name block max-w-full text-[clamp(2.25rem,10vw,3.25rem)] font-normal leading-none tracking-normal text-foreground">
                 {getArabicNumber(surahNumber)}
             </span>
         );
@@ -586,8 +586,8 @@ export default function AyahActions({
     }
 
     return (
-        <div dir={direction} className="pb-1">
-            <header className="relative isolate overflow-hidden pb-6 pe-10 pt-2">
+        <div dir={direction} className="min-w-0 pb-1">
+            <header className="relative isolate min-w-0 overflow-hidden pb-5 pe-10 pt-1">
                 <span
                     aria-hidden="true"
                     className="pointer-events-none absolute -end-6 -top-10 -z-10 size-44 rounded-full bg-primary/8 blur-3xl"
@@ -603,7 +603,7 @@ export default function AyahActions({
                 </div>
                 <h1
                     id="ayah-actions-title"
-                    className="mt-5 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+                    className="mt-4 min-w-0 text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl"
                 >
                     <SurahTitle
                         locale={locale}
@@ -616,7 +616,7 @@ export default function AyahActions({
                 </p>
             </header>
 
-            <div className="grid grid-cols-1 gap-1 pb-2 sm:grid-cols-2 sm:gap-x-3 sm:gap-y-1">
+            <div className="flex min-w-0 flex-col pb-1">
                 {audioStreams.length > 0 && (
                     <button
                         type="button"
@@ -626,7 +626,7 @@ export default function AyahActions({
                                 ? retryAudio()
                                 : toggleAudio(globalAyahNumber, audioStreams)
                         }
-                        className="col-span-2 mb-1 rounded-xl bg-primary/8 px-4 py-4 text-start text-foreground transition-colors hover:bg-primary/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-wait"
+                        className="mb-2 w-full min-w-0 rounded-2xl bg-gradient-to-br from-primary/12 to-primary/5 px-3.5 py-3.5 text-start text-foreground transition-colors hover:from-primary/16 hover:to-primary/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait sm:px-4"
                     >
                         <span className="flex items-center gap-4">
                             <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -681,16 +681,16 @@ export default function AyahActions({
                 <button
                     type="button"
                     onClick={() => setIsTafsirVisible(true)}
-                    className="group flex min-h-24 items-start gap-4 rounded-xl px-3 py-4 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 sm:py-3.5"
                 >
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/8 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/14 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
                         <BookOpenText aria-hidden="true" className="size-4" />
                     </span>
-                    <span className="block pt-0.5">
-                        <span className="font-medium text-card-foreground">
+                    <span className="min-w-0 flex-1 py-0.5">
+                        <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
                             {t("actions.readTafsir")}
                         </span>
-                        <span className="mt-1 block text-sm leading-5 text-muted-foreground">
+                        <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
                             {t("actions.readTafsirDescription")}
                         </span>
                     </span>
@@ -698,16 +698,16 @@ export default function AyahActions({
                 <button
                     type="button"
                     onClick={copyArabicText}
-                    className="group flex min-h-24 items-start gap-4 rounded-xl px-3 py-4 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 sm:py-3.5"
                 >
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/8 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/14 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
                         <Copy aria-hidden="true" className="size-4" />
                     </span>
-                    <span className="block pt-0.5">
-                        <span className="font-medium text-card-foreground">
+                    <span className="min-w-0 flex-1 py-0.5">
+                        <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
                             {t("actions.copyArabic")}
                         </span>
-                        <span className="mt-1 block text-sm leading-5 text-muted-foreground">
+                        <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
                             {t("actions.copyArabicDescription")}
                         </span>
                     </span>
@@ -717,9 +717,9 @@ export default function AyahActions({
                     disabled={isSavingBookmark}
                     onClick={toggleBookmark}
                     aria-pressed={isBookmarked}
-                    className="group flex min-h-24 items-start gap-4 rounded-xl px-3 py-4 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60"
+                    className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60 sm:px-3 sm:py-3.5"
                 >
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/8 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/14 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
                         {isSavingBookmark ? (
                             <LoaderCircle
                                 aria-hidden="true"
@@ -732,13 +732,13 @@ export default function AyahActions({
                             />
                         )}
                     </span>
-                    <span className="block pt-0.5">
-                        <span className="font-medium text-card-foreground">
+                    <span className="min-w-0 flex-1 py-0.5">
+                        <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
                             {isBookmarked
                                 ? t("actions.removeBookmark")
                                 : t("actions.bookmarkAyah")}
                         </span>
-                        <span className="mt-1 block text-sm leading-5 text-muted-foreground">
+                        <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
                             {isBookmarked
                                 ? t("actions.savedCollection")
                                 : t("actions.keepCollection")}
@@ -748,18 +748,18 @@ export default function AyahActions({
                 <button
                     type="button"
                     onClick={openReflection}
-                    className="group flex min-h-24 items-start gap-4 rounded-xl px-3 py-4 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 sm:py-3.5"
                 >
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/8 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/14 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
                         <NotebookPen aria-hidden="true" className="size-4" />
                     </span>
-                    <span className="block pt-0.5">
-                        <span className="font-medium text-card-foreground">
+                    <span className="min-w-0 flex-1 py-0.5">
+                        <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
                             {reflection
                                 ? t("actions.editReflection")
                                 : t("actions.addReflection")}
                         </span>
-                        <span className="mt-1 block text-sm leading-5 text-muted-foreground">
+                        <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
                             {reflection
                                 ? t("actions.returnPrivateNote")
                                 : t("actions.writePrivateNote")}

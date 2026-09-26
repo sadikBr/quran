@@ -22,8 +22,8 @@ export default async function AyahActionsPage({
     }
 
     return (
-        <main className="mx-auto flex h-full w-full max-w-2xl items-center p-4">
-            <section className="w-full rounded-2xl border bg-card p-6 shadow-sm">
+        <main className="mx-auto flex h-full min-h-0 w-full max-w-2xl items-start overflow-y-auto px-3 py-4 sm:items-center sm:px-4">
+            <section className="w-full min-w-0 rounded-2xl bg-card/80 p-4 shadow-sm ring-1 ring-border/50 sm:p-7">
                 <AyahActionsContent surahNumber={surah} ayahNumber={ayah} />
             </section>
         </main>
