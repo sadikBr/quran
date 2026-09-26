@@ -42,13 +42,13 @@ export default function AyahActionsModal({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="ayah-actions-title"
-                className="relative z-10 flex max-h-[min(94dvh,52rem)] w-full max-w-2xl min-w-0 flex-col overflow-hidden rounded-t-[1.75rem] bg-background/98 shadow-[0_32px_90px_-24px_hsl(var(--foreground)/0.5)] ring-1 ring-border/60 backdrop-blur-xl sm:max-h-[calc(100dvh-2rem)] sm:rounded-[1.75rem]"
+                className="relative z-10 flex max-h-[min(94dvh,52rem)] w-full max-w-2xl min-w-0 flex-col overflow-hidden rounded-t-[0.25rem] bg-background/98 shadow-[0_32px_90px_-24px_hsl(var(--foreground)/0.5)] ring-1 ring-border/60 backdrop-blur-xl sm:max-h-[calc(100dvh-2rem)] sm:rounded-[1.75rem]"
             >
                 <button
                     ref={closeButtonRef}
                     type="button"
                     onClick={() => router.back()}
-                    className="absolute top-3 end-3 z-20 inline-flex size-9 sm:top-4 sm:end-4 items-center justify-center rounded-full bg-muted/35 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="absolute top-1 end-1 z-20 inline-flex size-9 sm:top-4 sm:end-4 items-center justify-center rounded-md bg-muted/35 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     aria-label={t("actions.close")}
                 >
                     <X aria-hidden="true" className="size-4" />
