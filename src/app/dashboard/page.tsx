@@ -7,6 +7,7 @@ import {
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { createTranslator } from "next-intl";
 
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
@@ -19,18 +20,17 @@ import getReadingProgress from "@/features/reading-progress/server/get-reading-p
 import SavedAyahsSection from "@/features/saved-ayahs/components/saved-ayahs-section";
 import getSavedAyahs from "@/features/saved-ayahs/server/get-saved-ayahs";
 import getPreferences from "@/features/settings/server/get-preferences";
+import { getMessages, getTextDirection } from "@/i18n/config";
+import { cn } from "@/lib/utils";
 
 const upcomingFeatures = [
     {
         icon: Target,
-        title: "Memorization goals",
-        description:
-            "Set a daily goal and build a sustainable memorization routine.",
+        key: "memorizationGoals" as const,
     },
     {
         icon: ChartNoAxesCombined,
-        title: "Progress insights",
-        description: "See your reading and memorization progress at a glance.",
+        key: "progressInsights" as const,
     },
 ];
 
@@ -43,37 +43,90 @@ export default async function DashboardPage() {
         redirect("/sign-in");
     }
 
-    const [preferences, readingProgress, savedAyahs] = await Promise.all([
-        getPreferences(),
-        getReadingProgress(),
-        getSavedAyahs(session.user.id),
-    ]);
+    const [preferences, readingProgress, savedAyahs, surahs] =
+        await Promise.all([
+            getPreferences(),
+            getReadingProgress(),
+            getSavedAyahs(session.user.id),
+            getSurahsMeta().catch(() => []),
+        ]);
+    const messages = await getMessages(preferences.language);
+    const t = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Dashboard",
+    });
+    const homeT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Home",
+    });
     const savedNumber =
         preferences.readingMode === "page"
             ? readingProgress.lastPageNumber
             : readingProgress.lastSurahNumber;
     const currentNumber = savedNumber ?? 1;
-    const readingLabel = preferences.readingMode === "page" ? "page" : "surah";
+    const readingLabel = t(
+        preferences.readingMode === "page" ? "reading.page" : "reading.surah",
+    );
     const continueReadingHref = `/quran/${preferences.readingMode}/${currentNumber}`;
-    let readingHeading = `Begin with ${readingLabel} ${currentNumber}.`;
+    let readingHeading = t("reading.beginWith", {
+        type: readingLabel,
+        number: currentNumber,
+    });
 
     if (savedNumber !== null) {
-        readingHeading = `Continue from ${readingLabel} ${currentNumber}.`;
+        readingHeading = t("reading.continueFrom", {
+            type: readingLabel,
+            number: currentNumber,
+        });
 
         if (preferences.readingMode === "surah") {
-            const surahs = await getSurahsMeta().catch(() => []);
-            const surahName = surahs.find(
-                (surah) => surah.number === savedNumber,
-            )?.englishName;
+            const surah = surahs.find((item) => item.number === savedNumber);
+            const surahName = surah
+                ? preferences.language === "ar"
+                    ? surah.name
+                    : surah.englishName
+                : undefined;
 
             readingHeading = surahName
-                ? `Continue with ${surahName}.`
-                : "Continue reading.";
+                ? t("reading.continueWith", { surah: surahName })
+                : t("reading.continueGeneric");
         }
     }
 
+    const localizedSavedAyahs = savedAyahs.map((ayah) => {
+        const surah = surahs.find((item) => item.number === ayah.surahNumber);
+
+        return {
+            ...ayah,
+            surahName:
+                preferences.language === "ar"
+                    ? (surah?.name ?? ayah.surahName)
+                    : (surah?.englishName ?? ayah.surahName),
+        };
+    });
+    const accountLabels = {
+        openMenu: homeT("account.openMenu"),
+        readingSpace: homeT("account.readingSpace"),
+        switchToLight: homeT("account.switchToLight"),
+        switchToDark: homeT("account.switchToDark"),
+        continueReading: homeT("account.continueReading"),
+        dashboard: homeT("account.dashboard"),
+        profile: homeT("account.profile"),
+        settings: homeT("account.settings"),
+        signOut: homeT("account.signOut"),
+    };
+
     return (
-        <main className="relative isolate min-h-dvh overflow-x-clip bg-background">
+        <main
+            lang={preferences.language}
+            dir={getTextDirection(preferences.language)}
+            className={cn(
+                "relative isolate min-h-dvh overflow-x-clip bg-background",
+                preferences.language === "ar" && "arabic-ui",
+            )}
+        >
             <PageBackground />
             <div className="mx-auto max-w-5xl px-4">
                 <StickyAppHeader className="-mx-4 px-4">
@@ -85,27 +138,27 @@ export default async function DashboardPage() {
                             <BookOpen aria-hidden="true" className="size-5" />
                         </span>
                         <span className="text-sm font-semibold tracking-wide">
-                            Quran Reader
+                            {homeT("brand")}
                         </span>
                     </Link>
                     <UserMenu
                         name={session.user.name}
                         image={session.user.image}
                         continueReadingHref={continueReadingHref}
+                        labels={accountLabels}
                     />
                 </StickyAppHeader>
 
                 <section className="py-10 sm:py-14">
                     <div>
                         <p className="text-sm font-semibold tracking-[0.18em] text-primary">
-                            YOUR DASHBOARD
+                            {t("eyebrow")}
                         </p>
                         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                            Welcome back, {session.user.name}.
+                            {t("welcome", { name: session.user.name })}
                         </h1>
                         <p className="mt-4 max-w-2xl leading-7 text-muted-foreground">
-                            Return to the Quran at your own pace. Your reading
-                            space is ready whenever you are.
+                            {t("introduction")}
                         </p>
                     </div>
 
@@ -120,15 +173,15 @@ export default async function DashboardPage() {
                                 </span>
                                 <div>
                                     <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                        Your reading place
+                                        {t("reading.eyebrow")}
                                     </p>
                                     <h2 className="mt-1.5 text-2xl font-semibold tracking-tight">
                                         {readingHeading}
                                     </h2>
                                     <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
                                         {savedNumber
-                                            ? "Pick up exactly where you left off in your preferred reading mode."
-                                            : "Start your reading journey in your preferred reading mode."}
+                                            ? t("reading.resumeDescription")
+                                            : t("reading.startDescription")}
                                     </p>
                                 </div>
                             </div>
@@ -136,13 +189,21 @@ export default async function DashboardPage() {
                                 <Button asChild>
                                     <Link href={continueReadingHref}>
                                         {savedNumber
-                                            ? "Continue reading"
-                                            : "Start reading"}
-                                        <ArrowRight aria-hidden="true" />
+                                            ? t("reading.continueReading")
+                                            : t("reading.startReading")}
+                                        <ArrowRight
+                                            aria-hidden="true"
+                                            className={cn(
+                                                preferences.language === "ar" &&
+                                                    "rotate-180",
+                                            )}
+                                        />
                                     </Link>
                                 </Button>
                                 <Button asChild variant="ghost">
-                                    <Link href="/quran">Browse surahs</Link>
+                                    <Link href="/quran">
+                                        {t("reading.browseSurahs")}
+                                    </Link>
                                 </Button>
                             </div>
                         </div>
@@ -150,7 +211,7 @@ export default async function DashboardPage() {
 
                     <QuranAudioProvider>
                         <SavedAyahsSection
-                            savedAyahs={savedAyahs}
+                            savedAyahs={localizedSavedAyahs}
                             readingMode={preferences.readingMode}
                         />
                     </QuranAudioProvider>
@@ -158,43 +219,40 @@ export default async function DashboardPage() {
                     <section className="mt-16" aria-labelledby="coming-soon">
                         <div className="max-w-xl">
                             <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                On the horizon
+                                {t("upcoming.eyebrow")}
                             </p>
                             <h2
                                 id="coming-soon"
                                 className="mt-2 text-xl font-semibold tracking-tight"
                             >
-                                Your practice will grow with you.
+                                {t("upcoming.title")}
                             </h2>
                             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                These tools are being prepared for your personal
-                                reading journey.
+                                {t("upcoming.description")}
                             </p>
                         </div>
                         <div className="mt-8 grid gap-8 sm:grid-cols-2 sm:gap-12">
-                            {upcomingFeatures.map(
-                                ({ icon: Icon, title, description }) => (
-                                    <article key={title} className="flex gap-4">
-                                        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
-                                            <Icon
-                                                aria-hidden="true"
-                                                className="size-5"
-                                            />
-                                        </span>
-                                        <div>
-                                            <p className="text-[0.65rem] font-semibold tracking-[0.16em] text-primary uppercase">
-                                                In development
-                                            </p>
-                                            <h3 className="mt-1 font-semibold">
-                                                {title}
-                                            </h3>
-                                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                                {description}
-                                            </p>
-                                        </div>
-                                    </article>
-                                ),
-                            )}
+                            {upcomingFeatures.map(({ icon: Icon, key }) => (
+                                <article key={key} className="flex gap-4">
+                                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
+                                        <Icon
+                                            aria-hidden="true"
+                                            className="size-5"
+                                        />
+                                    </span>
+                                    <div>
+                                        <p className="text-[0.65rem] font-semibold tracking-[0.16em] text-primary uppercase">
+                                            {t("upcoming.inDevelopment")}
+                                        </p>
+                                        <h3 className="mt-1 font-semibold">
+                                            {t(`upcoming.${key}.title`)}
+                                        </h3>
+                                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                            {t(`upcoming.${key}.description`)}
+                                        </p>
+                                    </div>
+                                </article>
+                            ))}
                         </div>
                     </section>
                 </section>

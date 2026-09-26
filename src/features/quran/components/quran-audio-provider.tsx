@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
     createContext,
     type ReactNode,
@@ -83,6 +84,7 @@ export default function QuranAudioProvider({
         queue: QuranAudioQueueItem[];
         index: number;
     } | null>(null);
+    const t = useTranslations("Reader");
     const [activeAyahNumber, setActiveAyahNumber] = useState<number | null>(
         null,
     );
@@ -109,11 +111,11 @@ export default function QuranAudioProvider({
             if (latestPlayRequestRef.current !== playRequest) return;
 
             setPlaybackStatus("error");
-            toast.error("Unable to play this recitation", {
+            toast.error(t("audio.unableToPlay"), {
                 id: "quran-audio-error",
             });
         });
-    }, [activeStreams, playRequest]);
+    }, [activeStreams, playRequest, t]);
 
     useEffect(() => {
         if (playbackStatus !== "loading" || playRequest === 0) return;
@@ -121,13 +123,13 @@ export default function QuranAudioProvider({
         const loadingTimeout = window.setTimeout(() => {
             audioRef.current?.pause();
             setPlaybackStatus("error");
-            toast.error("This recitation took too long to load", {
+            toast.error(t("audio.loadTimeout"), {
                 id: "quran-audio-error",
             });
         }, 15000);
 
         return () => window.clearTimeout(loadingTimeout);
-    }, [playbackStatus, playRequest]);
+    }, [playbackStatus, playRequest, t]);
 
     const playAyah = useCallback((item: QuranAudioQueueItem) => {
         shouldPlayRef.current = true;
@@ -178,7 +180,7 @@ export default function QuranAudioProvider({
                         await audio.play();
                     } catch {
                         setPlaybackStatus("error");
-                        toast.error("Unable to play this recitation", {
+                        toast.error(t("audio.unableToPlay"), {
                             id: "quran-audio-error",
                         });
                     }
@@ -201,7 +203,7 @@ export default function QuranAudioProvider({
             playbackQueueRef.current = null;
             playAyah({ ayahNumber, streams });
         },
-        [activeAyahNumber, playAyah, playQueue],
+        [activeAyahNumber, playAyah, playQueue, t],
     );
 
     const setReaderQueue = useCallback(
@@ -247,7 +249,7 @@ export default function QuranAudioProvider({
                         await audio.play();
                     } catch {
                         setPlaybackStatus("error");
-                        toast.error("Unable to play this recitation", {
+                        toast.error(t("audio.unableToPlay"), {
                             id: "quran-audio-error",
                         });
                     }
@@ -260,7 +262,7 @@ export default function QuranAudioProvider({
 
             playQueue(queue);
         },
-        [playQueue],
+        [playQueue, t],
     );
 
     const restartQueue = useCallback(
@@ -338,7 +340,7 @@ export default function QuranAudioProvider({
                 }}
                 onError={() => {
                     setPlaybackStatus("error");
-                    toast.error("Unable to play this recitation", {
+                    toast.error(t("audio.unableToPlay"), {
                         id: "quran-audio-error",
                     });
                 }}

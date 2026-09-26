@@ -1,11 +1,16 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 export default function QuranLoading() {
+    const t = useTranslations("Reader");
     return (
         <div
             aria-busy="true"
             aria-live="polite"
             className="mx-auto h-full max-w-5xl overflow-hidden p-4"
         >
-            <p className="sr-only">Loading Quran content</p>
+            <p className="sr-only">{t("loading")}</p>
             <div className="animate-pulse space-y-8 pt-4">
                 <div className="mx-auto h-10 w-48 rounded-md bg-muted" />
                 <div className="space-y-4 rounded-xl border bg-card/60 p-6">

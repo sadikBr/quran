@@ -11,6 +11,7 @@ import {
     Search,
 } from "lucide-react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,6 +46,12 @@ export default function SavedAyahsSection({
     savedAyahs: SavedAyah[];
     readingMode: ReadingMode;
 }) {
+    const t = useTranslations("Dashboard");
+    const locale = useLocale();
+    const numberFormatter = useMemo(
+        () => new Intl.NumberFormat(locale, { useGrouping: false }),
+        [locale],
+    );
     const [query, setQuery] = useState("");
     const [surahFilter, setSurahFilter] = useState("all");
     const [requestedPage, setRequestedPage] = useState(1);
@@ -96,17 +103,16 @@ export default function SavedAyahsSection({
             <div className="flex flex-col gap-5 border-b border-primary/15 pb-6 sm:flex-row sm:items-end sm:justify-between">
                 <div className="max-w-xl">
                     <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                        Your collection
+                        {t("saved.eyebrow")}
                     </p>
                     <h2
                         id="saved-ayahs-title"
                         className="mt-2 text-2xl font-semibold tracking-tight"
                     >
-                        Saved ayahs
+                        {t("saved.title")}
                     </h2>
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                        Return to bookmarks and private reflections from your
-                        reading.
+                        {t("saved.description")}
                     </p>
                 </div>
 
@@ -116,10 +122,12 @@ export default function SavedAyahsSection({
                             htmlFor="saved-ayah-search"
                             className="relative block sm:w-56"
                         >
-                            <span className="sr-only">Search saved ayahs</span>
+                            <span className="sr-only">
+                                {t("saved.searchLabel")}
+                            </span>
                             <Search
                                 aria-hidden="true"
-                                className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                                className="absolute top-1/2 start-3 size-4 -translate-y-1/2 text-muted-foreground"
                             />
                             <Input
                                 id="saved-ayah-search"
@@ -128,8 +136,8 @@ export default function SavedAyahsSection({
                                     setQuery(event.target.value);
                                     setRequestedPage(1);
                                 }}
-                                placeholder="Search saved ayahs…"
-                                className="border-0 bg-muted/55 pl-9 shadow-none"
+                                placeholder={t("saved.searchPlaceholder")}
+                                className="border-0 bg-muted/55 ps-9 shadow-none"
                             />
                         </label>
                         <Combobox
@@ -147,7 +155,7 @@ export default function SavedAyahsSection({
                                 setRequestedPage(1);
                             }}
                             itemToStringLabel={(surah) =>
-                                `${surah.number}. ${surah.name}`
+                                `${numberFormatter.format(surah.number)}. ${surah.name}`
                             }
                             itemToStringValue={(surah) =>
                                 surah.number.toString()
@@ -158,14 +166,17 @@ export default function SavedAyahsSection({
                             autoHighlight
                         >
                             <ComboboxInput
-                                aria-label="Filter by surah"
-                                placeholder="All surahs"
+                                aria-label={t("saved.filterLabel")}
+                                placeholder={t("saved.allSurahs")}
                                 showClear
                                 className="w-full border-0 bg-muted/55 shadow-none sm:w-48"
                             />
-                            <ComboboxContent className="w-[min(20rem,calc(100vw-2rem))] min-w-0 rounded-xl bg-popover/98 p-1 shadow-xl ring-primary/10 backdrop-blur-md">
+                            <ComboboxContent
+                                dir={locale === "ar" ? "rtl" : "ltr"}
+                                className="w-[min(20rem,calc(100vw-2rem))] min-w-0 rounded-xl bg-popover/98 p-1 shadow-xl ring-primary/10 backdrop-blur-md"
+                            >
                                 <ComboboxEmpty>
-                                    No matching saved surahs.
+                                    {t("saved.noMatchingSurahs")}
                                 </ComboboxEmpty>
                                 <ComboboxList className="max-h-72 p-1">
                                     {(surah: {
@@ -175,9 +186,12 @@ export default function SavedAyahsSection({
                                         <ComboboxItem
                                             key={surah.number}
                                             value={surah}
-                                            className="rounded-lg px-3 py-2.5 pr-9 data-highlighted:bg-primary/8"
+                                            className="rounded-lg px-3 py-2.5 pe-9 data-highlighted:bg-primary/8"
                                         >
-                                            {surah.number}. {surah.name}
+                                            {numberFormatter.format(
+                                                surah.number,
+                                            )}
+                                            . {surah.name}
                                         </ComboboxItem>
                                     )}
                                 </ComboboxList>
@@ -193,16 +207,17 @@ export default function SavedAyahsSection({
                         <BookOpen aria-hidden="true" className="size-5" />
                     </span>
                     <div>
-                        <h3 className="font-semibold">Nothing saved yet</h3>
+                        <h3 className="font-semibold">
+                            {t("saved.emptyTitle")}
+                        </h3>
                         <p className="mt-1 max-w-lg text-sm leading-6 text-muted-foreground">
-                            Open an ayah’s actions while reading to bookmark it
-                            or write a private reflection.
+                            {t("saved.emptyDescription")}
                         </p>
                     </div>
                 </div>
             ) : filteredAyahs.length === 0 ? (
                 <p className="py-9 text-sm text-muted-foreground">
-                    No saved ayahs match this search.
+                    {t("saved.noSearchResults")}
                 </p>
             ) : (
                 <div>
@@ -229,11 +244,15 @@ export default function SavedAyahsSection({
                                                 className="size-1 rounded-full bg-primary/30"
                                             />
                                             <span className="shrink-0 text-xs text-muted-foreground">
-                                                Ayah {ayah.ayahNumber}
+                                                {t("saved.ayah", {
+                                                    number: ayah.ayahNumber,
+                                                })}
                                             </span>
                                             {ayah.isBookmarked && (
                                                 <span
-                                                    title="Bookmarked"
+                                                    title={t(
+                                                        "saved.bookmarked",
+                                                    )}
                                                     className="text-primary"
                                                 >
                                                     <Bookmark
@@ -241,13 +260,15 @@ export default function SavedAyahsSection({
                                                         className="size-3 fill-current"
                                                     />
                                                     <span className="sr-only">
-                                                        Bookmarked
+                                                        {t("saved.bookmarked")}
                                                     </span>
                                                 </span>
                                             )}
                                             {ayah.reflection && (
                                                 <span
-                                                    title="Has a reflection"
+                                                    title={t(
+                                                        "saved.hasReflection",
+                                                    )}
                                                     className="text-accent-foreground"
                                                 >
                                                     <NotebookPen
@@ -255,7 +276,9 @@ export default function SavedAyahsSection({
                                                         className="size-3.5"
                                                     />
                                                     <span className="sr-only">
-                                                        Has a reflection
+                                                        {t(
+                                                            "saved.hasReflection",
+                                                        )}
                                                     </span>
                                                 </span>
                                             )}
@@ -268,8 +291,15 @@ export default function SavedAyahsSection({
                                                 className="text-primary hover:text-primary"
                                             >
                                                 <Link href={href}>
-                                                    Open in reader
-                                                    <ArrowRight aria-hidden="true" />
+                                                    {t("saved.openReader")}
+                                                    <ArrowRight
+                                                        aria-hidden="true"
+                                                        className={
+                                                            locale === "ar"
+                                                                ? "rotate-180"
+                                                                : undefined
+                                                        }
+                                                    />
                                                 </Link>
                                             </Button>
                                             <Button
@@ -280,12 +310,18 @@ export default function SavedAyahsSection({
                                                     setActiveAyah(ayah)
                                                 }
                                                 className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                                                title="Ayah actions"
-                                                aria-label={`Open actions for ${ayah.surahName}, ayah ${ayah.ayahNumber}`}
+                                                title={t("saved.actionTitle")}
+                                                aria-label={t(
+                                                    "saved.openActions",
+                                                    {
+                                                        surah: ayah.surahName,
+                                                        number: ayah.ayahNumber,
+                                                    },
+                                                )}
                                             >
                                                 <Ellipsis aria-hidden="true" />
                                                 <span className="sr-only">
-                                                    Actions
+                                                    {t("saved.actions")}
                                                 </span>
                                             </Button>
                                         </div>
@@ -303,7 +339,7 @@ export default function SavedAyahsSection({
                                         </p>
                                     </Link>
                                     {ayah.reflection && (
-                                        <div className="mt-4 border-l-2 border-primary/25 pl-4">
+                                        <div className="mt-4 border-s-2 border-primary/25 ps-4">
                                             <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
                                                 {ayah.reflection}
                                             </p>
@@ -316,13 +352,14 @@ export default function SavedAyahsSection({
 
                     <div className="mt-3 flex flex-col gap-3 border-t border-primary/15 pt-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
                         <p aria-live="polite">
-                            Showing {firstVisibleIndex + 1}–
-                            {Math.min(
-                                firstVisibleIndex + AYAH_ITEMS_PER_PAGE,
-                                filteredAyahs.length,
-                            )}{" "}
-                            of {filteredAyahs.length} saved{" "}
-                            {filteredAyahs.length === 1 ? "ayah" : "ayahs"}
+                            {t("saved.summary", {
+                                start: firstVisibleIndex + 1,
+                                end: Math.min(
+                                    firstVisibleIndex + AYAH_ITEMS_PER_PAGE,
+                                    filteredAyahs.length,
+                                ),
+                                count: filteredAyahs.length,
+                            })}
                         </p>
                         {pageCount > 1 && (
                             <div className="flex items-center gap-1">
@@ -335,11 +372,21 @@ export default function SavedAyahsSection({
                                         setRequestedPage(currentPage - 1)
                                     }
                                 >
-                                    <ChevronLeft aria-hidden="true" />
-                                    Previous
+                                    <ChevronLeft
+                                        aria-hidden="true"
+                                        className={
+                                            locale === "ar"
+                                                ? "rotate-180"
+                                                : undefined
+                                        }
+                                    />
+                                    {t("saved.previous")}
                                 </Button>
                                 <span className="px-2 font-medium text-foreground">
-                                    {currentPage} / {pageCount}
+                                    {t("saved.pageIndicator", {
+                                        current: currentPage,
+                                        total: pageCount,
+                                    })}
                                 </span>
                                 <Button
                                     type="button"
@@ -350,8 +397,15 @@ export default function SavedAyahsSection({
                                         setRequestedPage(currentPage + 1)
                                     }
                                 >
-                                    Next
-                                    <ChevronRight aria-hidden="true" />
+                                    {t("saved.next")}
+                                    <ChevronRight
+                                        aria-hidden="true"
+                                        className={
+                                            locale === "ar"
+                                                ? "rotate-180"
+                                                : undefined
+                                        }
+                                    />
                                 </Button>
                             </div>
                         )}

@@ -1,12 +1,19 @@
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
+    const locale = useLocale();
+    const t = useTranslations("Common");
     return (
-        <div className="relative isolate min-h-dvh overflow-x-clip bg-background">
+        <div
+            lang={locale}
+            dir={locale === "ar" ? "rtl" : "ltr"}
+            className="relative isolate min-h-dvh overflow-x-clip bg-background"
+        >
             <PageBackground />
             <StickyAppHeader className="px-4">
                 <div className="mx-auto flex h-20 w-full max-w-5xl items-center">
@@ -17,7 +24,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                         <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform group-hover:-rotate-3">
                             <BookOpen aria-hidden="true" className="size-5" />
                         </span>
-                        Quran Reader
+                        {t("brand")}
                     </Link>
                 </div>
             </StickyAppHeader>

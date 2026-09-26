@@ -1,0 +1,28 @@
+{
+    "Common": {
+        "brand": "Quran Reader",
+        "metadata": {
+            "title": "Read Quran & Track Your Memorization",
+            "description": "Read the Quran, listen to recitations, and keep your place."
+        },
+        "loading": { "page": "Loading your page…", "label": "Loading" },
+        "error": {
+            "eyebrow": "SOMETHING WENT WRONG",
+            "title": "We couldn’t load this page",
+            "description": "Please check your connection and try again. If the problem continues, the Quran data service may be temporarily unavailable.",
+            "retry": "Try again"
+        },
+        "notFound": {
+            "code": "404",
+            "title": "Page not found",
+            "description": "The page you are looking for does not exist or may have moved. Choose a reading option below to continue.",
+            "browse": "Browse surahs",
+            "openFirstPage": "Open page 1"
+        },
+        "feedback": {
+            "preferencesUpdateFailed": "We couldn’t save your preferences. Please try again.",
+            "bookmarkUpdateFailed": "We couldn’t update this bookmark. Please try again.",
+            "reflectionSaveFailed": "We couldn’t save your reflection. Please try again."
+        }
+    }
+}

@@ -1,5 +1,8 @@
+"use client";
+
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
 import type { SurahType } from "../types";
@@ -11,6 +14,12 @@ export default function SurahFrame({
     surah: SurahType;
     href?: string;
 }) {
+    const t = useTranslations("Reader");
+    const locale = useLocale();
+    const isArabic = locale === "ar";
+    const numberFormatter = new Intl.NumberFormat(locale, {
+        useGrouping: false,
+    });
     const isMeccan = surah.revelationType === "Meccan";
     const backgroundImage = isMeccan
         ? "/meccan-surah-background-v2.webp"
@@ -26,7 +35,7 @@ export default function SurahFrame({
                         : "bg-accent text-accent-foreground",
                 )}
             >
-                {surah.number}
+                {numberFormatter.format(surah.number)}
             </span>
 
             <div className="min-w-0 flex-1 text-center">
@@ -34,24 +43,32 @@ export default function SurahFrame({
                     {getArabicNumber(surah.number)}
                 </h2>
                 <p className="mt-2 truncate text-sm font-semibold text-foreground">
-                    {surah.englishName}
+                    {isArabic ? surah.name : surah.englishName}
                 </p>
                 <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                    {surah.englishNameTranslation}
+                    {isArabic
+                        ? t(
+                              surah.revelationType === "Meccan"
+                                  ? "surah.meccan"
+                                  : "surah.medinan",
+                          )
+                        : surah.englishNameTranslation}
                 </p>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2 text-right">
+            <div className="flex shrink-0 items-center gap-2 text-end">
                 <div>
                     <p className="text-sm font-semibold text-foreground">
-                        {surah.numberOfAyahs}
+                        {numberFormatter.format(surah.numberOfAyahs)}
                     </p>
-                    <p className="text-xs text-muted-foreground">Ayahs</p>
+                    <p className="text-xs text-muted-foreground">
+                        {t("surah.ayahs")}
+                    </p>
                 </div>
                 {href && (
                     <ChevronRight
                         aria-hidden="true"
-                        className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+                        className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
                     />
                 )}
             </div>

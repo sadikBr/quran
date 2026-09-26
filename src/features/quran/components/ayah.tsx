@@ -2,6 +2,7 @@
 
 import { Ellipsis, LoaderCircle, Pause, Play, RefreshCcw } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ export default function Ayah({
     highlightEnabled?: boolean;
 }) {
     const ayahRef = useRef<HTMLSpanElement>(null);
+    const t = useTranslations("Reader");
     const { activeAyahNumber, playbackStatus } = useQuranAudio();
     const playbackAyahNumber = ayah.audioNumber ?? ayah.number;
     const isActiveAyah =
@@ -80,7 +82,9 @@ export default function Ayah({
                     href={actionsHref}
                     scroll={false}
                     className="frame relative inline-block rounded-sm text-sidebar-accent transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    aria-label={`Open actions for ayah ${ayah.numberInSurah}`}
+                    aria-label={t("ayah.openActions", {
+                        number: ayah.numberInSurah,
+                    })}
                 >
                     <span className="transition-opacity duration-300 ease-out sm:group-hover/ayah:opacity-0 sm:group-focus-within/ayah:opacity-0">
                         {getArabicNumber(ayah.numberInSurah)}
@@ -98,6 +102,7 @@ export default function Ayah({
 }
 
 function AyahPlayer({ ayah }: { ayah: AyahType }) {
+    const t = useTranslations("Reader");
     const streams = getAyahAudioStreams(ayah);
     const playbackAyahNumber = ayah.audioNumber ?? ayah.number;
     const {
@@ -117,10 +122,10 @@ function AyahPlayer({ ayah }: { ayah: AyahType }) {
     const hasPlaybackError = isCurrentAyah && playbackStatus === "error";
     const progressOffset = 75.4 * (1 - Math.min(Math.max(progress, 0), 1));
     const actionLabel = hasPlaybackError
-        ? "Retry"
+        ? t("ayah.retry")
         : isPlayingThisAyah
-          ? "Pause"
-          : "Play";
+          ? t("ayah.pause")
+          : t("ayah.play");
 
     return (
         <>
@@ -160,7 +165,10 @@ function AyahPlayer({ ayah }: { ayah: AyahType }) {
                         hasPlaybackError &&
                             "border-destructive/40 bg-destructive/8 text-destructive hover:border-destructive hover:bg-destructive hover:text-destructive-foreground",
                     )}
-                    aria-label={`${actionLabel} ayah ${ayah.numberInSurah}`}
+                    aria-label={t("ayah.playerLabel", {
+                        action: actionLabel,
+                        number: ayah.numberInSurah,
+                    })}
                 >
                     {isLoadingThisAyah ? (
                         <LoaderCircle
@@ -176,7 +184,7 @@ function AyahPlayer({ ayah }: { ayah: AyahType }) {
                         />
                     ) : (
                         <Play
-                            className="ml-px size-3 fill-current"
+                            className="ms-px size-3 fill-current"
                             aria-hidden="true"
                         />
                     )}

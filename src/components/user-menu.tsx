@@ -10,6 +10,7 @@ import {
     UserRound,
 } from "lucide-react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -41,16 +42,44 @@ function getInitials(name: string) {
     return initials.toUpperCase() || "U";
 }
 
+export interface UserMenuLabels {
+    openMenu: string;
+    readingSpace: string;
+    switchToLight: string;
+    switchToDark: string;
+    continueReading: string;
+    dashboard: string;
+    profile: string;
+    settings: string;
+    signOut: string;
+}
+
+const DEFAULT_LABELS: UserMenuLabels = {
+    openMenu: "Open account menu",
+    readingSpace: "Your reading space",
+    switchToLight: "Switch to light theme",
+    switchToDark: "Switch to dark theme",
+    continueReading: "Continue reading",
+    dashboard: "Dashboard",
+    profile: "Profile",
+    settings: "Settings",
+    signOut: "Sign out",
+};
+
 export default function UserMenu({
     name,
     image,
     continueReadingHref,
+    labels = DEFAULT_LABELS,
 }: {
     name: string;
     image?: string | null;
     continueReadingHref?: string;
+    labels?: UserMenuLabels;
 }) {
     const { resolvedTheme, setTheme } = useTheme();
+    const locale = useLocale();
+    const commonT = useTranslations("Common");
     const { setPreferences, ...preferences } = useSettings();
     const [selectedTheme, setSelectedTheme] = useState(preferences.theme);
 
@@ -65,7 +94,7 @@ export default function UserMenu({
         if (!result.success) {
             setSelectedTheme(previousTheme);
             setTheme(previousTheme);
-            toast.error(result.message);
+            toast.error(commonT("feedback.preferencesUpdateFailed"));
             return;
         }
 
@@ -91,12 +120,12 @@ export default function UserMenu({
     }
 
     return (
-        <DropdownMenu>
+        <DropdownMenu dir={locale === "ar" ? "rtl" : "ltr"}>
             <DropdownMenuTrigger asChild>
                 <button
                     type="button"
                     className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    aria-label="Open account menu"
+                    aria-label={labels.openMenu}
                 >
                     <Avatar className="size-10 border border-primary/20">
                         {image && <AvatarImage src={image} alt="" />}
@@ -113,14 +142,18 @@ export default function UserMenu({
                             {name}
                         </p>
                         <p className="mt-0.5 text-xs font-normal text-muted-foreground">
-                            Your reading space
+                            {labels.readingSpace}
                         </p>
                     </div>
                     <button
                         type="button"
                         onClick={toggleTheme}
                         className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-muted/65 text-muted-foreground transition-colors hover:bg-primary/12 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        aria-label={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} theme`}
+                        aria-label={
+                            resolvedTheme === "dark"
+                                ? labels.switchToLight
+                                : labels.switchToDark
+                        }
                     >
                         {resolvedTheme === "dark" ? (
                             <Sun aria-hidden="true" className="size-4" />
@@ -141,7 +174,7 @@ export default function UserMenu({
                                     aria-hidden="true"
                                     className="text-primary-foreground"
                                 />
-                                Continue reading
+                                {labels.continueReading}
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="my-0.5 opacity-0" />
@@ -150,25 +183,25 @@ export default function UserMenu({
                 <DropdownMenuItem asChild>
                     <Link href="/dashboard">
                         <LayoutDashboard aria-hidden="true" />
-                        Dashboard
+                        {labels.dashboard}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                     <Link href="/profile">
                         <UserRound aria-hidden="true" />
-                        Profile
+                        {labels.profile}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                     <Link href="/settings">
                         <Settings aria-hidden="true" />
-                        Settings
+                        {labels.settings}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive" onSelect={signOut}>
                     <LogOut aria-hidden="true" />
-                    Sign out
+                    {labels.signOut}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

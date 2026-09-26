@@ -88,6 +88,7 @@ export interface Reciter {
     id: string;
     host: HostType;
     name: string;
+    arabicName?: string;
     bitrate_kbps?: number;
     scope: "ayah" | "surah";
     url: string;

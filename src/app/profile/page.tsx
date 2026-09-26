@@ -2,6 +2,7 @@ import { BookOpen, UserRound } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import ProfileForm from "@/components/profile-form";
 import StickyAppHeader from "@/components/sticky-app-header";
@@ -9,6 +10,8 @@ import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
+import { getMessages, getTextDirection } from "@/i18n/config";
+import { cn } from "@/lib/utils";
 
 export default async function ProfilePage() {
     const session = await auth.api.getSession({
@@ -23,6 +26,32 @@ export default async function ProfilePage() {
         getPreferences(),
         getReadingProgress(),
     ]);
+    const messages = await getMessages(preferences.language);
+    const t = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Profile",
+    });
+    const homeT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Home",
+    });
+    const accountLabels = {
+        openMenu: homeT("account.openMenu"),
+        readingSpace: homeT("account.readingSpace"),
+        switchToLight: homeT("account.switchToLight"),
+        switchToDark: homeT("account.switchToDark"),
+        continueReading: homeT("account.continueReading"),
+        dashboard: homeT("account.dashboard"),
+        profile: homeT("account.profile"),
+        settings: homeT("account.settings"),
+        signOut: homeT("account.signOut"),
+    };
+    const memberSince = new Intl.DateTimeFormat(preferences.language, {
+        month: "long",
+        year: "numeric",
+    }).format(session.user.createdAt);
     const savedNumber =
         preferences.readingMode === "page"
             ? readingProgress.lastPageNumber
@@ -30,7 +59,14 @@ export default async function ProfilePage() {
     const continueReadingHref = `/quran/${preferences.readingMode}/${savedNumber ?? 1}`;
 
     return (
-        <main className="relative isolate min-h-dvh overflow-x-clip bg-background">
+        <main
+            lang={preferences.language}
+            dir={getTextDirection(preferences.language)}
+            className={cn(
+                "relative isolate min-h-dvh overflow-x-clip bg-background",
+                preferences.language === "ar" && "arabic-ui",
+            )}
+        >
             <PageBackground />
             <div className="mx-auto max-w-5xl px-4">
                 <StickyAppHeader className="-mx-4 px-4">
@@ -41,12 +77,13 @@ export default async function ProfilePage() {
                         <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:-rotate-3">
                             <BookOpen aria-hidden="true" className="size-5" />
                         </span>
-                        Quran Reader
+                        {homeT("brand")}
                     </Link>
                     <UserMenu
                         name={session.user.name}
                         image={session.user.image}
                         continueReadingHref={continueReadingHref}
+                        labels={accountLabels}
                     />
                 </StickyAppHeader>
 
@@ -55,24 +92,17 @@ export default async function ProfilePage() {
                         <UserRound aria-hidden="true" className="size-5" />
                     </span>
                     <p className="mt-6 text-xs font-semibold tracking-[0.2em] text-primary">
-                        YOUR PROFILE
+                        {t("page.eyebrow")}
                     </p>
                     <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                        Your account details.
+                        {t("page.title")}
                     </h1>
                     <p className="mt-4 max-w-xl leading-7 text-muted-foreground">
-                        Update the name and image used across your personal
-                        reading space.
+                        {t("page.description")}
                     </p>
                     <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
                         <span>
-                            Member since{" "}
-                            <span className="font-medium text-foreground">
-                                {new Intl.DateTimeFormat(undefined, {
-                                    month: "long",
-                                    year: "numeric",
-                                }).format(session.user.createdAt)}
-                            </span>
+                            {t("page.memberSince", { date: memberSince })}
                         </span>
                         <span
                             className={
@@ -82,8 +112,8 @@ export default async function ProfilePage() {
                             }
                         >
                             {session.user.emailVerified
-                                ? "Email verified"
-                                : "Email not verified"}
+                                ? t("page.emailVerified")
+                                : t("page.emailNotVerified")}
                         </span>
                     </div>
                     <ProfileForm

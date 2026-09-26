@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import {
     Combobox,
     ComboboxCollection,
@@ -22,8 +23,10 @@ interface EditionComboboxProps {
     onValueChange: (value: string) => void;
     disabled?: boolean;
     placeholder: string;
+    emptyMessage?: string;
     groupBy?: (edition: Edition) => string;
     getBadge?: (edition: Edition) => string | undefined;
+    getLabel?: (edition: Edition) => string;
     className?: string;
 }
 
@@ -35,10 +38,13 @@ export default function EditionCombobox({
     onValueChange,
     disabled = false,
     placeholder,
+    emptyMessage = "No matching editions found.",
     groupBy,
     getBadge,
+    getLabel: getCustomLabel,
     className,
 }: EditionComboboxProps) {
+    const locale = useLocale();
     const groupedEditions = new Map<string, Edition[]>();
 
     for (const edition of editions) {
@@ -57,7 +63,11 @@ export default function EditionCombobox({
         editions.find((edition) => edition.identifier === value) ?? null;
 
     function getLabel(edition: Edition) {
-        return edition.englishName || edition.name;
+        if (getCustomLabel) return getCustomLabel(edition);
+
+        return locale === "ar"
+            ? edition.name || edition.englishName
+            : edition.englishName || edition.name;
     }
 
     return (
@@ -81,9 +91,12 @@ export default function EditionCombobox({
                 placeholder={placeholder}
                 className={className}
             />
-            <ComboboxContent className="w-[min(28rem,calc(100vw-2rem))] min-w-0 rounded-xl bg-popover/98 p-1 shadow-xl ring-primary/10 backdrop-blur-md">
+            <ComboboxContent
+                dir={locale === "ar" ? "rtl" : "ltr"}
+                className="w-[min(28rem,calc(100vw-2rem))] min-w-0 rounded-xl bg-popover/98 p-1 shadow-xl ring-primary/10 backdrop-blur-md"
+            >
                 <ComboboxEmpty className="px-4 py-8">
-                    No matching editions found.
+                    {emptyMessage}
                 </ComboboxEmpty>
                 <ComboboxList className="max-h-80 p-1">
                     {(
@@ -106,13 +119,13 @@ export default function EditionCombobox({
                                             <ComboboxItem
                                                 key={edition.identifier}
                                                 value={edition}
-                                                className="min-h-10 rounded-lg px-3 py-2 pr-9 data-highlighted:bg-primary/8"
+                                                className="min-h-10 rounded-lg px-3 py-2 pe-9 data-highlighted:bg-primary/8"
                                             >
                                                 <span className="min-w-0 flex-1 leading-5">
                                                     {getLabel(edition)}
                                                 </span>
                                                 {badge && (
-                                                    <span className="mr-1 shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[0.6rem] font-semibold tracking-wide text-primary uppercase">
+                                                    <span className="me-1 shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[0.6rem] font-semibold tracking-wide text-primary uppercase">
                                                         {badge}
                                                     </span>
                                                 )}

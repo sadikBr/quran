@@ -3,6 +3,7 @@
 import { ArrowLeft, ArrowRight, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,12 +23,10 @@ import type { SurahType } from "../types";
 
 const navigationDetails = {
     page: {
-        label: "Page",
         min: QuranInfo.minPageNumber,
         max: QuranInfo.maxPageNumber,
     },
     surah: {
-        label: "Surah",
         min: QuranInfo.minSurahNumber,
         max: QuranInfo.maxSurahNumber,
     },
@@ -77,7 +76,12 @@ export default function QuranPageNavigation({
     const isNavigatingRef = useRef(false);
     const lastTouchAt = useRef(0);
     const router = useRouter();
-    const { label, min, max } = navigationDetails[readingMode];
+    const t = useTranslations("Reader");
+    const locale = useLocale();
+    const { min, max } = navigationDetails[readingMode];
+    const label = t(
+        readingMode === "page" ? "navigation.page" : "navigation.surah",
+    );
 
     useEffect(() => {
         setInputValue(currentNumber.toString());
@@ -429,13 +433,16 @@ export default function QuranPageNavigation({
     return (
         <nav
             className="relative shrink-0 border-t border-primary/15 bg-background/95 backdrop-blur-sm"
-            aria-label={`${label} navigation`}
+            aria-label={t("navigation.navigation", { type: label })}
             aria-busy={isNavigating}
         >
             {isNavigating && (
                 <span className="absolute inset-x-0 top-0 h-px animate-pulse bg-primary" />
             )}
-            <div className="mx-auto flex h-18 max-w-5xl items-center justify-between gap-3 px-4 sm:h-20">
+            <div
+                dir="ltr"
+                className="mx-auto flex h-18 max-w-5xl items-center justify-between gap-3 px-4 sm:h-20"
+            >
                 {currentNumber >= max ? (
                     <Button
                         disabled
@@ -443,7 +450,7 @@ export default function QuranPageNavigation({
                         className="min-w-25 justify-start text-muted-foreground"
                     >
                         <ArrowLeft aria-hidden="true" />
-                        Next
+                        {t("navigation.next")}
                     </Button>
                 ) : (
                     <Button
@@ -468,7 +475,7 @@ export default function QuranPageNavigation({
                             }}
                         >
                             <ArrowLeft aria-hidden="true" />
-                            Next
+                            {t("navigation.next")}
                         </Link>
                     </Button>
                 )}
@@ -503,12 +510,14 @@ export default function QuranPageNavigation({
                         autoHighlight
                     >
                         <ComboboxTrigger
-                            aria-label="Go to surah"
+                            aria-label={t("navigation.goTo", {
+                                type: t("navigation.surah"),
+                            })}
                             className="flex h-11 w-52 items-center rounded-lg border border-primary/15 bg-card/75 px-3 shadow-xs hover:bg-card sm:w-64"
                         >
                             <span className="flex min-w-0 flex-1 items-center gap-3">
                                 <span className="hidden text-xs font-semibold tracking-[0.12em] text-primary uppercase sm:block">
-                                    Surah
+                                    {t("navigation.surah")}
                                 </span>
                                 <span
                                     aria-hidden="true"
@@ -523,27 +532,28 @@ export default function QuranPageNavigation({
                             </span>
                         </ComboboxTrigger>
                         <ComboboxContent
+                            dir={locale === "ar" ? "rtl" : "ltr"}
                             side="top"
                             align="center"
-                            aria-label="Select a surah"
+                            aria-label={t("navigation.selectSurah")}
                             className="w-[min(22rem,calc(100vw-2rem))] min-w-0 rounded-xl bg-popover/98 p-1 shadow-xl ring-primary/10 backdrop-blur-md"
                         >
                             <ComboboxInput
-                                placeholder="Search surahs…"
+                                placeholder={t("navigation.searchSurahs")}
                                 className="w-auto"
                                 showTrigger={false}
                             />
                             <ComboboxEmpty>
-                                No matching surahs found.
+                                {t("navigation.noSurahs")}
                             </ComboboxEmpty>
                             <ComboboxList className="max-h-72 p-1">
                                 {(surah: SurahType) => (
                                     <ComboboxItem
                                         key={surah.number}
                                         value={surah}
-                                        className="rounded-lg px-2 py-2.5 pr-9 data-highlighted:bg-primary/8 data-highlighted:text-foreground"
+                                        className="rounded-lg px-2 py-2.5 pe-9 data-highlighted:bg-primary/8 data-highlighted:text-foreground"
                                     >
-                                        <div className="flex min-w-0 items-center gap-3 pr-2">
+                                        <div className="flex min-w-0 items-center gap-3 pe-2">
                                             <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[0.65rem] font-semibold text-primary">
                                                 {surah.number}
                                             </span>
@@ -590,7 +600,7 @@ export default function QuranPageNavigation({
                                 )
                             }
                             className="h-8 w-11 rounded-md border-0 bg-muted px-1 text-center text-sm font-semibold shadow-none focus-visible:bg-muted focus-visible:ring-0 sm:w-12"
-                            aria-label={`Go to ${label.toLowerCase()}`}
+                            aria-label={t("navigation.goTo", { type: label })}
                         />
                         <span className="px-1.5 text-xs text-muted-foreground">
                             {isNavigating ? (
@@ -610,7 +620,7 @@ export default function QuranPageNavigation({
                         variant="ghost"
                         className="min-w-25 justify-end text-muted-foreground"
                     >
-                        Previous
+                        {t("navigation.previous")}
                         <ArrowRight aria-hidden="true" />
                     </Button>
                 ) : (
@@ -635,7 +645,7 @@ export default function QuranPageNavigation({
                                 navigateTo(currentNumber - 1);
                             }}
                         >
-                            Previous
+                            {t("navigation.previous")}
                             <ArrowRight aria-hidden="true" />
                         </Link>
                     </Button>

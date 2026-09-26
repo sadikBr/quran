@@ -9,6 +9,7 @@ import {
     Smartphone,
     UserRound,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -36,38 +37,11 @@ type UserSession = {
     createdAt: Date | string;
 };
 
-function formatSessionDate(date: Date | string) {
-    return new Intl.DateTimeFormat(undefined, {
+function formatSessionDate(date: Date | string, locale: string) {
+    return new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
         timeStyle: "short",
     }).format(new Date(date));
-}
-
-function getSessionDevice(userAgent?: string | null) {
-    if (!userAgent) return "Unknown device";
-
-    const browser = userAgent.includes("Firefox")
-        ? "Firefox"
-        : userAgent.includes("Edg")
-          ? "Microsoft Edge"
-          : userAgent.includes("Chrome")
-            ? "Chrome"
-            : userAgent.includes("Safari")
-              ? "Safari"
-              : "Web browser";
-    const operatingSystem = userAgent.includes("Windows")
-        ? "Windows"
-        : userAgent.includes("Mac OS")
-          ? "macOS"
-          : userAgent.includes("Android")
-            ? "Android"
-            : userAgent.includes("iPhone") || userAgent.includes("iPad")
-              ? "iOS"
-              : userAgent.includes("Linux")
-                ? "Linux"
-                : null;
-
-    return operatingSystem ? `${browser} on ${operatingSystem}` : browser;
 }
 
 export default function ProfileForm({
@@ -81,6 +55,8 @@ export default function ProfileForm({
     initialEmail: string;
     currentSessionToken: string;
 }) {
+    const t = useTranslations("Profile");
+    const locale = useLocale();
     const [name, setName] = useState(initialName);
     const [image, setImage] = useState(initialImage ?? "");
     const [email, setEmail] = useState(initialEmail);
@@ -97,12 +73,44 @@ export default function ProfileForm({
     const [revokingToken, setRevokingToken] = useState<string | null>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
 
+    function getSessionDevice(userAgent?: string | null) {
+        if (!userAgent) return t("devices.unknown");
+
+        const browser = userAgent.includes("Firefox")
+            ? "Firefox"
+            : userAgent.includes("Edg")
+              ? "Microsoft Edge"
+              : userAgent.includes("Chrome")
+                ? "Chrome"
+                : userAgent.includes("Safari")
+                  ? "Safari"
+                  : t("devices.webBrowser");
+        const operatingSystem = userAgent.includes("Windows")
+            ? "Windows"
+            : userAgent.includes("Mac OS")
+              ? "macOS"
+              : userAgent.includes("Android")
+                ? "Android"
+                : userAgent.includes("iPhone") || userAgent.includes("iPad")
+                  ? "iOS"
+                  : userAgent.includes("Linux")
+                    ? "Linux"
+                    : null;
+
+        return operatingSystem
+            ? t("devices.browserOnSystem", {
+                  browser,
+                  system: operatingSystem,
+              })
+            : browser;
+    }
+
     useEffect(() => {
         async function loadSessions() {
             const { data, error } = await authClient.listSessions();
 
             if (error) {
-                toast.error("We could not load your active sessions");
+                toast.error(t("feedback.sessionsLoadFailed"));
             } else {
                 setSessions((data ?? []) as UserSession[]);
             }
@@ -111,14 +119,14 @@ export default function ProfileForm({
         }
 
         void loadSessions();
-    }, []);
+    }, [t]);
 
     async function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const trimmedName = name.trim();
 
         if (!trimmedName) {
-            toast.error("Please enter your name");
+            toast.error(t("feedback.nameRequired"));
             return;
         }
 
@@ -132,11 +140,11 @@ export default function ProfileForm({
         setIsSavingProfile(false);
 
         if (error) {
-            toast.error(error.message || "We could not update your profile");
+            toast.error(t("feedback.profileUpdateFailed"));
             return;
         }
 
-        toast.success("Profile updated");
+        toast.success(t("feedback.profileUpdated"));
     }
 
     function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -145,12 +153,12 @@ export default function ProfileForm({
         if (!file) return;
 
         if (!file.type.startsWith("image/")) {
-            toast.error("Please choose an image file");
+            toast.error(t("feedback.imageFileRequired"));
             return;
         }
 
         if (file.size > 1_000_000) {
-            toast.error("Please choose an image smaller than 1 MB");
+            toast.error(t("feedback.imageTooLarge"));
             return;
         }
 
@@ -162,7 +170,7 @@ export default function ProfileForm({
             }
         };
         reader.onerror = () => {
-            toast.error("We could not read that image");
+            toast.error(t("feedback.imageReadFailed"));
         };
         reader.readAsDataURL(file);
     }
@@ -172,7 +180,7 @@ export default function ProfileForm({
         const newEmail = email.trim().toLowerCase();
 
         if (newEmail === initialEmail) {
-            toast.message("That is already your current email address");
+            toast.message(t("feedback.emailUnchanged"));
             return;
         }
 
@@ -181,18 +189,18 @@ export default function ProfileForm({
         setIsSavingEmail(false);
 
         if (error) {
-            toast.error(error.message || "We could not update your email");
+            toast.error(t("feedback.emailUpdateFailed"));
             return;
         }
 
-        toast.success("Email address updated");
+        toast.success(t("feedback.emailUpdated"));
     }
 
     async function handlePasswordSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
         if (newPassword.length < 8) {
-            toast.error("Your new password must contain at least 8 characters");
+            toast.error(t("feedback.passwordTooShort"));
             return;
         }
 
@@ -205,20 +213,20 @@ export default function ProfileForm({
         setIsSavingPassword(false);
 
         if (error) {
-            toast.error(error.message || "We could not update your password");
+            toast.error(t("feedback.passwordUpdateFailed"));
             return;
         }
 
         setCurrentPassword("");
         setNewPassword("");
-        toast.success("Password updated. Other sessions were signed out.");
+        toast.success(t("feedback.passwordUpdated"));
     }
 
     async function handleDeleteAccount(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
         if (deleteConfirmation !== "DELETE") {
-            toast.error('Type "DELETE" to confirm account deletion');
+            toast.error(t("feedback.deleteConfirmationRequired"));
             return;
         }
 
@@ -230,7 +238,7 @@ export default function ProfileForm({
         setIsDeleting(false);
 
         if (error) {
-            toast.error(error.message || "We could not delete your account");
+            toast.error(t("feedback.deleteFailed"));
             return;
         }
 
@@ -243,14 +251,14 @@ export default function ProfileForm({
         setRevokingToken(null);
 
         if (error) {
-            toast.error(error.message || "We could not revoke that session");
+            toast.error(t("feedback.sessionRevokeFailed"));
             return;
         }
 
         setSessions((currentSessions) =>
             currentSessions.filter((session) => session.token !== token),
         );
-        toast.success("Session signed out");
+        toast.success(t("feedback.sessionRevoked"));
     }
 
     return (
@@ -261,7 +269,7 @@ export default function ProfileForm({
                         type="button"
                         onClick={() => imageInputRef.current?.click()}
                         className="group relative shrink-0 cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        aria-label="Choose profile image"
+                        aria-label={t("aside.chooseImage")}
                     >
                         <Avatar className="size-24 border-2 border-primary/20">
                             {image.trim() && <AvatarImage src={image} alt="" />}
@@ -272,7 +280,7 @@ export default function ProfileForm({
                         <span className="absolute inset-0 flex items-center justify-center rounded-full bg-foreground/60 text-background opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
                             <Camera aria-hidden="true" className="size-4" />
                             <span className="sr-only">
-                                Choose profile image
+                                {t("aside.chooseImage")}
                             </span>
                         </span>
                     </button>
@@ -285,7 +293,7 @@ export default function ProfileForm({
                         onChange={handleImageChange}
                     />
                     <p className="mt-5 text-xs font-semibold tracking-[0.18em] text-primary">
-                        ACCOUNT PROFILE
+                        {t("aside.eyebrow")}
                     </p>
                     <p className="mt-2 text-xl font-semibold tracking-tight text-foreground">
                         {name}
@@ -294,8 +302,7 @@ export default function ProfileForm({
                         {email}
                     </p>
                     <p className="mt-6 border-t border-primary/15 pt-4 text-sm leading-6 text-muted-foreground">
-                        Click the image to change it. Your details are private
-                        to your reading space.
+                        {t("aside.description")}
                     </p>
                 </div>
             </aside>
@@ -310,12 +317,11 @@ export default function ProfileForm({
                                     className="size-4 text-primary"
                                 />
                                 <h2 className="font-semibold text-foreground">
-                                    Personal details
+                                    {t("personal.title")}
                                 </h2>
                             </div>
                             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                Choose how your identity appears in Quran
-                                Reader.
+                                {t("personal.description")}
                             </p>
                         </div>
                     </div>
@@ -324,7 +330,9 @@ export default function ProfileForm({
                         className="mt-8 grid gap-6 sm:grid-cols-2"
                     >
                         <div className="grid content-start gap-2">
-                            <Label htmlFor="name">Display name</Label>
+                            <Label htmlFor="name">
+                                {t("personal.displayName")}
+                            </Label>
                             <Input
                                 id="name"
                                 value={name}
@@ -336,19 +344,19 @@ export default function ProfileForm({
                         </div>
                         <div className="grid content-start gap-2">
                             <p className="text-sm leading-none font-medium">
-                                Profile image
+                                {t("personal.profileImage")}
                             </p>
                             {image.startsWith("data:image/") ? (
                                 <div className="flex min-h-9 items-center justify-between gap-3 border-b border-primary/20 py-1 text-sm">
                                     <span className="text-muted-foreground">
-                                        Image uploaded from your device
+                                        {t("personal.imageUploaded")}
                                     </span>
                                     <button
                                         type="button"
                                         onClick={() => setImage("")}
                                         className="shrink-0 font-medium text-primary transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                     >
-                                        Remove
+                                        {t("personal.removeImage")}
                                     </button>
                                 </div>
                             ) : (
@@ -359,19 +367,22 @@ export default function ProfileForm({
                                     onChange={(event) =>
                                         setImage(event.target.value)
                                     }
-                                    placeholder="https://example.com/photo.jpg"
+                                    placeholder={t(
+                                        "personal.imageUrlPlaceholder",
+                                    )}
                                     autoComplete="url"
                                 />
                             )}
                             <p className="text-xs leading-5 text-muted-foreground">
-                                Click your avatar to upload an image, or paste
-                                an image URL here.
+                                {t("personal.imageHelp")}
                             </p>
                         </div>
                         <div className="sm:col-span-2">
                             <Button type="submit" disabled={isSavingProfile}>
                                 <Save aria-hidden="true" />
-                                {isSavingProfile ? "Saving…" : "Save details"}
+                                {isSavingProfile
+                                    ? t("personal.saving")
+                                    : t("personal.save")}
                             </Button>
                         </div>
                     </form>
@@ -380,10 +391,10 @@ export default function ProfileForm({
                 <section className="border-b border-primary/15 py-12">
                     <div>
                         <h2 className="font-semibold text-foreground">
-                            Account access
+                            {t("access.title")}
                         </h2>
                         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                            Keep your contact details and password up to date.
+                            {t("access.description")}
                         </p>
                     </div>
                     <div className="mt-8 space-y-8">
@@ -392,7 +403,9 @@ export default function ProfileForm({
                             className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
                         >
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">
+                                    {t("access.email")}
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -401,7 +414,7 @@ export default function ProfileForm({
                                         setEmail(event.target.value)
                                     }
                                     autoComplete="email"
-                                    aria-label="Email address"
+                                    aria-label={t("access.email")}
                                 />
                             </div>
                             <Button
@@ -409,7 +422,9 @@ export default function ProfileForm({
                                 variant="outline"
                                 disabled={isSavingEmail}
                             >
-                                {isSavingEmail ? "Updating…" : "Update email"}
+                                {isSavingEmail
+                                    ? t("access.updating")
+                                    : t("access.updateEmail")}
                             </Button>
                         </form>
 
@@ -420,12 +435,11 @@ export default function ProfileForm({
                                     className="size-4 text-primary"
                                 />
                                 <h3 className="font-semibold text-foreground">
-                                    Password
+                                    {t("access.passwordTitle")}
                                 </h3>
                             </div>
                             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                Use a strong, unique password. Updating it signs
-                                out your other sessions.
+                                {t("access.passwordDescription")}
                             </p>
                             <form
                                 onSubmit={handlePasswordSubmit}
@@ -433,7 +447,7 @@ export default function ProfileForm({
                             >
                                 <div className="grid gap-2">
                                     <Label htmlFor="current-password">
-                                        Current password
+                                        {t("access.currentPassword")}
                                     </Label>
                                     <Input
                                         id="current-password"
@@ -450,7 +464,7 @@ export default function ProfileForm({
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="new-password">
-                                        New password
+                                        {t("access.newPassword")}
                                     </Label>
                                     <Input
                                         id="new-password"
@@ -470,8 +484,8 @@ export default function ProfileForm({
                                         disabled={isSavingPassword}
                                     >
                                         {isSavingPassword
-                                            ? "Updating…"
-                                            : "Update password"}
+                                            ? t("access.updating")
+                                            : t("access.updatePassword")}
                                     </Button>
                                 </div>
                             </form>
@@ -488,27 +502,26 @@ export default function ProfileForm({
                                     className="size-4 text-primary"
                                 />
                                 <h2 className="font-semibold text-foreground">
-                                    Active sessions
+                                    {t("sessions.title")}
                                 </h2>
                             </div>
                             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                Review where your account is signed in and
-                                remove sessions you do not recognize.
+                                {t("sessions.description")}
                             </p>
                         </div>
                     </div>
                     <div className="relative mt-8">
                         <span
                             aria-hidden="true"
-                            className="absolute top-5 bottom-5 left-[3.5px] w-px bg-primary/20"
+                            className="absolute top-5 bottom-5 start-[3.5px] w-px bg-primary/20"
                         />
                         {isLoadingSessions ? (
                             <p className="text-sm text-muted-foreground">
-                                Loading active sessions…
+                                {t("sessions.loading")}
                             </p>
                         ) : sessions.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
-                                No active sessions found.
+                                {t("sessions.empty")}
                             </p>
                         ) : (
                             sessions.map((session) => {
@@ -518,9 +531,9 @@ export default function ProfileForm({
                                 return (
                                     <div
                                         key={session.token}
-                                        className="relative flex flex-wrap items-center gap-4 pb-8 pl-8 last:pb-1"
+                                        className="relative flex flex-wrap items-center gap-4 pb-8 ps-8 last:pb-1"
                                     >
-                                        <span className="absolute top-4 left-0 size-2 rounded-full bg-primary ring-4 ring-background" />
+                                        <span className="absolute top-4 start-0 size-2 rounded-full bg-primary ring-4 ring-background" />
                                         <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                                             <Laptop
                                                 aria-hidden="true"
@@ -534,17 +547,22 @@ export default function ProfileForm({
                                                 )}
                                             </p>
                                             <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
-                                                {isCurrentSession
-                                                    ? "This device · "
-                                                    : "Signed in · "}
-                                                {formatSessionDate(
-                                                    session.createdAt,
+                                                {t(
+                                                    isCurrentSession
+                                                        ? "sessions.currentDetails"
+                                                        : "sessions.otherDetails",
+                                                    {
+                                                        date: formatSessionDate(
+                                                            session.createdAt,
+                                                            locale,
+                                                        ),
+                                                    },
                                                 )}
                                             </p>
                                         </div>
                                         {isCurrentSession ? (
                                             <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                                                Current
+                                                {t("sessions.current")}
                                             </span>
                                         ) : (
                                             <Button
@@ -560,8 +578,8 @@ export default function ProfileForm({
                                                 }
                                             >
                                                 {revokingToken === session.token
-                                                    ? "Signing out…"
-                                                    : "Sign out"}
+                                                    ? t("sessions.signingOut")
+                                                    : t("sessions.signOut")}
                                             </Button>
                                         )}
                                     </div>
@@ -581,12 +599,10 @@ export default function ProfileForm({
                         </span>
                         <div>
                             <h2 className="font-semibold text-destructive">
-                                Delete account
+                                {t("delete.title")}
                             </h2>
                             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                This permanently removes your profile,
-                                preferences, and saved reading progress. This
-                                cannot be undone.
+                                {t("delete.description")}
                             </p>
                         </div>
                     </div>
@@ -596,7 +612,7 @@ export default function ProfileForm({
                     >
                         <div className="grid gap-2">
                             <Label htmlFor="delete-password">
-                                Current password
+                                {t("delete.currentPassword")}
                             </Label>
                             <Input
                                 id="delete-password"
@@ -611,7 +627,7 @@ export default function ProfileForm({
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="delete-confirmation">
-                                Type DELETE to confirm
+                                {t("delete.confirmation")}
                             </Label>
                             <Input
                                 id="delete-confirmation"
@@ -630,8 +646,8 @@ export default function ProfileForm({
                                 disabled={isDeleting}
                             >
                                 {isDeleting
-                                    ? "Deleting account…"
-                                    : "Permanently delete account"}
+                                    ? t("delete.deleting")
+                                    : t("delete.submit")}
                             </Button>
                         </div>
                     </form>

@@ -1,0 +1,84 @@
+{
+    "Profile": {
+        "page": {
+            "eyebrow": "YOUR PROFILE",
+            "title": "Your account details.",
+            "description": "Update the name and image used across your personal reading space.",
+            "memberSince": "Member since {date}",
+            "emailVerified": "Email verified",
+            "emailNotVerified": "Email not verified"
+        },
+        "aside": {
+            "chooseImage": "Choose profile image",
+            "eyebrow": "ACCOUNT PROFILE",
+            "description": "Click the image to change it. Your details are private to your reading space."
+        },
+        "personal": {
+            "title": "Personal details",
+            "description": "Choose how your identity appears in Quran Reader.",
+            "displayName": "Display name",
+            "profileImage": "Profile image",
+            "imageUploaded": "Image uploaded from your device",
+            "removeImage": "Remove",
+            "imageUrlPlaceholder": "https://example.com/photo.jpg",
+            "imageHelp": "Click your avatar to upload an image, or paste an image URL here.",
+            "save": "Save details",
+            "saving": "Saving…"
+        },
+        "access": {
+            "title": "Account access",
+            "description": "Keep your contact details and password up to date.",
+            "email": "Email address",
+            "updateEmail": "Update email",
+            "updating": "Updating…",
+            "passwordTitle": "Password",
+            "passwordDescription": "Use a strong, unique password. Updating it signs out your other sessions.",
+            "currentPassword": "Current password",
+            "newPassword": "New password",
+            "updatePassword": "Update password"
+        },
+        "sessions": {
+            "title": "Active sessions",
+            "description": "Review where your account is signed in and remove sessions you do not recognize.",
+            "loading": "Loading active sessions…",
+            "empty": "No active sessions found.",
+            "currentDetails": "This device · {date}",
+            "otherDetails": "Signed in · {date}",
+            "current": "Current",
+            "signingOut": "Signing out…",
+            "signOut": "Sign out"
+        },
+        "devices": {
+            "unknown": "Unknown device",
+            "webBrowser": "Web browser",
+            "browserOnSystem": "{browser} on {system}"
+        },
+        "delete": {
+            "title": "Delete account",
+            "description": "This permanently removes your profile, preferences, and saved reading progress. This cannot be undone.",
+            "currentPassword": "Current password",
+            "confirmation": "Type DELETE to confirm",
+            "deleting": "Deleting account…",
+            "submit": "Permanently delete account"
+        },
+        "feedback": {
+            "sessionsLoadFailed": "We could not load your active sessions",
+            "nameRequired": "Please enter your name",
+            "profileUpdateFailed": "We could not update your profile",
+            "profileUpdated": "Profile updated",
+            "imageFileRequired": "Please choose an image file",
+            "imageTooLarge": "Please choose an image smaller than 1 MB",
+            "imageReadFailed": "We could not read that image",
+            "emailUnchanged": "That is already your current email address",
+            "emailUpdateFailed": "We could not update your email",
+            "emailUpdated": "Email address updated",
+            "passwordTooShort": "Your new password must contain at least 8 characters",
+            "passwordUpdateFailed": "We could not update your password",
+            "passwordUpdated": "Password updated. Other sessions were signed out.",
+            "deleteConfirmationRequired": "Type “DELETE” to confirm account deletion",
+            "deleteFailed": "We could not delete your account",
+            "sessionRevokeFailed": "We could not revoke that session",
+            "sessionRevoked": "Session signed out"
+        }
+    }
+}

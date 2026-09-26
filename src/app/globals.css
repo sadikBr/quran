@@ -117,20 +117,20 @@
     --shadow-2xs: 0px 2px 3px 0px hsl(28 18% 25% / 0.09);
     --shadow-xs: 0px 2px 3px 0px hsl(28 18% 25% / 0.09);
     --shadow-sm:
-        0px 2px 3px 0px hsl(28 18% 25% / 0.18),
-        0px 1px 2px -1px hsl(28 18% 25% / 0.18);
+        0px 2px 3px 0px hsl(28 18% 25% / 0.18), 0px 1px 2px -1px
+        hsl(28 18% 25% / 0.18);
     --shadow:
-        0px 2px 3px 0px hsl(28 18% 25% / 0.18),
-        0px 1px 2px -1px hsl(28 18% 25% / 0.18);
+        0px 2px 3px 0px hsl(28 18% 25% / 0.18), 0px 1px 2px -1px
+        hsl(28 18% 25% / 0.18);
     --shadow-md:
-        0px 2px 3px 0px hsl(28 18% 25% / 0.18),
-        0px 2px 4px -1px hsl(28 18% 25% / 0.18);
+        0px 2px 3px 0px hsl(28 18% 25% / 0.18), 0px 2px 4px -1px
+        hsl(28 18% 25% / 0.18);
     --shadow-lg:
-        0px 2px 3px 0px hsl(28 18% 25% / 0.18),
-        0px 4px 6px -1px hsl(28 18% 25% / 0.18);
+        0px 2px 3px 0px hsl(28 18% 25% / 0.18), 0px 4px 6px -1px
+        hsl(28 18% 25% / 0.18);
     --shadow-xl:
-        0px 2px 3px 0px hsl(28 18% 25% / 0.18),
-        0px 8px 10px -1px hsl(28 18% 25% / 0.18);
+        0px 2px 3px 0px hsl(28 18% 25% / 0.18), 0px 8px 10px -1px
+        hsl(28 18% 25% / 0.18);
     --shadow-2xl: 0px 2px 3px 0px hsl(28 18% 25% / 0.45);
     --tracking-normal: 0em;
     --background: oklch(0.9885 0.0057 84.5659);
@@ -185,20 +185,20 @@
     --shadow-2xs: 0px 2px 3px 0px hsl(0 0% 5% / 0.09);
     --shadow-xs: 0px 2px 3px 0px hsl(0 0% 5% / 0.09);
     --shadow-sm:
-        0px 2px 3px 0px hsl(0 0% 5% / 0.18),
-        0px 1px 2px -1px hsl(0 0% 5% / 0.18);
+        0px 2px 3px 0px hsl(0 0% 5% / 0.18), 0px 1px 2px -1px
+        hsl(0 0% 5% / 0.18);
     --shadow:
-        0px 2px 3px 0px hsl(0 0% 5% / 0.18),
-        0px 1px 2px -1px hsl(0 0% 5% / 0.18);
+        0px 2px 3px 0px hsl(0 0% 5% / 0.18), 0px 1px 2px -1px
+        hsl(0 0% 5% / 0.18);
     --shadow-md:
-        0px 2px 3px 0px hsl(0 0% 5% / 0.18),
-        0px 2px 4px -1px hsl(0 0% 5% / 0.18);
+        0px 2px 3px 0px hsl(0 0% 5% / 0.18), 0px 2px 4px -1px
+        hsl(0 0% 5% / 0.18);
     --shadow-lg:
-        0px 2px 3px 0px hsl(0 0% 5% / 0.18),
-        0px 4px 6px -1px hsl(0 0% 5% / 0.18);
+        0px 2px 3px 0px hsl(0 0% 5% / 0.18), 0px 4px 6px -1px
+        hsl(0 0% 5% / 0.18);
     --shadow-xl:
-        0px 2px 3px 0px hsl(0 0% 5% / 0.18),
-        0px 8px 10px -1px hsl(0 0% 5% / 0.18);
+        0px 2px 3px 0px hsl(0 0% 5% / 0.18), 0px 8px 10px -1px
+        hsl(0 0% 5% / 0.18);
     --shadow-2xl: 0px 2px 3px 0px hsl(0 0% 5% / 0.45);
 }
 
@@ -274,4 +274,17 @@
 
 .frame {
     font-family: Frame, sans-serif;
+}
+
+.arabic-ui {
+    font-family: var(--font-arabic-ui), sans-serif;
+}
+
+.arabic-ui :is(h1, h2, h3) {
+    letter-spacing: 0;
+    line-height: 1.4;
+}
+
+.arabic-ui .ayah {
+    font-family: Amiri, Ayah, sans-serif;
 }

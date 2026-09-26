@@ -1,0 +1,43 @@
+{
+    "Auth": {
+        "signIn": {
+            "eyebrow": "مرحبًا بعودتك",
+            "title": "تابع قراءتك.",
+            "description": "سجّل الدخول للعودة إلى موضعك وتفضيلات القراءة المحفوظة.",
+            "submit": "تسجيل الدخول",
+            "submitting": "جارٍ تسجيل الدخول…",
+            "prompt": "جديد في قارئ القرآن؟",
+            "promptAction": "أنشئ حسابًا",
+            "errorTitle": "تعذّر تسجيل دخولك.",
+            "errorDescription": "تحقق من بريدك الإلكتروني وكلمة المرور ثم حاول مرة أخرى."
+        },
+        "signUp": {
+            "eyebrow": "ابدأ رحلتك",
+            "title": "أنشئ مساحة قراءتك.",
+            "description": "احفظ تفضيلاتك واجعل قارئ القرآن ملائمًا لك.",
+            "submit": "إنشاء حساب",
+            "submitting": "جارٍ إنشاء الحساب…",
+            "prompt": "لديك حساب بالفعل؟",
+            "promptAction": "سجّل الدخول",
+            "errorTitle": "تعذّر إنشاء حسابك.",
+            "errorDescription": "راجع بياناتك ثم حاول مرة أخرى."
+        },
+        "fields": {
+            "email": "البريد الإلكتروني",
+            "password": "كلمة المرور",
+            "confirmPassword": "تأكيد كلمة المرور",
+            "fullName": "الاسم الكامل",
+            "imageUrl": "رابط الصورة",
+            "namePlaceholder": "اسمك",
+            "imagePlaceholder": "https://example.com/image.jpg"
+        },
+        "actions": { "reset": "إعادة تعيين" },
+        "validation": {
+            "email": "أدخل بريدًا إلكترونيًا صالحًا.",
+            "passwordLength": "يجب ألا تقل كلمة المرور عن 8 أحرف.",
+            "nameLength": "يجب ألا يقل الاسم عن حرفين.",
+            "imageUrl": "أدخل رابط صورة صالحًا.",
+            "passwordMismatch": "كلمتا المرور غير متطابقتين."
+        }
+    }
+}

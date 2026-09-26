@@ -3,6 +3,7 @@
 import { useForm } from "@tanstack/react-form";
 import { ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -24,13 +25,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/features/auth/auth-client";
 
-const formSchema = z.object({
-    email: z.email("Email is required and must be a valid email address."),
-    password: z.string().min(8, "Password must be at least 8 characters."),
-});
-
 export default function SignInPage() {
     const [loading, setLoading] = useState(false);
+    const locale = useLocale();
+    const t = useTranslations("Auth");
+    const formSchema = z.object({
+        email: z.email(t("validation.email")),
+        password: z.string().min(8, t("validation.passwordLength")),
+    });
 
     const form = useForm({
         defaultValues: {
@@ -51,12 +53,10 @@ export default function SignInPage() {
                     onSuccess: (_ctx) => {
                         window.location.assign("/dashboard");
                     },
-                    onError: (ctx) => {
+                    onError: (_ctx) => {
                         setLoading(false);
-                        toast.error("We couldn't sign you in.", {
-                            description:
-                                ctx.error.message ||
-                                "Please check your email and password, then try again.",
+                        toast.error(t("signIn.errorTitle"), {
+                            description: t("signIn.errorDescription"),
                         });
                     },
                 },
@@ -65,20 +65,24 @@ export default function SignInPage() {
     });
 
     return (
-        <main className="flex min-h-dvh items-center justify-center px-4 py-24 sm:px-6">
+        <main
+            lang={locale}
+            dir={locale === "ar" ? "rtl" : "ltr"}
+            className="flex min-h-dvh items-center justify-center px-4 py-24 sm:px-6"
+        >
             <Card className="w-full max-w-md gap-0 border-primary/15 bg-card/90 py-0 shadow-lg backdrop-blur-sm">
                 <CardHeader className="border-b border-primary/10 px-6 pt-7 pb-6 sm:px-8">
                     <span className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                         <BookOpen aria-hidden="true" className="size-5" />
                     </span>
                     <p className="text-xs font-semibold tracking-[0.18em] text-primary">
-                        WELCOME BACK
+                        {t("signIn.eyebrow")}
                     </p>
                     <CardTitle className="text-2xl tracking-tight">
-                        Continue your reading.
+                        {t("signIn.title")}
                     </CardTitle>
                     <CardDescription className="leading-6">
-                        Sign in to return to your saved reading preferences.
+                        {t("signIn.description")}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="px-6 py-6 sm:px-8">
@@ -90,16 +94,15 @@ export default function SignInPage() {
                         }}
                     >
                         <FieldGroup>
-                            <form.Field
-                                name="email"
-                                children={(field) => {
+                            <form.Field name="email">
+                                {(field) => {
                                     const isInvalid =
                                         field.state.meta.isTouched &&
                                         !field.state.meta.isValid;
                                     return (
                                         <Field data-invalid={isInvalid}>
                                             <FieldLabel htmlFor={field.name}>
-                                                Email
+                                                {t("fields.email")}
                                             </FieldLabel>
                                             <Input
                                                 id={field.name}
@@ -125,17 +128,16 @@ export default function SignInPage() {
                                         </Field>
                                     );
                                 }}
-                            />
-                            <form.Field
-                                name="password"
-                                children={(field) => {
+                            </form.Field>
+                            <form.Field name="password">
+                                {(field) => {
                                     const isInvalid =
                                         field.state.meta.isTouched &&
                                         !field.state.meta.isValid;
                                     return (
                                         <Field data-invalid={isInvalid}>
                                             <FieldLabel htmlFor={field.name}>
-                                                Password
+                                                {t("fields.password")}
                                             </FieldLabel>
                                             <Input
                                                 type="password"
@@ -162,7 +164,7 @@ export default function SignInPage() {
                                         </Field>
                                     );
                                 }}
-                            />
+                            </form.Field>
                         </FieldGroup>
                     </form>
                 </CardContent>
@@ -173,20 +175,22 @@ export default function SignInPage() {
                             variant="outline"
                             onClick={() => form.reset()}
                         >
-                            Reset
+                            {t("actions.reset")}
                         </Button>
                         <Button type="submit" form="signin-form">
-                            {loading ? "Signing In..." : "Sign In"}
+                            {loading
+                                ? t("signIn.submitting")
+                                : t("signIn.submit")}
                             <ArrowRight aria-hidden="true" />
                         </Button>
                     </Field>
                     <p className="text-center text-sm text-muted-foreground">
-                        New to Quran Reader?{" "}
+                        {t("signIn.prompt")}{" "}
                         <Link
                             href="/sign-up"
                             className="font-medium text-primary underline-offset-4 hover:underline"
                         >
-                            Create an account
+                            {t("signIn.promptAction")}
                         </Link>
                     </p>
                 </CardFooter>

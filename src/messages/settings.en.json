@@ -1,0 +1,124 @@
+{
+    "Settings": {
+        "page": {
+            "eyebrow": "READER PREFERENCES",
+            "title": "Shape your reading space.",
+            "description": "Choose a reading flow, editions, and display details that help you return to the Quran with focus."
+        },
+        "sections": {
+            "appearance": {
+                "eyebrow": "APPEARANCE",
+                "title": "A comfortable environment"
+            },
+            "readingFlow": {
+                "eyebrow": "READING FLOW",
+                "title": "Follow your own pace"
+            },
+            "quranText": {
+                "eyebrow": "QURAN TEXT",
+                "title": "Choose your editions"
+            }
+        },
+        "theme": {
+            "title": "Theme",
+            "description": "Choose how the application looks across every page.",
+            "label": "Theme",
+            "system": "System",
+            "light": "Light",
+            "dark": "Dark"
+        },
+        "language": {
+            "title": "Language",
+            "description": "Choose the language used by the application interface.",
+            "label": "Language",
+            "english": "English",
+            "arabic": "Arabic"
+        },
+        "readingMode": {
+            "title": "Reading mode",
+            "description": "Choose the way you would like to move through the Quran.",
+            "label": "Reading mode",
+            "page": "Read by page",
+            "surah": "Read by surah"
+        },
+        "riwayah": {
+            "title": "Riwayah",
+            "description": "Choose the Quranic transmission used for Arabic text and recitation.",
+            "label": "Riwayah",
+            "hafs": "Hafs ‘an ‘Asim",
+            "warsh": "Warsh ‘an Nafi‘"
+        },
+        "translationVisibility": {
+            "title": "Show translation",
+            "description": "Display English beneath the Arabic text.",
+            "shown": "Shown",
+            "hidden": "Hidden"
+        },
+        "continuousRecitation": {
+            "title": "Continuous recitation",
+            "description": "After an ayah finishes, continue with the next ayah in your current reading view.",
+            "automatic": "Continue automatically",
+            "manual": "Ayah by ayah"
+        },
+        "arabicEdition": {
+            "title": "Arabic edition",
+            "description": "Choose the Arabic text style used throughout the reader.",
+            "warshDescription": "Warsh uses its dedicated Quran script; your Hafs edition remains saved for when you switch back.",
+            "label": "Edition",
+            "placeholder": "Search text editions…",
+            "empty": "No matching text editions found.",
+            "badge": "Text"
+        },
+        "reciter": {
+            "title": "Reciter",
+            "description": "Choose the voice used for ayah playback and full recitation.",
+            "label": "Reciter",
+            "placeholder": "Search reciters…",
+            "empty": "No matching reciters found.",
+            "wholeSurah": "Whole-surah reciters",
+            "ayahByAyah": "Ayah-by-ayah reciters",
+            "warshPageHint": "Warsh page mode supports full-page recitation only; individual ayah playback and highlighting are hidden because recording boundaries vary by source.",
+            "surahHint": "Surah mode supports ayah-by-ayah and whole-surah reciters.",
+            "pageHint": "Page mode uses reciters with audio for each ayah."
+        },
+        "translation": {
+            "title": "English translation",
+            "description": "Set the translation shown alongside the Arabic text.",
+            "label": "English edition",
+            "placeholder": "Search translations…",
+            "empty": "No matching translations found.",
+            "editions": {
+                "ahmedAli": "Ahmed Ali",
+                "ahmedRaza": "Ahmed Raza Khan",
+                "arberry": "A. J. Arberry",
+                "asad": "Muhammad Asad",
+                "daryabadi": "Abdul Majid Daryabadi",
+                "hilali": "Muhammad Taqi-ud-Din al-Hilali and Muhammad Muhsin Khan",
+                "pickthall": "Mohammed Marmaduke William Pickthall",
+                "qaribullah": "Hasan al-Fatih Qaribullah and Ahmad Darwish",
+                "sahih": "Saheeh International",
+                "sarwar": "Muhammad Sarwar",
+                "yusufAli": "Abdullah Yusuf Ali",
+                "maududi": "Abul Ala Maududi",
+                "shakir": "Mohammad Habib Shakir",
+                "itani": "Clear Quran by Talal Itani",
+                "mubarakpuri": "Mubarakpuri",
+                "qarai": "Qarai",
+                "wahiduddin": "Wahiduddin Khan"
+            }
+        },
+        "tafsir": {
+            "title": "Tafsir edition",
+            "description": "Choose the commentary that will be used when you explore an ayah.",
+            "label": "Tafsir",
+            "placeholder": "Search tafsir editions…",
+            "empty": "No matching tafsir editions found."
+        },
+        "footer": {
+            "note": "Changes will apply to your next reading session.",
+            "save": "Save preferences",
+            "saving": "Saving…",
+            "success": "Your reading preferences have been saved."
+        }
+    }
+}

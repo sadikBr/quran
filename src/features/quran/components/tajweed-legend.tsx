@@ -1,6 +1,7 @@
 "use client";
 
 import { Palette } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -11,6 +12,7 @@ import {
 import { TAJWEED_RULES } from "./tajweed-text";
 
 export default function TajweedLegend() {
+    const t = useTranslations("Reader");
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -21,8 +23,12 @@ export default function TajweedLegend() {
                     className="h-9 rounded-full bg-muted/55 px-3 text-muted-foreground hover:bg-primary/10 hover:text-primary"
                 >
                     <Palette aria-hidden="true" className="size-3.5" />
-                    <span className="hidden sm:inline">Tajweed colors</span>
-                    <span className="sr-only sm:hidden">Tajweed colors</span>
+                    <span className="hidden sm:inline">
+                        {t("tajweed.button")}
+                    </span>
+                    <span className="sr-only sm:hidden">
+                        {t("tajweed.button")}
+                    </span>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -32,16 +38,15 @@ export default function TajweedLegend() {
             >
                 <DropdownMenuLabel className="p-0">
                     <span className="block text-sm font-semibold text-foreground">
-                        Tajweed color guide
+                        {t("tajweed.title")}
                     </span>
                     <span className="mt-1 block text-xs leading-5 font-normal text-muted-foreground">
-                        Each color highlights a pronunciation rule in the
-                        selected Tajweed edition.
+                        {t("tajweed.description")}
                     </span>
                 </DropdownMenuLabel>
-                <div className="mt-4 grid max-h-[min(60dvh,28rem)] gap-x-5 gap-y-3 overflow-y-auto pr-1 sm:grid-cols-2">
+                <div className="mt-4 grid max-h-[min(60dvh,28rem)] gap-x-5 gap-y-3 overflow-y-auto pe-1 sm:grid-cols-2">
                     {Object.entries(TAJWEED_RULES).map(
-                        ([code, { className, label }]) => (
+                        ([code, { className }]) => (
                             <div
                                 key={code}
                                 className="flex items-center gap-3 text-sm"
@@ -51,15 +56,14 @@ export default function TajweedLegend() {
                                     className={`size-2.5 shrink-0 rounded-full bg-current ring-4 ring-current/10 ${className}`}
                                 />
                                 <span className="leading-5 text-foreground/85">
-                                    {label}
+                                    {t(`tajweed.rules.${code}`)}
                                 </span>
                             </div>
                         ),
                     )}
                 </div>
                 <p className="mt-4 border-t border-primary/10 pt-3 text-[0.7rem] leading-5 text-muted-foreground">
-                    Light mode follows Al Quran Cloud’s official palette. Dark
-                    mode uses contrast-adjusted shades of the same colors.
+                    {t("tajweed.paletteNote")}
                 </p>
             </DropdownMenuContent>
         </DropdownMenu>

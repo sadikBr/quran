@@ -1,0 +1,66 @@
+{
+    "Dashboard": {
+        "eyebrow": "YOUR DASHBOARD",
+        "welcome": "Welcome back, {name}.",
+        "introduction": "Return to the Quran at your own pace. Your reading space is ready whenever you are.",
+        "reading": {
+            "eyebrow": "Your reading place",
+            "page": "page",
+            "surah": "surah",
+            "beginWith": "Begin with {type} {number, number}.",
+            "continueFrom": "Continue from {type} {number, number}.",
+            "continueWith": "Continue with {surah}.",
+            "continueGeneric": "Continue reading.",
+            "resumeDescription": "Pick up exactly where you left off in your preferred reading mode.",
+            "startDescription": "Start your reading journey in your preferred reading mode.",
+            "continueReading": "Continue reading",
+            "startReading": "Start reading",
+            "browseSurahs": "Browse surahs"
+        },
+        "upcoming": {
+            "eyebrow": "On the horizon",
+            "title": "Your practice will grow with you.",
+            "description": "These tools are being prepared for your personal reading journey.",
+            "inDevelopment": "In development",
+            "memorizationGoals": {
+                "title": "Memorization goals",
+                "description": "Set a daily goal and build a sustainable memorization routine."
+            },
+            "progressInsights": {
+                "title": "Progress insights",
+                "description": "See your reading and memorization progress at a glance."
+            }
+        },
+        "saved": {
+            "eyebrow": "Your collection",
+            "title": "Saved ayahs",
+            "description": "Return to bookmarks and private reflections from your reading.",
+            "searchLabel": "Search saved ayahs",
+            "searchPlaceholder": "Search saved ayahs…",
+            "filterLabel": "Filter by surah",
+            "allSurahs": "All surahs",
+            "noMatchingSurahs": "No matching saved surahs.",
+            "emptyTitle": "Nothing saved yet",
+            "emptyDescription": "Open an ayah’s actions while reading to bookmark it or write a private reflection.",
+            "noSearchResults": "No saved ayahs match this search.",
+            "ayah": "Ayah {number, number}",
+            "bookmarked": "Bookmarked",
+            "hasReflection": "Has a reflection",
+            "openReader": "Open in reader",
+            "actions": "Actions",
+            "actionTitle": "Ayah actions",
+            "openActions": "Open actions for {surah}, ayah {number, number}",
+            "summary": "Showing {start, number}–{end, number} of {count, number} saved {count, plural, one {ayah} other {ayahs}}",
+            "previous": "Previous",
+            "next": "Next",
+            "pageIndicator": "{current, number} / {total, number}"
+        },
+        "modal": {
+            "close": "Close ayah actions",
+            "title": "Ayah actions",
+            "loadFailedTitle": "We could not load this ayah’s actions.",
+            "loadFailedDescription": "Close this window and try again.",
+            "loading": "Loading ayah actions…"
+        }
+    }
+}

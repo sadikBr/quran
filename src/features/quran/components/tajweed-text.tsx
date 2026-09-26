@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Fragment, type ReactNode } from "react";
 
 export const TAJWEED_RULES = {
@@ -151,14 +152,18 @@ export function getPlainQuranText(text: string) {
     return parseTajweedNodes(text).nodes.map(getNodeText).join("");
 }
 
-function renderTajweedNode(node: TajweedNode, key: string): ReactNode {
+function renderTajweedNode(
+    node: TajweedNode,
+    key: string,
+    getRuleLabel: (code: TajweedRuleCode) => string,
+): ReactNode {
     if (typeof node === "string") {
         return <Fragment key={key}>{node}</Fragment>;
     }
 
     const rule = isTajweedRuleCode(node.code) ? TAJWEED_RULES[node.code] : null;
     const children = node.children.map((child, index) =>
-        renderTajweedNode(child, `${key}-${index}`),
+        renderTajweedNode(child, `${key}-${index}`, getRuleLabel),
     );
 
     if (!rule) {
@@ -169,7 +174,7 @@ function renderTajweedNode(node: TajweedNode, key: string): ReactNode {
         <span
             key={key}
             className={rule.className}
-            title={rule.label}
+            title={getRuleLabel(node.code as TajweedRuleCode)}
             data-tajweed={node.identifier}
         >
             {children}
@@ -178,7 +183,11 @@ function renderTajweedNode(node: TajweedNode, key: string): ReactNode {
 }
 
 export default function TajweedText({ text }: { text: string }) {
+    const t = useTranslations("Reader");
+
     return parseTajweedNodes(text).nodes.map((node, index) =>
-        renderTajweedNode(node, `tajweed-${index}`),
+        renderTajweedNode(node, `tajweed-${index}`, (code) =>
+            t(`tajweed.rules.${code}`),
+        ),
     );
 }

@@ -8,6 +8,7 @@ import {
     RefreshCcw,
     RotateCcw,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import type { QuranAudioQueueItem } from "./quran-audio-provider";
@@ -26,6 +27,7 @@ export default function QuranAudioQueue({
     scope?: "page" | "surah";
     className?: string;
 }) {
+    const t = useTranslations("Reader");
     const {
         getQueueStatus,
         isQueuePlaying,
@@ -49,15 +51,18 @@ export default function QuranAudioQueue({
     const isLoading = queueStatus === "loading";
     const hasError = queueStatus === "error";
     const isPaused = queueStatus === "paused";
+    const scopeLabel = t(
+        scope === "surah" ? "audio.surahRecitation" : "audio.pageRecitation",
+    );
 
     return (
         <div
-            className={`relative flex w-fit items-center gap-1 overflow-hidden rounded-full bg-muted/55 p-1 pl-2 ${className ?? ""}`}
+            className={`relative flex w-fit items-center gap-1 overflow-hidden rounded-full bg-muted/55 p-1 ps-2 ${className ?? ""}`}
         >
             {queueStatus !== "idle" && progress > 0 && (
                 <span
                     aria-hidden="true"
-                    className="absolute inset-x-0 bottom-0 h-0.5 origin-left bg-primary transition-transform duration-300 ease-linear"
+                    className="absolute inset-x-0 bottom-0 h-0.5 origin-left rtl:origin-right bg-primary transition-transform duration-300 ease-linear"
                     style={{ transform: `scaleX(${progress})` }}
                 />
             )}
@@ -66,9 +71,7 @@ export default function QuranAudioQueue({
                     className="size-3.5 text-primary"
                     aria-hidden="true"
                 />
-                <span className="hidden sm:inline">
-                    {scope === "surah" ? "Surah recitation" : "Page recitation"}
-                </span>
+                <span className="hidden sm:inline">{scopeLabel}</span>
             </span>
             <div className="flex items-center gap-0.5">
                 <Button
@@ -77,7 +80,7 @@ export default function QuranAudioQueue({
                     variant="ghost"
                     className="size-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary pointer-coarse:size-10"
                     onClick={() => restartQueue(queue)}
-                    aria-label={`Restart ${scope} recitation`}
+                    aria-label={t("audio.restart", { scope: scopeLabel })}
                 >
                     <RotateCcw className="size-4" aria-hidden="true" />
                 </Button>
@@ -91,14 +94,14 @@ export default function QuranAudioQueue({
                     }
                     aria-label={
                         hasError
-                            ? `Retry ${scope} recitation`
+                            ? t("audio.retry", { scope: scopeLabel })
                             : isLoading
-                              ? `Loading ${scope} recitation`
+                              ? t("audio.loading", { scope: scopeLabel })
                               : isPlaying
-                                ? `Pause ${scope} recitation`
+                                ? t("audio.pause", { scope: scopeLabel })
                                 : isPaused
-                                  ? `Continue ${scope} recitation`
-                                  : "Read all ayahs"
+                                  ? t("audio.continue", { scope: scopeLabel })
+                                  : t("audio.readAllAyahs")
                     }
                 >
                     <span className="flex size-5 items-center justify-center rounded-full bg-primary-foreground/18 transition-transform group-hover:scale-110">
@@ -119,21 +122,21 @@ export default function QuranAudioQueue({
                             />
                         ) : (
                             <Play
-                                className="ml-px size-2.5 fill-current"
+                                className="ms-px size-2.5 fill-current"
                                 aria-hidden="true"
                             />
                         )}
                     </span>
                     <span>
                         {isLoading
-                            ? "Loading"
+                            ? t("audio.loadingShort")
                             : hasError
-                              ? "Retry"
+                              ? t("audio.retryShort")
                               : isPlaying
-                                ? "Pause"
+                                ? t("audio.pauseShort")
                                 : isPaused
-                                  ? "Continue"
-                                  : "Read all"}
+                                  ? t("audio.continueShort")
+                                  : t("audio.readAll")}
                     </span>
                 </Button>
             </div>

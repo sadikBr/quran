@@ -2,6 +2,7 @@
 
 import { LoaderCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import AyahActions from "@/features/quran/components/ayah-actions";
 import getAyahActionsData, {
@@ -17,6 +18,8 @@ export default function SavedAyahActions({
     onCloseAction: () => void;
 }) {
     const router = useRouter();
+    const t = useTranslations("Dashboard");
+    const locale = useLocale();
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const [data, setData] = useState<AyahActionsData | null>(null);
     const [loadFailed, setLoadFailed] = useState(false);
@@ -56,21 +59,23 @@ export default function SavedAyahActions({
                 type="button"
                 onClick={onCloseAction}
                 className="absolute inset-0 bg-foreground/25 backdrop-blur-sm"
-                aria-label="Close ayah actions"
+                aria-label={t("modal.close")}
             />
             <section
+                lang={locale}
+                dir={locale === "ar" ? "rtl" : "ltr"}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={data ? "ayah-actions-title" : undefined}
-                aria-label={data ? undefined : "Ayah actions"}
-                className="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto rounded-2xl border bg-background p-5 shadow-2xl sm:p-7"
+                aria-label={data ? undefined : t("modal.title")}
+                className="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto rounded-[1.75rem] bg-background/98 p-5 shadow-[0_32px_90px_-24px_hsl(var(--foreground)/0.5)] ring-1 ring-border/60 backdrop-blur-xl sm:p-8"
             >
                 <button
                     ref={closeButtonRef}
                     type="button"
                     onClick={onCloseAction}
-                    className="absolute top-4 right-4 z-10 inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    aria-label="Close ayah actions"
+                    className="absolute top-4 end-4 z-10 inline-flex size-8 items-center justify-center rounded-full bg-muted/35 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={t("modal.close")}
                 >
                     <X aria-hidden="true" className="size-4" />
                 </button>
@@ -83,10 +88,10 @@ export default function SavedAyahActions({
                 ) : loadFailed ? (
                     <div className="py-14 text-center">
                         <h2 className="font-semibold">
-                            We could not load this ayah’s actions.
+                            {t("modal.loadFailedTitle")}
                         </h2>
                         <p className="mt-2 text-sm text-muted-foreground">
-                            Close this window and try again.
+                            {t("modal.loadFailedDescription")}
                         </p>
                     </div>
                 ) : (
@@ -95,7 +100,7 @@ export default function SavedAyahActions({
                             aria-hidden="true"
                             className="size-5 animate-spin text-primary"
                         />
-                        <p className="text-sm">Loading ayah actions…</p>
+                        <p className="text-sm">{t("modal.loading")}</p>
                     </div>
                 )}
             </section>

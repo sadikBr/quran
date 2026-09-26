@@ -1,0 +1,66 @@
+{
+    "Dashboard": {
+        "eyebrow": "لوحة المتابعة",
+        "welcome": "مرحبًا بعودتك، {name}.",
+        "introduction": "عُد إلى القرآن على مهلٍ وبالوتيرة التي تناسبك. مساحتك للقراءة جاهزة متى شئت.",
+        "reading": {
+            "eyebrow": "موضع قراءتك",
+            "page": "الصفحة",
+            "surah": "السورة",
+            "beginWith": "ابدأ من {type} {number, number}.",
+            "continueFrom": "تابع من {type} {number, number}.",
+            "continueWith": "تابع مع {surah}.",
+            "continueGeneric": "تابع القراءة.",
+            "resumeDescription": "واصل من الموضع الذي توقفت عنده في نمط القراءة المفضّل لديك.",
+            "startDescription": "ابدأ رحلتك مع القرآن بنمط القراءة المفضّل لديك.",
+            "continueReading": "تابع القراءة",
+            "startReading": "ابدأ القراءة",
+            "browseSurahs": "تصفّح السور"
+        },
+        "upcoming": {
+            "eyebrow": "في الطريق",
+            "title": "ستنمو ممارستك معك.",
+            "description": "نعمل على إعداد هذه الأدوات لتدعم رحلتك الشخصية مع القرآن.",
+            "inDevelopment": "قيد التطوير",
+            "memorizationGoals": {
+                "title": "أهداف الحفظ",
+                "description": "حدّد هدفًا يوميًا وابنِ عادة حفظ ثابتة ومتوازنة."
+            },
+            "progressInsights": {
+                "title": "إحصاءات التقدّم",
+                "description": "اطّلع على تقدّمك في القراءة والحفظ بنظرة واحدة."
+            }
+        },
+        "saved": {
+            "eyebrow": "مجموعتك",
+            "title": "الآيات المحفوظة",
+            "description": "عُد إلى علاماتك وخواطرك الخاصة من جلسات القراءة.",
+            "searchLabel": "ابحث في الآيات المحفوظة",
+            "searchPlaceholder": "ابحث في الآيات المحفوظة…",
+            "filterLabel": "صفِّ حسب السورة",
+            "allSurahs": "جميع السور",
+            "noMatchingSurahs": "لم نعثر على سورة محفوظة مطابقة.",
+            "emptyTitle": "لا توجد آيات محفوظة بعد",
+            "emptyDescription": "افتح إجراءات أي آية أثناء القراءة لحفظها أو كتابة خاطرة خاصة.",
+            "noSearchResults": "لا توجد آيات محفوظة تطابق هذا البحث.",
+            "ayah": "الآية {number, number}",
+            "bookmarked": "محفوظة",
+            "hasReflection": "لها خاطرة",
+            "openReader": "افتح في القارئ",
+            "actions": "الإجراءات",
+            "actionTitle": "إجراءات الآية",
+            "openActions": "افتح إجراءات {surah}، الآية {number, number}",
+            "summary": "عرض {start, number}–{end, number} من أصل {count, number} {count, plural, one {آية محفوظة} other {آيات محفوظة}}",
+            "previous": "السابق",
+            "next": "التالي",
+            "pageIndicator": "{current, number} / {total, number}"
+        },
+        "modal": {
+            "close": "أغلق إجراءات الآية",
+            "title": "إجراءات الآية",
+            "loadFailedTitle": "تعذّر تحميل إجراءات هذه الآية.",
+            "loadFailedDescription": "أغلق هذه النافذة ثم حاول مرة أخرى.",
+            "loading": "جارٍ تحميل إجراءات الآية…"
+        }
+    }
+}

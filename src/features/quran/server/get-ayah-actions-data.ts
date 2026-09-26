@@ -78,7 +78,9 @@ export default async function getAyahActionsData(
         arabicText,
         tafsirText: tafsirAyah.text,
         tafsirEditionName:
-            tafsirAyah.edition.englishName || tafsirAyah.edition.name,
+            preferences.language === "ar"
+                ? tafsirAyah.edition.name || tafsirAyah.edition.englishName
+                : tafsirAyah.edition.englishName || tafsirAyah.edition.name,
         tafsirEditionIdentifier: tafsirAyah.edition.identifier,
         tafsirDirection: tafsirAyah.edition.direction,
         audioStreams:

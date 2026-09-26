@@ -1,0 +1,69 @@
+{
+    "Home": {
+        "metadata": {
+            "title": "Read Quran & Track Your Memorization",
+            "description": "A focused Quran reader for reading, listening, translation, and tafsir."
+        },
+        "brand": "Quran Reader",
+        "header": {
+            "signIn": "Sign in",
+            "createAccount": "Create account"
+        },
+        "hero": {
+            "intro": "A quiet place to read, listen, and reflect",
+            "eyebrow": "Read without the noise",
+            "title": "Make room for the Quran.",
+            "description": "A focused reader that keeps the Arabic clear, remembers your place, and brings recitation, translation, and tafsir close when you need them.",
+            "beginReading": "Begin reading",
+            "continueReading": "Continue reading",
+            "explore": "Explore the Quran"
+        },
+        "progress": {
+            "startingPlace": "Your starting place",
+            "continueFrom": "Continue from",
+            "page": "Page {number, number}",
+            "surah": "Surah {number, number}",
+            "readingMode": "Reading mode",
+            "modePage": "Page by page",
+            "modeSurah": "Surah by surah",
+            "completeText": "Complete text",
+            "textSummary": "{surahs, number} surahs · {pages, number} pages"
+        },
+        "tools": {
+            "eyebrow": "Made for returning",
+            "title": "Everything useful. Nothing between you and the page.",
+            "description": "The reader stays simple by default and reveals more only when you ask for it.",
+            "place": {
+                "eyebrow": "Your place is remembered",
+                "title": "Leave and return without losing the thread.",
+                "description": "Read page by page or surah by surah, then continue from exactly where you stopped."
+            },
+            "recitation": {
+                "eyebrow": "Recitation, when you want it",
+                "title": "Listen alongside the words.",
+                "description": "Play one ayah or keep listening through the surah with your preferred recitation."
+            },
+            "meaning": {
+                "eyebrow": "Meaning within reach",
+                "title": "Open translation and tafsir without leaving the reader.",
+                "description": "Keep the Arabic at the center and bring supporting meaning into view only when needed."
+            }
+        },
+        "closing": {
+            "title": "Ready when you are.",
+            "description": "Begin with the first page or choose a surah that is already on your mind.",
+            "browse": "Browse all surahs"
+        },
+        "account": {
+            "openMenu": "Open account menu",
+            "readingSpace": "Your reading space",
+            "switchToLight": "Switch to light theme",
+            "switchToDark": "Switch to dark theme",
+            "continueReading": "Continue reading",
+            "dashboard": "Dashboard",
+            "profile": "Profile",
+            "settings": "Settings",
+            "signOut": "Sign out"
+        }
+    }
+}

@@ -2,6 +2,7 @@ import { BookOpen, SlidersHorizontal } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { createTranslator } from "next-intl";
 
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
@@ -9,9 +10,57 @@ import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
+import type { Edition, Reciter } from "@/features/quran/types";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import SettingsForm from "@/features/settings/components/settings-form";
 import getPreferences from "@/features/settings/server/get-preferences";
+import { getMessages, getTextDirection } from "@/i18n/config";
+import { cn } from "@/lib/utils";
+
+function normalizeReciterName(value: string) {
+    return value
+        .toLocaleLowerCase()
+        .replace(/quranexplorer\.com|ketaballah\.net/g, "")
+        .replace(/[^a-z0-9]+/g, "")
+        .trim();
+}
+
+function addArabicReciterNames(reciters: Reciter[], editions: Edition[]) {
+    const audioEditions = editions.filter(
+        (edition) => edition.format === "audio" && edition.language === "ar",
+    );
+
+    return reciters.map((reciter) => {
+        if (reciter.arabicName) return reciter;
+
+        const identifier = reciter.id.split("/").at(-1);
+        const identifierMatch = audioEditions.find(
+            (edition) => edition.identifier === identifier,
+        );
+        const normalizedName = normalizeReciterName(reciter.name);
+        const nameMatch = audioEditions
+            .map((edition) => ({
+                edition,
+                normalizedEnglishName: normalizeReciterName(
+                    edition.englishName,
+                ),
+            }))
+            .filter(
+                ({ normalizedEnglishName }) =>
+                    normalizedName === normalizedEnglishName ||
+                    normalizedName.includes(normalizedEnglishName) ||
+                    normalizedEnglishName.includes(normalizedName),
+            )
+            .sort(
+                (first, second) =>
+                    second.normalizedEnglishName.length -
+                    first.normalizedEnglishName.length,
+            )[0]?.edition;
+        const arabicName = (identifierMatch ?? nameMatch)?.name;
+
+        return arabicName ? { ...reciter, arabicName } : reciter;
+    });
+}
 
 export default async function SettingsPage() {
     const session = await auth.api.getSession({
@@ -29,6 +78,28 @@ export default async function SettingsPage() {
             getAvailableReciters(),
             getReadingProgress(),
         ]);
+    const messages = await getMessages(preferences.language);
+    const t = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Settings",
+    });
+    const homeT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Home",
+    });
+    const accountLabels = {
+        openMenu: homeT("account.openMenu"),
+        readingSpace: homeT("account.readingSpace"),
+        switchToLight: homeT("account.switchToLight"),
+        switchToDark: homeT("account.switchToDark"),
+        continueReading: homeT("account.continueReading"),
+        dashboard: homeT("account.dashboard"),
+        profile: homeT("account.profile"),
+        settings: homeT("account.settings"),
+        signOut: homeT("account.signOut"),
+    };
     const savedNumber =
         preferences.readingMode === "page"
             ? readingProgress.lastPageNumber
@@ -42,6 +113,8 @@ export default async function SettingsPage() {
             edition.type === "quran",
     );
 
+    const localizedReciters = addArabicReciterNames(reciters, editions);
+
     const translationEditions = editions.filter(
         (edition) =>
             edition.type === "translation" && edition.language === "en",
@@ -52,7 +125,14 @@ export default async function SettingsPage() {
     );
 
     return (
-        <main className="relative isolate min-h-dvh overflow-x-clip bg-background">
+        <main
+            lang={preferences.language}
+            dir={getTextDirection(preferences.language)}
+            className={cn(
+                "relative isolate min-h-dvh overflow-x-clip bg-background",
+                preferences.language === "ar" && "arabic-ui",
+            )}
+        >
             <PageBackground />
             <div className="mx-auto max-w-6xl px-5 sm:px-6">
                 <StickyAppHeader className="-mx-5 px-5 sm:-mx-6 sm:px-6">
@@ -63,12 +143,13 @@ export default async function SettingsPage() {
                         <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:-rotate-3">
                             <BookOpen aria-hidden="true" className="size-6" />
                         </span>
-                        Quran Reader
+                        {homeT("brand")}
                     </Link>
                     <UserMenu
                         name={session.user.name}
                         image={session.user.image}
                         continueReadingHref={continueReadingHref}
+                        labels={accountLabels}
                     />
                 </StickyAppHeader>
 
@@ -81,21 +162,20 @@ export default async function SettingsPage() {
                             />
                         </span>
                         <p className="mt-4 text-[0.68rem] font-semibold tracking-[0.22em] text-primary">
-                            READER PREFERENCES
+                            {t("page.eyebrow")}
                         </p>
                         <h1 className="mt-3 text-4xl font-semibold tracking-[-0.035em] sm:text-5xl">
-                            Shape your reading space.
+                            {t("page.title")}
                         </h1>
                         <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                            Choose a reading flow, editions, and display details
-                            that help you return to the Quran with focus.
+                            {t("page.description")}
                         </p>
                     </div>
 
                     <SettingsForm
                         preferences={preferences}
                         arabicEditions={arabicEditions}
-                        reciters={reciters}
+                        reciters={localizedReciters}
                         translationEditions={translationEditions}
                         tafsirEditions={tafsirEditions}
                     />

@@ -1,0 +1,84 @@
+{
+    "Profile": {
+        "page": {
+            "eyebrow": "ملفك الشخصي",
+            "title": "تفاصيل حسابك.",
+            "description": "حدّث الاسم والصورة المستخدمين في مساحة القراءة الشخصية.",
+            "memberSince": "عضو منذ {date}",
+            "emailVerified": "البريد الإلكتروني موثّق",
+            "emailNotVerified": "البريد الإلكتروني غير موثّق"
+        },
+        "aside": {
+            "chooseImage": "اختر صورة الملف الشخصي",
+            "eyebrow": "الملف الشخصي للحساب",
+            "description": "انقر على الصورة لتغييرها. تبقى تفاصيلك خاصة بمساحة قراءتك."
+        },
+        "personal": {
+            "title": "التفاصيل الشخصية",
+            "description": "اختر كيفية ظهور هويتك في قارئ القرآن.",
+            "displayName": "اسم العرض",
+            "profileImage": "صورة الملف الشخصي",
+            "imageUploaded": "تم رفع الصورة من جهازك",
+            "removeImage": "إزالة",
+            "imageUrlPlaceholder": "https://example.com/photo.jpg",
+            "imageHelp": "انقر على صورتك لرفع صورة، أو ألصق رابط صورة هنا.",
+            "save": "حفظ التفاصيل",
+            "saving": "جارٍ الحفظ…"
+        },
+        "access": {
+            "title": "الدخول إلى الحساب",
+            "description": "حافظ على تحديث بيانات الاتصال وكلمة المرور.",
+            "email": "البريد الإلكتروني",
+            "updateEmail": "تحديث البريد الإلكتروني",
+            "updating": "جارٍ التحديث…",
+            "passwordTitle": "كلمة المرور",
+            "passwordDescription": "استخدم كلمة مرور قوية وفريدة. سيؤدي تحديثها إلى تسجيل الخروج من جلساتك الأخرى.",
+            "currentPassword": "كلمة المرور الحالية",
+            "newPassword": "كلمة المرور الجديدة",
+            "updatePassword": "تحديث كلمة المرور"
+        },
+        "sessions": {
+            "title": "الجلسات النشطة",
+            "description": "راجع الأجهزة التي سُجّل الدخول إلى حسابك منها وأزل أي جلسة لا تعرفها.",
+            "loading": "جارٍ تحميل الجلسات النشطة…",
+            "empty": "لا توجد جلسات نشطة.",
+            "currentDetails": "هذا الجهاز · {date}",
+            "otherDetails": "تم تسجيل الدخول · {date}",
+            "current": "الحالية",
+            "signingOut": "جارٍ تسجيل الخروج…",
+            "signOut": "تسجيل الخروج"
+        },
+        "devices": {
+            "unknown": "جهاز غير معروف",
+            "webBrowser": "متصفح ويب",
+            "browserOnSystem": "{browser} على {system}"
+        },
+        "delete": {
+            "title": "حذف الحساب",
+            "description": "سيؤدي هذا إلى حذف ملفك الشخصي وتفضيلاتك وتقدّم القراءة المحفوظ نهائيًا. لا يمكن التراجع عن ذلك.",
+            "currentPassword": "كلمة المرور الحالية",
+            "confirmation": "اكتب DELETE للتأكيد",
+            "deleting": "جارٍ حذف الحساب…",
+            "submit": "حذف الحساب نهائيًا"
+        },
+        "feedback": {
+            "sessionsLoadFailed": "تعذّر تحميل جلساتك النشطة",
+            "nameRequired": "يرجى إدخال اسمك",
+            "profileUpdateFailed": "تعذّر تحديث ملفك الشخصي",
+            "profileUpdated": "تم تحديث الملف الشخصي",
+            "imageFileRequired": "يرجى اختيار ملف صورة",
+            "imageTooLarge": "يرجى اختيار صورة يقل حجمها عن 1 ميغابايت",
+            "imageReadFailed": "تعذّرت قراءة هذه الصورة",
+            "emailUnchanged": "هذا هو بريدك الإلكتروني الحالي بالفعل",
+            "emailUpdateFailed": "تعذّر تحديث بريدك الإلكتروني",
+            "emailUpdated": "تم تحديث البريد الإلكتروني",
+            "passwordTooShort": "يجب أن تتكوّن كلمة المرور الجديدة من 8 أحرف على الأقل",
+            "passwordUpdateFailed": "تعذّر تحديث كلمة المرور",
+            "passwordUpdated": "تم تحديث كلمة المرور وتسجيل الخروج من الجلسات الأخرى.",
+            "deleteConfirmationRequired": "اكتب «DELETE» لتأكيد حذف الحساب",
+            "deleteFailed": "تعذّر حذف حسابك",
+            "sessionRevokeFailed": "تعذّر إنهاء هذه الجلسة",
+            "sessionRevoked": "تم تسجيل الخروج من الجلسة"
+        }
+    }
+}

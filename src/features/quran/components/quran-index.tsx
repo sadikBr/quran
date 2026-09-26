@@ -1,6 +1,7 @@
 "use client";
 
 import { Search, SearchX, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ function normalizeForSearch(value: string) {
 }
 
 export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
+    const t = useTranslations("Reader");
     const [revelationTypeFilter, setRevelationTypeFilter] =
         useState<RevelationType>();
     const [searchFilter, setSearchFilter] = useState<string>("");
@@ -84,23 +86,23 @@ export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="relative w-full max-w-xl">
                     <Label htmlFor="search-filter" className="sr-only">
-                        Search surahs
+                        {t("index.searchLabel")}
                     </Label>
                     <Search
                         aria-hidden="true"
-                        className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground"
+                        className="pointer-events-none absolute top-1/2 start-3.5 size-4 -translate-y-1/2 text-muted-foreground"
                     />
                     <Input
                         id="search-filter"
                         value={searchFilter}
                         onChange={(e) => setSearchFilter(e.target.value)}
-                        placeholder="Search by name or meaning"
-                        className="h-11 border-0 bg-muted/55 pl-10 shadow-none placeholder:text-muted-foreground/75 focus-visible:bg-muted/75 focus-visible:ring-1"
+                        placeholder={t("index.searchPlaceholder")}
+                        className="h-11 border-0 bg-muted/55 ps-10 shadow-none placeholder:text-muted-foreground/75 focus-visible:bg-muted/75 focus-visible:ring-1"
                     />
                 </div>
                 <fieldset className="flex self-start rounded-full border-0 bg-muted/55 p-1 sm:self-auto">
                     <legend className="sr-only">
-                        Filter by revelation type
+                        {t("index.filterLegend")}
                     </legend>
                     <button
                         type="button"
@@ -114,7 +116,7 @@ export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
                         }
                         onClick={() => updateFilter(RevelationType.Meccan)}
                     >
-                        Meccan
+                        {t("index.meccan")}
                     </button>
                     <button
                         type="button"
@@ -128,7 +130,7 @@ export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
                         }
                         onClick={() => updateFilter(RevelationType.Medinan)}
                     >
-                        Medinan
+                        {t("index.medinan")}
                     </button>
                 </fieldset>
             </div>
@@ -141,7 +143,7 @@ export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
                     className="-mt-3 mb-4 gap-1.5 px-1 text-muted-foreground hover:bg-transparent hover:text-foreground"
                 >
                     <X aria-hidden="true" className="size-3.5" />
-                    Clear filters
+                    {t("index.clearFilters")}
                 </Button>
             )}
 
@@ -161,9 +163,11 @@ export default function QuranIndex({ surahs }: { surahs: SurahType[] }) {
                     <span className="mb-4 flex size-11 items-center justify-center rounded-full bg-accent text-accent-foreground">
                         <SearchX aria-hidden="true" className="size-5" />
                     </span>
-                    <h2 className="text-lg font-semibold">No surahs found</h2>
+                    <h2 className="text-lg font-semibold">
+                        {t("index.noResultsTitle")}
+                    </h2>
                     <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-                        Try a different search term or clear the active filters.
+                        {t("index.noResultsDescription")}
                     </p>
                 </div>
             )}

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { stripBasmalaPrefix } from "../helpers/basmala";
 import type { AyahType, Edition, SurahType } from "../types";
 import Ayah from "./ayah";
@@ -20,6 +23,7 @@ export default function Surah({
     translationEdition?: Edition;
     highlightAyahs?: boolean;
 }) {
+    const t = useTranslations("Reader");
     const beginsAtSurahStart = ayahs[0]?.numberInSurah === 1;
     const hasUnnumberedFatihaBasmala =
         beginsAtSurahStart &&
@@ -81,19 +85,19 @@ export default function Surah({
                     <div className="flex items-center justify-between gap-4">
                         <div>
                             <p className="text-[0.65rem] font-semibold tracking-[0.18em] text-primary uppercase">
-                                Translation
+                                {t("translation.eyebrow")}
                             </p>
                             <h2
                                 id={`translation-${surah.number}`}
                                 className="mt-1 text-lg font-semibold tracking-tight text-foreground"
                             >
-                                English translation
+                                {t("translation.title")}
                             </h2>
                         </div>
                         <p className="rounded-full bg-muted/55 px-3 py-1.5 text-xs text-muted-foreground">
                             {translationEdition?.englishName ??
                                 translationEdition?.name ??
-                                "Translation"}
+                                t("translation.fallback")}
                         </p>
                     </div>
                     <div className="mt-5 space-y-1 text-[0.95rem] leading-7 text-foreground/85 sm:text-base sm:leading-8">

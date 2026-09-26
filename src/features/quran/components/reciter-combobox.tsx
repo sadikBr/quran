@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import {
     Combobox,
     ComboboxCollection,
@@ -22,6 +23,7 @@ interface ReciterComboboxProps {
     onValueChange: (value: string) => void;
     disabled?: boolean;
     placeholder: string;
+    emptyMessage?: string;
     groupBy?: (reciter: Reciter) => string;
     getBadge?: (reciter: Reciter) => string | undefined;
     className?: string;
@@ -35,10 +37,12 @@ export default function ReciterCombobox({
     onValueChange,
     disabled = false,
     placeholder,
+    emptyMessage = "No matching reciters found.",
     groupBy,
     getBadge,
     className,
 }: ReciterComboboxProps) {
+    const locale = useLocale();
     const groupedReciters = new Map<string, Reciter[]>();
 
     for (const reciter of reciters) {
@@ -57,7 +61,9 @@ export default function ReciterCombobox({
         reciters.find((reciter) => reciter.id === value) ?? null;
 
     function getLabel(reciter: Reciter) {
-        return reciter.name;
+        return locale === "ar"
+            ? (reciter.arabicName ?? reciter.name)
+            : reciter.name;
     }
 
     return (
@@ -81,9 +87,12 @@ export default function ReciterCombobox({
                 placeholder={placeholder}
                 className={className}
             />
-            <ComboboxContent className="w-[min(28rem,calc(100vw-2rem))] min-w-0 rounded-xl bg-popover/98 p-1 shadow-xl ring-primary/10 backdrop-blur-md">
+            <ComboboxContent
+                dir={locale === "ar" ? "rtl" : "ltr"}
+                className="w-[min(28rem,calc(100vw-2rem))] min-w-0 rounded-xl bg-popover/98 p-1 shadow-xl ring-primary/10 backdrop-blur-md"
+            >
                 <ComboboxEmpty className="px-4 py-8">
-                    No matching reciters found.
+                    {emptyMessage}
                 </ComboboxEmpty>
                 <ComboboxList className="max-h-80 p-1">
                     {(
@@ -106,13 +115,13 @@ export default function ReciterCombobox({
                                             <ComboboxItem
                                                 key={reciter.id}
                                                 value={reciter}
-                                                className="min-h-10 rounded-lg px-3 py-2 pr-9 data-highlighted:bg-primary/8"
+                                                className="min-h-10 rounded-lg px-3 py-2 pe-9 data-highlighted:bg-primary/8"
                                             >
                                                 <span className="min-w-0 flex-1 leading-5">
                                                     {getLabel(reciter)}
                                                 </span>
                                                 {badge && (
-                                                    <span className="mr-1 shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[0.6rem] font-semibold tracking-wide text-primary uppercase">
+                                                    <span className="me-1 shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[0.6rem] font-semibold tracking-wide text-primary uppercase">
                                                         {badge}
                                                     </span>
                                                 )}

@@ -1,0 +1,43 @@
+{
+    "Auth": {
+        "signIn": {
+            "eyebrow": "WELCOME BACK",
+            "title": "Continue your reading.",
+            "description": "Sign in to return to your saved reading preferences.",
+            "submit": "Sign in",
+            "submitting": "Signing in…",
+            "prompt": "New to Quran Reader?",
+            "promptAction": "Create an account",
+            "errorTitle": "We couldn’t sign you in.",
+            "errorDescription": "Please check your email and password, then try again."
+        },
+        "signUp": {
+            "eyebrow": "BEGIN YOUR JOURNEY",
+            "title": "Create your reading space.",
+            "description": "Save your preferences and make the Quran reader yours.",
+            "submit": "Sign up",
+            "submitting": "Signing up…",
+            "prompt": "Already have an account?",
+            "promptAction": "Sign in",
+            "errorTitle": "We couldn’t create your account.",
+            "errorDescription": "Please review your details and try again."
+        },
+        "fields": {
+            "email": "Email",
+            "password": "Password",
+            "confirmPassword": "Confirm password",
+            "fullName": "Full name",
+            "imageUrl": "Image URL",
+            "namePlaceholder": "Your name",
+            "imagePlaceholder": "https://example.com/image.jpg"
+        },
+        "actions": { "reset": "Reset" },
+        "validation": {
+            "email": "Enter a valid email address.",
+            "passwordLength": "Password must be at least 8 characters.",
+            "nameLength": "Name must be at least 2 characters.",
+            "imageUrl": "Enter a valid image URL.",
+            "passwordMismatch": "The passwords do not match."
+        }
+    }
+}

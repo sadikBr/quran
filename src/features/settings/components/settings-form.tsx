@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ import {
 } from "../edition-compatibility";
 import {
     DEFAULT_PREFERENCES,
+    type Language,
     type Preferences,
     type ReadingMode,
     type Riwayah,
@@ -32,6 +34,26 @@ import updatePreferences from "../server/update-preferences";
 import PreferenceCard from "./settings-card";
 import SettingField from "./settings-field";
 import SettingsSection from "./settings-section";
+
+const TRANSLATION_NAME_KEYS = {
+    "en.ahmedali": "ahmedAli",
+    "en.ahmedraza": "ahmedRaza",
+    "en.arberry": "arberry",
+    "en.asad": "asad",
+    "en.daryabadi": "daryabadi",
+    "en.hilali": "hilali",
+    "en.pickthall": "pickthall",
+    "en.qaribullah": "qaribullah",
+    "en.sahih": "sahih",
+    "en.sarwar": "sarwar",
+    "en.yusufali": "yusufAli",
+    "en.maududi": "maududi",
+    "en.shakir": "shakir",
+    "en.itani": "itani",
+    "en.mubarakpuri": "mubarakpuri",
+    "en.qarai": "qarai",
+    "en.wahiduddin": "wahiduddin",
+} as const;
 
 export default function SettingsForm({
     preferences,
@@ -47,6 +69,10 @@ export default function SettingsForm({
     tafsirEditions: Edition[];
 }) {
     const router = useRouter();
+    const t = useTranslations("Settings");
+    const commonT = useTranslations("Common");
+    const locale = useLocale();
+    const direction = locale === "ar" ? "rtl" : "ltr";
     const { setTheme } = useTheme();
     const { setPreferences, theme: syncedTheme } = useSettings();
     const [values, setValues] = useState(() => {
@@ -173,14 +199,14 @@ export default function SettingsForm({
         setIsSaving(false);
 
         if (!result.success) {
-            toast.error(result.message);
+            toast.error(commonT("feedback.preferencesUpdateFailed"));
             return;
         }
 
         setTheme(values.theme);
         setPreferences(values);
         router.refresh();
-        toast.success("Your reading preferences have been saved.");
+        toast.success(t("footer.success"));
     }
 
     return (
@@ -194,15 +220,19 @@ export default function SettingsForm({
             <div className="space-y-16">
                 <div className="space-y-16">
                     <SettingsSection
-                        eyebrow="APPEARANCE"
-                        title="A comfortable environment"
+                        eyebrow={t("sections.appearance.eyebrow")}
+                        title={t("sections.appearance.title")}
                     >
                         <PreferenceCard
-                            title="Theme"
-                            description="Choose how the application looks across every page."
+                            title={t("theme.title")}
+                            description={t("theme.description")}
                         >
-                            <SettingField label="Theme" htmlFor="theme">
+                            <SettingField
+                                label={t("theme.label")}
+                                htmlFor="theme"
+                            >
                                 <Select
+                                    dir={direction}
                                     value={values.theme}
                                     onValueChange={(value) =>
                                         updateValue("theme", value as Theme)
@@ -216,13 +246,49 @@ export default function SettingsForm({
                                     </SelectTrigger>
                                     <SelectContent position="popper">
                                         <SelectItem value="system">
-                                            System
+                                            {t("theme.system")}
                                         </SelectItem>
                                         <SelectItem value="light">
-                                            Light
+                                            {t("theme.light")}
                                         </SelectItem>
                                         <SelectItem value="dark">
-                                            Dark
+                                            {t("theme.dark")}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </SettingField>
+                        </PreferenceCard>
+
+                        <PreferenceCard
+                            title={t("language.title")}
+                            description={t("language.description")}
+                        >
+                            <SettingField
+                                label={t("language.label")}
+                                htmlFor="language"
+                            >
+                                <Select
+                                    dir={direction}
+                                    value={values.language}
+                                    onValueChange={(value) =>
+                                        updateValue(
+                                            "language",
+                                            value as Language,
+                                        )
+                                    }
+                                >
+                                    <SelectTrigger
+                                        id="language"
+                                        className={selectClassName}
+                                    >
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper">
+                                        <SelectItem value="en">
+                                            {t("language.english")}
+                                        </SelectItem>
+                                        <SelectItem value="ar">
+                                            {t("language.arabic")}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -231,18 +297,19 @@ export default function SettingsForm({
                     </SettingsSection>
 
                     <SettingsSection
-                        eyebrow="READING FLOW"
-                        title="Follow your own pace"
+                        eyebrow={t("sections.readingFlow.eyebrow")}
+                        title={t("sections.readingFlow.title")}
                     >
                         <PreferenceCard
-                            title="Reading mode"
-                            description="Choose the way you would like to move through the Quran."
+                            title={t("readingMode.title")}
+                            description={t("readingMode.description")}
                         >
                             <SettingField
-                                label="Reading mode"
+                                label={t("readingMode.label")}
                                 htmlFor="readingMode"
                             >
                                 <Select
+                                    dir={direction}
                                     value={values.readingMode}
                                     onValueChange={(value) =>
                                         updateReadingMode(value as ReadingMode)
@@ -256,10 +323,10 @@ export default function SettingsForm({
                                     </SelectTrigger>
                                     <SelectContent position="popper">
                                         <SelectItem value="page">
-                                            Read by page
+                                            {t("readingMode.page")}
                                         </SelectItem>
                                         <SelectItem value="surah">
-                                            Read by surah
+                                            {t("readingMode.surah")}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -267,11 +334,15 @@ export default function SettingsForm({
                         </PreferenceCard>
 
                         <PreferenceCard
-                            title="Riwayah"
-                            description="Choose the Quranic transmission used for Arabic text and recitation."
+                            title={t("riwayah.title")}
+                            description={t("riwayah.description")}
                         >
-                            <SettingField label="Riwayah" htmlFor="riwayah">
+                            <SettingField
+                                label={t("riwayah.label")}
+                                htmlFor="riwayah"
+                            >
                                 <Select
+                                    dir={direction}
                                     value={values.riwayah}
                                     onValueChange={(value) =>
                                         updateRiwayah(value as Riwayah)
@@ -285,10 +356,10 @@ export default function SettingsForm({
                                     </SelectTrigger>
                                     <SelectContent position="popper">
                                         <SelectItem value="hafs">
-                                            Hafs ‘an ‘Asim
+                                            {t("riwayah.hafs")}
                                         </SelectItem>
                                         <SelectItem value="warsh">
-                                            Warsh ‘an Nafi‘
+                                            {t("riwayah.warsh")}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -296,8 +367,8 @@ export default function SettingsForm({
                         </PreferenceCard>
 
                         <PreferenceCard
-                            title="Show translation"
-                            description="Display English beneath the Arabic text."
+                            title={t("translationVisibility.title")}
+                            description={t("translationVisibility.description")}
                         >
                             <div className="flex min-h-11 items-center justify-between gap-4 px-1">
                                 <label
@@ -305,8 +376,8 @@ export default function SettingsForm({
                                     className="cursor-pointer text-sm font-medium"
                                 >
                                     {values.showTranslation
-                                        ? "Shown"
-                                        : "Hidden"}
+                                        ? t("translationVisibility.shown")
+                                        : t("translationVisibility.hidden")}
                                 </label>
                                 <Checkbox
                                     id="show-translation"
@@ -322,8 +393,8 @@ export default function SettingsForm({
                         </PreferenceCard>
 
                         <PreferenceCard
-                            title="Continuous recitation"
-                            description="After an ayah finishes, continue with the next ayah in your current reading view."
+                            title={t("continuousRecitation.title")}
+                            description={t("continuousRecitation.description")}
                         >
                             <div className="flex min-h-11 items-center justify-between gap-4 px-1">
                                 <label
@@ -331,8 +402,8 @@ export default function SettingsForm({
                                     className="cursor-pointer text-sm font-medium"
                                 >
                                     {values.continuousRecitation
-                                        ? "Continue automatically"
-                                        : "Ayah by ayah"}
+                                        ? t("continuousRecitation.automatic")
+                                        : t("continuousRecitation.manual")}
                                 </label>
                                 <Checkbox
                                     id="continuous-recitation"
@@ -350,18 +421,21 @@ export default function SettingsForm({
                 </div>
 
                 <SettingsSection
-                    eyebrow="QURAN TEXT"
-                    title="Choose your editions"
+                    eyebrow={t("sections.quranText.eyebrow")}
+                    title={t("sections.quranText.title")}
                 >
                     <PreferenceCard
-                        title="Arabic edition"
+                        title={t("arabicEdition.title")}
                         description={
                             values.riwayah === "warsh"
-                                ? "Warsh uses its dedicated Quran script; your Hafs edition remains saved for when you switch back."
-                                : "Choose the Arabic text style used throughout the reader."
+                                ? t("arabicEdition.warshDescription")
+                                : t("arabicEdition.description")
                         }
                     >
-                        <SettingField label="Edition" htmlFor="arabic-edition">
+                        <SettingField
+                            label={t("arabicEdition.label")}
+                            htmlFor="arabic-edition"
+                        >
                             <EditionCombobox
                                 id="arabic-edition"
                                 editions={availableArabicEditions}
@@ -370,18 +444,22 @@ export default function SettingsForm({
                                     updateValue("arabicEdition", value)
                                 }
                                 disabled={values.riwayah === "warsh"}
-                                placeholder="Search text editions…"
+                                placeholder={t("arabicEdition.placeholder")}
                                 className={selectClassName}
-                                getBadge={() => "Text"}
+                                emptyMessage={t("arabicEdition.empty")}
+                                getBadge={() => t("arabicEdition.badge")}
                             />
                         </SettingField>
                     </PreferenceCard>
 
                     <PreferenceCard
-                        title="Reciter"
-                        description="Choose the voice used for ayah playback and full recitation."
+                        title={t("reciter.title")}
+                        description={t("reciter.description")}
                     >
-                        <SettingField label="Reciter" htmlFor="reciter">
+                        <SettingField
+                            label={t("reciter.label")}
+                            htmlFor="reciter"
+                        >
                             <ReciterCombobox
                                 id="reciter"
                                 reciters={availableReciters}
@@ -389,12 +467,13 @@ export default function SettingsForm({
                                 onValueChange={(value) =>
                                     updateValue("reciter", value)
                                 }
-                                placeholder="Search reciters…"
+                                placeholder={t("reciter.placeholder")}
                                 className={selectClassName}
+                                emptyMessage={t("reciter.empty")}
                                 groupBy={(reciter) =>
                                     reciter.scope === "surah"
-                                        ? "Whole-surah reciters"
-                                        : "Ayah-by-ayah reciters"
+                                        ? t("reciter.wholeSurah")
+                                        : t("reciter.ayahByAyah")
                                 }
                                 getBadge={(reciter) =>
                                     reciter.bitrate_kbps
@@ -406,19 +485,19 @@ export default function SettingsForm({
                         <p className="text-xs leading-5 text-muted-foreground">
                             {values.riwayah === "warsh" &&
                             values.readingMode === "page"
-                                ? "Warsh page mode supports full-page recitation only; individual ayah playback and highlighting are hidden because recording boundaries vary by source."
+                                ? t("reciter.warshPageHint")
                                 : values.readingMode === "surah"
-                                  ? "Surah mode supports ayah-by-ayah and whole-surah reciters."
-                                  : "Page mode uses reciters with audio for each ayah."}
+                                  ? t("reciter.surahHint")
+                                  : t("reciter.pageHint")}
                         </p>
                     </PreferenceCard>
 
                     <PreferenceCard
-                        title="English translation"
-                        description="Set the translation shown alongside the Arabic text."
+                        title={t("translation.title")}
+                        description={t("translation.description")}
                     >
                         <SettingField
-                            label="English edition"
+                            label={t("translation.label")}
                             htmlFor="translation-edition"
                         >
                             <EditionCombobox
@@ -428,17 +507,31 @@ export default function SettingsForm({
                                 onValueChange={(value) =>
                                     updateValue("translationEdition", value)
                                 }
-                                placeholder="Search translations…"
+                                placeholder={t("translation.placeholder")}
                                 className={selectClassName}
+                                emptyMessage={t("translation.empty")}
+                                getLabel={(edition) => {
+                                    const key =
+                                        TRANSLATION_NAME_KEYS[
+                                            edition.identifier as keyof typeof TRANSLATION_NAME_KEYS
+                                        ];
+
+                                    return locale === "ar" && key
+                                        ? t(`translation.editions.${key}`)
+                                        : edition.englishName || edition.name;
+                                }}
                             />
                         </SettingField>
                     </PreferenceCard>
 
                     <PreferenceCard
-                        title="Tafsir edition"
-                        description="Choose the commentary that will be used when you explore an ayah."
+                        title={t("tafsir.title")}
+                        description={t("tafsir.description")}
                     >
-                        <SettingField label="Tafsir" htmlFor="tafsir-edition">
+                        <SettingField
+                            label={t("tafsir.label")}
+                            htmlFor="tafsir-edition"
+                        >
                             <EditionCombobox
                                 id="tafsir-edition"
                                 editions={tafsirEditions}
@@ -446,8 +539,9 @@ export default function SettingsForm({
                                 onValueChange={(value) =>
                                     updateValue("tafsirEdition", value)
                                 }
-                                placeholder="Search tafsir editions…"
+                                placeholder={t("tafsir.placeholder")}
                                 className={selectClassName}
+                                emptyMessage={t("tafsir.empty")}
                             />
                         </SettingField>
                     </PreferenceCard>
@@ -456,14 +550,14 @@ export default function SettingsForm({
 
             <div className="mt-16 flex flex-col gap-5 pb-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-6 text-muted-foreground">
-                    Changes will apply to your next reading session.
+                    {t("footer.note")}
                 </p>
                 <Button
                     type="submit"
                     disabled={isSaving}
                     className="h-10 rounded-xl px-6 shadow-sm shadow-primary/10"
                 >
-                    {isSaving ? "Saving…" : "Save preferences"}
+                    {isSaving ? t("footer.saving") : t("footer.save")}
                 </Button>
             </div>
         </form>

@@ -3,6 +3,7 @@
 import { useForm } from "@tanstack/react-form";
 import { ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -24,23 +25,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/features/auth/auth-client";
 
-const formSchema = z
-    .object({
-        email: z.email("Email is required and must be a valid email address."),
-        password: z.string().min(8, "Password must be at least 8 characters."),
-        confirmPassword: z
-            .string()
-            .min(8, "Password must be at least 8 characters."),
-        name: z.string().min(2, "Name must be at least 2 characters."),
-        image: z.url("Invalid URL").or(z.literal("")),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-        message: "The passwords are not matching.",
-        path: ["confirmPassword"],
-    });
-
 export default function SignUpPage() {
     const [loading, setLoading] = useState(false);
+    const locale = useLocale();
+    const t = useTranslations("Auth");
+    const formSchema = z
+        .object({
+            email: z.email(t("validation.email")),
+            password: z.string().min(8, t("validation.passwordLength")),
+            confirmPassword: z.string().min(8, t("validation.passwordLength")),
+            name: z.string().min(2, t("validation.nameLength")),
+            image: z.url(t("validation.imageUrl")).or(z.literal("")),
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+            message: t("validation.passwordMismatch"),
+            path: ["confirmPassword"],
+        });
 
     const form = useForm({
         defaultValues: {
@@ -65,12 +65,10 @@ export default function SignUpPage() {
                     onSuccess: (_ctx) => {
                         window.location.assign("/dashboard");
                     },
-                    onError: (ctx) => {
+                    onError: (_ctx) => {
                         setLoading(false);
-                        toast.error("We couldn't create your account.", {
-                            description:
-                                ctx.error.message ||
-                                "Please review your details and try again.",
+                        toast.error(t("signUp.errorTitle"), {
+                            description: t("signUp.errorDescription"),
                         });
                     },
                 },
@@ -79,20 +77,24 @@ export default function SignUpPage() {
     });
 
     return (
-        <main className="flex min-h-dvh items-center justify-center px-4 py-24 sm:px-6">
+        <main
+            lang={locale}
+            dir={locale === "ar" ? "rtl" : "ltr"}
+            className="flex min-h-dvh items-center justify-center px-4 py-24 sm:px-6"
+        >
             <Card className="w-full max-w-lg gap-0 border-primary/15 bg-card/90 py-0 shadow-lg backdrop-blur-sm">
                 <CardHeader className="border-b border-primary/10 px-6 pt-7 pb-6 sm:px-8">
                     <span className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                         <BookOpen aria-hidden="true" className="size-5" />
                     </span>
                     <p className="text-xs font-semibold tracking-[0.18em] text-primary">
-                        BEGIN YOUR JOURNEY
+                        {t("signUp.eyebrow")}
                     </p>
                     <CardTitle className="text-2xl tracking-tight">
-                        Create your reading space.
+                        {t("signUp.title")}
                     </CardTitle>
                     <CardDescription className="leading-6">
-                        Save your preferences and make the Quran reader yours.
+                        {t("signUp.description")}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="px-6 py-6 sm:px-8">
@@ -104,16 +106,15 @@ export default function SignUpPage() {
                         }}
                     >
                         <FieldGroup>
-                            <form.Field
-                                name="email"
-                                children={(field) => {
+                            <form.Field name="email">
+                                {(field) => {
                                     const isInvalid =
                                         field.state.meta.isTouched &&
                                         !field.state.meta.isValid;
                                     return (
                                         <Field data-invalid={isInvalid}>
                                             <FieldLabel htmlFor={field.name}>
-                                                Email
+                                                {t("fields.email")}
                                             </FieldLabel>
                                             <Input
                                                 id={field.name}
@@ -139,17 +140,16 @@ export default function SignUpPage() {
                                         </Field>
                                     );
                                 }}
-                            />
-                            <form.Field
-                                name="password"
-                                children={(field) => {
+                            </form.Field>
+                            <form.Field name="password">
+                                {(field) => {
                                     const isInvalid =
                                         field.state.meta.isTouched &&
                                         !field.state.meta.isValid;
                                     return (
                                         <Field data-invalid={isInvalid}>
                                             <FieldLabel htmlFor={field.name}>
-                                                Password
+                                                {t("fields.password")}
                                             </FieldLabel>
                                             <Input
                                                 type="password"
@@ -176,17 +176,16 @@ export default function SignUpPage() {
                                         </Field>
                                     );
                                 }}
-                            />
-                            <form.Field
-                                name="confirmPassword"
-                                children={(field) => {
+                            </form.Field>
+                            <form.Field name="confirmPassword">
+                                {(field) => {
                                     const isInvalid =
                                         field.state.meta.isTouched &&
                                         !field.state.meta.isValid;
                                     return (
                                         <Field data-invalid={isInvalid}>
                                             <FieldLabel htmlFor={field.name}>
-                                                Confirm Password
+                                                {t("fields.confirmPassword")}
                                             </FieldLabel>
                                             <Input
                                                 type="password"
@@ -213,17 +212,16 @@ export default function SignUpPage() {
                                         </Field>
                                     );
                                 }}
-                            />
-                            <form.Field
-                                name="name"
-                                children={(field) => {
+                            </form.Field>
+                            <form.Field name="name">
+                                {(field) => {
                                     const isInvalid =
                                         field.state.meta.isTouched &&
                                         !field.state.meta.isValid;
                                     return (
                                         <Field data-invalid={isInvalid}>
                                             <FieldLabel htmlFor={field.name}>
-                                                Full Name
+                                                {t("fields.fullName")}
                                             </FieldLabel>
                                             <Input
                                                 id={field.name}
@@ -236,7 +234,9 @@ export default function SignUpPage() {
                                                     )
                                                 }
                                                 aria-invalid={isInvalid}
-                                                placeholder="John Doe"
+                                                placeholder={t(
+                                                    "fields.namePlaceholder",
+                                                )}
                                                 autoComplete="off"
                                             />
                                             {isInvalid && (
@@ -249,17 +249,16 @@ export default function SignUpPage() {
                                         </Field>
                                     );
                                 }}
-                            />
-                            <form.Field
-                                name="image"
-                                children={(field) => {
+                            </form.Field>
+                            <form.Field name="image">
+                                {(field) => {
                                     const isInvalid =
                                         field.state.meta.isTouched &&
                                         !field.state.meta.isValid;
                                     return (
                                         <Field data-invalid={isInvalid}>
                                             <FieldLabel htmlFor={field.name}>
-                                                Image URL
+                                                {t("fields.imageUrl")}
                                             </FieldLabel>
                                             <Input
                                                 id={field.name}
@@ -272,7 +271,9 @@ export default function SignUpPage() {
                                                     )
                                                 }
                                                 aria-invalid={isInvalid}
-                                                placeholder="https://example.com/image.jpg"
+                                                placeholder={t(
+                                                    "fields.imagePlaceholder",
+                                                )}
                                                 autoComplete="off"
                                             />
                                             {isInvalid && (
@@ -285,7 +286,7 @@ export default function SignUpPage() {
                                         </Field>
                                     );
                                 }}
-                            />
+                            </form.Field>
                         </FieldGroup>
                     </form>
                 </CardContent>
@@ -296,20 +297,22 @@ export default function SignUpPage() {
                             variant="outline"
                             onClick={() => form.reset()}
                         >
-                            Reset
+                            {t("actions.reset")}
                         </Button>
                         <Button type="submit" form="signup-form">
-                            {loading ? "Signing Up..." : "Sign Up"}
+                            {loading
+                                ? t("signUp.submitting")
+                                : t("signUp.submit")}
                             <ArrowRight aria-hidden="true" />
                         </Button>
                     </Field>
                     <p className="text-center text-sm text-muted-foreground">
-                        Already have an account?{" "}
+                        {t("signUp.prompt")}{" "}
                         <Link
                             href="/sign-in"
                             className="font-medium text-primary underline-offset-4 hover:underline"
                         >
-                            Sign in
+                            {t("signUp.promptAction")}
                         </Link>
                     </p>
                 </CardFooter>

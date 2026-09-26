@@ -1,15 +1,18 @@
 import z from "zod";
 
 export const THEMES = ["system", "light", "dark"] as const;
+export const LANGUAGES = ["en", "ar"] as const;
 export const READING_MODES = ["page", "surah"] as const;
 export const RIWAYAHS = ["hafs", "warsh"] as const;
 
 export type Theme = (typeof THEMES)[number];
+export type Language = (typeof LANGUAGES)[number];
 export type ReadingMode = (typeof READING_MODES)[number];
 export type Riwayah = (typeof RIWAYAHS)[number];
 
 export interface Preferences {
     theme: Theme;
+    language: Language;
     riwayah: Riwayah;
     arabicEdition: string;
     reciter: string;
@@ -22,6 +25,7 @@ export interface Preferences {
 
 export const DEFAULT_PREFERENCES: Preferences = {
     theme: "light",
+    language: "en",
     riwayah: "hafs",
     arabicEdition: "quran-simple",
     reciter: "everyayah/Alafasy_64kbps",
@@ -34,6 +38,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
 
 export const preferencesZodSchema = z.object({
     theme: z.enum(THEMES),
+    language: z.enum(LANGUAGES),
     riwayah: z.enum(RIWAYAHS),
     arabicEdition: z.string().min(1),
     reciter: z.string().min(1),

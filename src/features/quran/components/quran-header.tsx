@@ -1,15 +1,24 @@
+"use client";
+
 import { ArrowRight, BookOpen } from "lucide-react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 export default function QuranHeader({
     startReadingHref,
-    startReadingLabel = "Start reading",
+    startReadingLabel,
+    hasSavedProgress = false,
     showSurahIndex,
 }: {
     startReadingHref?: string;
     startReadingLabel?: string;
+    hasSavedProgress?: boolean;
     showSurahIndex?: boolean;
 }) {
+    const t = useTranslations("Reader");
+    const locale = useLocale();
+
     return (
         <header className="z-10 shrink-0 bg-background/85 backdrop-blur-sm">
             <div className="mx-auto flex h-20 max-w-5xl items-center justify-between gap-4 px-4">
@@ -21,11 +30,11 @@ export default function QuranHeader({
                         <BookOpen aria-hidden="true" className="size-5" />
                     </span>
                     <span className="truncate text-foreground">
-                        Quran Reader
+                        {t("header.brand")}
                     </span>
                 </Link>
                 <nav
-                    aria-label="Quran navigation"
+                    aria-label={t("header.navigation")}
                     className="flex shrink-0 items-center gap-3 text-sm"
                 >
                     {showSurahIndex && (
@@ -33,7 +42,7 @@ export default function QuranHeader({
                             href="/quran"
                             className="text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
-                            Surah index
+                            {t("header.surahIndex")}
                         </Link>
                     )}
                     {showSurahIndex && startReadingHref && (
@@ -46,10 +55,18 @@ export default function QuranHeader({
                             href={startReadingHref}
                             className="group inline-flex items-center gap-1.5 font-semibold text-primary transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
-                            {startReadingLabel}
+                            {startReadingLabel ??
+                                t(
+                                    hasSavedProgress
+                                        ? "header.continueReading"
+                                        : "header.startReading",
+                                )}
                             <ArrowRight
                                 aria-hidden="true"
-                                className="size-3.5 transition-transform group-hover:translate-x-0.5"
+                                className={cn(
+                                    "size-3.5 transition-transform group-hover:translate-x-0.5",
+                                    locale === "ar" && "rotate-180",
+                                )}
                             />
                         </Link>
                     )}

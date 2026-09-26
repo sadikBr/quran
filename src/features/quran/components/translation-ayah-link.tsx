@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import showArabicAyah from "../helpers/show-arabic-ayah";
 
@@ -10,6 +11,7 @@ export default function TranslationAyahLink({
     ayahNumber: number;
     numberInSurah: number;
 }) {
+    const t = useTranslations("Reader");
     const clearHighlightRef = useRef<(() => void) | null>(null);
 
     useEffect(() => {
@@ -26,7 +28,7 @@ export default function TranslationAyahLink({
             type="button"
             onClick={revealArabicAyah}
             className="mt-1 flex size-6 items-center justify-center rounded-full bg-primary/10 text-[0.65rem] font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label={`Show Arabic ayah ${numberInSurah}`}
+            aria-label={t("ayah.showArabic", { number: numberInSurah })}
         >
             {numberInSurah}
         </button>
