@@ -1,0 +1,73 @@
+{
+    "Wird": {
+        "eyebrow": "DAILY WIRD",
+        "title": "A steady portion, every day.",
+        "description": "Choose a portion that fits your rhythm. Complete it when you finish reading, and your next Wird will be prepared for the following day.",
+        "setup": {
+            "title": "Set your daily Wird",
+            "description": "Begin at the start of the Quran and continue in order without losing your place.",
+            "unitLabel": "Measure my Wird by",
+            "amountLabel": "Daily amount",
+            "preview": "{amount, number} {unit} each day",
+            "decrease": "Decrease daily amount",
+            "increase": "Increase daily amount",
+            "save": "Create my Wird",
+            "update": "Update my Wird",
+            "saving": "Saving…",
+            "success": "Your daily Wird has been saved.",
+            "error": "We could not save your Wird. Please try again."
+        },
+        "units": {
+            "ayah": "Ayahs",
+            "quarter": "Hizb quarters",
+            "hizb": "Hizbs",
+            "surah": "Surahs"
+        },
+        "today": {
+            "eyebrow": "TODAY’S PORTION",
+            "goal": "{amount, number} {unit}",
+            "sameSurah": "{surah}, ayahs {start, number}–{end, number}",
+            "acrossSurahs": "From {startSurah}, ayah {startAyah, number}, to {endSurah}, ayah {endAyah, number}",
+            "pages": "Pages {start, number}–{end, number}",
+            "singlePage": "Page {page, number}",
+            "carriedOver": "Carry-over portion",
+            "carriedOverDescription": "This portion is waiting from an earlier day. Complete it before moving forward.",
+            "ready": "Ready for today",
+            "readyDescription": "Read at your own pace, then mark the portion complete when you reach the end.",
+            "completed": "Completed for today",
+            "completedDescription": "Beautifully done. Your next portion will be prepared tomorrow.",
+            "startReading": "Start today’s Wird",
+            "continueReading": "Continue today’s Wird",
+            "markComplete": "Mark as complete",
+            "completing": "Completing…",
+            "completeSuccess": "Today’s Wird is complete.",
+            "completeError": "We could not complete this Wird. Please try again.",
+            "changeGoal": "Change daily goal"
+        },
+        "dashboard": {
+            "eyebrow": "Your daily Wird",
+            "emptyTitle": "Build a steady Quran habit",
+            "emptyDescription": "Choose a small daily portion and always know exactly where to continue.",
+            "setup": "Set a daily Wird",
+            "open": "Open today’s Wird",
+            "completed": "Today’s portion is complete",
+            "pending": "Your portion is ready"
+        },
+        "reader": {
+            "title": "Today’s Wird",
+            "back": "Back to Wird overview",
+            "progress": "Reading progress",
+            "progressSummary": "{completed, number} of {total, number} ayahs · {percentage, number}%",
+            "markReached": "I reached here",
+            "reached": "Reached",
+            "saving": "Saving…",
+            "saved": "Your reading place has been saved.",
+            "saveError": "We could not save your reading place.",
+            "finishDescription": "When you have read the entire assigned portion, complete today’s Wird.",
+            "empty": "There are no ayahs in this portion. Return to the overview and update your goal."
+        },
+        "navigation": {
+            "back": "Back to dashboard"
+        }
+    }
+}

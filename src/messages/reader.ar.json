@@ -76,6 +76,7 @@
         "audio": {
             "pageRecitation": "تلاوة الصفحة كاملة",
             "surahRecitation": "تلاوة السورة كاملة",
+            "wirdRecitation": "تلاوة الورد",
             "restart": "إعادة {scope} من البداية",
             "retry": "إعادة تشغيل {scope}",
             "loading": "جارٍ إعداد {scope}",

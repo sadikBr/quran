@@ -6,6 +6,7 @@ import englishHomeMessages from "@/messages/en.json";
 import englishProfileMessages from "@/messages/profile.en.json";
 import englishReaderMessages from "@/messages/reader.en.json";
 import englishSettingsMessages from "@/messages/settings.en.json";
+import englishWirdMessages from "@/messages/wird.en.json";
 
 const englishMessages = {
     ...englishAuthMessages,
@@ -15,6 +16,7 @@ const englishMessages = {
     ...englishProfileMessages,
     ...englishReaderMessages,
     ...englishSettingsMessages,
+    ...englishWirdMessages,
 };
 
 export type AppMessages = typeof englishMessages;
@@ -25,7 +27,7 @@ const messageLoaders: Record<
 > = {
     en: async () => ({ default: englishMessages }),
     ar: async () => {
-        const [auth, common, home, dashboard, profile, reader, settings] =
+        const [auth, common, home, dashboard, profile, reader, settings, wird] =
             await Promise.all([
                 import("@/messages/auth.ar.json"),
                 import("@/messages/common.ar.json"),
@@ -34,6 +36,7 @@ const messageLoaders: Record<
                 import("@/messages/profile.ar.json"),
                 import("@/messages/reader.ar.json"),
                 import("@/messages/settings.ar.json"),
+                import("@/messages/wird.ar.json"),
             ]);
 
         return {
@@ -45,6 +48,7 @@ const messageLoaders: Record<
                 ...profile.default,
                 ...reader.default,
                 ...settings.default,
+                ...wird.default,
             },
         };
     },

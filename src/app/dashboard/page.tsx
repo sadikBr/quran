@@ -1,9 +1,4 @@
-import {
-    ArrowRight,
-    BookOpen,
-    ChartNoAxesCombined,
-    Target,
-} from "lucide-react";
+import { ArrowRight, BookOpen, ChartNoAxesCombined } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -20,14 +15,12 @@ import getReadingProgress from "@/features/reading-progress/server/get-reading-p
 import SavedAyahsSection from "@/features/saved-ayahs/components/saved-ayahs-section";
 import getSavedAyahs from "@/features/saved-ayahs/server/get-saved-ayahs";
 import getPreferences from "@/features/settings/server/get-preferences";
+import WirdDashboardCard from "@/features/wird/components/wird-dashboard-card";
+import getDailyWird from "@/features/wird/server/get-daily-wird";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
 const upcomingFeatures = [
-    {
-        icon: Target,
-        key: "memorizationGoals" as const,
-    },
     {
         icon: ChartNoAxesCombined,
         key: "progressInsights" as const,
@@ -50,6 +43,10 @@ export default async function DashboardPage() {
             getSavedAyahs(session.user.id),
             getSurahsMeta().catch(() => []),
         ]);
+    const dailyWird = await getDailyWird(
+        session.user.id,
+        preferences.arabicEdition,
+    );
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
@@ -60,6 +57,11 @@ export default async function DashboardPage() {
         locale: preferences.language,
         messages,
         namespace: "Home",
+    });
+    const wirdT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Wird",
     });
     const savedNumber =
         preferences.readingMode === "page"
@@ -208,6 +210,28 @@ export default async function DashboardPage() {
                             </div>
                         </div>
                     </section>
+
+                    <WirdDashboardCard
+                        wird={dailyWird}
+                        isArabic={preferences.language === "ar"}
+                        labels={{
+                            eyebrow: wirdT("dashboard.eyebrow"),
+                            emptyTitle: wirdT("dashboard.emptyTitle"),
+                            emptyDescription: wirdT(
+                                "dashboard.emptyDescription",
+                            ),
+                            setup: wirdT("dashboard.setup"),
+                            open: wirdT("dashboard.open"),
+                            completed: wirdT("dashboard.completed"),
+                            pending: wirdT("dashboard.pending"),
+                            goal: dailyWird
+                                ? wirdT("today.goal", {
+                                      amount: dailyWird.amount,
+                                      unit: wirdT(`units.${dailyWird.unit}`),
+                                  })
+                                : undefined,
+                        }}
+                    />
 
                     <QuranAudioProvider>
                         <SavedAyahsSection

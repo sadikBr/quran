@@ -1,0 +1,73 @@
+{
+    "Wird": {
+        "eyebrow": "وِرْدُكَ اليَوْمِيّ",
+        "title": "قليلٌ دائم، وخيرٌ متتابع.",
+        "description": "اختر مقدارًا يلائم يومك، فإذا أتممت قراءته أثبت إنجازك، وهيّأنا لك الورد الذي يليه في اليوم التالي.",
+        "setup": {
+            "title": "حدّد وردك اليومي",
+            "description": "ابدأ من أول المصحف، وتقدّم فيه على الترتيب من غير أن يضيع موضعك.",
+            "unitLabel": "أقسّم وردي بحسب",
+            "amountLabel": "المقدار اليومي",
+            "preview": "{amount, number} {unit} كل يوم",
+            "decrease": "تقليل المقدار اليومي",
+            "increase": "زيادة المقدار اليومي",
+            "save": "اعتماد الورد",
+            "update": "تعديل الورد",
+            "saving": "جارٍ الحفظ…",
+            "success": "حُفظ وردك اليومي.",
+            "error": "تعذّر حفظ وردك. أعد المحاولة."
+        },
+        "units": {
+            "ayah": "آيات",
+            "quarter": "أرباع أحزاب",
+            "hizb": "أحزاب",
+            "surah": "سور"
+        },
+        "today": {
+            "eyebrow": "وِرْدُ اليَوْم",
+            "goal": "{amount, number} {unit}",
+            "sameSurah": "سورة {surah}، من الآية {start, number} إلى الآية {end, number}",
+            "acrossSurahs": "من سورة {startSurah}، الآية {startAyah, number}، إلى سورة {endSurah}، الآية {endAyah, number}",
+            "pages": "من الصفحة {start, number} إلى الصفحة {end, number}",
+            "singlePage": "الصفحة {page, number}",
+            "carriedOver": "وردٌ مُرحّل",
+            "carriedOverDescription": "هذا الورد باقٍ من يوم سابق. أتممه أولًا، ثم واصل مسيرك.",
+            "ready": "وردك مهيّأ لليوم",
+            "readyDescription": "اقرأ على مهل، ثم أثبت إتمام الورد حين تبلغ آخره.",
+            "completed": "تمّ ورد اليوم",
+            "completedDescription": "تقبّل الله منك. نهيّئ لك الورد التالي غدًا بإذن الله.",
+            "startReading": "ابدأ ورد اليوم",
+            "continueReading": "أكمل ورد اليوم",
+            "markComplete": "إثبات الإتمام",
+            "completing": "جارٍ الإثبات…",
+            "completeSuccess": "أتممت ورد اليوم، بارك الله فيك.",
+            "completeError": "تعذّر إثبات إتمام الورد. أعد المحاولة.",
+            "changeGoal": "تعديل مقدار الورد"
+        },
+        "dashboard": {
+            "eyebrow": "وردك اليومي",
+            "emptyTitle": "اجعل لك عهدًا يوميًّا مع القرآن",
+            "emptyDescription": "اختر مقدارًا يسيرًا، واعرف في كل يوم من أين تبدأ وإلى أين تنتهي.",
+            "setup": "حدّد وردك اليومي",
+            "open": "عرض ورد اليوم",
+            "completed": "أتممت ورد اليوم",
+            "pending": "وردك في انتظارك"
+        },
+        "reader": {
+            "title": "ورد اليوم",
+            "back": "العودة إلى ملخّص الورد",
+            "progress": "موضع القراءة",
+            "progressSummary": "أتممت {completed, number} من {total, number} آية · {percentage, number}%",
+            "markReached": "بلغتُ هذا الموضع",
+            "reached": "تمّت قراءتها",
+            "saving": "جارٍ الحفظ…",
+            "saved": "حُفظ موضع قراءتك.",
+            "saveError": "تعذّر حفظ موضع قراءتك.",
+            "finishDescription": "إذا فرغت من قراءة المقدار كلّه، فأثبت إتمام ورد اليوم.",
+            "empty": "لا توجد آيات ضمن هذا المقدار. عُد إلى ملخّص الورد وعدّل هدفك."
+        },
+        "navigation": {
+            "back": "العودة إلى الرئيسية"
+        }
+    }
+}

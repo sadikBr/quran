@@ -24,7 +24,7 @@ export default function QuranAudioQueue({
     queue: QuranAudioQueueItem[];
     continuousRecitation: boolean;
     showReadAll?: boolean;
-    scope?: "page" | "surah";
+    scope?: "page" | "surah" | "wird";
     className?: string;
 }) {
     const t = useTranslations("Reader");
@@ -52,7 +52,11 @@ export default function QuranAudioQueue({
     const hasError = queueStatus === "error";
     const isPaused = queueStatus === "paused";
     const scopeLabel = t(
-        scope === "surah" ? "audio.surahRecitation" : "audio.pageRecitation",
+        scope === "surah"
+            ? "audio.surahRecitation"
+            : scope === "wird"
+              ? "audio.wirdRecitation"
+              : "audio.pageRecitation",
     );
 
     return (

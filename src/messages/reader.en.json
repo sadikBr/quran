@@ -76,6 +76,7 @@
         "audio": {
             "pageRecitation": "Page recitation",
             "surahRecitation": "Surah recitation",
+            "wirdRecitation": "Wird recitation",
             "restart": "Restart {scope}",
             "retry": "Retry {scope}",
             "loading": "Loading {scope}",
