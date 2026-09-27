@@ -30,17 +30,21 @@ export default function WirdDashboardCard({
     isArabic: boolean;
 }) {
     return (
-        <section className="mt-10 bg-primary/[0.07] px-5 py-6 sm:px-7 sm:py-7">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex gap-4">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+        <section className="relative mt-10 overflow-hidden rounded-3xl bg-gradient-to-br from-primary/[0.11] via-primary/[0.065] to-transparent px-5 py-6 ring-1 ring-primary/12 sm:px-7 sm:py-7">
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-20 -end-20 size-48 rounded-full bg-primary/[0.07] blur-3xl"
+            />
+            <div className="relative grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-8">
+                <div className="flex min-w-0 flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:gap-4 sm:text-start">
+                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary ring-1 ring-primary/15 sm:size-11 sm:rounded-full">
                         {wird?.completed ? (
                             <Check aria-hidden="true" className="size-5" />
                         ) : (
                             <MoonStar aria-hidden="true" className="size-5" />
                         )}
                     </span>
-                    <div>
+                    <div className="min-w-0 w-full sm:w-auto">
                         <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                             {labels.eyebrow}
                         </p>
@@ -62,7 +66,7 @@ export default function WirdDashboardCard({
                             </p>
                         )}
                         {khatmahProgress !== null && (
-                            <div className="mt-4 max-w-sm">
+                            <div className="mx-auto mt-4 w-full max-w-sm sm:mx-0">
                                 <div className="flex items-center justify-between gap-4 text-xs">
                                     <span className="font-medium text-primary">
                                         {labels.khatmahProgress}
@@ -81,7 +85,10 @@ export default function WirdDashboardCard({
                         )}
                     </div>
                 </div>
-                <Button asChild className="shrink-0 self-start sm:self-auto">
+                <Button
+                    asChild
+                    className="min-h-11 w-full rounded-xl shadow-sm shadow-primary/15 sm:w-auto sm:shrink-0"
+                >
                     <Link href="/wird">
                         {wird ? labels.open : labels.setup}
                         <ArrowRight

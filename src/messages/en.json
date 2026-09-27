@@ -16,6 +16,8 @@
             "description": "A focused reader that keeps the Arabic clear, remembers your place, and brings recitation, translation, and tafsir close when you need them.",
             "beginReading": "Begin reading",
             "continueReading": "Continue reading",
+            "startWird": "Read today’s Wird",
+            "continueWird": "Continue today’s Wird",
             "explore": "Explore the Quran",
             "search": "Search the Quran"
         },

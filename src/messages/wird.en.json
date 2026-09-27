@@ -3,6 +3,10 @@
         "eyebrow": "DAILY WIRD",
         "title": "A steady portion, every day.",
         "description": "Choose a portion that fits your rhythm. Complete it when you finish reading, and your next Wird will be prepared for the following day.",
+        "loading": {
+            "overview": "Preparing your daily Wird",
+            "reader": "Preparing today’s reading"
+        },
         "setup": {
             "title": "Set your daily Wird",
             "description": "Begin at the start of the Quran and continue in order without losing your place.",

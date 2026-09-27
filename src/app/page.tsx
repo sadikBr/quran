@@ -18,6 +18,7 @@ import { auth } from "@/features/auth/auth";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
+import getDailyWird from "@/features/wird/server/get-daily-wird";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import QuranInfo from "@/lib/quran-info";
 import { cn } from "@/lib/utils";
@@ -61,6 +62,11 @@ export default async function Home() {
         getPreferences(),
         getReadingProgress(),
     ]);
+    const dailyWird = session
+        ? await getDailyWird(session.user.id, preferences.arabicEdition).catch(
+              () => null,
+          )
+        : null;
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
@@ -72,7 +78,11 @@ export default async function Home() {
             ? readingProgress.lastPageNumber
             : readingProgress.lastSurahNumber;
     const currentNumber = savedNumber ?? 1;
-    const href = `/quran/${preferences.readingMode}/${currentNumber}`;
+    const readingHref = `/quran/${preferences.readingMode}/${currentNumber}`;
+    const hasPendingWird = Boolean(
+        dailyWird && !dailyWird.completed && !dailyWird.scheduledForFuture,
+    );
+    const href = hasPendingWird ? "/wird" : readingHref;
     let continueReadingLabel = t("hero.beginReading");
     let readingPlace =
         preferences.readingMode === "page"
@@ -93,12 +103,22 @@ export default async function Home() {
         continueReadingLabel = t("hero.continueReading");
     }
 
+    if (hasPendingWird) {
+        continueReadingLabel = t(
+            dailyWird?.progressGlobalAyah
+                ? "hero.continueWird"
+                : "hero.startWird",
+        );
+    }
+
     const accountLabels = {
         openMenu: t("account.openMenu"),
         readingSpace: t("account.readingSpace"),
         switchToLight: t("account.switchToLight"),
         switchToDark: t("account.switchToDark"),
-        continueReading: t("account.continueReading"),
+        continueReading: hasPendingWird
+            ? continueReadingLabel
+            : t("account.continueReading"),
         dashboard: t("account.dashboard"),
         profile: t("account.profile"),
         settings: t("account.settings"),

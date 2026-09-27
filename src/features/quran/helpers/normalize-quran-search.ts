@@ -3,6 +3,11 @@ const IGNORED_QURAN_MARK =
     /[\u0610-\u061a\u064b-\u065f\u0670\u06d6-\u06ed\u08d4-\u08ff]/u;
 const PUNCTUATION_OR_SYMBOL = /[\p{P}\p{S}]/u;
 const WHITESPACE = /\s/u;
+const ALEF_VARIANT = /[أإآٱٲ]/u;
+const YEH_VARIANT = /[ىئېێۍیےۓ]/u;
+const WAW_VARIANT = /[ؤۇۈۉۋ]/u;
+const KAF_VARIANT = /[کڪ]/u;
+const HEH_VARIANT = /[ہھۀە]/u;
 
 export function stripQuranMarkup(text: string) {
     return text
@@ -14,7 +19,7 @@ export function stripQuranMarkup(text: string) {
         .replace(/^\uFEFF/, "");
 }
 
-function normalizeCharacter(character: string) {
+function normalizeUnit(character: string) {
     if (
         character === "\u0640" ||
         character === "\uFEFF" ||
@@ -23,14 +28,32 @@ function normalizeCharacter(character: string) {
         return "";
     }
 
-    if (/[أإآٱٲ]/u.test(character)) return "ا";
-    if (character === "ى" || character === "ئ") return "ي";
-    if (character === "ؤ") return "و";
+    if (ALEF_VARIANT.test(character)) return "ا";
+    if (YEH_VARIANT.test(character)) return "ي";
+    if (WAW_VARIANT.test(character)) return "و";
+    if (KAF_VARIANT.test(character)) return "ك";
+    if (HEH_VARIANT.test(character)) return "ه";
     if (WHITESPACE.test(character) || PUNCTUATION_OR_SYMBOL.test(character)) {
         return " ";
     }
 
     return character.toLocaleLowerCase("en");
+}
+
+function normalizeCharacter(character: string) {
+    return [...character.normalize("NFKD")].map(normalizeUnit).join("");
+}
+
+function removeQuranicInitialHamza(
+    characters: string[],
+    originalIndexes: number[],
+) {
+    for (let index = characters.length - 2; index >= 0; index -= 1) {
+        if (characters[index] === "ء" && characters[index + 1] === "ا") {
+            characters.splice(index, 1);
+            originalIndexes.splice(index, 1);
+        }
+    }
 }
 
 export interface NormalizedSearchText {
@@ -73,6 +96,10 @@ export function normalizeSearchTextWithMap(text: string): NormalizedSearchText {
         characters.pop();
         originalIndexes.pop();
     }
+
+    // Warsh text may spell an initial alif with a separate hamza (ءَامنوا),
+    // while readers commonly type the modern spelling (آمنوا).
+    removeQuranicInitialHamza(characters, originalIndexes);
 
     return { value: characters.join(""), originalIndexes };
 }

@@ -10,6 +10,7 @@ export default async function getSavedAyah(
 ) {
     const [result] = await db
         .select({
+            ayahNumber: savedAyah.ayahNumber,
             isBookmarked: savedAyah.isBookmarked,
             reflection: savedAyah.reflection,
         })

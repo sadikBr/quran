@@ -61,6 +61,10 @@ export default async function getAyahActionsData(
         : ayah.numberInSurah === 1 && surahNumber !== 1
           ? stripBasmalaPrefix(ayah.text)
           : ayah.text;
+    const canonicalArabicText =
+        ayah.numberInSurah === 1 && surahNumber !== 1
+            ? stripBasmalaPrefix(ayah.text)
+            : ayah.text;
 
     const [tafsirAyah, tafsirEditions, savedAyah] = await Promise.all([
         getAyah(ayah.number),
@@ -71,6 +75,22 @@ export default async function getAyahActionsData(
             : [],
         session ? getSavedAyah(session.user.id, ayah.number) : null,
     ]);
+    const savedWarshVerse =
+        savedAyah && warshChapter
+            ? warshChapter.verses.find(
+                  (verse) =>
+                      verse.number === savedAyah.ayahNumber &&
+                      verse.number_in_hafs.includes(ayah.numberInSurah),
+              )
+            : null;
+    const defaultWarshVerse = warshChapter?.verses.find((verse) =>
+        verse.number_in_hafs.includes(ayah.numberInSurah),
+    );
+    const resolvedSavedAyah = warshVerse
+        ? (savedWarshVerse ?? defaultWarshVerse)?.number === warshVerse.number
+            ? savedAyah
+            : null
+        : savedAyah;
 
     return {
         surahName: surahMeta.englishName,
@@ -93,12 +113,20 @@ export default async function getAyahActionsData(
                 : [],
         globalAyahNumber: ayah.number,
         surahNumber,
-        pageNumber: warshVerse?.page_number ?? ayah.page,
         tafsirEditions,
         canChooseTafsir: Boolean(session),
         canSaveAyah: Boolean(session),
-        initialBookmarked: savedAyah?.isBookmarked ?? false,
-        initialReflection: savedAyah?.reflection ?? "",
-        plainArabicText: getPlainQuranText(arabicText),
+        initialBookmarked: resolvedSavedAyah?.isBookmarked ?? false,
+        initialReflection: resolvedSavedAyah?.reflection ?? "",
+        savedAyahMetadata: {
+            globalAyahNumber: ayah.number,
+            surahNumber,
+            // Preserve the displayed number as provenance. More than one
+            // Warsh ayah can share the same canonical Hafs anchor.
+            ayahNumber,
+            pageNumber: ayah.page,
+            surahName: surahMeta.englishName,
+            arabicText: getPlainQuranText(canonicalArabicText),
+        },
     };
 }

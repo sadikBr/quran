@@ -4,7 +4,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import { auth } from "@/features/auth/auth";
-import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
 import getPreferences from "@/features/settings/server/get-preferences";
 import WirdReader from "@/features/wird/components/wird-reader";
 import getDailyWird from "@/features/wird/server/get-daily-wird";
@@ -62,22 +61,20 @@ export default async function WirdReaderPage() {
                 </div>
             </header>
 
-            <QuranAudioProvider>
-                {groups.some((group) => group.ayahs.length > 0) ? (
-                    <WirdReader
-                        groups={groups}
-                        startGlobalAyah={wird.start.globalAyahNumber}
-                        endGlobalAyah={wird.end.globalAyahNumber}
-                        initialProgress={wird.progressGlobalAyah}
-                        showTranslation={preferences.showTranslation}
-                        continuousRecitation={preferences.continuousRecitation}
-                    />
-                ) : (
-                    <p className="mx-auto max-w-lg px-6 py-24 text-center text-muted-foreground">
-                        {t("empty")}
-                    </p>
-                )}
-            </QuranAudioProvider>
+            {groups.some((group) => group.ayahs.length > 0) ? (
+                <WirdReader
+                    groups={groups}
+                    startGlobalAyah={wird.start.globalAyahNumber}
+                    endGlobalAyah={wird.end.globalAyahNumber}
+                    initialProgress={wird.progressGlobalAyah}
+                    showTranslation={preferences.showTranslation}
+                    continuousRecitation={preferences.continuousRecitation}
+                />
+            ) : (
+                <p className="mx-auto max-w-lg px-6 py-24 text-center text-muted-foreground">
+                    {t("empty")}
+                </p>
+            )}
         </main>
     );
 }

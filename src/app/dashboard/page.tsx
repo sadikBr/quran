@@ -11,6 +11,7 @@ import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import getKhatmahPlan from "@/features/khatmah/server/get-khatmah-plan";
 import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
+import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
@@ -39,12 +40,13 @@ export default async function DashboardPage() {
         redirect("/sign-in");
     }
 
-    const [preferences, readingProgress, savedAyahs, surahs] =
+    const [preferences, readingProgress, savedAyahs, surahs, hafsNavigation] =
         await Promise.all([
             getPreferences(),
             getReadingProgress(),
             getSavedAyahs(session.user.id),
             getSurahsMeta().catch(() => []),
+            getQuranNavigationMeta().catch(() => null),
         ]);
     const [dailyWird, wirdHistory, khatmahPlan] = await Promise.all([
         getDailyWird(session.user.id, preferences.arabicEdition),
@@ -62,6 +64,21 @@ export default async function DashboardPage() {
         surahOffsets.set(surah.number, ayahOffset);
         ayahOffset += surah.numberOfAyahs;
     }
+    const hafsPageForAyah = (
+        globalAyahNumber: number,
+        fallbackPageNumber: number,
+    ) => {
+        if (!hafsNavigation) return fallbackPageNumber;
+
+        let pageNumber = 1;
+
+        for (const page of hafsNavigation.pages) {
+            if (page.globalAyahNumber > globalAyahNumber) break;
+            pageNumber = page.number;
+        }
+
+        return pageNumber;
+    };
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
@@ -116,16 +133,24 @@ export default async function DashboardPage() {
         const surah = surahs.find((item) => item.number === ayah.surahNumber);
         const hafsAyahNumber =
             ayah.globalAyahNumber - (surahOffsets.get(ayah.surahNumber) ?? 0);
-        const warshVerse = warshBySurah
-            .get(ayah.surahNumber)
-            ?.verses.find((verse) =>
+        const warshChapter = warshBySurah.get(ayah.surahNumber);
+        const exactWarshVerse = warshChapter?.verses.find(
+            (verse) =>
+                verse.number === ayah.ayahNumber &&
+                verse.number_in_hafs.includes(hafsAyahNumber),
+        );
+        const warshVerse =
+            exactWarshVerse ??
+            warshChapter?.verses.find((verse) =>
                 verse.number_in_hafs.includes(hafsAyahNumber),
             );
 
         return {
             ...ayah,
-            ayahNumber: warshVerse?.number ?? ayah.ayahNumber,
-            pageNumber: warshVerse?.page_number ?? ayah.pageNumber,
+            ayahNumber: warshVerse?.number ?? hafsAyahNumber,
+            pageNumber:
+                warshVerse?.page_number ??
+                hafsPageForAyah(ayah.globalAyahNumber, ayah.pageNumber),
             arabicText: warshVerse?.text ?? ayah.arabicText,
             surahName:
                 preferences.language === "ar"
@@ -189,20 +214,24 @@ export default async function DashboardPage() {
                         </p>
                     </div>
 
-                    <section className="mt-10 bg-muted/45 px-5 py-6 sm:px-7 sm:py-7">
-                        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
-                            <div className="flex gap-4">
-                                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <section className="relative mt-10 overflow-hidden rounded-3xl bg-gradient-to-br from-muted/70 via-muted/40 to-transparent px-5 py-6 ring-1 ring-primary/10 sm:px-7 sm:py-7">
+                        <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute -top-24 -start-20 size-52 rounded-full bg-primary/[0.06] blur-3xl"
+                        />
+                        <div className="relative grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-8">
+                            <div className="flex min-w-0 flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:gap-4 sm:text-start">
+                                <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm shadow-primary/20 sm:size-11 sm:rounded-full">
                                     <BookOpen
                                         aria-hidden="true"
                                         className="size-5"
                                     />
                                 </span>
-                                <div>
+                                <div className="min-w-0">
                                     <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                                         {t("reading.eyebrow")}
                                     </p>
-                                    <h2 className="mt-1.5 text-2xl font-semibold tracking-tight">
+                                    <h2 className="mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
                                         {readingHeading}
                                     </h2>
                                     <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
@@ -212,8 +241,11 @@ export default async function DashboardPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex shrink-0 flex-wrap gap-3">
-                                <Button asChild>
+                            <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0 sm:gap-3">
+                                <Button
+                                    asChild
+                                    className="min-h-11 w-full rounded-xl px-3 shadow-sm shadow-primary/15 sm:w-auto sm:px-4"
+                                >
                                     <Link href={continueReadingHref}>
                                         {savedNumber
                                             ? t("reading.continueReading")
@@ -227,7 +259,11 @@ export default async function DashboardPage() {
                                         />
                                     </Link>
                                 </Button>
-                                <Button asChild variant="ghost">
+                                <Button
+                                    asChild
+                                    variant="ghost"
+                                    className="min-h-11 w-full rounded-xl px-3 sm:w-auto sm:px-4"
+                                >
                                     <Link href="/quran">
                                         {t("reading.browseSurahs")}
                                     </Link>

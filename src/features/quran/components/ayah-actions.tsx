@@ -23,6 +23,7 @@ import {
     updateBookmark,
     updateReflection,
 } from "@/features/saved-ayahs/server/update-saved-ayah";
+import type { SavedAyahMetadata } from "@/features/saved-ayahs/types";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import getTafsirAyah from "../server/get-tafsir-ayah";
 import type { Edition } from "../types";
@@ -200,13 +201,12 @@ export type AyahActionsProps = {
     audioStreams: string[];
     globalAyahNumber: number;
     surahNumber: number;
-    pageNumber: number;
     tafsirEditions: Edition[];
     canChooseTafsir: boolean;
     canSaveAyah: boolean;
     initialBookmarked: boolean;
     initialReflection: string;
-    plainArabicText: string;
+    savedAyahMetadata: SavedAyahMetadata;
     closeOnCopy?: boolean;
     onSavedAyahChangeAction?: () => void;
 };
@@ -242,13 +242,12 @@ export default function AyahActions({
     audioStreams,
     globalAyahNumber,
     surahNumber,
-    pageNumber,
     tafsirEditions,
     canChooseTafsir,
     canSaveAyah,
     initialBookmarked,
     initialReflection,
-    plainArabicText,
+    savedAyahMetadata,
     closeOnCopy = false,
     onSavedAyahChangeAction,
 }: AyahActionsProps) {
@@ -284,15 +283,6 @@ export default function AyahActions({
     const isPlayingThisAyah = isCurrentAyah && isPlaying;
     const isLoadingThisAyah = isCurrentAyah && playbackStatus === "loading";
     const hasPlaybackError = isCurrentAyah && playbackStatus === "error";
-    const savedAyahMetadata = {
-        globalAyahNumber,
-        surahNumber,
-        ayahNumber,
-        pageNumber,
-        surahName,
-        arabicText: plainArabicText,
-    };
-
     async function copyArabicText() {
         try {
             await navigator.clipboard.writeText(getPlainQuranText(arabicText));
