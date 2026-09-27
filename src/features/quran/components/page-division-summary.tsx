@@ -24,10 +24,12 @@ function LocalizedQuarterList({ values }: { values: number[] }) {
 }
 
 export default function PageDivisionSummary({
+    surahNames,
     juzs,
     hizbs,
     hizbQuarters,
 }: {
+    surahNames: string[];
     juzs: number[];
     hizbs: number[];
     hizbQuarters: number[];
@@ -42,8 +44,8 @@ export default function PageDivisionSummary({
             aria-label={t("pageSummary")}
             className="mb-4 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[11px] text-muted-foreground sm:text-xs"
         >
-            <p className="font-semibold tracking-[0.12em] text-primary uppercase">
-                {t("pageSummary")}
+            <p className="font-semibold tracking-[0.08em] text-primary">
+                {surahNames.join(" · ")}
             </p>
             <span aria-hidden="true" className="text-primary/35">
                 •

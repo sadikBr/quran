@@ -131,6 +131,9 @@ export default async function QuranPage({ page }: { page: number }) {
         preferences.riwayah === "hafs" &&
         pageData.data.edition.identifier === "quran-tajweed";
     const pageJuzs = [...new Set(pageData.data.ayahs.map((ayah) => ayah.juz))];
+    const pageSurahNames = Object.values(pageData.data.surahs).map((surah) =>
+        preferences.language === "ar" ? surah.name : surah.englishName,
+    );
     const pageHizbQuarters = [
         ...new Set(pageData.data.ayahs.map((ayah) => ayah.hizbQuarter)),
     ];
@@ -201,6 +204,7 @@ export default async function QuranPage({ page }: { page: number }) {
             className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-0 overflow-auto p-4"
         >
             <PageDivisionSummary
+                surahNames={pageSurahNames}
                 juzs={pageJuzs}
                 hizbs={pageHizbs}
                 hizbQuarters={pageHizbQuarters}
