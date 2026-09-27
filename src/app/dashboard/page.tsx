@@ -17,6 +17,7 @@ import getSavedAyahs from "@/features/saved-ayahs/server/get-saved-ayahs";
 import getPreferences from "@/features/settings/server/get-preferences";
 import WirdDashboardCard from "@/features/wird/components/wird-dashboard-card";
 import getDailyWird from "@/features/wird/server/get-daily-wird";
+import getWirdHistory from "@/features/wird/server/get-wird-history";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
@@ -43,10 +44,10 @@ export default async function DashboardPage() {
             getSavedAyahs(session.user.id),
             getSurahsMeta().catch(() => []),
         ]);
-    const dailyWird = await getDailyWird(
-        session.user.id,
-        preferences.arabicEdition,
-    );
+    const [dailyWird, wirdHistory] = await Promise.all([
+        getDailyWird(session.user.id, preferences.arabicEdition),
+        getWirdHistory(session.user.id),
+    ]);
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
@@ -213,6 +214,7 @@ export default async function DashboardPage() {
 
                     <WirdDashboardCard
                         wird={dailyWird}
+                        history={wirdHistory}
                         isArabic={preferences.language === "ar"}
                         labels={{
                             eyebrow: wirdT("dashboard.eyebrow"),
@@ -224,6 +226,9 @@ export default async function DashboardPage() {
                             open: wirdT("dashboard.open"),
                             completed: wirdT("dashboard.completed"),
                             pending: wirdT("dashboard.pending"),
+                            streak: wirdT("dashboard.streak", {
+                                count: wirdHistory.currentStreak,
+                            }),
                             goal: dailyWird
                                 ? wirdT("today.goal", {
                                       amount: dailyWird.amount,

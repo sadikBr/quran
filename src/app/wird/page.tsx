@@ -17,8 +17,10 @@ import { auth } from "@/features/auth/auth";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import CompleteWirdButton from "@/features/wird/components/complete-wird-button";
+import WirdHistory from "@/features/wird/components/wird-history";
 import WirdPreferenceForm from "@/features/wird/components/wird-preference-form";
 import getDailyWird from "@/features/wird/server/get-daily-wird";
+import getWirdHistory from "@/features/wird/server/get-wird-history";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
@@ -30,9 +32,10 @@ export default async function WirdPage() {
         getPreferences(),
         getReadingProgress(),
     ]);
-    const [messages, wird] = await Promise.all([
+    const [messages, wird, history] = await Promise.all([
         getMessages(preferences.language),
         getDailyWird(session.user.id, preferences.arabicEdition),
+        getWirdHistory(session.user.id),
     ]);
     const t = createTranslator({
         locale: preferences.language,
@@ -253,6 +256,8 @@ export default async function WirdPage() {
                             </details>
                         </>
                     )}
+
+                    <WirdHistory stats={history} />
                 </section>
             </div>
         </main>

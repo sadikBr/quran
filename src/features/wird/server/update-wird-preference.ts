@@ -1,10 +1,10 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import db from "@/drizzle/db";
-import { userWird } from "@/drizzle/schema";
+import { userWird, userWirdHistory } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
@@ -31,52 +31,72 @@ export default async function updateWirdPreference(input: unknown) {
     }
 
     try {
-        const [existing, navigation, surahs] = await Promise.all([
+        const [existingRecords, navigation, surahs] = await Promise.all([
             db
-                .select({ start: userWird.targetStartGlobalAyah })
+                .select()
                 .from(userWird)
                 .where(eq(userWird.userId, session.user.id))
                 .limit(1),
             getQuranNavigationMeta(),
             getSurahsMeta(),
         ]);
+        const existing = existingRecords[0];
         const target = buildWirdTarget(
             parsed.data.unit,
             parsed.data.amount,
-            existing[0]?.start ?? 1,
+            existing?.targetStartGlobalAyah ?? 1,
             navigation,
             surahs,
         );
+        const targetDate = getWirdDate();
 
-        await db
-            .insert(userWird)
-            .values({
-                userId: session.user.id,
-                unit: parsed.data.unit,
-                amount: parsed.data.amount,
-                targetStartGlobalAyah: target.startGlobalAyah,
-                targetEndGlobalAyah: target.endGlobalAyah,
-                progressGlobalAyah: null,
-                targetDate: getWirdDate(),
-                completedAt: null,
-            })
-            .onConflictDoUpdate({
-                target: userWird.userId,
-                set: {
+        await db.transaction(async (transaction) => {
+            if (existing) {
+                await transaction
+                    .delete(userWirdHistory)
+                    .where(
+                        and(
+                            eq(userWirdHistory.userId, session.user.id),
+                            eq(userWirdHistory.targetDate, existing.targetDate),
+                            eq(
+                                userWirdHistory.targetStartGlobalAyah,
+                                existing.targetStartGlobalAyah,
+                            ),
+                        ),
+                    );
+            }
+
+            await transaction
+                .insert(userWird)
+                .values({
+                    userId: session.user.id,
                     unit: parsed.data.unit,
                     amount: parsed.data.amount,
                     targetStartGlobalAyah: target.startGlobalAyah,
                     targetEndGlobalAyah: target.endGlobalAyah,
                     progressGlobalAyah: null,
-                    targetDate: getWirdDate(),
+                    targetDate,
                     completedAt: null,
-                },
-            });
+                })
+                .onConflictDoUpdate({
+                    target: userWird.userId,
+                    set: {
+                        unit: parsed.data.unit,
+                        amount: parsed.data.amount,
+                        targetStartGlobalAyah: target.startGlobalAyah,
+                        targetEndGlobalAyah: target.endGlobalAyah,
+                        progressGlobalAyah: null,
+                        targetDate,
+                        completedAt: null,
+                    },
+                });
+        });
     } catch {
         return { success: false as const, message: "Could not save Wird." };
     }
 
     revalidatePath("/wird");
+    revalidatePath("/wird/read");
     revalidatePath("/dashboard");
     return { success: true as const };
 }

@@ -51,7 +51,22 @@
             "setup": "حدّد وردك اليومي",
             "open": "عرض ورد اليوم",
             "completed": "أتممت ورد اليوم",
-            "pending": "وردك في انتظارك"
+            "pending": "وردك في انتظارك",
+            "streak": "{count, plural, one {يوم واحد متتابع} two {يومان متتابعان} few {# أيام متتابعة} many {# يومًا متتابعًا} other {# يوم متتابع}}"
+        },
+        "history": {
+            "eyebrow": "أَثَرُ المُدَاوَمَة",
+            "title": "خطواتٌ تتراكم في هدوء.",
+            "description": "نحفظ هنا كل ورد أتممته، لتبقى ثمرة المداومة ظاهرة أمامك مع الأيام.",
+            "currentStreak": "المداومة الحالية",
+            "longestStreak": "أطول مداومة",
+            "totalCompleted": "الأوراد المكتملة",
+            "lastSevenDays": "الأيام السبعة الماضية",
+            "daysCompleted": "{count, plural, zero {لم تُتم وردًا} one {يوم مكتمل} two {يومان مكتملان} few {# أيام مكتملة} many {# يومًا مكتملًا} other {# يوم مكتمل}}",
+            "totalsTitle": "حصيلة ما قرأت",
+            "recentTitle": "آخر ما أتممت",
+            "entry": "{amount, number} {unit}",
+            "carriedOver": "أُتمّ بعد ترحيله"
         },
         "reader": {
             "title": "ورد اليوم",

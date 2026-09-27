@@ -51,7 +51,22 @@
             "setup": "Set a daily Wird",
             "open": "Open today’s Wird",
             "completed": "Today’s portion is complete",
-            "pending": "Your portion is ready"
+            "pending": "Your portion is ready",
+            "streak": "{count, plural, one {# day in a row} other {# days in a row}}"
+        },
+        "history": {
+            "eyebrow": "YOUR CONSISTENCY",
+            "title": "A record of returning.",
+            "description": "Every completed portion is kept here, so steady effort remains visible over time.",
+            "currentStreak": "Current streak",
+            "longestStreak": "Longest streak",
+            "totalCompleted": "Portions completed",
+            "lastSevenDays": "Last seven days",
+            "daysCompleted": "{count, plural, one {# completed day} other {# completed days}}",
+            "totalsTitle": "What you have completed",
+            "recentTitle": "Recent completions",
+            "entry": "{amount, number} {unit}",
+            "carriedOver": "Completed after being carried over"
         },
         "reader": {
             "title": "Today’s Wird",

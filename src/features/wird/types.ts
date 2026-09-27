@@ -28,3 +28,21 @@ export interface DailyWird {
     start: WirdLocation;
     end: WirdLocation;
 }
+
+export interface WirdHistoryEntry {
+    id: string;
+    unit: WirdUnit;
+    amount: number;
+    targetDate: string;
+    completedDate: string;
+    carriedOver: boolean;
+}
+
+export interface WirdHistoryStats {
+    currentStreak: number;
+    longestStreak: number;
+    totalCompleted: number;
+    totals: Record<WirdUnit, number>;
+    lastSevenDays: { date: string; completed: boolean }[];
+    recent: WirdHistoryEntry[];
+}

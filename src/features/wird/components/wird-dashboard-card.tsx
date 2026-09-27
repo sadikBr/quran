@@ -2,14 +2,16 @@ import { ArrowRight, Check, MoonStar } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { DailyWird } from "../types";
+import type { DailyWird, WirdHistoryStats } from "../types";
 
 export default function WirdDashboardCard({
     wird,
     labels,
     isArabic,
+    history,
 }: {
     wird: DailyWird | null;
+    history: WirdHistoryStats;
     labels: {
         eyebrow: string;
         emptyTitle: string;
@@ -19,6 +21,7 @@ export default function WirdDashboardCard({
         completed: string;
         pending: string;
         goal?: string;
+        streak: string;
     };
     isArabic: boolean;
 }) {
@@ -47,6 +50,11 @@ export default function WirdDashboardCard({
                                     : labels.pending
                                 : labels.emptyDescription}
                         </p>
+                        {history.currentStreak > 0 && (
+                            <p className="mt-2 text-xs font-medium text-primary">
+                                {labels.streak}
+                            </p>
+                        )}
                     </div>
                 </div>
                 <Button asChild className="shrink-0 self-start sm:self-auto">
