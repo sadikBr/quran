@@ -30,17 +30,25 @@ function HizbMarker({
     return (
         <div
             dir={locale === "ar" ? "rtl" : "ltr"}
-            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap sm:gap-2"
+            className="flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-muted/55 p-1 pe-2.5 whitespace-nowrap shadow-black/5 shadow-sm sm:min-h-11 sm:gap-1.5 sm:pe-3"
         >
-            <span className="text-muted-foreground">{label}</span>
-            <span className="font-semibold text-foreground/90">
-                {formatter.format(hizb)}
-            </span>
             {quarter !== undefined && (
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary">
-                    {quarterLabel} {quarter}/4
+                <span
+                    dir={locale === "ar" ? "rtl" : "ltr"}
+                    className="inline-flex min-h-8 items-center gap-1 rounded-full bg-primary/12 px-2 font-semibold text-primary tabular-nums sm:min-h-9 sm:px-2.5"
+                >
+                    <span className="hidden text-[9px] font-medium opacity-75 min-[390px]:inline sm:text-[10px]">
+                        {quarterLabel}
+                    </span>
+                    <span dir="ltr">{quarter}/4</span>
                 </span>
             )}
+            <span className="ms-0.5 text-[10px] font-medium text-muted-foreground sm:text-[11px]">
+                {label}
+            </span>
+            <span className="text-sm font-bold text-foreground tabular-nums sm:text-base">
+                {formatter.format(hizb)}
+            </span>
         </div>
     );
 }
@@ -106,7 +114,7 @@ export default function PageDivisionSummary({
                                     hizb={marker.hizb}
                                     quarter={marker.quarter}
                                     label={t("hizb")}
-                                    quarterLabel={t("rubShort")}
+                                    quarterLabel={t("rub")}
                                 />
                             ))}
                         </div>
@@ -126,7 +134,7 @@ export default function PageDivisionSummary({
                             hizb={rightHizb.hizb}
                             quarter={rightHizb.quarter}
                             label={t("hizb")}
-                            quarterLabel={t("rubShort")}
+                            quarterLabel={t("rub")}
                         />
                     )}
                 </div>
