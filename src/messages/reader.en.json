@@ -113,6 +113,7 @@
             "juz": "Juz",
             "hizb": "Hizb",
             "rub": "Hizb quarter",
+            "rubShort": "Q",
             "juzNumber": "Juz {number, number}",
             "hizbNumber": "Hizb {number, number}",
             "quarterNumber": "Quarter {number}/4"

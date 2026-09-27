@@ -113,6 +113,7 @@
             "juz": "الجزء",
             "hizb": "الحزب",
             "rub": "ربع الحزب",
+            "rubShort": "ر",
             "juzNumber": "الجزء {number, number}",
             "hizbNumber": "الحزب {number, number}",
             "quarterNumber": "الربع {number}/4"
