@@ -3,7 +3,8 @@
 import { LoaderCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import AyahActions from "@/features/quran/components/ayah-actions";
 import getAyahActionsData, {
     type AyahActionsData,
@@ -19,13 +20,17 @@ export default function SavedAyahActions({
 }) {
     const router = useRouter();
     const t = useTranslations("Dashboard");
+    const commonT = useTranslations("Common");
     const locale = useLocale();
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const [data, setData] = useState<AyahActionsData | null>(null);
     const [loadFailed, setLoadFailed] = useState(false);
 
-    useEffect(() => {
+    const loadActions = useCallback(() => {
         let cancelled = false;
+
+        setData(null);
+        setLoadFailed(false);
 
         getAyahActionsData(ayah.surahNumber, ayah.ayahNumber)
             .then((result) => {
@@ -41,6 +46,10 @@ export default function SavedAyahActions({
             cancelled = true;
         };
     }, [ayah.ayahNumber, ayah.surahNumber]);
+
+    useEffect(() => {
+        return loadActions();
+    }, [loadActions]);
 
     useEffect(() => {
         closeButtonRef.current?.focus();
@@ -94,6 +103,14 @@ export default function SavedAyahActions({
                             <p className="mt-2 text-sm text-muted-foreground">
                                 {t("modal.loadFailedDescription")}
                             </p>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="mt-5"
+                                onClick={loadActions}
+                            >
+                                {commonT("error.retry")}
+                            </Button>
                         </div>
                     ) : (
                         <div className="flex min-h-52 flex-col items-center justify-center gap-3 text-muted-foreground">

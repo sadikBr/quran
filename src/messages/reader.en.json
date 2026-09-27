@@ -18,6 +18,9 @@
             "enable": "Enter focus mode",
             "disable": "Exit focus mode"
         },
+        "controls": {
+            "label": "Reading controls"
+        },
         "index": {
             "sectionsLabel": "Browse the Quran by division",
             "surahsTab": "Surahs",

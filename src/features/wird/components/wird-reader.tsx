@@ -84,8 +84,8 @@ export default function WirdReader({
     }
 
     return (
-        <div className="mx-auto w-full max-w-4xl px-4 pb-20">
-            <section className="sticky top-16 z-20 -mx-4 bg-background/92 px-4 py-4 backdrop-blur-md">
+        <div className="mx-auto w-full max-w-4xl px-3 pb-[max(5rem,env(safe-area-inset-bottom))] sm:px-4">
+            <section className="sticky top-16 z-20 -mx-3 bg-background/92 px-3 py-4 backdrop-blur-md sm:-mx-4 sm:px-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">

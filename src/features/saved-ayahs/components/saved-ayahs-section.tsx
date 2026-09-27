@@ -9,6 +9,7 @@ import {
     Ellipsis,
     NotebookPen,
     Search,
+    SearchX,
 } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -216,9 +217,27 @@ export default function SavedAyahsSection({
                     </div>
                 </div>
             ) : filteredAyahs.length === 0 ? (
-                <p className="py-9 text-sm text-muted-foreground">
-                    {t("saved.noSearchResults")}
-                </p>
+                <div className="flex flex-col items-center py-12 text-center">
+                    <span className="flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                        <SearchX aria-hidden="true" className="size-5" />
+                    </span>
+                    <p className="mt-4 text-sm text-muted-foreground">
+                        {t("saved.noSearchResults")}
+                    </p>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="mt-2 text-primary"
+                        onClick={() => {
+                            setQuery("");
+                            setSurahFilter("all");
+                            setRequestedPage(1);
+                        }}
+                    >
+                        {t("saved.clearSearch")}
+                    </Button>
+                </div>
             ) : (
                 <div>
                     <div className="divide-y divide-primary/10">

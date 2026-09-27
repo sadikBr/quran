@@ -9,18 +9,29 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import { TAJWEED_RULES } from "./tajweed-text";
 
-export default function TajweedLegend() {
+export default function TajweedLegend({
+    embedded = false,
+}: {
+    embedded?: boolean;
+}) {
     const t = useTranslations("Reader");
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button
                     type="button"
+                    title={t("tajweed.button")}
                     variant="ghost"
                     size="sm"
-                    className="h-9 rounded-full bg-muted/55 px-3 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    className={cn(
+                        "h-9 px-3 text-muted-foreground hover:bg-primary/10 hover:text-primary",
+                        embedded
+                            ? "rounded-xl bg-transparent"
+                            : "rounded-full bg-muted/55",
+                    )}
                 >
                     <Palette aria-hidden="true" className="size-3.5" />
                     <span className="hidden sm:inline">

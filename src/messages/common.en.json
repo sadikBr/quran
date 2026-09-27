@@ -22,7 +22,10 @@
         "feedback": {
             "preferencesUpdateFailed": "We couldn’t save your preferences. Please try again.",
             "bookmarkUpdateFailed": "We couldn’t update this bookmark. Please try again.",
-            "reflectionSaveFailed": "We couldn’t save your reflection. Please try again."
+            "reflectionSaveFailed": "We couldn’t save your reflection. Please try again.",
+            "networkOffline": "You’re offline. Already loaded content remains available, but new Quran pages may not load.",
+            "networkRestored": "You’re back online.",
+            "signOutFailed": "We couldn’t sign you out. Please try again."
         }
     }
 }

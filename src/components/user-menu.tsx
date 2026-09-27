@@ -3,6 +3,7 @@
 import {
     BookOpen,
     LayoutDashboard,
+    LoaderCircle,
     LogOut,
     Moon,
     Settings,
@@ -82,6 +83,7 @@ export default function UserMenu({
     const commonT = useTranslations("Common");
     const { setPreferences, ...preferences } = useSettings();
     const [selectedTheme, setSelectedTheme] = useState(preferences.theme);
+    const [isSigningOut, setIsSigningOut] = useState(false);
 
     async function changeTheme(theme: Theme) {
         const previousTheme = selectedTheme;
@@ -109,11 +111,17 @@ export default function UserMenu({
     }
 
     function signOut() {
+        if (isSigningOut) return;
+        setIsSigningOut(true);
         authClient.signOut({
             fetchOptions: {
                 onSuccess: () => {
                     setTheme(DEFAULT_PREFERENCES.theme);
                     window.location.assign("/");
+                },
+                onError: () => {
+                    setIsSigningOut(false);
+                    toast.error(commonT("feedback.signOutFailed"));
                 },
             },
         });
@@ -199,8 +207,19 @@ export default function UserMenu({
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onSelect={signOut}>
-                    <LogOut aria-hidden="true" />
+                <DropdownMenuItem
+                    variant="destructive"
+                    disabled={isSigningOut}
+                    onSelect={signOut}
+                >
+                    {isSigningOut ? (
+                        <LoaderCircle
+                            aria-hidden="true"
+                            className="animate-spin"
+                        />
+                    ) : (
+                        <LogOut aria-hidden="true" />
+                    )}
                     {labels.signOut}
                 </DropdownMenuItem>
             </DropdownMenuContent>

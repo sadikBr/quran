@@ -31,7 +31,7 @@ export default async function Loading() {
                 </div>
                 <span
                     aria-hidden="true"
-                    className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent"
+                    className="size-5 rounded-full border-2 border-primary border-t-transparent motion-safe:animate-spin"
                 />
                 <p className="sr-only">{t("loading.label")}</p>
             </div>

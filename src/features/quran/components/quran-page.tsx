@@ -9,6 +9,7 @@ import getQuranPageData from "../server/get-quran-page-data";
 import FocusModeToggle from "./focus-mode-toggle";
 import PageDivisionSummary from "./page-division-summary";
 import QuranAudioQueue from "./quran-audio-queue";
+import ReaderToolbar from "./reader-toolbar";
 import Surah from "./surah";
 import TajweedLegend from "./tajweed-legend";
 import WarshQuranPage from "./warsh-quran-page";
@@ -91,7 +92,7 @@ export default async function QuranPage({ page }: { page: number }) {
     return (
         <div
             data-quran-scroll-container
-            className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-0 overflow-auto p-4"
+            className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-0 overflow-auto p-3 sm:p-4"
         >
             <PageDivisionSummary
                 surahNames={pageSurahNames}
@@ -99,19 +100,20 @@ export default async function QuranPage({ page }: { page: number }) {
                 hizbs={pageHizbs}
                 hizbQuarters={pageHizbQuarters}
             />
-            <div className="mb-3 flex items-center justify-end gap-2">
+            <ReaderToolbar>
                 {pageData.data.edition.identifier === "quran-tajweed" && (
-                    <TajweedLegend />
+                    <TajweedLegend embedded />
                 )}
                 {audioQueue.length > 0 && (
                     <QuranAudioQueue
                         queue={audioQueue}
                         continuousRecitation={preferences.continuousRecitation}
                         showReadAll
+                        embedded
                     />
                 )}
-                <FocusModeToggle />
-            </div>
+                <FocusModeToggle embedded />
+            </ReaderToolbar>
             {Object.keys(pageData.data.surahs).map((surahNumber) => {
                 const surah = pageData.data.surahs[surahNumber];
                 const ayahs = pageData.data.ayahs

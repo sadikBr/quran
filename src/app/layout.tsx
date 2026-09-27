@@ -9,6 +9,7 @@ import {
 import { createTranslator, NextIntlClientProvider } from "next-intl";
 import "./globals.css";
 import { Toaster } from "sonner";
+import ConnectionStatus from "@/components/connection-status";
 import ContentProtection from "@/components/content-protection";
 import { ThemeProvider } from "@/components/theme-provider";
 import ThemePreferenceSync from "@/features/settings/components/theme-preference-sync";
@@ -101,6 +102,7 @@ export default async function RootLayout({
                     >
                         <SettingsProvider preferences={preferences}>
                             <ContentProtection />
+                            <ConnectionStatus />
                             <ThemePreferenceSync />
                             <Toaster
                                 closeButton

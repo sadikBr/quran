@@ -312,6 +312,11 @@ body.focus-mode .quran-focus-chrome {
         -webkit-user-select: text;
         user-select: text;
     }
+
+    :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 3px;
+    }
 }
 
 @font-face {
@@ -409,6 +414,15 @@ body.focus-mode .quran-focus-chrome {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
+        scroll-behavior: auto;
+        transition-duration: 0.01ms;
+    }
+
     [data-quran-swipe-content],
     .quran-reader-text {
         scroll-behavior: auto;

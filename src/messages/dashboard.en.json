@@ -43,6 +43,7 @@
             "emptyTitle": "Nothing saved yet",
             "emptyDescription": "Open an ayah’s actions while reading to bookmark it or write a private reflection.",
             "noSearchResults": "No saved ayahs match this search.",
+            "clearSearch": "Clear search and filters",
             "ayah": "Ayah {number, number}",
             "bookmarked": "Bookmarked",
             "hasReflection": "Has a reflection",
@@ -59,7 +60,7 @@
             "close": "Close ayah actions",
             "title": "Ayah actions",
             "loadFailedTitle": "We could not load this ayah’s actions.",
-            "loadFailedDescription": "Close this window and try again.",
+            "loadFailedDescription": "The connection may have been interrupted. You can try again here.",
             "loading": "Loading ayah actions…"
         }
     }

@@ -11,6 +11,7 @@ import {
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { QuranAudioQueueItem } from "./quran-audio-provider";
 import { useQuranAudio } from "./quran-audio-provider";
 
@@ -20,12 +21,14 @@ export default function QuranAudioQueue({
     showReadAll = false,
     scope = "page",
     className,
+    embedded = false,
 }: {
     queue: QuranAudioQueueItem[];
     continuousRecitation: boolean;
     showReadAll?: boolean;
     scope?: "page" | "surah" | "wird";
     className?: string;
+    embedded?: boolean;
 }) {
     const t = useTranslations("Reader");
     const {
@@ -61,7 +64,13 @@ export default function QuranAudioQueue({
 
     return (
         <div
-            className={`relative flex w-fit items-center gap-1 overflow-hidden rounded-full bg-muted/55 p-1 ps-2 ${className ?? ""}`}
+            className={cn(
+                "relative flex w-fit shrink-0 items-center gap-1 overflow-hidden",
+                embedded
+                    ? "h-10 rounded-xl bg-transparent p-0 ps-1"
+                    : "rounded-full bg-muted/55 p-1 ps-2",
+                className,
+            )}
         >
             {queueStatus !== "idle" && progress > 0 && (
                 <span
@@ -82,9 +91,13 @@ export default function QuranAudioQueue({
                     type="button"
                     size="icon"
                     variant="ghost"
-                    className="size-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary pointer-coarse:size-10"
+                    className={cn(
+                        "rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary pointer-coarse:size-10",
+                        embedded ? "size-9" : "size-8",
+                    )}
                     onClick={() => restartQueue(queue)}
                     aria-label={t("audio.restart", { scope: scopeLabel })}
+                    title={t("audio.restart", { scope: scopeLabel })}
                 >
                     <RotateCcw className="size-4" aria-hidden="true" />
                 </Button>
@@ -92,7 +105,10 @@ export default function QuranAudioQueue({
                     type="button"
                     size="sm"
                     disabled={isLoading}
-                    className="group h-8 rounded-full bg-primary px-3 text-primary-foreground shadow-[0_5px_16px_-8px_hsl(var(--primary))] hover:bg-primary/90 disabled:cursor-wait pointer-coarse:h-10 pointer-coarse:px-4"
+                    className={cn(
+                        "group rounded-full bg-primary px-3 text-primary-foreground shadow-[0_5px_16px_-8px_hsl(var(--primary))] hover:bg-primary/90 disabled:cursor-wait pointer-coarse:h-10 pointer-coarse:px-4",
+                        embedded ? "h-9" : "h-8",
+                    )}
                     onClick={() =>
                         hasError ? retryAudio() : toggleQueue(queue)
                     }

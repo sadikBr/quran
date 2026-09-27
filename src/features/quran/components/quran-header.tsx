@@ -38,7 +38,7 @@ export default function QuranHeader({
                     <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform group-hover:-rotate-3">
                         <BookOpen aria-hidden="true" className="size-5" />
                     </span>
-                    <span className="truncate text-foreground">
+                    <span className="hidden truncate text-foreground min-[360px]:block">
                         {t("header.brand")}
                     </span>
                 </Link>
@@ -64,6 +64,7 @@ export default function QuranHeader({
                     )}
                     <Link
                         href="/quran/search"
+                        title={t("header.search")}
                         className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                         <Search aria-hidden="true" className="size-4" />
