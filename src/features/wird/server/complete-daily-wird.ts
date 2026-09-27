@@ -5,8 +5,11 @@ import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import db from "@/drizzle/db";
-import { userWird, userWirdHistory } from "@/drizzle/schema";
+import { userKhatmahPlan, userWird, userWirdHistory } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import { shiftDate } from "@/features/khatmah/server/calculate-khatmah";
+import { TOTAL_QURAN_AYAHS } from "./build-wird-target";
+import getWirdDate from "./wird-date";
 
 export default async function completeDailyWird() {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -28,6 +31,7 @@ export default async function completeDailyWird() {
                 )
                 .limit(1);
             if (!record) return false;
+            if (record.targetDate > getWirdDate()) return false;
 
             const completedAt = new Date();
             const updated = await transaction
@@ -70,6 +74,47 @@ export default async function completeDailyWird() {
                         completedAt,
                     },
                 });
+
+            const [khatmahPlan] = await transaction
+                .select()
+                .from(userKhatmahPlan)
+                .where(
+                    and(
+                        eq(userKhatmahPlan.userId, session.user.id),
+                        eq(userKhatmahPlan.isActive, true),
+                    ),
+                )
+                .limit(1);
+            if (khatmahPlan) {
+                const khatmahCompleted =
+                    record.targetEndGlobalAyah >= TOTAL_QURAN_AYAHS;
+                const startsNextCycle =
+                    khatmahCompleted && khatmahPlan.repeatable;
+                await transaction
+                    .update(userKhatmahPlan)
+                    .set({
+                        startGlobalAyah: startsNextCycle
+                            ? 1
+                            : khatmahPlan.startGlobalAyah,
+                        currentGlobalAyah: startsNextCycle
+                            ? 1
+                            : khatmahCompleted
+                              ? TOTAL_QURAN_AYAHS + 1
+                              : record.targetEndGlobalAyah + 1,
+                        targetDate: startsNextCycle
+                            ? shiftDate(
+                                  getWirdDate(completedAt),
+                                  khatmahPlan.durationWeeks * 7,
+                              )
+                            : khatmahPlan.targetDate,
+                        isActive: startsNextCycle || !khatmahCompleted,
+                        completedAt:
+                            khatmahCompleted && !startsNextCycle
+                                ? completedAt
+                                : null,
+                    })
+                    .where(eq(userKhatmahPlan.userId, session.user.id));
+            }
             return true;
         });
     } catch {

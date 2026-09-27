@@ -1,6 +1,13 @@
 import { z } from "zod";
 
-export const WIRD_UNITS = ["ayah", "quarter", "hizb", "surah"] as const;
+export const WIRD_UNITS = [
+    "ayah",
+    "page",
+    "quarter",
+    "hizb",
+    "juz",
+    "surah",
+] as const;
 
 export type WirdUnit = (typeof WIRD_UNITS)[number];
 
@@ -24,6 +31,7 @@ export interface DailyWird {
     targetDate: string;
     completed: boolean;
     carriedOver: boolean;
+    scheduledForFuture: boolean;
     progressGlobalAyah: number | null;
     start: WirdLocation;
     end: WirdLocation;

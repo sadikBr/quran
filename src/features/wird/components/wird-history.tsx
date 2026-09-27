@@ -4,7 +4,7 @@ import { CalendarCheck, Check, Flame, Trophy } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import type { WirdHistoryStats, WirdUnit } from "../types";
 
-const UNITS: WirdUnit[] = ["ayah", "quarter", "hizb", "surah"];
+const UNITS: WirdUnit[] = ["ayah", "page", "quarter", "hizb", "juz", "surah"];
 
 export default function WirdHistory({ stats }: { stats: WirdHistoryStats }) {
     const locale = useLocale();

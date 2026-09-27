@@ -12,8 +12,10 @@ import type { WirdUnit } from "../types";
 
 const MAX_AMOUNTS: Record<WirdUnit, number> = {
     ayah: 100,
+    page: 50,
     quarter: 8,
     hizb: 4,
+    juz: 3,
     surah: 5,
 };
 

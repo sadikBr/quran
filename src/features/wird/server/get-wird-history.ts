@@ -20,8 +20,10 @@ function dayDistance(first: string, second: string) {
 
 const EMPTY_TOTALS: Record<WirdUnit, number> = {
     ayah: 0,
+    page: 0,
     quarter: 0,
     hizb: 0,
+    juz: 0,
     surah: 0,
 };
 

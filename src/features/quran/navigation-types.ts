@@ -7,6 +7,7 @@ export interface QuranDivisionReference {
 }
 
 export interface QuranNavigationMeta {
+    pages: QuranDivisionReference[];
     juzs: QuranDivisionReference[];
     hizbs: QuranDivisionReference[];
     hizbQuarters: QuranDivisionReference[];

@@ -2,7 +2,9 @@ import "server-only";
 
 import { eq } from "drizzle-orm";
 import db from "@/drizzle/db";
-import { userWird } from "@/drizzle/schema";
+import { userKhatmahPlan, userWird } from "@/drizzle/schema";
+import { buildAdaptiveKhatmahTarget } from "@/features/khatmah/server/calculate-khatmah";
+import type { KhatmahMeasurement } from "@/features/khatmah/types";
 import getAyah from "@/features/quran/server/get-ayah";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
@@ -47,33 +49,67 @@ export default async function getDailyWird(
         : null;
 
     if (completedOn && completedOn < currentDate) {
-        const [navigation, surahs] = await Promise.all([
+        const [navigation, surahs, activePlans] = await Promise.all([
             getQuranNavigationMeta(),
             getSurahsMeta(),
+            db
+                .select()
+                .from(userKhatmahPlan)
+                .where(eq(userKhatmahPlan.userId, userId))
+                .limit(1),
         ]);
-        const nextCursor =
-            record.targetEndGlobalAyah >= TOTAL_QURAN_AYAHS
-                ? 1
-                : record.targetEndGlobalAyah + 1;
-        const nextTarget = buildWirdTarget(
-            record.unit as WirdUnit,
-            record.amount,
-            nextCursor,
-            navigation,
-            surahs,
-        );
+        const plan = activePlans[0];
+        if (!plan?.completedAt) {
+            const nextCursor = Math.min(
+                record.targetEndGlobalAyah + 1,
+                TOTAL_QURAN_AYAHS,
+            );
+            const adaptive = plan?.isActive
+                ? buildAdaptiveKhatmahTarget(
+                      {
+                          targetDate: plan.targetDate,
+                          durationWeeks: plan.durationWeeks,
+                          currentGlobalAyah: plan.currentGlobalAyah,
+                          measurement: plan.measurement as KhatmahMeasurement,
+                          restDays: plan.restDays,
+                      },
+                      currentDate,
+                      navigation,
+                      surahs,
+                  )
+                : null;
+            if (adaptive && adaptive.targetDate !== plan?.targetDate) {
+                await db
+                    .update(userKhatmahPlan)
+                    .set({ targetDate: adaptive.targetDate })
+                    .where(eq(userKhatmahPlan.userId, userId));
+            }
+            const nextTarget =
+                adaptive ??
+                buildWirdTarget(
+                    record.unit as WirdUnit,
+                    record.amount,
+                    record.targetEndGlobalAyah >= TOTAL_QURAN_AYAHS
+                        ? 1
+                        : nextCursor,
+                    navigation,
+                    surahs,
+                );
 
-        [record] = await db
-            .update(userWird)
-            .set({
-                targetStartGlobalAyah: nextTarget.startGlobalAyah,
-                targetEndGlobalAyah: nextTarget.endGlobalAyah,
-                progressGlobalAyah: null,
-                targetDate: currentDate,
-                completedAt: null,
-            })
-            .where(eq(userWird.userId, userId))
-            .returning();
+            [record] = await db
+                .update(userWird)
+                .set({
+                    unit: plan?.isActive ? plan.measurement : record.unit,
+                    amount: adaptive?.amount ?? record.amount,
+                    targetStartGlobalAyah: nextTarget.startGlobalAyah,
+                    targetEndGlobalAyah: nextTarget.endGlobalAyah,
+                    progressGlobalAyah: null,
+                    targetDate: adaptive?.scheduledDate ?? currentDate,
+                    completedAt: null,
+                })
+                .where(eq(userWird.userId, userId))
+                .returning();
+        }
     }
 
     const [start, end] = await Promise.all([
@@ -88,6 +124,8 @@ export default async function getDailyWird(
         completed: record.completedAt !== null,
         carriedOver:
             record.completedAt === null && record.targetDate < currentDate,
+        scheduledForFuture:
+            record.completedAt === null && record.targetDate > currentDate,
         progressGlobalAyah: record.progressGlobalAyah,
         start,
         end,

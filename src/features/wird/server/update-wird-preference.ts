@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import db from "@/drizzle/db";
-import { userWird, userWirdHistory } from "@/drizzle/schema";
+import { userKhatmahPlan, userWird, userWirdHistory } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
@@ -14,8 +14,10 @@ import getWirdDate from "./wird-date";
 
 const MAX_AMOUNTS = {
     ayah: 100,
+    page: 50,
     quarter: 8,
     hizb: 4,
+    juz: 3,
     surah: 5,
 } as const;
 
@@ -51,6 +53,9 @@ export default async function updateWirdPreference(input: unknown) {
         const targetDate = getWirdDate();
 
         await db.transaction(async (transaction) => {
+            await transaction
+                .delete(userKhatmahPlan)
+                .where(eq(userKhatmahPlan.userId, session.user.id));
             if (existing) {
                 await transaction
                     .delete(userWirdHistory)

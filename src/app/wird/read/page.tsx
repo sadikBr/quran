@@ -21,7 +21,7 @@ export default async function WirdReaderPage() {
         getMessages(preferences.language),
         getDailyWird(session.user.id, preferences.arabicEdition),
     ]);
-    if (!wird || wird.completed) redirect("/wird");
+    if (!wird || wird.completed || wird.scheduledForFuture) redirect("/wird");
 
     const groups = await getWirdReaderData(wird, preferences);
     const t = createTranslator({

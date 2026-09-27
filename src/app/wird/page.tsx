@@ -14,6 +14,9 @@ import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
+import KhatmahPlanner from "@/features/khatmah/components/khatmah-planner";
+import getKhatmahPlan from "@/features/khatmah/server/get-khatmah-plan";
+import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import CompleteWirdButton from "@/features/wird/components/complete-wird-button";
@@ -32,10 +35,12 @@ export default async function WirdPage() {
         getPreferences(),
         getReadingProgress(),
     ]);
-    const [messages, wird, history] = await Promise.all([
+    const [messages, wird, history, khatmahPlan, surahs] = await Promise.all([
         getMessages(preferences.language),
         getDailyWird(session.user.id, preferences.arabicEdition),
         getWirdHistory(session.user.id),
+        getKhatmahPlan(session.user.id),
+        getSurahsMeta(),
     ]);
     const t = createTranslator({
         locale: preferences.language,
@@ -92,6 +97,15 @@ export default async function WirdPage() {
               })
         : "";
     const startReadingHref = "/wird/read";
+    let initialStartSurah = 1;
+    if (khatmahPlan) {
+        let cursor = 1;
+        for (const surah of surahs) {
+            if (cursor > khatmahPlan.startGlobalAyah) break;
+            initialStartSurah = surah.number;
+            cursor += surah.numberOfAyahs;
+        }
+    }
 
     return (
         <main
@@ -188,9 +202,11 @@ export default async function WirdPage() {
                                             "inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold",
                                             wird.completed
                                                 ? "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400"
-                                                : wird.carriedOver
-                                                  ? "bg-amber-500/12 text-amber-600 dark:text-amber-400"
-                                                  : "bg-primary/10 text-primary",
+                                                : wird.scheduledForFuture
+                                                  ? "bg-sky-500/12 text-sky-600 dark:text-sky-400"
+                                                  : wird.carriedOver
+                                                    ? "bg-amber-500/12 text-amber-600 dark:text-amber-400"
+                                                    : "bg-primary/10 text-primary",
                                         )}
                                     >
                                         {wird.completed ? (
@@ -207,9 +223,11 @@ export default async function WirdPage() {
                                         {t(
                                             wird.completed
                                                 ? "today.completed"
-                                                : wird.carriedOver
-                                                  ? "today.carriedOver"
-                                                  : "today.ready",
+                                                : wird.scheduledForFuture
+                                                  ? "today.restDay"
+                                                  : wird.carriedOver
+                                                    ? "today.carriedOver"
+                                                    : "today.ready",
                                         )}
                                     </span>
                                 </div>
@@ -217,29 +235,32 @@ export default async function WirdPage() {
                                     {t(
                                         wird.completed
                                             ? "today.completedDescription"
-                                            : wird.carriedOver
-                                              ? "today.carriedOverDescription"
-                                              : "today.readyDescription",
+                                            : wird.scheduledForFuture
+                                              ? "today.restDayDescription"
+                                              : wird.carriedOver
+                                                ? "today.carriedOverDescription"
+                                                : "today.readyDescription",
                                     )}
                                 </p>
-                                {!wird.completed && (
-                                    <div className="mt-6 flex flex-wrap gap-3">
-                                        <Button asChild>
-                                            <Link href={startReadingHref}>
-                                                <BookOpen
-                                                    aria-hidden="true"
-                                                    className="size-4"
-                                                />
-                                                {t(
-                                                    wird.progressGlobalAyah
-                                                        ? "today.continueReading"
-                                                        : "today.startReading",
-                                                )}
-                                            </Link>
-                                        </Button>
-                                        <CompleteWirdButton />
-                                    </div>
-                                )}
+                                {!wird.completed &&
+                                    !wird.scheduledForFuture && (
+                                        <div className="mt-6 flex flex-wrap gap-3">
+                                            <Button asChild>
+                                                <Link href={startReadingHref}>
+                                                    <BookOpen
+                                                        aria-hidden="true"
+                                                        className="size-4"
+                                                    />
+                                                    {t(
+                                                        wird.progressGlobalAyah
+                                                            ? "today.continueReading"
+                                                            : "today.startReading",
+                                                    )}
+                                                </Link>
+                                            </Button>
+                                            <CompleteWirdButton />
+                                        </div>
+                                    )}
                             </section>
 
                             <details className="mt-10 max-w-2xl group">
@@ -256,6 +277,16 @@ export default async function WirdPage() {
                             </details>
                         </>
                     )}
+
+                    <KhatmahPlanner
+                        plan={khatmahPlan}
+                        surahs={surahs.map((surah) => ({
+                            number: surah.number,
+                            name: surah.name,
+                            englishName: surah.englishName,
+                        }))}
+                        initialStartSurah={initialStartSurah}
+                    />
 
                     <WirdHistory stats={history} />
                 </section>

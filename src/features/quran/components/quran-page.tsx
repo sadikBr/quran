@@ -37,6 +37,7 @@ export default async function QuranPage({ page }: { page: number }) {
                 ? getQuranPageData(page, preferences.translationEdition)
                 : Promise.resolve(null),
             getQuranNavigationMeta().catch(() => ({
+                pages: [],
                 juzs: [],
                 hizbs: [],
                 hizbQuarters: [],

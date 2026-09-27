@@ -19,8 +19,10 @@
         },
         "units": {
             "ayah": "Ayahs",
+            "page": "Pages",
             "quarter": "Hizb quarters",
             "hizb": "Hizbs",
+            "juz": "Juzs",
             "surah": "Surahs"
         },
         "today": {
@@ -34,6 +36,8 @@
             "carriedOverDescription": "This portion is waiting from an earlier day. Complete it before moving forward.",
             "ready": "Ready for today",
             "readyDescription": "Read at your own pace, then mark the portion complete when you reach the end.",
+            "restDay": "A planned rest day",
+            "restDayDescription": "Nothing has fallen behind. Your next portion is already scheduled for your next reading day.",
             "completed": "Completed for today",
             "completedDescription": "Beautifully done. Your next portion will be prepared tomorrow.",
             "startReading": "Start today’s Wird",
@@ -52,6 +56,8 @@
             "open": "Open today’s Wird",
             "completed": "Today’s portion is complete",
             "pending": "Your portion is ready",
+            "restDay": "Today is a planned rest day",
+            "khatmahProgress": "Khatmah progress",
             "streak": "{count, plural, one {# day in a row} other {# days in a row}}"
         },
         "history": {
@@ -83,6 +89,52 @@
         },
         "navigation": {
             "back": "Back to dashboard"
+        }
+    },
+    "Khatmah": {
+        "eyebrow": "ADAPTIVE KHATMAH",
+        "title": "Reach the final page at a pace that fits your life.",
+        "description": "Choose how many weeks each Khatmah should take. Your daily Wird adjusts automatically whenever your pace changes.",
+        "measurements": {
+            "page": "pages",
+            "hizb": "hizbs",
+            "juz": "juzs"
+        },
+        "form": {
+            "duration": "Complete one Khatmah in",
+            "weeks": "{count, plural, one {# week} other {# weeks}}",
+            "decreaseWeeks": "Use fewer weeks",
+            "increaseWeeks": "Use more weeks",
+            "startSurah": "Begin from",
+            "measurement": "Measure the daily portion by",
+            "restDays": "Weekly rest days",
+            "optional": "Optional",
+            "repeat": "Repeat this plan automatically",
+            "repeatDescription": "After each completion, begin again with a fresh {count, plural, one {#-week} other {#-week}} plan.",
+            "save": "Create my Khatmah plan",
+            "update": "Update the plan",
+            "saving": "Saving…",
+            "success": "Your Khatmah plan is ready.",
+            "error": "We could not save the plan. Please try again."
+        },
+        "summary": {
+            "complete": "of the plan complete",
+            "cadence": "Khatmah rhythm",
+            "weeks": "Every {count, plural, one {# week} other {# weeks}}",
+            "deadline": "Target date",
+            "dailyPace": "Current daily pace",
+            "daysRemaining": "Time remaining",
+            "amount": "{amount, number} {unit}",
+            "days": "{count, plural, one {# day} other {# days}}",
+            "repeats": "A new cycle begins automatically after completion",
+            "adaptiveNote": "Your next portion is recalculated after every completed Wird, so missing a day never leaves the plan out of sync."
+        },
+        "actions": {
+            "edit": "Adjust the plan",
+            "pause": "Pause plan",
+            "resume": "Resume plan",
+            "startAgain": "Plan another Khatmah",
+            "cancel": "Cancel"
         }
     }
 }

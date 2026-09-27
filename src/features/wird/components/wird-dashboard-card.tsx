@@ -9,9 +9,11 @@ export default function WirdDashboardCard({
     labels,
     isArabic,
     history,
+    khatmahProgress,
 }: {
     wird: DailyWird | null;
     history: WirdHistoryStats;
+    khatmahProgress: number | null;
     labels: {
         eyebrow: string;
         emptyTitle: string;
@@ -22,6 +24,8 @@ export default function WirdDashboardCard({
         pending: string;
         goal?: string;
         streak: string;
+        restDay: string;
+        khatmahProgress: string;
     };
     isArabic: boolean;
 }) {
@@ -47,13 +51,33 @@ export default function WirdDashboardCard({
                             {wird
                                 ? wird.completed
                                     ? labels.completed
-                                    : labels.pending
+                                    : wird.scheduledForFuture
+                                      ? labels.restDay
+                                      : labels.pending
                                 : labels.emptyDescription}
                         </p>
                         {history.currentStreak > 0 && (
                             <p className="mt-2 text-xs font-medium text-primary">
                                 {labels.streak}
                             </p>
+                        )}
+                        {khatmahProgress !== null && (
+                            <div className="mt-4 max-w-sm">
+                                <div className="flex items-center justify-between gap-4 text-xs">
+                                    <span className="font-medium text-primary">
+                                        {labels.khatmahProgress}
+                                    </span>
+                                    <span className="font-semibold tabular-nums">
+                                        {khatmahProgress}%
+                                    </span>
+                                </div>
+                                <div className="mt-2 h-1 overflow-hidden rounded-full bg-primary/15">
+                                    <div
+                                        className="h-full rounded-full bg-primary"
+                                        style={{ width: `${khatmahProgress}%` }}
+                                    />
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>

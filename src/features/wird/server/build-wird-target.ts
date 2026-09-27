@@ -71,7 +71,13 @@ export default function buildWirdTarget(
     }
 
     return boundaryTarget(
-        unit === "hizb" ? navigation.hizbs : navigation.hizbQuarters,
+        unit === "page"
+            ? navigation.pages
+            : unit === "juz"
+              ? navigation.juzs
+              : unit === "hizb"
+                ? navigation.hizbs
+                : navigation.hizbQuarters,
         amount,
         safeCursor,
     );

@@ -66,6 +66,7 @@ export default async function getQuranNavigationMeta(): Promise<QuranNavigationM
     }
 
     return {
+        pages: pages.references.map(toDivisionReference),
         juzs: juzs.references.map(toDivisionReference),
         hizbs: hizbQuarters.references
             .filter((_, index) => index % 4 === 0)

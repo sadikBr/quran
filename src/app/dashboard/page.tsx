@@ -9,6 +9,7 @@ import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
+import getKhatmahPlan from "@/features/khatmah/server/get-khatmah-plan";
 import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
@@ -44,9 +45,10 @@ export default async function DashboardPage() {
             getSavedAyahs(session.user.id),
             getSurahsMeta().catch(() => []),
         ]);
-    const [dailyWird, wirdHistory] = await Promise.all([
+    const [dailyWird, wirdHistory, khatmahPlan] = await Promise.all([
         getDailyWird(session.user.id, preferences.arabicEdition),
         getWirdHistory(session.user.id),
+        getKhatmahPlan(session.user.id),
     ]);
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
@@ -215,6 +217,9 @@ export default async function DashboardPage() {
                     <WirdDashboardCard
                         wird={dailyWird}
                         history={wirdHistory}
+                        khatmahProgress={
+                            khatmahPlan ? khatmahPlan.progressPercentage : null
+                        }
                         isArabic={preferences.language === "ar"}
                         labels={{
                             eyebrow: wirdT("dashboard.eyebrow"),
@@ -226,6 +231,8 @@ export default async function DashboardPage() {
                             open: wirdT("dashboard.open"),
                             completed: wirdT("dashboard.completed"),
                             pending: wirdT("dashboard.pending"),
+                            restDay: wirdT("dashboard.restDay"),
+                            khatmahProgress: wirdT("dashboard.khatmahProgress"),
                             streak: wirdT("dashboard.streak", {
                                 count: wirdHistory.currentStreak,
                             }),

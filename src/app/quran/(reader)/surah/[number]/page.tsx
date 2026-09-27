@@ -39,6 +39,7 @@ export default async function SurahPage({
     const preferences = await getPreferences();
     const surahsPromise = getSurahsMeta().catch(() => []);
     const navigationPromise = getQuranNavigationMeta().catch(() => ({
+        pages: [],
         juzs: [],
         hizbs: [],
         hizbQuarters: [],
