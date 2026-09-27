@@ -81,6 +81,7 @@ export default async function RootLayout({
                     amiri.variable,
                     ibmPlexSansArabic.variable,
                     "antialiased",
+                    `quran-font-step-${preferences.arabicTextSize}`,
                     preferences.language === "ar" && "arabic-ui",
                 )}
             >

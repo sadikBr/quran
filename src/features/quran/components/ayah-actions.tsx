@@ -162,7 +162,7 @@ function QuranAyahPreview({
                               }
                             : undefined
                     }
-                    className={`ayah mt-3 text-center text-xl leading-loose text-foreground sm:text-2xl sm:leading-[2.1] ${
+                    className={`ayah quran-display-text mt-3 text-center leading-loose text-foreground sm:leading-[2.1] ${
                         isExpanded ? "" : "max-h-36 overflow-hidden sm:max-h-40"
                     }`}
                 >
@@ -436,7 +436,7 @@ export default function AyahActions({
                 <p
                     dir="rtl"
                     lang="ar"
-                    className="ayah mt-6 rounded-xl bg-muted/45 px-5 py-4 text-center text-xl leading-loose text-foreground sm:text-2xl"
+                    className="ayah quran-display-text mt-6 rounded-xl bg-muted/45 px-5 py-4 text-center leading-loose text-foreground"
                 >
                     <TajweedText text={arabicText} />
                 </p>

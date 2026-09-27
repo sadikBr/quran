@@ -135,6 +135,9 @@
     --tracking-normal: 0em;
     --background: oklch(0.9885 0.0057 84.5659);
     --foreground: oklch(0.366 0.0251 49.6085);
+    --quran-reader-font-size: 2.25rem;
+    --quran-display-font-size: 1.7rem;
+    --quran-basmala-font-size: 4.5rem;
 }
 
 .dark {
@@ -205,6 +208,80 @@
 @layer base {
     body {
         letter-spacing: var(--tracking-normal);
+    }
+}
+
+.quran-font-step-1 {
+    --quran-reader-font-size: 1.5rem;
+    --quran-display-font-size: 1.125rem;
+    --quran-basmala-font-size: 3.25rem;
+}
+
+.quran-font-step-2 {
+    --quran-reader-font-size: 1.7rem;
+    --quran-display-font-size: 1.25rem;
+    --quran-basmala-font-size: 3.5rem;
+}
+
+.quran-font-step-3 {
+    --quran-reader-font-size: 1.875rem;
+    --quran-display-font-size: 1.5rem;
+    --quran-basmala-font-size: 3.75rem;
+}
+
+.quran-font-step-4 {
+    --quran-reader-font-size: 2.125rem;
+    --quran-display-font-size: 1.65rem;
+    --quran-basmala-font-size: 4rem;
+}
+
+.quran-font-step-5 {
+    --quran-reader-font-size: 2.375rem;
+    --quran-display-font-size: 1.8rem;
+    --quran-basmala-font-size: 4.25rem;
+}
+
+.quran-reader-text {
+    font-size: var(--quran-reader-font-size);
+}
+
+.quran-display-text {
+    font-size: var(--quran-display-font-size);
+}
+
+.quran-basmala-text {
+    font-size: var(--quran-basmala-font-size);
+}
+
+@media (min-width: 640px) {
+    .quran-font-step-1 {
+        --quran-reader-font-size: 1.875rem;
+        --quran-display-font-size: 1.25rem;
+        --quran-basmala-font-size: 3.75rem;
+    }
+
+    .quran-font-step-2 {
+        --quran-reader-font-size: 2.05rem;
+        --quran-display-font-size: 1.4rem;
+        --quran-basmala-font-size: 4rem;
+    }
+
+    .quran-font-step-3 {
+        --quran-reader-font-size: 2.25rem;
+        --quran-display-font-size: 1.7rem;
+        --quran-basmala-font-size: 4.5rem;
+    }
+
+    .quran-font-step-4 {
+        --quran-reader-font-size: 2.55rem;
+        --quran-display-font-size: 1.9rem;
+        --quran-basmala-font-size: 4.8rem;
+    }
+
+    .quran-font-step-5 {
+        --quran-reader-font-size: 2.875rem;
+        --quran-display-font-size: 2.1rem;
+        --quran-basmala-font-size: 5.1rem;
     }
 }
 

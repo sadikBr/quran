@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgEnum, pgTable, text } from "drizzle-orm/pg-core";
+import { boolean, integer, pgEnum, pgTable, text } from "drizzle-orm/pg-core";
 import {
     LANGUAGES,
     READING_MODES,
@@ -33,6 +33,7 @@ export const userSettings = pgTable("user_settings", {
     continuousRecitation: boolean("continuous_recitation")
         .notNull()
         .default(false),
+    arabicTextSize: integer("arabic_text_size").notNull().default(3),
 
     createdAt,
     updatedAt,

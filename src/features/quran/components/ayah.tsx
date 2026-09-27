@@ -63,7 +63,7 @@ export default function Ayah({
             ref={ayahRef}
             id={`ayah-${ayah.number}`}
             className={cn(
-                "ayah group/ayah me-[0.35em] inline scroll-mt-6 rounded-md text-3xl leading-[inherit] text-foreground transition-[background-color,color,box-shadow] duration-500 ease-out sm:text-4xl",
+                "ayah quran-reader-text group/ayah me-[0.35em] inline scroll-mt-6 rounded-md leading-[inherit] text-foreground transition-[background-color,color,box-shadow] duration-500 ease-out",
                 isActiveAyah &&
                     "bg-primary/6 shadow-[inset_0_-1px_0_hsl(var(--primary)/0.45)] dark:bg-primary/9",
             )}

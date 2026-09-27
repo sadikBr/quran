@@ -34,6 +34,13 @@
             "english": "English",
             "arabic": "Arabic"
         },
+        "arabicTextSize": {
+            "title": "Arabic text size",
+            "description": "Adjust Quran text to the size that feels most comfortable to read.",
+            "label": "Arabic text size",
+            "preview": "وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا",
+            "step": "Size {current, number} of {total, number}"
+        },
         "readingMode": {
             "title": "Reading mode",
             "description": "Choose the way you would like to move through the Quran.",

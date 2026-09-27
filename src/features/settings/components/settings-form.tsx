@@ -14,15 +14,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import EditionCombobox from "@/features/quran/components/edition-combobox";
 import ReciterCombobox from "@/features/quran/components/reciter-combobox";
 import type { Edition, Reciter } from "@/features/quran/types";
 import { useSettings } from "@/features/settings/settings-provider";
+import { cn } from "@/lib/utils";
 import {
     isArabicTextEditionCompatible,
     isReciterCompatible,
 } from "../edition-compatibility";
 import {
+    type ArabicTextSize,
     DEFAULT_PREFERENCES,
     type Language,
     type Preferences,
@@ -293,6 +296,75 @@ export default function SettingsForm({
                                     </SelectContent>
                                 </Select>
                             </SettingField>
+                        </PreferenceCard>
+
+                        <PreferenceCard
+                            title={t("arabicTextSize.title")}
+                            description={t("arabicTextSize.description")}
+                        >
+                            <div
+                                className={`quran-font-step-${values.arabicTextSize} space-y-3`}
+                            >
+                                <div className="flex min-h-20 flex-col items-center justify-center py-2 text-center">
+                                    <p
+                                        dir="rtl"
+                                        lang="ar"
+                                        className="ayah quran-display-text leading-[1.9] text-foreground transition-[font-size] duration-200"
+                                    >
+                                        {t("arabicTextSize.preview")}
+                                    </p>
+                                    <p className="mt-1 text-[0.68rem] font-medium tracking-wide text-muted-foreground">
+                                        {t("arabicTextSize.step", {
+                                            current: values.arabicTextSize,
+                                            total: 5,
+                                        })}
+                                    </p>
+                                </div>
+                                <SettingField
+                                    label={t("arabicTextSize.label")}
+                                    htmlFor="arabic-text-size"
+                                >
+                                    <Slider
+                                        id="arabic-text-size"
+                                        min={1}
+                                        max={5}
+                                        step={1}
+                                        value={[values.arabicTextSize]}
+                                        onValueChange={(nextValue) =>
+                                            updateValue(
+                                                "arabicTextSize",
+                                                nextValue[0] as ArabicTextSize,
+                                            )
+                                        }
+                                        aria-label={t("arabicTextSize.label")}
+                                        aria-valuetext={t(
+                                            "arabicTextSize.step",
+                                            {
+                                                current: values.arabicTextSize,
+                                                total: 5,
+                                            },
+                                        )}
+                                    />
+                                </SettingField>
+                                <div
+                                    aria-hidden="true"
+                                    className="grid grid-cols-5 text-center text-[0.65rem] text-muted-foreground"
+                                >
+                                    {[1, 2, 3, 4, 5].map((step) => (
+                                        <span
+                                            key={step}
+                                            className={cn(
+                                                "transition-colors",
+                                                step ===
+                                                    values.arabicTextSize &&
+                                                    "font-semibold text-primary",
+                                            )}
+                                        >
+                                            {step}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
                         </PreferenceCard>
                     </SettingsSection>
 

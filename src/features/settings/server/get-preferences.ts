@@ -40,6 +40,10 @@ export default async function getPreferences(): Promise<Preferences> {
         showTranslation: settings.showTranslation,
         readingMode: settings.readingMode,
         continuousRecitation: settings.continuousRecitation,
+        arabicTextSize:
+            settings.arabicTextSize >= 1 && settings.arabicTextSize <= 5
+                ? (settings.arabicTextSize as Preferences["arabicTextSize"])
+                : DEFAULT_PREFERENCES.arabicTextSize,
     };
 
     try {

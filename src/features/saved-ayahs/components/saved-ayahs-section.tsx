@@ -333,7 +333,7 @@ export default function SavedAyahsSection({
                                         <p
                                             dir="rtl"
                                             lang="ar"
-                                            className="ayah line-clamp-2 text-right text-2xl leading-[1.9] text-foreground transition-colors group-hover:text-foreground/80 sm:text-[1.7rem]"
+                                            className="ayah quran-display-text line-clamp-2 text-right leading-[1.9] text-foreground transition-colors group-hover:text-foreground/80"
                                         >
                                             {ayah.arabicText}
                                         </p>

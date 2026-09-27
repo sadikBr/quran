@@ -92,7 +92,7 @@ function SearchResultRow({
                     {result.field === "arabic" ? (
                         <HighlightedSnippet
                             snippet={result.snippet}
-                            className="ayah mt-3 text-end text-2xl leading-[2.15] text-foreground sm:text-[1.7rem]"
+                            className="ayah quran-display-text mt-3 text-end leading-[2.15] text-foreground"
                         />
                     ) : (
                         <>
@@ -102,7 +102,7 @@ function SearchResultRow({
                             />
                             <p
                                 dir="rtl"
-                                className="ayah mt-3 line-clamp-2 text-end text-lg leading-9 text-muted-foreground"
+                                className="ayah quran-display-text mt-3 line-clamp-2 text-end leading-[1.9] text-muted-foreground"
                             >
                                 {result.arabicText}
                             </p>
