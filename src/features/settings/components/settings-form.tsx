@@ -326,6 +326,7 @@ export default function SettingsForm({
                                 >
                                     <Slider
                                         id="arabic-text-size"
+                                        dir="ltr"
                                         min={1}
                                         max={5}
                                         step={1}
@@ -348,6 +349,7 @@ export default function SettingsForm({
                                 </SettingField>
                                 <div
                                     aria-hidden="true"
+                                    dir="ltr"
                                     className="grid grid-cols-5 text-center text-[0.65rem] text-muted-foreground"
                                 >
                                     {[1, 2, 3, 4, 5].map((step) => (
