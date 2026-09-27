@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import BackToTopButton from "@/features/quran/components/back-to-top-button";
 import QuranHeader from "@/features/quran/components/quran-header";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -35,6 +36,7 @@ export default async function QuranIndexLayout({
                 hasSavedProgress={hasSavedProgress}
             />
             <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
+            <BackToTopButton />
         </div>
     );
 }

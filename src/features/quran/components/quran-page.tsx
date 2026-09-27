@@ -195,7 +195,10 @@ export default async function QuranPage({ page }: { page: number }) {
     }
 
     return (
-        <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-0 overflow-auto p-4">
+        <div
+            data-quran-scroll-container
+            className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-0 overflow-auto p-4"
+        >
             <PageDivisionSummary
                 juzs={pageJuzs}
                 hizbs={pageHizbs}

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import AyahTargetScroller from "@/features/quran/components/ayah-target-scroller";
+import BackToTopButton from "@/features/quran/components/back-to-top-button";
 import QuranHeader from "@/features/quran/components/quran-header";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getTextDirection } from "@/i18n/config";
@@ -24,6 +25,7 @@ export default async function QuranReaderLayout({
             <QuranHeader showSurahIndex />
             <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
             <AyahTargetScroller />
+            <BackToTopButton />
         </div>
     );
 }

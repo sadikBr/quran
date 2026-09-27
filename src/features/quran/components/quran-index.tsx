@@ -97,7 +97,10 @@ export default function QuranIndex({
     const sections: IndexSection[] = ["surahs", "juz", "hizb"];
 
     return (
-        <div className="mx-auto h-full max-w-5xl overflow-y-auto p-4">
+        <div
+            data-quran-scroll-container
+            className="mx-auto h-full max-w-5xl overflow-y-auto p-4"
+        >
             <div
                 role="tablist"
                 aria-label={t("index.sectionsLabel")}
