@@ -38,9 +38,11 @@ function normalizeForSearch(value: string) {
 export default function QuranIndex({
     surahs,
     navigation,
+    surahStartingPages,
 }: {
     surahs: SurahType[];
     navigation: QuranNavigationMeta;
+    surahStartingPages?: Record<number, number>;
 }) {
     const t = useTranslations("Reader");
     const [activeSection, setActiveSection] = useState<IndexSection>("surahs");
@@ -211,7 +213,11 @@ export default function QuranIndex({
                             <SurahFrame
                                 key={surah.number}
                                 surah={surah}
-                                href={getReadingHref(surah.number, preferences)}
+                                href={getReadingHref(
+                                    surah.number,
+                                    preferences,
+                                    surahStartingPages?.[surah.number],
+                                )}
                             />
                         ))
                     ) : (

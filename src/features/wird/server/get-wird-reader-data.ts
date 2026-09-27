@@ -48,18 +48,20 @@ export default async function getWirdReaderData(
                 ? mapWarshAyahs(surahData.ayahs, warshChapter, nativeWarshAudio)
                 : surahData.ayahs;
             const ayahs = displayedAyahs
-                .filter(
-                    (ayah) =>
-                        ayah.number >= wird.start.globalAyahNumber &&
-                        ayah.number <= wird.end.globalAyahNumber,
+                .filter((ayah) =>
+                    (ayah.hafsGlobalNumbers ?? [ayah.number]).some(
+                        (number) =>
+                            number >= wird.start.globalAyahNumber &&
+                            number <= wird.end.globalAyahNumber,
+                    ),
                 )
                 .map((ayah) => {
                     const warshVerse = warshChapter?.verses.find(
-                        (verse) => verse.id === ayah.numberInSurah,
+                        (verse) => verse.number === ayah.numberInSurah,
                     );
                     const audioAyahNumber = warshVerse
                         ? nativeWarshAudio
-                            ? warshVerse.id
+                            ? warshVerse.number
                             : getWarshAudioAyahNumbers(
                                   warshVerse,
                                   surahNumber,
@@ -71,7 +73,8 @@ export default async function getWirdReaderData(
                             ? getRecitationStreams(reciter, {
                                   surahNumber,
                                   ayahNumber: audioAyahNumber,
-                                  globalAyahNumber: ayah.number,
+                                  globalAyahNumber:
+                                      ayah.hafsGlobalNumber ?? ayah.number,
                               })
                             : [];
 

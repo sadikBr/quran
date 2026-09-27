@@ -59,45 +59,55 @@ export default function Ayah({
     }, [isActiveAyah]);
 
     return (
-        <span
-            ref={ayahRef}
-            id={`ayah-${ayah.number}`}
-            className={cn(
-                "ayah quran-reader-text group/ayah me-[0.35em] inline scroll-mt-6 rounded-md leading-[inherit] text-foreground transition-[background-color,color,box-shadow] duration-500 ease-out",
-                isActiveAyah &&
-                    "bg-primary/6 shadow-[inset_0_-1px_0_hsl(var(--primary)/0.45)] dark:bg-primary/9",
-            )}
-        >
+        <>
+            {ayah.legacyAnchorNumber !== undefined &&
+                ayah.legacyAnchorNumber !== ayah.number && (
+                    <span
+                        id={`ayah-${ayah.legacyAnchorNumber}`}
+                        className="scroll-mt-6"
+                        aria-hidden="true"
+                    />
+                )}
             <span
+                ref={ayahRef}
+                id={`ayah-${ayah.number}`}
                 className={cn(
-                    ayah.sajda &&
-                        "text-primary underline decoration-primary/40 decoration-2 underline-offset-8",
+                    "ayah quran-reader-text group/ayah me-[0.35em] inline scroll-mt-6 rounded-md leading-[inherit] text-foreground transition-[background-color,color,box-shadow] duration-500 ease-out",
+                    isActiveAyah &&
+                        "bg-primary/6 shadow-[inset_0_-1px_0_hsl(var(--primary)/0.45)] dark:bg-primary/9",
                 )}
             >
-                <TajweedText text={ayah.text} />
-            </span>{" "}
-            <AyahPlayer ayah={ayah} />
-            <span className="relative inline-block align-[0.08em]">
-                <Link
-                    href={actionsHref}
-                    scroll={false}
-                    className="frame relative inline-block rounded-sm text-sidebar-accent transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    aria-label={t("ayah.openActions", {
-                        number: ayah.numberInSurah,
-                    })}
+                <span
+                    className={cn(
+                        ayah.sajda &&
+                            "text-primary underline decoration-primary/40 decoration-2 underline-offset-8",
+                    )}
                 >
-                    <span className="transition-opacity duration-300 ease-out sm:group-hover/ayah:opacity-0 sm:group-focus-within/ayah:opacity-0">
-                        {getArabicNumber(ayah.numberInSurah)}
-                    </span>
-                    <span
-                        aria-hidden="true"
-                        className="pointer-events-none absolute top-[55%] left-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 scale-95 items-center justify-center rounded-full bg-primary/10 font-sans text-primary opacity-0 transition-[opacity,transform,background-color,color] duration-200 ease-out sm:group-hover/ayah:scale-100 sm:group-hover/ayah:opacity-100 sm:group-focus-within/ayah:scale-100 sm:group-focus-within/ayah:opacity-100"
+                    <TajweedText text={ayah.text} />
+                </span>{" "}
+                <AyahPlayer ayah={ayah} />
+                <span className="relative inline-block align-[0.08em]">
+                    <Link
+                        href={actionsHref}
+                        scroll={false}
+                        className="frame relative inline-block rounded-sm text-sidebar-accent transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        aria-label={t("ayah.openActions", {
+                            number: ayah.numberInSurah,
+                        })}
                     >
-                        <Ellipsis className="size-4" />
-                    </span>
-                </Link>
+                        <span className="transition-opacity duration-300 ease-out sm:group-hover/ayah:opacity-0 sm:group-focus-within/ayah:opacity-0">
+                            {getArabicNumber(ayah.numberInSurah)}
+                        </span>
+                        <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute top-[55%] left-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 scale-95 items-center justify-center rounded-full bg-primary/10 font-sans text-primary opacity-0 transition-[opacity,transform,background-color,color] duration-200 ease-out sm:group-hover/ayah:scale-100 sm:group-hover/ayah:opacity-100 sm:group-focus-within/ayah:scale-100 sm:group-focus-within/ayah:opacity-100"
+                        >
+                            <Ellipsis className="size-4" />
+                        </span>
+                    </Link>
+                </span>
             </span>
-        </span>
+        </>
     );
 }
 

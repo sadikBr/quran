@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import db from "@/drizzle/db";
 import { userSettings } from "@/drizzle/schema";
@@ -64,6 +65,12 @@ export default async function updatePreferences(
                     ...preferencesToSave,
                 },
             });
+
+        // Preferences affect server-rendered data throughout the app (most
+        // importantly the Quran reader). Clear the complete client router
+        // cache so returning to an already visited URL cannot restore a Hafs
+        // payload while the settings provider says Warsh, or vice versa.
+        revalidatePath("/", "layout");
 
         return { success: true };
     } catch {

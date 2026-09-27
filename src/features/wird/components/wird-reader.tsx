@@ -28,6 +28,9 @@ export default function WirdReader({
     showTranslation: boolean;
     continuousRecitation: boolean;
 }) {
+    function progressNumber(ayah: WirdReaderGroup["ayahs"][number]) {
+        return ayah.hafsGlobalNumber ?? ayah.number;
+    }
     const locale = useLocale();
     const t = useTranslations("Wird.reader");
     const [progress, setProgress] = useState(initialProgress);
@@ -143,13 +146,26 @@ export default function WirdReader({
 
                             <div className="space-y-4">
                                 {group.ayahs.map((ayah) => {
+                                    const ayahProgressNumber =
+                                        progressNumber(ayah);
                                     const isReached =
                                         progress !== null &&
-                                        ayah.number <= progress;
-                                    const isNext = ayah.number === nextAyah;
-                                    const translation = translationByAyah.get(
-                                        ayah.number,
-                                    );
+                                        ayahProgressNumber <= progress;
+                                    const isNext = (
+                                        ayah.hafsGlobalNumbers ?? [
+                                            ayahProgressNumber,
+                                        ]
+                                    ).includes(nextAyah);
+                                    const translation = (
+                                        ayah.hafsGlobalNumbers ?? [
+                                            ayahProgressNumber,
+                                        ]
+                                    )
+                                        .map((number) =>
+                                            translationByAyah.get(number),
+                                        )
+                                        .filter(Boolean)
+                                        .join(" ");
 
                                     return (
                                         <article
@@ -191,11 +207,11 @@ export default function WirdReader({
                                                     }
                                                     disabled={
                                                         savingAyah ===
-                                                        ayah.number
+                                                        ayahProgressNumber
                                                     }
                                                     onClick={() =>
                                                         saveProgress(
-                                                            ayah.number,
+                                                            ayahProgressNumber,
                                                         )
                                                     }
                                                     className="gap-2 rounded-full"
@@ -211,7 +227,8 @@ export default function WirdReader({
                                                             className="size-3.5"
                                                         />
                                                     )}
-                                                    {savingAyah === ayah.number
+                                                    {savingAyah ===
+                                                    ayahProgressNumber
                                                         ? t("saving")
                                                         : isReached
                                                           ? t("reached")

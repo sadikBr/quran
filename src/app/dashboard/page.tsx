@@ -12,6 +12,7 @@ import { auth } from "@/features/auth/auth";
 import getKhatmahPlan from "@/features/khatmah/server/get-khatmah-plan";
 import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
+import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import SavedAyahsSection from "@/features/saved-ayahs/components/saved-ayahs-section";
 import getSavedAyahs from "@/features/saved-ayahs/server/get-saved-ayahs";
@@ -50,6 +51,17 @@ export default async function DashboardPage() {
         getWirdHistory(session.user.id),
         getKhatmahPlan(session.user.id),
     ]);
+    const warshChapters =
+        preferences.riwayah === "warsh" ? await getWarshChapters() : [];
+    const warshBySurah = new Map(
+        warshChapters.map((chapter) => [chapter.id, chapter]),
+    );
+    const surahOffsets = new Map<number, number>();
+    let ayahOffset = 0;
+    for (const surah of surahs) {
+        surahOffsets.set(surah.number, ayahOffset);
+        ayahOffset += surah.numberOfAyahs;
+    }
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
@@ -102,9 +114,19 @@ export default async function DashboardPage() {
 
     const localizedSavedAyahs = savedAyahs.map((ayah) => {
         const surah = surahs.find((item) => item.number === ayah.surahNumber);
+        const hafsAyahNumber =
+            ayah.globalAyahNumber - (surahOffsets.get(ayah.surahNumber) ?? 0);
+        const warshVerse = warshBySurah
+            .get(ayah.surahNumber)
+            ?.verses.find((verse) =>
+                verse.number_in_hafs.includes(hafsAyahNumber),
+            );
 
         return {
             ...ayah,
+            ayahNumber: warshVerse?.number ?? ayah.ayahNumber,
+            pageNumber: warshVerse?.page_number ?? ayah.pageNumber,
+            arabicText: warshVerse?.text ?? ayah.arabicText,
             surahName:
                 preferences.language === "ar"
                     ? (surah?.name ?? ayah.surahName)

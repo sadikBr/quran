@@ -16,7 +16,7 @@ export function getWarshHafsAnchor(verse: WarshVerse, surahNumber: number) {
     // Warsh does not count Al-Faatiha's basmala as its first ayah. Its first
     // textual ayah therefore anchors to Hafs ayah 2 even though the source
     // reports the complete [1, 2] correspondence.
-    if (surahNumber === 1 && verse.id === 1) return 2;
+    if (surahNumber === 1 && verse.number === 1) return 2;
     return verse.number_in_hafs[0];
 }
 
@@ -28,7 +28,7 @@ export function getNativeWarshPlaybackNumber(
     verse: WarshVerse,
     surahNumber: number,
 ) {
-    return surahNumber * 1_000 + verse.id;
+    return surahNumber * 1_000 + verse.number;
 }
 
 export function getWarshPlaybackNumberForHafs(
@@ -50,7 +50,7 @@ export function getWarshAudioAyahNumbers(
     verse: WarshVerse,
     surahNumber: number,
 ) {
-    if (surahNumber === 1 && verse.id === 1) return [2];
+    if (surahNumber === 1 && verse.number === 1) return [2];
     return verse.number_in_hafs;
 }
 
@@ -62,20 +62,43 @@ export default function mapWarshAyahs(
     const hafsByNumber = new Map(
         hafsAyahs.map((ayah) => [ayah.numberInSurah, ayah]),
     );
+    const claimedLegacyAnchors = new Set<number>();
     const mappedAyahs = chapter.verses.flatMap((verse) => {
         const anchor = getWarshHafsAnchor(verse, chapter.id);
         const hafsAyah = hafsByNumber.get(anchor);
 
         if (!hafsAyah) return [];
 
+        const hafsGlobalNumbers = getWarshAudioAyahNumbers(
+            verse,
+            chapter.id,
+        ).flatMap((number) => {
+            const mapped = hafsByNumber.get(number);
+            return mapped ? [mapped.number] : [];
+        });
+
+        const legacyAnchorNumber = claimedLegacyAnchors.has(hafsAyah.number)
+            ? undefined
+            : hafsAyah.number;
+        claimedLegacyAnchors.add(hafsAyah.number);
+
         return [
             {
                 ...hafsAyah,
+                number: verse.id,
+                hafsGlobalNumber: hafsAyah.number,
+                hafsGlobalNumbers,
+                legacyAnchorNumber,
                 audioNumber: nativeAudioNumbering
                     ? getNativeWarshPlaybackNumber(verse, chapter.id)
                     : getWarshPlaybackNumber(verse, chapter.id),
-                numberInSurah: verse.id,
+                numberInSurah: verse.number,
                 text: verse.text,
+                juz: verse.juz,
+                manzil: verse.manzil,
+                page: verse.page_number,
+                ruku: verse.ruku,
+                hizbQuarter: verse.hizb,
             },
         ];
     });
@@ -90,6 +113,8 @@ export default function mapWarshAyahs(
     return [
         {
             ...basmala,
+            hafsGlobalNumber: basmala.number,
+            hafsGlobalNumbers: [basmala.number],
             audioNumber: chapter.id * 1_000,
             isBasmalaSentinel: true,
             text: WARSH_FATIHA_BASMALA,

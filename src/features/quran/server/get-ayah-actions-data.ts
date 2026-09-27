@@ -41,7 +41,7 @@ export default async function getAyahActionsData(
                 : Promise.resolve(null),
         ]);
     const warshVerse = warshChapter?.verses.find(
-        (verse) => verse.id === ayahNumber,
+        (verse) => verse.number === ayahNumber,
     );
     const reciter = reciters.find((item) => item.id === preferences.reciter);
     const nativeWarshAudio = usesNativeWarshAyahNumbering(reciter);
@@ -50,7 +50,7 @@ export default async function getAyahActionsData(
         : ayahNumber;
     const audioAyahNumber = warshVerse
         ? nativeWarshAudio
-            ? warshVerse.id
+            ? warshVerse.number
             : getWarshAudioAyahNumbers(warshVerse, surahNumber)[0]
         : ayahNumber;
     const ayah = ayahs.find((item) => item.numberInSurah === hafsAyahNumber);
@@ -93,7 +93,7 @@ export default async function getAyahActionsData(
                 : [],
         globalAyahNumber: ayah.number,
         surahNumber,
-        pageNumber: ayah.page,
+        pageNumber: warshVerse?.page_number ?? ayah.page,
         tafsirEditions,
         canChooseTafsir: Boolean(session),
         canSaveAyah: Boolean(session),

@@ -83,6 +83,7 @@ export default async function RootLayout({
                     "antialiased",
                     `quran-font-step-${preferences.arabicTextSize}`,
                     preferences.language === "ar" && "arabic-ui",
+                    preferences.riwayah === "warsh" && "riwayah-warsh",
                 )}
             >
                 <NextIntlClientProvider

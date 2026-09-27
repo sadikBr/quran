@@ -24,5 +24,19 @@ export default async function getSurahData(
         ...surahMeta
     } = data.data;
 
-    return { ayahs, edition: editionData, surahMeta, audio, audioSecondary };
+    // The full-surah endpoint omits the nested `surah` object that is present
+    // on page responses. Keep the app's AyahType contract consistent so
+    // shared reader/audio code can safely use the same shape in both modes.
+    const normalizedAyahs = ayahs.map((ayah) => ({
+        ...ayah,
+        surah: ayah.surah ?? surahMeta,
+    }));
+
+    return {
+        ayahs: normalizedAyahs,
+        edition: editionData,
+        surahMeta,
+        audio,
+        audioSecondary,
+    };
 }

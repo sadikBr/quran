@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Riwayah } from "@/features/settings/preferences";
+import { getWarshHafsAnchor } from "../helpers/map-warsh-ayahs";
 import {
     createSearchSnippet,
     normalizeSearchText,
@@ -14,8 +15,8 @@ import type {
 } from "../search-types";
 import type { AyahType, Edition, SurahType, WarshChapter } from "../types";
 import fetchQuranCloud from "./fetch-quran-cloud";
+import { getWarshChapters } from "./get-warsh-mushaf";
 
-const QURAN_JSON_BASE_URL = "https://quran-json.risanb.com";
 const MAX_CACHED_CORPORA = 8;
 const MAX_CACHED_EDITIONS = 16;
 const MAX_RESULTS = 50;
@@ -53,7 +54,6 @@ interface SearchCorpus {
 
 const corpusCache = new Map<string, Promise<SearchCorpus>>();
 const editionCache = new Map<string, Promise<CompleteEditionResponse>>();
-let warshQuranCache: Promise<WarshChapter[]> | undefined;
 
 function rememberCorpus(key: string, corpus: Promise<SearchCorpus>) {
     if (!corpusCache.has(key) && corpusCache.size >= MAX_CACHED_CORPORA) {
@@ -82,39 +82,6 @@ async function getCompleteEdition(identifier: string) {
     editionCache.set(identifier, edition);
     edition.catch(() => editionCache.delete(identifier));
     return edition;
-}
-
-async function getCompleteWarshQuran(): Promise<WarshChapter[]> {
-    if (warshQuranCache) return warshQuranCache;
-
-    warshQuranCache = fetchWarshQuran();
-    warshQuranCache.catch(() => {
-        warshQuranCache = undefined;
-    });
-    return warshQuranCache;
-}
-
-async function fetchWarshQuran(): Promise<WarshChapter[]> {
-    let response: Response;
-
-    try {
-        response = await fetch(`${QURAN_JSON_BASE_URL}/text/warsh/quran.json`, {
-            cache: "no-store",
-        });
-    } catch (error) {
-        console.error("Unable to reach Quran JSON for Warsh search.", error);
-        throw new Error("Unable to load the Warsh search corpus.");
-    }
-
-    if (!response.ok) {
-        console.error("Quran JSON returned a Warsh search error.", {
-            status: response.status,
-            statusText: response.statusText,
-        });
-        throw new Error("Unable to load the Warsh search corpus.");
-    }
-
-    return response.json();
 }
 
 function editionName(edition: Edition) {
@@ -188,8 +155,10 @@ function buildWarshDocuments(
 
         return chapter.verses.flatMap((verse) => {
             const mappedHafsNumbers =
-                chapter.id === 1 && verse.id === 1 ? [2] : verse.number_in_hafs;
-            const anchor = hafsAyahs.get(mappedHafsNumbers[0]);
+                chapter.id === 1 && verse.number === 1
+                    ? [2]
+                    : verse.number_in_hafs;
+            const anchor = hafsAyahs.get(getWarshHafsAnchor(verse, chapter.id));
             if (!anchor) return [];
 
             const translationText = mappedHafsNumbers
@@ -205,9 +174,9 @@ function buildWarshDocuments(
                     surahEnglishName: hafsSurah.englishName,
                     surahEnglishNameTranslation:
                         hafsSurah.englishNameTranslation,
-                    ayahNumber: verse.id,
-                    globalAyahNumber: anchor.number,
-                    pageNumber: anchor.page,
+                    ayahNumber: verse.number,
+                    globalAyahNumber: verse.id,
+                    pageNumber: verse.page_number,
                     arabicText,
                     translationText,
                     normalizedArabic: normalizeSearchTextWithMap(arabicText),
@@ -229,7 +198,7 @@ async function buildSearchCorpus(
     if (riwayah === "warsh") {
         const [hafs, warsh, translation] = await Promise.all([
             getCompleteEdition("quran-simple"),
-            getCompleteWarshQuran(),
+            getWarshChapters(),
             translationPromise,
         ]);
 

@@ -19,6 +19,12 @@ export interface Data {
 
 export interface AyahType {
     number: number;
+    /** Hafs global ayah used by shared bookmarks, translations and progress. */
+    hafsGlobalNumber?: number;
+    /** All Hafs ayahs represented by this ayah (some Warsh boundaries differ). */
+    hafsGlobalNumbers?: number[];
+    /** Backwards-compatible hash target for links saved before Warsh migration. */
+    legacyAnchorNumber?: number;
     audioNumber?: number;
     isBasmalaSentinel?: boolean;
     audio?: string;
@@ -99,11 +105,39 @@ export interface Reciter {
 
 export interface WarshChapter {
     id: number;
+    name: string;
+    coded_name: string;
     verses: WarshVerse[];
 }
 
 export interface WarshVerse {
     id: number;
+    number: number;
+    surah: string;
+    page_number: number;
     text: string;
+    marker: string;
+    juz: number;
+    hizb: number;
+    ruku: number;
+    manzil: number;
+    options: string[];
     number_in_hafs: number[];
+}
+
+export interface WarshMushaf {
+    id: number;
+    name: string;
+    description: string;
+    image: string;
+    bismillah: string;
+    font_file: string;
+    images: string;
+    images_png: string | null;
+    surahs: Array<{
+        id: number;
+        name: string;
+        coded_name: string;
+        ayahs: WarshVerse[];
+    }>;
 }

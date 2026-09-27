@@ -334,6 +334,12 @@ body.focus-mode .quran-focus-chrome {
     src: url("/amiri.ttf");
 }
 
+@font-face {
+    font-family: "Uthmanic Warsh";
+    src: url("/api/quran/warsh-font") format("truetype");
+    font-display: swap;
+}
+
 .rtl {
     direction: rtl;
 }
@@ -362,6 +368,10 @@ body.focus-mode .quran-focus-chrome {
     font-family: Amiri, Ayah, sans-serif;
     -webkit-user-select: none;
     user-select: none;
+}
+
+.riwayah-warsh .ayah {
+    font-family: "Uthmanic Warsh", Amiri, Ayah, sans-serif;
 }
 
 .frame {

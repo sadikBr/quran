@@ -4,9 +4,10 @@ import getSurahStartingPage from "./get-surah-starting-page";
 export default function getReadingHref(
     surahNumber: number,
     preferences: Preferences,
+    startingPage?: number,
 ): string {
     if (preferences.readingMode === "page") {
-        const page = getSurahStartingPage(surahNumber);
+        const page = startingPage ?? getSurahStartingPage(surahNumber);
         return `/quran/page/${page}`;
     }
 
