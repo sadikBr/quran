@@ -1,9 +1,12 @@
 import QuranIndex from "@/features/quran/components/quran-index";
+import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
-import type { SurahType } from "@/features/quran/types";
 
 export default async function IndexPage() {
-    const surahs: SurahType[] = await getSurahsMeta();
+    const [surahs, navigation] = await Promise.all([
+        getSurahsMeta(),
+        getQuranNavigationMeta(),
+    ]);
 
-    return <QuranIndex surahs={surahs} />;
+    return <QuranIndex surahs={surahs} navigation={navigation} />;
 }

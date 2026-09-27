@@ -10,6 +10,10 @@
         },
         "loading": "Loading Quran content",
         "index": {
+            "sectionsLabel": "Browse the Quran by division",
+            "surahsTab": "Surahs",
+            "juzTab": "Juz",
+            "hizbTab": "Hizb",
             "searchLabel": "Search surahs",
             "searchPlaceholder": "Search by name or meaning",
             "filterLegend": "Filter by revelation type",
@@ -17,7 +21,16 @@
             "medinan": "Medinan",
             "clearFilters": "Clear filters",
             "noResultsTitle": "No surahs found",
-            "noResultsDescription": "Try a different search term or clear the active filters."
+            "noResultsDescription": "Try a different search term or clear the active filters.",
+            "juzTitle": "Read by Juz",
+            "juzDescription": "Move through the Quran in its thirty equal reading portions.",
+            "hizbTitle": "Read by Hizb",
+            "hizbDescription": "Choose one of the Quran’s sixty Hizbs for a shorter reading portion.",
+            "juz": "Juz {number, number}",
+            "hizb": "Hizb {number, number}",
+            "beginsAt": "{surah} · Ayah {ayah, number}",
+            "page": "Page {number, number}",
+            "openDivision": "Open {division}, beginning at {surah}, ayah {ayah, number}"
         },
         "search": {
             "eyebrow": "QURAN SEARCH",
@@ -89,6 +102,15 @@
             "ayahs": "Ayahs",
             "meccan": "Meccan",
             "medinan": "Medinan"
+        },
+        "divisions": {
+            "pageSummary": "Reading divisions",
+            "juz": "Juz",
+            "hizb": "Hizb",
+            "rub": "Hizb quarter",
+            "juzNumber": "Juz {number, number}",
+            "hizbNumber": "Hizb {number, number}",
+            "quarterNumber": "Quarter {number}/4"
         },
         "tajweed": {
             "button": "Tajweed colors",

@@ -9,7 +9,9 @@ import mapWarshAyahs, {
     getWarshPlaybackNumberForHafs,
     usesNativeWarshAyahNumbering,
 } from "@/features/quran/helpers/map-warsh-ayahs";
+import type { QuranDivisionMarker } from "@/features/quran/navigation-types";
 import getAvailableReciters from "@/features/quran/server/get-available-reciter";
+import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahData from "@/features/quran/server/get-surah";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getWarshChapter from "@/features/quran/server/get-warsh-chapter";
@@ -35,6 +37,11 @@ export default async function SurahPage({
 
     const preferences = await getPreferences();
     const surahsPromise = getSurahsMeta().catch(() => []);
+    const navigationPromise = getQuranNavigationMeta().catch(() => ({
+        juzs: [],
+        hizbs: [],
+        hizbQuarters: [],
+    }));
 
     const [surahData, { reciters }, translatedSurahData, warshChapter] =
         await Promise.all([
@@ -47,7 +54,10 @@ export default async function SurahPage({
                 ? getWarshChapter(surahNumber)
                 : Promise.resolve(null),
         ]);
-    const surahs = await surahsPromise;
+    const [surahs, navigation] = await Promise.all([
+        surahsPromise,
+        navigationPromise,
+    ]);
     const reciter = reciters.find((item) => item.id === preferences.reciter);
     const nativeWarshAudio = usesNativeWarshAyahNumbering(reciter);
     const displayedAyahs = warshChapter
@@ -146,6 +156,69 @@ export default async function SurahPage({
     const showTajweedLegend =
         preferences.riwayah === "hafs" &&
         surahData.edition.identifier === "quran-tajweed";
+    const markerByDisplayedAyah = new Map<number, QuranDivisionMarker>();
+
+    function displayedMarkerAnchor(
+        ayahNumber: number,
+        globalAyahNumber: number,
+    ) {
+        if (!warshChapter) return globalAyahNumber;
+
+        if (
+            surahNumber === 1 &&
+            ayahNumber === 1 &&
+            displayedAyahs[0]?.isBasmalaSentinel
+        ) {
+            return displayedAyahs[0].number;
+        }
+
+        const warshVerse = warshChapter.verses.find((verse) =>
+            verse.number_in_hafs.includes(ayahNumber),
+        );
+        return (
+            displayedAyahs.find((ayah) => ayah.numberInSurah === warshVerse?.id)
+                ?.number ?? globalAyahNumber
+        );
+    }
+
+    for (const juz of navigation.juzs) {
+        if (juz.surahNumber !== surahNumber) continue;
+        const anchor = displayedMarkerAnchor(
+            juz.ayahNumber,
+            juz.globalAyahNumber,
+        );
+        const marker = markerByDisplayedAyah.get(anchor) ?? {
+            globalAyahNumber: anchor,
+        };
+        marker.juzNumber = juz.number;
+        markerByDisplayedAyah.set(anchor, marker);
+    }
+
+    for (const hizb of navigation.hizbs) {
+        if (hizb.surahNumber !== surahNumber) continue;
+        const anchor = displayedMarkerAnchor(
+            hizb.ayahNumber,
+            hizb.globalAyahNumber,
+        );
+        const marker = markerByDisplayedAyah.get(anchor) ?? {
+            globalAyahNumber: anchor,
+        };
+        marker.hizbNumber = hizb.number;
+        markerByDisplayedAyah.set(anchor, marker);
+    }
+
+    for (const quarter of navigation.hizbQuarters) {
+        if (quarter.surahNumber !== surahNumber) continue;
+        const anchor = displayedMarkerAnchor(
+            quarter.ayahNumber,
+            quarter.globalAyahNumber,
+        );
+        const marker = markerByDisplayedAyah.get(anchor) ?? {
+            globalAyahNumber: anchor,
+        };
+        marker.hizbQuarterNumber = quarter.number;
+        markerByDisplayedAyah.set(anchor, marker);
+    }
 
     return (
         <div className="flex h-full min-h-0 flex-col overflow-hidden">
@@ -175,6 +248,7 @@ export default async function SurahPage({
                         }
                         showTranslation={preferences.showTranslation}
                         translationEdition={translatedSurahData?.edition}
+                        divisionMarkers={[...markerByDisplayedAyah.values()]}
                     />
                 </div>
             </div>

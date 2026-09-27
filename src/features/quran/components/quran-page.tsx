@@ -7,9 +7,12 @@ import mapWarshAyahs, {
     getWarshPlaybackNumberForHafs,
     usesNativeWarshAyahNumbering,
 } from "../helpers/map-warsh-ayahs";
+import type { QuranDivisionMarker } from "../navigation-types";
 import getAvailableReciters from "../server/get-available-reciter";
+import getQuranNavigationMeta from "../server/get-quran-navigation-meta";
 import getQuranPageData from "../server/get-quran-page-data";
 import getWarshChapter from "../server/get-warsh-chapter";
+import PageDivisionSummary from "./page-division-summary";
 import QuranAudioQueue from "./quran-audio-queue";
 import Surah from "./surah";
 import TajweedLegend from "./tajweed-legend";
@@ -25,13 +28,19 @@ export default async function QuranPage({ page }: { page: number }) {
 
     const preferences = await getPreferences();
 
-    const [pageData, { reciters }, translatedPageData] = await Promise.all([
-        getQuranPageData(page, preferences.arabicEdition),
-        getAvailableReciters(),
-        preferences.showTranslation
-            ? getQuranPageData(page, preferences.translationEdition)
-            : Promise.resolve(null),
-    ]);
+    const [pageData, { reciters }, translatedPageData, navigation] =
+        await Promise.all([
+            getQuranPageData(page, preferences.arabicEdition),
+            getAvailableReciters(),
+            preferences.showTranslation
+                ? getQuranPageData(page, preferences.translationEdition)
+                : Promise.resolve(null),
+            getQuranNavigationMeta().catch(() => ({
+                juzs: [],
+                hizbs: [],
+                hizbQuarters: [],
+            })),
+        ]);
     const reciter = reciters.find((item) => item.id === preferences.reciter);
     const nativeWarshAudio = usesNativeWarshAyahNumbering(reciter);
     const warshChapters =
@@ -120,9 +129,78 @@ export default async function QuranPage({ page }: { page: number }) {
     const showTajweedLegend =
         preferences.riwayah === "hafs" &&
         pageData.data.edition.identifier === "quran-tajweed";
+    const pageJuzs = [...new Set(pageData.data.ayahs.map((ayah) => ayah.juz))];
+    const pageHizbQuarters = [
+        ...new Set(pageData.data.ayahs.map((ayah) => ayah.hizbQuarter)),
+    ];
+    const pageHizbs = [
+        ...new Set(
+            pageHizbQuarters.map((hizbQuarter) => Math.ceil(hizbQuarter / 4)),
+        ),
+    ];
+    const markerByDisplayedAyah = new Map<number, QuranDivisionMarker>();
+
+    function displayedMarkerAnchor(
+        surahNumber: number,
+        ayahNumber: number,
+        globalAyahNumber: number,
+    ) {
+        const chapter = warshChaptersBySurah.get(surahNumber);
+        if (!chapter) return globalAyahNumber;
+
+        if (
+            surahNumber === 1 &&
+            ayahNumber === 1 &&
+            displayedAyahs[0]?.isBasmalaSentinel
+        ) {
+            return displayedAyahs[0].number;
+        }
+
+        const warshVerse = chapter.verses.find((verse) =>
+            verse.number_in_hafs.includes(ayahNumber),
+        );
+        return (
+            displayedAyahs.find(
+                (ayah) =>
+                    ayah.surah.number === surahNumber &&
+                    ayah.numberInSurah === warshVerse?.id,
+            )?.number ?? globalAyahNumber
+        );
+    }
+
+    function addPageMarker(
+        reference: (typeof navigation.juzs)[number],
+        kind: "juz" | "hizb" | "quarter",
+    ) {
+        if (reference.pageNumber !== page) return;
+        const anchor = displayedMarkerAnchor(
+            reference.surahNumber,
+            reference.ayahNumber,
+            reference.globalAyahNumber,
+        );
+        const marker = markerByDisplayedAyah.get(anchor) ?? {
+            globalAyahNumber: anchor,
+        };
+
+        if (kind === "juz") marker.juzNumber = reference.number;
+        if (kind === "hizb") marker.hizbNumber = reference.number;
+        if (kind === "quarter") marker.hizbQuarterNumber = reference.number;
+        markerByDisplayedAyah.set(anchor, marker);
+    }
+
+    for (const juz of navigation.juzs) addPageMarker(juz, "juz");
+    for (const hizb of navigation.hizbs) addPageMarker(hizb, "hizb");
+    for (const quarter of navigation.hizbQuarters) {
+        addPageMarker(quarter, "quarter");
+    }
 
     return (
         <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-0 overflow-auto p-4">
+            <PageDivisionSummary
+                juzs={pageJuzs}
+                hizbs={pageHizbs}
+                hizbQuarters={pageHizbQuarters}
+            />
             {(showTajweedLegend || audioQueue.length > 0) && (
                 <div className="mb-3 flex items-center justify-end gap-2">
                     {showTajweedLegend && <TajweedLegend />}
@@ -185,6 +263,7 @@ export default async function QuranPage({ page }: { page: number }) {
                         showTranslation={preferences.showTranslation}
                         translationEdition={translatedPageData?.data.edition}
                         highlightAyahs={preferences.riwayah === "hafs"}
+                        divisionMarkers={[...markerByDisplayedAyah.values()]}
                     />
                 );
             })}

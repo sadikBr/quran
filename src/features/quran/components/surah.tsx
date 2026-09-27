@@ -1,9 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Fragment } from "react";
 import { stripBasmalaPrefix } from "../helpers/basmala";
+import type { QuranDivisionMarker as QuranDivisionMarkerType } from "../navigation-types";
 import type { AyahType, Edition, SurahType } from "../types";
 import Ayah from "./ayah";
+import QuranDivisionMarker from "./quran-division-marker";
 import SurahBasmala from "./surah-basmala";
 import SurahFrame from "./surah-frame";
 import TranslationAyah from "./translation-ayah";
@@ -15,6 +18,7 @@ export default function Surah({
     showTranslation,
     translationEdition,
     highlightAyahs = true,
+    divisionMarkers = [],
 }: {
     surah: SurahType;
     ayahs: AyahType[];
@@ -22,6 +26,7 @@ export default function Surah({
     showTranslation: boolean;
     translationEdition?: Edition;
     highlightAyahs?: boolean;
+    divisionMarkers?: QuranDivisionMarkerType[];
 }) {
     const t = useTranslations("Reader");
     const beginsAtSurahStart = ayahs[0]?.numberInSurah === 1;
@@ -42,11 +47,20 @@ export default function Surah({
                     ? { ...ayah, text: stripBasmalaPrefix(ayah.text) }
                     : ayah,
             );
+    const markerByAyah = new Map(
+        divisionMarkers.map((marker) => [marker.globalAyahNumber, marker]),
+    );
+    const leadingMarker = beginsAtSurahStart
+        ? markerByAyah.get(ayahs[0]?.number)
+        : undefined;
 
     return (
         <>
             <div className="rtl">
                 {beginsAtSurahStart && <SurahFrame surah={surah} />}
+                {leadingMarker && (
+                    <QuranDivisionMarker marker={leadingMarker} />
+                )}
                 {beginsAtSurahStart && (
                     <SurahBasmala
                         surahNumber={surah.number}
@@ -66,13 +80,21 @@ export default function Surah({
                     style={{ textAlignLast: "center" }}
                 >
                     {readingAyahs.map((ayah) => {
+                        const marker = markerByAyah.get(ayah.number);
+
                         return (
-                            <Ayah
+                            <Fragment
                                 key={`${ayah.number}-${ayah.numberInSurah}`}
-                                ayah={ayah}
-                                surahNumber={surah.number}
-                                highlightEnabled={highlightAyahs}
-                            />
+                            >
+                                {marker !== leadingMarker && marker && (
+                                    <QuranDivisionMarker marker={marker} />
+                                )}
+                                <Ayah
+                                    ayah={ayah}
+                                    surahNumber={surah.number}
+                                    highlightEnabled={highlightAyahs}
+                                />
+                            </Fragment>
                         );
                     })}
                 </div>

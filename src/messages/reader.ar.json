@@ -10,6 +10,10 @@
         },
         "loading": "جارٍ إعداد صفحة القرآن",
         "index": {
+            "sectionsLabel": "تصفّح القرآن بحسب التقسيم",
+            "surahsTab": "السور",
+            "juzTab": "الأجزاء",
+            "hizbTab": "الأحزاب",
             "searchLabel": "البحث عن سورة",
             "searchPlaceholder": "اكتب اسم السورة أو معناها",
             "filterLegend": "موضع النزول",
@@ -17,7 +21,16 @@
             "medinan": "مدنية",
             "clearFilters": "إلغاء التصفية",
             "noResultsTitle": "لا توجد سورة مطابقة",
-            "noResultsDescription": "جرّب اسمًا آخر، أو ألغِ خيارات التصفية."
+            "noResultsDescription": "جرّب اسمًا آخر، أو ألغِ خيارات التصفية.",
+            "juzTitle": "القراءة بحسب الأجزاء",
+            "juzDescription": "انتقل مباشرة إلى أحد أجزاء القرآن الثلاثين.",
+            "hizbTitle": "القراءة بحسب الأحزاب",
+            "hizbDescription": "اختر حزبًا من أحزاب القرآن الستين لورد أقصر.",
+            "juz": "الجزء {number, number}",
+            "hizb": "الحزب {number, number}",
+            "beginsAt": "{surah} · الآية {ayah, number}",
+            "page": "الصفحة {number, number}",
+            "openDivision": "فتح {division}، ويبدأ من {surah}، الآية {ayah, number}"
         },
         "search": {
             "eyebrow": "البحث في القرآن",
@@ -89,6 +102,15 @@
             "ayahs": "آيات",
             "meccan": "مكية",
             "medinan": "مدنية"
+        },
+        "divisions": {
+            "pageSummary": "تقسيمات القراءة",
+            "juz": "الجزء",
+            "hizb": "الحزب",
+            "rub": "ربع الحزب",
+            "juzNumber": "الجزء {number, number}",
+            "hizbNumber": "الحزب {number, number}",
+            "quarterNumber": "الربع {number}/4"
         },
         "tajweed": {
             "button": "ألوان التجويد",
