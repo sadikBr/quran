@@ -432,7 +432,7 @@ export default function QuranPageNavigation({
 
     return (
         <nav
-            className="relative shrink-0 border-t border-primary/15 bg-background/95 backdrop-blur-sm"
+            className="quran-focus-chrome relative shrink-0 border-t border-primary/15 bg-background/95 backdrop-blur-sm"
             aria-label={t("navigation.navigation", { type: label })}
             aria-busy={isNavigating}
         >

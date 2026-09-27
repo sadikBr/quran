@@ -22,7 +22,9 @@ export default async function QuranReaderLayout({
                 language === "ar" && "arabic-ui",
             )}
         >
-            <QuranHeader showSurahIndex />
+            <div className="quran-focus-chrome">
+                <QuranHeader showSurahIndex />
+            </div>
             <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
             <AyahTargetScroller />
             <BackToTopButton />

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import FocusModeToggle from "@/features/quran/components/focus-mode-toggle";
 import QuranAudioQueue from "@/features/quran/components/quran-audio-queue";
 import QuranPageNavigation from "@/features/quran/components/quran-page-navigation";
 import Surah from "@/features/quran/components/surah";
@@ -229,9 +230,9 @@ export default async function SurahPage({
                 className="flex-1 overflow-y-auto"
             >
                 <div className="mx-auto max-w-5xl p-4">
-                    {(showTajweedLegend || audioQueue.length > 0) && (
-                        <div className="mb-3 flex items-center justify-end gap-2">
-                            {showTajweedLegend && <TajweedLegend />}
+                    <div className="mb-3 flex items-center justify-end gap-2">
+                        {showTajweedLegend && <TajweedLegend />}
+                        {audioQueue.length > 0 && (
                             <QuranAudioQueue
                                 queue={audioQueue}
                                 continuousRecitation={
@@ -240,8 +241,9 @@ export default async function SurahPage({
                                 showReadAll
                                 scope="surah"
                             />
-                        </div>
-                    )}
+                        )}
+                        <FocusModeToggle />
+                    </div>
                     <Surah
                         surah={displayedSurah}
                         ayahs={ayahsWithAudio}

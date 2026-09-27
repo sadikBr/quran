@@ -12,6 +12,7 @@ import getAvailableReciters from "../server/get-available-reciter";
 import getQuranNavigationMeta from "../server/get-quran-navigation-meta";
 import getQuranPageData from "../server/get-quran-page-data";
 import getWarshChapter from "../server/get-warsh-chapter";
+import FocusModeToggle from "./focus-mode-toggle";
 import PageDivisionSummary from "./page-division-summary";
 import QuranAudioQueue from "./quran-audio-queue";
 import Surah from "./surah";
@@ -204,16 +205,17 @@ export default async function QuranPage({ page }: { page: number }) {
                 hizbs={pageHizbs}
                 hizbQuarters={pageHizbQuarters}
             />
-            {(showTajweedLegend || audioQueue.length > 0) && (
-                <div className="mb-3 flex items-center justify-end gap-2">
-                    {showTajweedLegend && <TajweedLegend />}
+            <div className="mb-3 flex items-center justify-end gap-2">
+                {showTajweedLegend && <TajweedLegend />}
+                {audioQueue.length > 0 && (
                     <QuranAudioQueue
                         queue={audioQueue}
                         continuousRecitation={preferences.continuousRecitation}
                         showReadAll
                     />
-                </div>
-            )}
+                )}
+                <FocusModeToggle />
+            </div>
             {Object.keys(pageData.data.surahs).map((surahNumber) => {
                 const surah = pageData.data.surahs[surahNumber];
                 const chapter = warshChaptersBySurah.get(surah.number);

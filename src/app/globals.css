@@ -211,6 +211,10 @@
     }
 }
 
+body.focus-mode .quran-focus-chrome {
+    display: none;
+}
+
 .quran-font-step-1 {
     --quran-reader-font-size: 1.5rem;
     --quran-display-font-size: 1.125rem;

@@ -10,6 +10,10 @@
         },
         "loading": "Loading Quran content",
         "backToTop": "Back to top",
+        "focusMode": {
+            "enable": "Enter focus mode",
+            "disable": "Exit focus mode"
+        },
         "index": {
             "sectionsLabel": "Browse the Quran by division",
             "surahsTab": "Surahs",
