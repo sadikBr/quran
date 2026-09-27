@@ -1,13 +1,22 @@
-const HIGHLIGHT_CLASSES = ["bg-primary/12", "dark:bg-primary/18"];
-const HIGHLIGHT_DURATION = 900;
+const HIGHLIGHT_CLASSES = [
+    "bg-primary/12",
+    "dark:bg-primary/18",
+    "ring-1",
+    "ring-primary/40",
+];
+const HIGHLIGHT_DURATION = 1800;
 const SETTLED_FRAME_COUNT = 4;
 const MAX_SCROLL_WAIT = 4000;
 
 export default function showArabicAyah(ayahNumber: number) {
-    const ayah = document.getElementById(`ayah-${ayahNumber}`);
+    const anchor = document.getElementById(`ayah-${ayahNumber}`);
 
-    if (!ayah) return null;
-    const targetAyah = ayah;
+    if (!anchor) return null;
+    const targetAyah = anchor.matches(".ayah")
+        ? anchor
+        : anchor.nextElementSibling?.matches(".ayah")
+          ? (anchor.nextElementSibling as HTMLElement)
+          : anchor;
 
     const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)",

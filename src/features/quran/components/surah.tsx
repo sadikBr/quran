@@ -93,6 +93,9 @@ export default function Surah({
                                     ayah={ayah}
                                     surahNumber={surah.number}
                                     highlightEnabled={highlightAyahs}
+                                    hidePrintedDivisionMarker={
+                                        marker?.hizbQuarterNumber !== undefined
+                                    }
                                 />
                             </Fragment>
                         );

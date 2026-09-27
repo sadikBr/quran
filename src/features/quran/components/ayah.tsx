@@ -15,10 +15,12 @@ export default function Ayah({
     ayah,
     surahNumber,
     highlightEnabled = true,
+    hidePrintedDivisionMarker = false,
 }: {
     ayah: AyahType;
     surahNumber: number;
     highlightEnabled?: boolean;
+    hidePrintedDivisionMarker?: boolean;
 }) {
     const ayahRef = useRef<HTMLSpanElement>(null);
     const t = useTranslations("Reader");
@@ -30,6 +32,9 @@ export default function Ayah({
         playbackStatus !== "idle" &&
         playbackStatus !== "error";
     const actionsHref = `/quran/ayah/${surahNumber}/${ayah.numberInSurah}`;
+    const displayedText = hidePrintedDivisionMarker
+        ? ayah.text.replace("۞", "").trimStart()
+        : ayah.text;
 
     useEffect(() => {
         if (!isActiveAyah) return;
@@ -71,6 +76,8 @@ export default function Ayah({
             <span
                 ref={ayahRef}
                 id={`ayah-${ayah.number}`}
+                data-hafs-ayah={ayah.hafsGlobalNumber ?? ayah.number}
+                data-ayah-number={ayah.numberInSurah}
                 className={cn(
                     "ayah quran-reader-text group/ayah me-[0.35em] inline scroll-mt-6 rounded-md leading-[inherit] text-foreground transition-[background-color,color,box-shadow] duration-500 ease-out",
                     isActiveAyah &&
@@ -83,7 +90,7 @@ export default function Ayah({
                             "text-primary underline decoration-primary/40 decoration-2 underline-offset-8",
                     )}
                 >
-                    <TajweedText text={ayah.text} />
+                    <TajweedText text={displayedText} />
                 </span>{" "}
                 <AyahPlayer ayah={ayah} />
                 <span className="relative inline-block align-[0.08em]">

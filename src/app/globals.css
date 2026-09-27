@@ -390,3 +390,28 @@ body.focus-mode .quran-focus-chrome {
 .arabic-ui .ayah {
     font-family: Amiri, Ayah, sans-serif;
 }
+
+.arabic-ui.riwayah-warsh .ayah,
+.arabic-ui .riwayah-warsh .ayah {
+    font-family: "Uthmanic Warsh", Amiri, Ayah, sans-serif;
+}
+
+[data-quran-scroll-container] {
+    overscroll-behavior-y: contain;
+    scroll-padding-block: 6rem;
+}
+
+@media (max-width: 419px) {
+    .quran-reader-text {
+        overflow-wrap: normal;
+        word-break: normal;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-quran-swipe-content],
+    .quran-reader-text {
+        scroll-behavior: auto;
+        transition-duration: 0.01ms;
+    }
+}

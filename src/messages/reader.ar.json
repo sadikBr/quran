@@ -6,7 +6,11 @@
             "search": "البحث",
             "surahIndex": "السور",
             "startReading": "ابدأ القراءة",
-            "continueReading": "أكمل القراءة"
+            "continueReading": "أكمل القراءة",
+            "skipToReader": "الانتقال إلى نص القرآن",
+            "riwayahLabel": "الرواية المختارة: {riwayah}",
+            "hafs": "حفص",
+            "warsh": "ورش"
         },
         "loading": "جارٍ إعداد صفحة القرآن",
         "backToTop": "العودة إلى أعلى الصفحة",
@@ -68,10 +72,18 @@
             "navigation": "التنقّل حسب {type}",
             "next": "التالي",
             "previous": "السابق",
+            "loading": "جارٍ الانتقال إلى المقطع التالي",
             "goTo": "الانتقال إلى {type}",
             "selectSurah": "اختر السورة",
             "searchSurahs": "ابحث باسم السورة…",
             "noSurahs": "لا توجد سورة مطابقة."
+        },
+        "readerError": {
+            "eyebrow": "تعذّر فتح القارئ",
+            "title": "لم نتمكّن من عرض هذا المقطع.",
+            "description": "تحقّق من اتصالك بالإنترنت ثم أعد المحاولة. حُفظت تفضيلاتك وموضع قراءتك.",
+            "retry": "أعد المحاولة",
+            "index": "العودة إلى فهرس القرآن"
         },
         "audio": {
             "pageRecitation": "تلاوة الصفحة كاملة",

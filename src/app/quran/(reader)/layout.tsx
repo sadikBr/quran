@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import AyahTargetScroller from "@/features/quran/components/ayah-target-scroller";
 import BackToTopButton from "@/features/quran/components/back-to-top-button";
 import QuranHeader from "@/features/quran/components/quran-header";
+import ReaderPositionTracker from "@/features/quran/components/reader-position-tracker";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -11,7 +12,7 @@ export default async function QuranReaderLayout({
 }: {
     children: ReactNode;
 }) {
-    const { language } = await getPreferences();
+    const { language, riwayah } = await getPreferences();
 
     return (
         <div
@@ -23,9 +24,16 @@ export default async function QuranReaderLayout({
             )}
         >
             <div className="quran-focus-chrome">
-                <QuranHeader showSurahIndex />
+                <QuranHeader showSurahIndex riwayah={riwayah} />
             </div>
-            <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
+            <main
+                id="quran-reader-main"
+                tabIndex={-1}
+                className="min-h-0 flex-1 overflow-hidden"
+            >
+                {children}
+            </main>
+            <ReaderPositionTracker />
             <AyahTargetScroller />
             <BackToTopButton />
         </div>

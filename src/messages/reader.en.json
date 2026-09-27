@@ -6,7 +6,11 @@
             "search": "Search Quran",
             "surahIndex": "Surah index",
             "startReading": "Start reading",
-            "continueReading": "Continue reading"
+            "continueReading": "Continue reading",
+            "skipToReader": "Skip to Quran text",
+            "riwayahLabel": "Current riwayah: {riwayah}",
+            "hafs": "Hafs",
+            "warsh": "Warsh"
         },
         "loading": "Loading Quran content",
         "backToTop": "Back to top",
@@ -68,10 +72,18 @@
             "navigation": "{type} navigation",
             "next": "Next",
             "previous": "Previous",
+            "loading": "Loading the next reading section",
             "goTo": "Go to {type}",
             "selectSurah": "Select a surah",
             "searchSurahs": "Search surahs…",
             "noSurahs": "No matching surahs found."
+        },
+        "readerError": {
+            "eyebrow": "READER UNAVAILABLE",
+            "title": "This passage could not be loaded.",
+            "description": "Check your connection, then try again. Your reading preferences and position are safe.",
+            "retry": "Try again",
+            "index": "Return to the Quran index"
         },
         "audio": {
             "pageRecitation": "Page recitation",

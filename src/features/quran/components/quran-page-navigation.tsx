@@ -436,27 +436,32 @@ export default function QuranPageNavigation({
             aria-label={t("navigation.navigation", { type: label })}
             aria-busy={isNavigating}
         >
+            <span className="sr-only" aria-live="polite">
+                {isNavigating ? t("navigation.loading") : ""}
+            </span>
             {isNavigating && (
                 <span className="absolute inset-x-0 top-0 h-px animate-pulse bg-primary" />
             )}
             <div
                 dir="ltr"
-                className="mx-auto flex h-18 max-w-5xl items-center justify-between gap-3 px-4 sm:h-20"
+                className="mx-auto flex h-18 max-w-5xl items-center justify-between gap-1.5 px-2 min-[420px]:gap-3 min-[420px]:px-4 sm:h-20"
             >
                 {currentNumber >= max ? (
                     <Button
                         disabled
                         variant="ghost"
-                        className="min-w-25 justify-start text-muted-foreground"
+                        className="min-w-10 justify-start px-2 text-muted-foreground min-[420px]:min-w-24"
                     >
                         <ArrowLeft aria-hidden="true" />
-                        {t("navigation.next")}
+                        <span className="hidden min-[420px]:inline">
+                            {t("navigation.next")}
+                        </span>
                     </Button>
                 ) : (
                     <Button
                         asChild
                         variant="ghost"
-                        className="min-w-25 justify-start"
+                        className="min-w-10 justify-start px-2 min-[420px]:min-w-24"
                     >
                         <Link
                             href={getHref(Number(currentNumber) + 1)}
@@ -475,7 +480,9 @@ export default function QuranPageNavigation({
                             }}
                         >
                             <ArrowLeft aria-hidden="true" />
-                            {t("navigation.next")}
+                            <span className="hidden min-[420px]:inline">
+                                {t("navigation.next")}
+                            </span>
                         </Link>
                     </Button>
                 )}
@@ -513,7 +520,7 @@ export default function QuranPageNavigation({
                             aria-label={t("navigation.goTo", {
                                 type: t("navigation.surah"),
                             })}
-                            className="flex h-11 w-52 items-center rounded-lg border border-primary/15 bg-card/75 px-3 shadow-xs hover:bg-card sm:w-64"
+                            className="flex h-11 w-36 items-center rounded-lg border border-primary/15 bg-card/75 px-2 shadow-xs hover:bg-card min-[420px]:w-48 min-[420px]:px-3 sm:w-64"
                         >
                             <span className="flex min-w-0 flex-1 items-center gap-3">
                                 <span className="hidden text-xs font-semibold tracking-[0.12em] text-primary uppercase sm:block">
@@ -618,16 +625,18 @@ export default function QuranPageNavigation({
                     <Button
                         disabled
                         variant="ghost"
-                        className="min-w-25 justify-end text-muted-foreground"
+                        className="min-w-10 justify-end px-2 text-muted-foreground min-[420px]:min-w-24"
                     >
-                        {t("navigation.previous")}
+                        <span className="hidden min-[420px]:inline">
+                            {t("navigation.previous")}
+                        </span>
                         <ArrowRight aria-hidden="true" />
                     </Button>
                 ) : (
                     <Button
                         asChild
                         variant="ghost"
-                        className="min-w-25 justify-end"
+                        className="min-w-10 justify-end px-2 min-[420px]:min-w-24"
                     >
                         <Link
                             href={getHref(Number(currentNumber) - 1)}
@@ -645,7 +654,9 @@ export default function QuranPageNavigation({
                                 navigateTo(currentNumber - 1);
                             }}
                         >
-                            {t("navigation.previous")}
+                            <span className="hidden min-[420px]:inline">
+                                {t("navigation.previous")}
+                            </span>
                             <ArrowRight aria-hidden="true" />
                         </Link>
                     </Button>
