@@ -5,10 +5,7 @@ import { userSettings } from "@/drizzle/schema";
 import { DEFAULT_PREFERENCES } from "../settings/preferences";
 
 export const auth = betterAuth({
-    trustedOrigins: [
-        "https://www.brahim-quran-app.vercel.app",
-        "https://brahim-quran-app.vercel.app",
-    ],
+    trustedOrigins: ["*.brahimsadik.com"],
     database: drizzleAdapter(db, {
         provider: "pg",
     }),
