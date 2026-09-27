@@ -85,13 +85,10 @@ export default function SurahFrame({
             <span
                 aria-hidden="true"
                 className={cn(
-                    "pointer-events-none absolute inset-0 bg-[position:center_58%] bg-no-repeat opacity-[0.2] dark:opacity-[0.55] md:bg-bottom",
+                    "surah-frame-background pointer-events-none absolute inset-0 bg-[position:center_58%] bg-no-repeat opacity-[0.2] dark:opacity-[0.55] md:bg-bottom",
                     isMeccan ? "bg-primary/3" : "bg-accent/20",
                 )}
-                style={{
-                    backgroundImage: `url(${backgroundImage})`,
-                    backgroundSize: "cover",
-                }}
+                style={{ backgroundImage: `url(${backgroundImage})` }}
             />
             {href ? (
                 <Link

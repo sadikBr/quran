@@ -42,15 +42,18 @@ export default function PageDivisionSummary({
     return (
         <aside
             aria-label={t("pageSummary")}
-            className="mb-4 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-[11px] text-muted-foreground sm:text-xs"
+            className="mb-4 flex min-w-0 flex-col items-stretch gap-2 text-[11px] text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-x-3 sm:gap-y-1 sm:text-xs"
         >
-            <p className="font-semibold tracking-[0.08em] text-primary">
+            <p className="min-w-0 max-w-full break-words text-center font-semibold leading-relaxed tracking-[0.08em] text-primary sm:flex-1 sm:text-end">
                 {surahNames.join(" · ")}
             </p>
-            <span aria-hidden="true" className="text-primary/35">
+            <span
+                aria-hidden="true"
+                className="hidden text-primary/35 sm:inline"
+            >
                 •
             </span>
-            <dl className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+            <dl className="flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:w-auto sm:justify-end">
                 <div className="flex items-baseline gap-1.5">
                     <dt className="text-muted-foreground">{t("juz")}</dt>
                     <dd className="font-medium text-foreground/85">

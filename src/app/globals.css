@@ -347,6 +347,17 @@ body.focus-mode .quran-focus-chrome {
     font-family: Surah, sans-serif;
 }
 
+.surah-frame-background {
+    background-size: cover;
+}
+
+@media (max-width: 639px) {
+    .surah-frame-background {
+        /* Balance detail retention with the artwork's wide original aspect ratio. */
+        background-size: 120% 100%;
+    }
+}
+
 .ayah {
     font-family: Amiri, Ayah, sans-serif;
     -webkit-user-select: none;
