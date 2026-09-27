@@ -6,7 +6,7 @@ import { DEFAULT_PREFERENCES } from "../settings/preferences";
 import { env } from "@/data/env/server";
 
 export const auth = betterAuth({
-    trustedOrigins: env.PROCUTION_URLS.split(","),
+    trustedOrigins: env.PRODUCTION_URLS.split(","),
     database: drizzleAdapter(db, {
         provider: "pg",
     }),
