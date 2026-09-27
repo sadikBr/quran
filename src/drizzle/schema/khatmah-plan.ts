@@ -17,6 +17,10 @@ export const userKhatmahPlan = pgTable("user_khatmah_plan", {
     targetDate: date("target_date", { mode: "string" }).notNull(),
     durationWeeks: integer("duration_weeks").notNull().default(8),
     repeatable: boolean("repeatable").notNull().default(false),
+    cycleStartedOn: date("cycle_started_on", { mode: "string" })
+        .notNull()
+        .default(sql`CURRENT_DATE`),
+    cycleReadingDays: integer("cycle_reading_days").notNull().default(0),
     startGlobalAyah: integer("start_global_ayah").notNull(),
     currentGlobalAyah: integer("current_global_ayah").notNull(),
     measurement: text("measurement").notNull(),

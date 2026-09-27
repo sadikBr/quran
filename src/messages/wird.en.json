@@ -135,6 +135,22 @@
             "resume": "Resume plan",
             "startAgain": "Plan another Khatmah",
             "cancel": "Cancel"
+        },
+        "history": {
+            "eyebrow": "KHATMAH MILESTONES",
+            "title": "Every completion leaves a mark.",
+            "description": "Completed Khatmah cycles are preserved here, even when a repeating plan has already begun again.",
+            "latest": "LATEST KHATMAH",
+            "completedOn": "Completed {date}",
+            "duration": "Finished in {count, plural, one {# day} other {# days}}",
+            "total": "Khatmahs completed",
+            "fastest": "Fastest completion (days)",
+            "readingDays": "Reading days across Khatmahs",
+            "timeline": "Completion timeline",
+            "fullEntry": "Complete Khatmah",
+            "partialEntry": "Completed remainder",
+            "entryDetails": "{actual, plural, one {# calendar day} other {# calendar days}} · {reading, plural, one {# reading day} other {# reading days}} · planned for {planned, plural, one {# week} other {# weeks}}",
+            "partialNote": "Plans that began partway through the Quran remain in the timeline, but are not included in the completed-Khatmah total."
         }
     }
 }

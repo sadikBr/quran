@@ -14,7 +14,9 @@ import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
+import KhatmahMilestones from "@/features/khatmah/components/khatmah-milestones";
 import KhatmahPlanner from "@/features/khatmah/components/khatmah-planner";
+import getKhatmahHistory from "@/features/khatmah/server/get-khatmah-history";
 import getKhatmahPlan from "@/features/khatmah/server/get-khatmah-plan";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
@@ -35,13 +37,15 @@ export default async function WirdPage() {
         getPreferences(),
         getReadingProgress(),
     ]);
-    const [messages, wird, history, khatmahPlan, surahs] = await Promise.all([
-        getMessages(preferences.language),
-        getDailyWird(session.user.id, preferences.arabicEdition),
-        getWirdHistory(session.user.id),
-        getKhatmahPlan(session.user.id),
-        getSurahsMeta(),
-    ]);
+    const [messages, wird, history, khatmahPlan, khatmahHistory, surahs] =
+        await Promise.all([
+            getMessages(preferences.language),
+            getDailyWird(session.user.id, preferences.arabicEdition),
+            getWirdHistory(session.user.id),
+            getKhatmahPlan(session.user.id),
+            getKhatmahHistory(session.user.id),
+            getSurahsMeta(),
+        ]);
     const t = createTranslator({
         locale: preferences.language,
         messages,
@@ -287,6 +291,8 @@ export default async function WirdPage() {
                         }))}
                         initialStartSurah={initialStartSurah}
                     />
+
+                    <KhatmahMilestones stats={khatmahHistory} />
 
                     <WirdHistory stats={history} />
                 </section>

@@ -27,3 +27,21 @@ export interface KhatmahPlan {
     dailyAmount: number;
     nextReadingDate: string;
 }
+
+export interface KhatmahHistoryEntry {
+    id: string;
+    startedOn: string;
+    completedDate: string;
+    plannedWeeks: number;
+    actualDays: number;
+    readingDays: number;
+    measurement: KhatmahMeasurement;
+    fullKhatmah: boolean;
+}
+
+export interface KhatmahHistoryStats {
+    totalCompleted: number;
+    totalReadingDays: number;
+    fastestDays: number | null;
+    recent: KhatmahHistoryEntry[];
+}

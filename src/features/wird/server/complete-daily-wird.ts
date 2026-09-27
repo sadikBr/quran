@@ -5,9 +5,17 @@ import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import db from "@/drizzle/db";
-import { userKhatmahPlan, userWird, userWirdHistory } from "@/drizzle/schema";
+import {
+    userKhatmahHistory,
+    userKhatmahPlan,
+    userWird,
+    userWirdHistory,
+} from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
-import { shiftDate } from "@/features/khatmah/server/calculate-khatmah";
+import {
+    countCalendarDays,
+    shiftDate,
+} from "@/features/khatmah/server/calculate-khatmah";
 import { TOTAL_QURAN_AYAHS } from "./build-wird-target";
 import getWirdDate from "./wird-date";
 
@@ -90,6 +98,27 @@ export default async function completeDailyWird() {
                     record.targetEndGlobalAyah >= TOTAL_QURAN_AYAHS;
                 const startsNextCycle =
                     khatmahCompleted && khatmahPlan.repeatable;
+                const completionDate = getWirdDate(completedAt);
+                if (khatmahCompleted) {
+                    await transaction.insert(userKhatmahHistory).values({
+                        id: randomUUID(),
+                        userId: session.user.id,
+                        startedOn: khatmahPlan.cycleStartedOn,
+                        completedAt,
+                        plannedWeeks: khatmahPlan.durationWeeks,
+                        actualDays: Math.max(
+                            1,
+                            countCalendarDays(
+                                khatmahPlan.cycleStartedOn,
+                                completionDate,
+                            ),
+                        ),
+                        readingDays: khatmahPlan.cycleReadingDays + 1,
+                        measurement: khatmahPlan.measurement,
+                        startedGlobalAyah: khatmahPlan.startGlobalAyah,
+                        wasRepeatable: khatmahPlan.repeatable,
+                    });
+                }
                 await transaction
                     .update(userKhatmahPlan)
                     .set({
@@ -103,10 +132,16 @@ export default async function completeDailyWird() {
                               : record.targetEndGlobalAyah + 1,
                         targetDate: startsNextCycle
                             ? shiftDate(
-                                  getWirdDate(completedAt),
+                                  completionDate,
                                   khatmahPlan.durationWeeks * 7,
                               )
                             : khatmahPlan.targetDate,
+                        cycleStartedOn: startsNextCycle
+                            ? shiftDate(completionDate, 1)
+                            : khatmahPlan.cycleStartedOn,
+                        cycleReadingDays: startsNextCycle
+                            ? 0
+                            : khatmahPlan.cycleReadingDays + 1,
                         isActive: startsNextCycle || !khatmahCompleted,
                         completedAt:
                             khatmahCompleted && !startsNextCycle
