@@ -3,6 +3,7 @@ import {
     ArrowRight,
     BookMarked,
     CalendarDays,
+    CalendarRange,
     ChevronDown,
     CirclePlus,
     ClipboardCheck,
@@ -379,15 +380,30 @@ export default async function GroupPage({
                     )}
 
                     <section className="mt-12">
-                        <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                            {t("assignments.eyebrow")}
-                        </p>
-                        <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-                            {t("assignments.title")}
-                        </h2>
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                            {t("assignments.description")}
-                        </p>
+                        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                    {t("assignments.eyebrow")}
+                                </p>
+                                <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                                    {t("assignments.title")}
+                                </h2>
+                                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                                    {t("assignments.description")}
+                                </p>
+                            </div>
+                            {isAdmin && (
+                                <Button
+                                    asChild
+                                    className="w-full shrink-0 rounded-xl sm:w-auto"
+                                >
+                                    <Link href={`/groups/${group.id}/plan`}>
+                                        <CalendarRange className="size-4" />
+                                        {t("assignments.planWeek")}
+                                    </Link>
+                                </Button>
+                            )}
+                        </div>
 
                         {assignments.length > 0 ? (
                             <div className="mt-6 divide-y divide-border/55 overflow-hidden rounded-3xl bg-muted/30 ring-1 ring-border/50">

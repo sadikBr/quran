@@ -28,7 +28,7 @@ import { normalizeSearchText } from "@/features/quran/helpers/normalize-quran-se
 import { cn } from "@/lib/utils";
 import createMemberAssignment from "../server/create-member-assignment";
 
-interface AssignmentSurah {
+export interface AssignmentSurah {
     number: number;
     name: string;
     englishName: string;

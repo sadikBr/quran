@@ -97,6 +97,7 @@ export default async function getPracticeAssignment(
             and(
                 eq(practiceAssignment.id, assignmentId),
                 eq(practiceAssignment.assigneeId, userId),
+                inArray(practiceAssignment.status, activeStatuses),
             ),
         )
         .limit(1);
