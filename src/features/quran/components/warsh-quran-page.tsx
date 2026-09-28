@@ -193,6 +193,7 @@ export default async function WarshQuranPage({ page }: { page: number }) {
                         translationEdition={translation?.edition}
                         highlightAyahs={false}
                         divisionMarkers={[...markerByAyah.values()]}
+                        riwayah="warsh"
                     />
                 );
             })}

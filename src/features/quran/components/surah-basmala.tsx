@@ -1,7 +1,9 @@
 "use client";
 
+import type { Riwayah } from "@/features/settings/preferences";
 import { cn } from "@/lib/utils";
 import { getBasmalaText } from "../helpers/basmala";
+import type { QuranDivisionMarker } from "../navigation-types";
 import type { AyahType } from "../types";
 import Ayah from "./ayah";
 import { useQuranAudio } from "./quran-audio-provider";
@@ -10,12 +12,16 @@ export default function SurahBasmala({
     surahNumber,
     fatihaAyah,
     playbackAyahNumber,
+    divisionMarker,
     highlightEnabled = true,
+    riwayah = "hafs",
 }: {
     surahNumber: number;
     fatihaAyah?: AyahType;
     playbackAyahNumber?: number;
+    divisionMarker?: QuranDivisionMarker;
     highlightEnabled?: boolean;
+    riwayah?: Riwayah;
 }) {
     const { activeAyahNumber, playbackStatus } = useQuranAudio();
     const isActiveBasmala =
@@ -54,7 +60,9 @@ export default function SurahBasmala({
             <Ayah
                 ayah={fatihaAyah}
                 surahNumber={surahNumber}
+                divisionMarker={divisionMarker}
                 highlightEnabled={highlightEnabled}
+                riwayah={riwayah}
             />
         </div>
     );

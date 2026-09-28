@@ -2,13 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import { Fragment } from "react";
+import type { Riwayah } from "@/features/settings/preferences";
+import { getArabicNumber } from "@/lib/arabic-numbers";
 import { stripBasmalaPrefix } from "../helpers/basmala";
 import type { QuranDivisionMarker as QuranDivisionMarkerType } from "../navigation-types";
 import type { AyahType, Edition, SurahType } from "../types";
 import Ayah from "./ayah";
-import QuranDivisionMarker from "./quran-division-marker";
 import SurahBasmala from "./surah-basmala";
-import SurahFrame from "./surah-frame";
 import TranslationAyah from "./translation-ayah";
 
 export default function Surah({
@@ -19,6 +19,8 @@ export default function Surah({
     translationEdition,
     highlightAyahs = true,
     divisionMarkers = [],
+    showSurahHeading = false,
+    riwayah = "hafs",
 }: {
     surah: SurahType;
     ayahs: AyahType[];
@@ -27,6 +29,8 @@ export default function Surah({
     translationEdition?: Edition;
     highlightAyahs?: boolean;
     divisionMarkers?: QuranDivisionMarkerType[];
+    showSurahHeading?: boolean;
+    riwayah?: Riwayah;
 }) {
     const t = useTranslations("Reader");
     const beginsAtSurahStart = ayahs[0]?.numberInSurah === 1;
@@ -57,9 +61,20 @@ export default function Surah({
     return (
         <>
             <div className="rtl">
-                {beginsAtSurahStart && <SurahFrame surah={surah} />}
-                {leadingMarker && (
-                    <QuranDivisionMarker marker={leadingMarker} />
+                {beginsAtSurahStart && showSurahHeading && (
+                    <header className="mb-4 flex items-center justify-center gap-3 text-primary">
+                        <span
+                            aria-hidden="true"
+                            className="h-px w-8 bg-primary/25"
+                        />
+                        <h2 className="surah-name text-4xl leading-none sm:text-5xl">
+                            {getArabicNumber(surah.number)}
+                        </h2>
+                        <span
+                            aria-hidden="true"
+                            className="h-px w-8 bg-primary/25"
+                        />
+                    </header>
                 )}
                 {beginsAtSurahStart && (
                     <SurahBasmala
@@ -70,7 +85,9 @@ export default function Surah({
                                 ? ayahs[0]?.audioNumber
                                 : undefined
                         }
+                        divisionMarker={fatihaAyah ? leadingMarker : undefined}
                         highlightEnabled={highlightAyahs}
+                        riwayah={riwayah}
                     />
                 )}
                 <div
@@ -86,12 +103,11 @@ export default function Surah({
                             <Fragment
                                 key={`${ayah.number}-${ayah.numberInSurah}`}
                             >
-                                {marker !== leadingMarker && marker && (
-                                    <QuranDivisionMarker marker={marker} />
-                                )}
                                 <Ayah
                                     ayah={ayah}
                                     surahNumber={surah.number}
+                                    divisionMarker={marker}
+                                    riwayah={riwayah}
                                     highlightEnabled={highlightAyahs}
                                     hidePrintedDivisionMarker={
                                         marker?.hizbQuarterNumber !== undefined

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, BookOpen, Search } from "lucide-react";
+import { ArrowRight, BookOpen, LibraryBig, Search } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import type { Riwayah } from "@/features/settings/preferences";
@@ -23,31 +23,36 @@ export default function QuranHeader({
     const locale = useLocale();
 
     return (
-        <header className="z-10 shrink-0 bg-background/85 backdrop-blur-sm">
+        <header className="z-10 shrink-0 border-border/45 border-b bg-background/92 backdrop-blur-xl">
             <a
                 href="#quran-reader-main"
                 className="sr-only z-50 rounded-md bg-background px-4 py-2 text-sm font-semibold text-foreground shadow-lg focus:not-sr-only focus:absolute focus:start-4 focus:top-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
                 {t("header.skipToReader")}
             </a>
-            <div className="mx-auto flex h-20 max-w-5xl items-center justify-between gap-4 px-4">
+            <div className="mx-auto flex h-[calc(4.25rem+env(safe-area-inset-top))] max-w-5xl items-center justify-between gap-3 px-3 pt-[env(safe-area-inset-top)] sm:h-[calc(4.75rem+env(safe-area-inset-top))] sm:px-4">
                 <Link
                     href="/"
-                    className="group flex min-w-0 items-center gap-3 rounded-md text-sm font-semibold tracking-wide outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
+                    className="group flex min-w-0 items-center gap-3 rounded-xl outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform group-hover:-rotate-3">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm shadow-primary/15 transition-transform group-hover:-rotate-3">
                         <BookOpen aria-hidden="true" className="size-5" />
                     </span>
-                    <span className="hidden truncate text-foreground min-[360px]:block">
-                        {t("header.brand")}
+                    <span className="hidden min-w-0 min-[430px]:block">
+                        <span className="block truncate text-sm font-semibold text-foreground">
+                            {t("header.brand")}
+                        </span>
+                        <span className="mt-0.5 block text-[0.65rem] font-medium tracking-[0.12em] text-muted-foreground uppercase">
+                            {t("header.readerLabel")}
+                        </span>
                     </span>
                 </Link>
                 <nav
                     aria-label={t("header.navigation")}
-                    className="flex shrink-0 items-center gap-3 text-sm"
+                    className="flex min-w-0 shrink-0 items-center gap-1 rounded-2xl bg-muted/35 p-1 text-sm ring-1 ring-border/40"
                 >
                     {riwayah && (
-                        <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-primary/8 px-2.5 text-xs font-semibold text-primary ring-1 ring-primary/15">
+                        <span className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-primary/8 px-2.5 text-xs font-semibold text-primary">
                             <span className="sr-only">
                                 {t("header.riwayahLabel", {
                                     riwayah: t(`header.${riwayah}`),
@@ -65,7 +70,7 @@ export default function QuranHeader({
                     <Link
                         href="/quran/search"
                         title={t("header.search")}
-                        className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="inline-flex size-9 items-center justify-center gap-2 rounded-xl text-muted-foreground transition-colors hover:bg-background/75 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto sm:px-3"
                     >
                         <Search aria-hidden="true" className="size-4" />
                         <span className="hidden sm:inline">
@@ -78,31 +83,42 @@ export default function QuranHeader({
                     {showSurahIndex && (
                         <Link
                             href="/quran"
-                            className="text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className="inline-flex size-9 items-center justify-center gap-2 rounded-xl text-muted-foreground transition-colors hover:bg-background/75 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-[560px]:w-auto min-[560px]:px-3"
                         >
-                            {t("header.surahIndex")}
+                            <LibraryBig aria-hidden="true" className="size-4" />
+                            <span className="hidden min-[560px]:inline">
+                                {t("header.surahIndex")}
+                            </span>
+                            <span className="sr-only min-[560px]:hidden">
+                                {t("header.surahIndex")}
+                            </span>
                         </Link>
-                    )}
-                    {(showSurahIndex || startReadingHref) && (
-                        <span aria-hidden="true" className="text-border">
-                            ·
-                        </span>
                     )}
                     {startReadingHref && (
                         <Link
                             href={startReadingHref}
-                            className="group inline-flex items-center gap-1.5 font-semibold text-primary transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className="group inline-flex size-9 items-center justify-center gap-1.5 rounded-xl bg-primary font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto sm:px-3"
                         >
-                            {startReadingLabel ??
-                                t(
-                                    hasSavedProgress
-                                        ? "header.continueReading"
-                                        : "header.startReading",
-                                )}
+                            <span className="hidden sm:inline">
+                                {startReadingLabel ??
+                                    t(
+                                        hasSavedProgress
+                                            ? "header.continueReading"
+                                            : "header.startReading",
+                                    )}
+                            </span>
+                            <span className="sr-only sm:hidden">
+                                {startReadingLabel ??
+                                    t(
+                                        hasSavedProgress
+                                            ? "header.continueReading"
+                                            : "header.startReading",
+                                    )}
+                            </span>
                             <ArrowRight
                                 aria-hidden="true"
                                 className={cn(
-                                    "size-3.5 transition-transform group-hover:translate-x-0.5",
+                                    "size-4 transition-transform group-hover:translate-x-0.5",
                                     locale === "ar" && "rotate-180",
                                 )}
                             />

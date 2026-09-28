@@ -2,11 +2,13 @@
 
 import { Ellipsis, LoaderCircle, Pause, Play, RefreshCcw } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
+import type { Riwayah } from "@/features/settings/preferences";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
 import getAyahAudioStreams from "../helpers/get-ayah-audio-streams";
+import type { QuranDivisionMarker } from "../navigation-types";
 import type { AyahType } from "../types";
 import { useQuranAudio } from "./quran-audio-provider";
 import TajweedText from "./tajweed-text";
@@ -16,16 +18,21 @@ export default function Ayah({
     surahNumber,
     highlightEnabled = true,
     hidePrintedDivisionMarker = false,
+    divisionMarker,
+    riwayah = "hafs",
     actionsHref,
 }: {
     ayah: AyahType;
     surahNumber: number;
     highlightEnabled?: boolean;
     hidePrintedDivisionMarker?: boolean;
+    divisionMarker?: QuranDivisionMarker;
+    riwayah?: Riwayah;
     actionsHref?: string;
 }) {
     const ayahRef = useRef<HTMLSpanElement>(null);
     const t = useTranslations("Reader");
+    const locale = useLocale();
     const { activeAyahNumber, playbackStatus } = useQuranAudio();
     const playbackAyahNumber = ayah.audioNumber ?? ayah.number;
     const isActiveAyah =
@@ -36,7 +43,7 @@ export default function Ayah({
     const resolvedActionsHref =
         actionsHref ?? `/quran/ayah/${surahNumber}/${ayah.numberInSurah}`;
     const displayedText = hidePrintedDivisionMarker
-        ? ayah.text.replace("۞", "").trimStart()
+        ? ayah.text.replace(riwayah === "warsh" ? /[۞*]/u : "۞", "").trimStart()
         : ayah.text;
 
     useEffect(() => {
@@ -89,10 +96,18 @@ export default function Ayah({
             >
                 <span
                     className={cn(
+                        divisionMarker && !ayah.sajda && "text-division",
                         ayah.sajda &&
                             "text-primary underline decoration-primary/40 decoration-2 underline-offset-8",
                     )}
                 >
+                    {divisionMarker && (
+                        <AyahDivisionIndicator
+                            marker={divisionMarker}
+                            locale={locale}
+                            riwayah={riwayah}
+                        />
+                    )}
                     <TajweedText text={displayedText} />
                 </span>{" "}
                 <AyahPlayer ayah={ayah} />
@@ -118,6 +133,57 @@ export default function Ayah({
                 </span>
             </span>
         </>
+    );
+}
+
+function AyahDivisionIndicator({
+    marker,
+    locale,
+    riwayah,
+}: {
+    marker: QuranDivisionMarker;
+    locale: string;
+    riwayah: Riwayah;
+}) {
+    const t = useTranslations("Reader.divisions");
+    const quarterPosition = marker.hizbQuarterNumber
+        ? ((marker.hizbQuarterNumber - 1) % 4) + 1
+        : undefined;
+    const labels = [
+        marker.juzNumber !== undefined
+            ? t("juzNumber", { number: marker.juzNumber })
+            : null,
+        marker.hizbNumber !== undefined
+            ? t("hizbNumber", { number: marker.hizbNumber })
+            : null,
+        quarterPosition !== undefined
+            ? t("quarterNumber", { number: String(quarterPosition) })
+            : null,
+    ].filter((label): label is string => label !== null);
+    const label = labels.join(" · ");
+
+    return (
+        <span className="group/division relative me-1 inline-flex align-middle">
+            <button
+                type="button"
+                aria-label={label}
+                className={cn(
+                    "inline-flex items-center justify-center rounded-sm px-[0.06em] leading-none text-division/75 transition-[color,transform] hover:scale-110 hover:text-division focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-division focus-visible:ring-offset-2",
+                    riwayah === "warsh"
+                        ? "text-[0.9em]"
+                        : "font-serif text-[0.68em]",
+                )}
+            >
+                ۞
+            </button>
+            <span
+                role="tooltip"
+                dir={locale === "ar" ? "rtl" : "ltr"}
+                className="pointer-events-none absolute bottom-[calc(100%+0.55rem)] left-1/2 z-30 w-max max-w-[min(18rem,calc(100vw-2rem))] -translate-x-1/2 translate-y-1 rounded-xl bg-popover px-3 py-2 font-sans text-xs leading-5 text-popover-foreground opacity-0 shadow-xl ring-1 ring-border/60 transition-[opacity,transform] duration-150 group-hover/division:translate-y-0 group-hover/division:opacity-100 group-focus-within/division:translate-y-0 group-focus-within/division:opacity-100"
+            >
+                {label}
+            </span>
+        </span>
     );
 }
 

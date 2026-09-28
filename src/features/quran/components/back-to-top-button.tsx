@@ -3,8 +3,13 @@
 import { ArrowUp } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
-export default function BackToTopButton() {
+export default function BackToTopButton({
+    embedded = false,
+}: {
+    embedded?: boolean;
+}) {
     const t = useTranslations("Reader");
     const [isVisible, setIsVisible] = useState(false);
 
@@ -51,10 +56,11 @@ export default function BackToTopButton() {
         );
         scrollContainer?.scrollTo({
             top: 0,
-            behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-                .matches
-                ? "auto"
-                : "smooth",
+            behavior:
+                embedded ||
+                window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                    ? "auto"
+                    : "smooth",
         });
     }
 
@@ -64,11 +70,19 @@ export default function BackToTopButton() {
             onClick={scrollToTop}
             aria-label={t("backToTop")}
             aria-hidden={!isVisible}
+            hidden={embedded && !isVisible}
             tabIndex={isVisible ? 0 : -1}
-            className="fixed end-5 bottom-20 z-20 flex size-10 translate-y-2 items-center justify-center rounded-full border border-primary/20 bg-background/90 text-primary opacity-0 shadow-md backdrop-blur-sm transition-[opacity,transform,background-color] duration-200 hover:bg-primary hover:text-primary-foreground focus-visible:translate-y-0 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:end-7 sm:bottom-24 sm:size-11"
+            className={cn(
+                "flex size-10 items-center justify-center text-primary transition-[opacity,transform,background-color,color] duration-200 hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                embedded
+                    ? "shrink-0 rounded-xl bg-transparent"
+                    : "fixed end-5 bottom-20 z-20 translate-y-2 rounded-full border border-primary/20 bg-background/90 opacity-0 shadow-md backdrop-blur-sm focus-visible:translate-y-0 focus-visible:opacity-100 sm:end-7 sm:bottom-24 sm:size-11",
+            )}
             style={
                 isVisible
-                    ? { opacity: 1, transform: "translateY(0)" }
+                    ? embedded
+                        ? undefined
+                        : { opacity: 1, transform: "translateY(0)" }
                     : undefined
             }
         >

@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +37,7 @@ import type {
     SavedAyahMetadata,
 } from "@/features/saved-ayahs/types";
 import { getArabicNumber } from "@/lib/arabic-numbers";
+import { cn } from "@/lib/utils";
 import getTafsirAyah from "../server/get-tafsir-ayah";
 import type { Edition } from "../types";
 import AyahShareCard from "./ayah-share-card";
@@ -248,6 +249,53 @@ function SurahTitle({
     }
 
     return <>{surahName}</>;
+}
+
+function ActionTile({
+    icon,
+    title,
+    description,
+    onClick,
+    disabled = false,
+    pressed,
+    className,
+}: {
+    icon: ReactNode;
+    title: ReactNode;
+    description: ReactNode;
+    onClick: () => void;
+    disabled?: boolean;
+    pressed?: boolean;
+    className?: string;
+}) {
+    return (
+        <button
+            type="button"
+            disabled={disabled}
+            aria-pressed={pressed}
+            onClick={onClick}
+            className={cn(
+                "group flex min-h-28 w-full min-w-0 flex-col items-start rounded-2xl border border-border/55 bg-muted/20 p-4 text-start transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:bg-primary/5 hover:shadow-[0_12px_28px_-22px_hsl(var(--foreground)/0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60",
+                pressed && "border-primary/25 bg-primary/8",
+                className,
+            )}
+        >
+            <span
+                className={cn(
+                    "flex size-9 shrink-0 items-center justify-center rounded-xl bg-background/80 text-primary ring-1 ring-border/50 transition-colors group-hover:bg-primary group-hover:text-primary-foreground [&_svg]:size-4",
+                    pressed && "bg-primary text-primary-foreground",
+                )}
+            >
+                {icon}
+            </span>
+            <span className="mt-3 block min-w-0 text-sm font-semibold leading-5 text-card-foreground sm:text-base">
+                {title}
+            </span>
+            <span className="mt-1 block min-w-0 text-xs leading-5 text-muted-foreground sm:text-[0.8125rem]">
+                {description}
+            </span>
+        </button>
+    );
 }
 
 export default function AyahActions({
@@ -841,36 +889,28 @@ export default function AyahActions({
 
     return (
         <div dir={direction} className="min-w-0 pb-1">
-            <header className="relative isolate min-w-0 overflow-hidden pb-5 pe-10 pt-1">
-                <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -end-6 -top-10 -z-10 size-44 rounded-full bg-primary/8 blur-3xl"
-                />
-                <div className="flex items-center gap-3">
-                    <span
-                        aria-hidden="true"
-                        className="h-px w-6 bg-primary/70"
-                    />
-                    <p className="text-[0.65rem] font-semibold tracking-[0.22em] text-primary">
-                        {t("actions.title")}
+            <header className="relative min-w-0 border-border/55 border-b pb-5 pe-11 pt-1">
+                <p className="text-[0.65rem] font-semibold tracking-[0.2em] text-primary">
+                    {t("actions.title")}
+                </p>
+                <div className="mt-2 flex min-w-0 items-end justify-between gap-4">
+                    <h1
+                        id="ayah-actions-title"
+                        className="min-w-0 text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl"
+                    >
+                        <SurahTitle
+                            locale={locale}
+                            surahNumber={surahNumber}
+                            surahName={surahName}
+                        />
+                    </h1>
+                    <p className="mb-0.5 shrink-0 rounded-full bg-primary/9 px-3 py-1.5 text-xs font-medium text-primary ring-1 ring-primary/10">
+                        {t("actions.ayah", { number: ayahNumber })}
                     </p>
                 </div>
-                <h1
-                    id="ayah-actions-title"
-                    className="mt-4 min-w-0 text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl"
-                >
-                    <SurahTitle
-                        locale={locale}
-                        surahNumber={surahNumber}
-                        surahName={surahName}
-                    />
-                </h1>
-                <p className="mt-2 text-sm text-muted-foreground">
-                    {t("actions.ayah", { number: ayahNumber })}
-                </p>
             </header>
 
-            <div className="flex min-w-0 flex-col pb-1">
+            <div className="min-w-0 pt-4 pb-1">
                 {audioStreams.length > 0 && (
                     <button
                         type="button"
@@ -880,10 +920,10 @@ export default function AyahActions({
                                 ? retryAudio()
                                 : toggleAudio(globalAyahNumber, audioStreams)
                         }
-                        className="mb-2 w-full min-w-0 rounded-2xl bg-gradient-to-br from-primary/12 to-primary/5 px-3.5 py-3.5 text-start text-foreground transition-colors hover:from-primary/16 hover:to-primary/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait sm:px-4"
+                        className="w-full min-w-0 overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/12 via-primary/7 to-transparent p-4 text-start text-foreground transition-[border-color,background-color] hover:border-primary/25 hover:from-primary/16 hover:via-primary/9 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait"
                     >
                         <span className="flex items-center gap-4">
-                            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_8px_22px_-12px_hsl(var(--primary))]">
                                 {isLoadingThisAyah ? (
                                     <LoaderCircle
                                         aria-hidden="true"
@@ -932,134 +972,85 @@ export default function AyahActions({
                         </span>
                     </button>
                 )}
-                <button
-                    type="button"
-                    onClick={() => setIsTafsirVisible(true)}
-                    className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 sm:py-3.5"
-                >
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
-                        <BookOpenText aria-hidden="true" className="size-4" />
-                    </span>
-                    <span className="min-w-0 flex-1 py-0.5">
-                        <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
-                            {t("actions.readTafsir")}
-                        </span>
-                        <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
-                            {t("actions.readTafsirDescription")}
-                        </span>
-                    </span>
-                </button>
-                {isBookmarked && (
-                    <button
-                        type="button"
-                        onClick={() => setIsCollectionsVisible(true)}
-                        className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 sm:py-3.5"
-                    >
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
-                            <FolderHeart aria-hidden="true" />
-                        </span>
-                        <span className="min-w-0 flex-1 py-0.5">
-                            <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
-                                {t("actions.organizeBookmark")}
-                            </span>
-                            <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
-                                {collectionIds.length > 0
+                <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
+                    <ActionTile
+                        icon={<BookOpenText aria-hidden="true" />}
+                        title={t("actions.readTafsir")}
+                        description={t("actions.readTafsirDescription")}
+                        onClick={() => setIsTafsirVisible(true)}
+                    />
+                    <ActionTile
+                        icon={<Copy aria-hidden="true" />}
+                        title={t("actions.copyArabic")}
+                        description={t("actions.copyArabicDescription")}
+                        onClick={copyArabicText}
+                    />
+                    <ActionTile
+                        icon={<ImageDown aria-hidden="true" />}
+                        title={t("actions.shareAyah")}
+                        description={t("actions.shareAyahDescription")}
+                        onClick={() => setIsShareVisible(true)}
+                    />
+                    <ActionTile
+                        icon={
+                            isSavingBookmark ? (
+                                <LoaderCircle
+                                    aria-hidden="true"
+                                    className="animate-spin"
+                                />
+                            ) : (
+                                <Bookmark
+                                    aria-hidden="true"
+                                    className={
+                                        isBookmarked ? "fill-current" : ""
+                                    }
+                                />
+                            )
+                        }
+                        title={
+                            isBookmarked
+                                ? t("actions.removeBookmark")
+                                : t("actions.bookmarkAyah")
+                        }
+                        description={
+                            isBookmarked
+                                ? t("actions.savedCollection")
+                                : t("actions.keepCollection")
+                        }
+                        disabled={isSavingBookmark}
+                        pressed={isBookmarked}
+                        onClick={toggleBookmark}
+                    />
+                    {isBookmarked && (
+                        <ActionTile
+                            icon={<FolderHeart aria-hidden="true" />}
+                            title={t("actions.organizeBookmark")}
+                            description={
+                                collectionIds.length > 0
                                     ? t("actions.inCollections", {
                                           count: collectionIds.length,
                                       })
-                                    : t("actions.chooseCollections")}
-                            </span>
-                        </span>
-                    </button>
-                )}
-                <button
-                    type="button"
-                    onClick={copyArabicText}
-                    className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 sm:py-3.5"
-                >
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
-                        <Copy aria-hidden="true" className="size-4" />
-                    </span>
-                    <span className="min-w-0 flex-1 py-0.5">
-                        <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
-                            {t("actions.copyArabic")}
-                        </span>
-                        <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
-                            {t("actions.copyArabicDescription")}
-                        </span>
-                    </span>
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setIsShareVisible(true)}
-                    className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 sm:py-3.5"
-                >
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
-                        <ImageDown aria-hidden="true" />
-                    </span>
-                    <span className="min-w-0 flex-1 py-0.5">
-                        <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
-                            {t("actions.shareAyah")}
-                        </span>
-                        <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
-                            {t("actions.shareAyahDescription")}
-                        </span>
-                    </span>
-                </button>
-                <button
-                    type="button"
-                    disabled={isSavingBookmark}
-                    onClick={toggleBookmark}
-                    aria-pressed={isBookmarked}
-                    className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60 sm:px-3 sm:py-3.5"
-                >
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
-                        {isSavingBookmark ? (
-                            <LoaderCircle
-                                aria-hidden="true"
-                                className="size-4 animate-spin"
-                            />
-                        ) : (
-                            <Bookmark
-                                aria-hidden="true"
-                                className={`size-4 ${isBookmarked ? "fill-current" : ""}`}
-                            />
-                        )}
-                    </span>
-                    <span className="min-w-0 flex-1 py-0.5">
-                        <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
-                            {isBookmarked
-                                ? t("actions.removeBookmark")
-                                : t("actions.bookmarkAyah")}
-                        </span>
-                        <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
-                            {isBookmarked
-                                ? t("actions.savedCollection")
-                                : t("actions.keepCollection")}
-                        </span>
-                    </span>
-                </button>
-                <button
-                    type="button"
-                    onClick={openReflection}
-                    className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 sm:py-3.5"
-                >
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
-                        <NotebookPen aria-hidden="true" className="size-4" />
-                    </span>
-                    <span className="min-w-0 flex-1 py-0.5">
-                        <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
-                            {reflection
+                                    : t("actions.chooseCollections")
+                            }
+                            onClick={() => setIsCollectionsVisible(true)}
+                        />
+                    )}
+                    <ActionTile
+                        icon={<NotebookPen aria-hidden="true" />}
+                        title={
+                            reflection
                                 ? t("actions.editReflection")
-                                : t("actions.addReflection")}
-                        </span>
-                        <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
-                            {reflection
+                                : t("actions.addReflection")
+                        }
+                        description={
+                            reflection
                                 ? t("actions.returnPrivateNote")
-                                : t("actions.writePrivateNote")}
-                        </span>
-                    </span>
-                </button>
+                                : t("actions.writePrivateNote")
+                        }
+                        onClick={openReflection}
+                        className={!isBookmarked ? "sm:col-span-2" : undefined}
+                    />
+                </div>
             </div>
         </div>
     );

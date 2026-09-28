@@ -30,23 +30,26 @@ function HizbMarker({
     return (
         <div
             dir={locale === "ar" ? "rtl" : "ltr"}
-            className="flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-muted/55 p-1 pe-2.5 whitespace-nowrap shadow-black/5 shadow-sm sm:min-h-11 sm:gap-1.5 sm:pe-3"
+            className="flex min-h-9 shrink-0 items-center gap-2 whitespace-nowrap sm:gap-2.5"
         >
             {quarter !== undefined && (
                 <span
                     dir={locale === "ar" ? "rtl" : "ltr"}
-                    className="inline-flex min-h-8 items-center gap-1 rounded-full bg-primary/12 px-2 font-semibold text-primary tabular-nums sm:min-h-9 sm:px-2.5"
+                    className="inline-flex items-baseline gap-1 font-semibold text-primary tabular-nums"
                 >
-                    <span className="hidden text-[9px] font-medium opacity-75 min-[390px]:inline sm:text-[10px]">
+                    <span className="hidden text-[9px] font-medium opacity-70 min-[390px]:inline sm:text-[10px]">
                         {quarterLabel}
                     </span>
                     <span dir="ltr">{quarter}/4</span>
                 </span>
             )}
-            <span className="ms-0.5 text-[10px] font-medium text-muted-foreground sm:text-[11px]">
+            {quarter !== undefined && (
+                <span aria-hidden="true" className="h-4 w-px bg-border/70" />
+            )}
+            <span className="text-[10px] font-medium text-muted-foreground sm:text-[11px]">
                 {label}
             </span>
-            <span className="text-sm font-bold text-foreground tabular-nums sm:text-base">
+            <span className="text-base font-bold text-foreground tabular-nums sm:text-lg">
                 {formatter.format(hizb)}
             </span>
         </div>
@@ -94,16 +97,11 @@ export default function PageDivisionSummary({
     return (
         <aside
             aria-label={t("pageSummary")}
-            className="mb-4 min-w-0 text-[11px] text-muted-foreground sm:text-xs"
+            className="mb-2 min-w-0 shrink-0 px-1 py-1 text-[11px] text-muted-foreground sm:px-2 sm:text-xs"
         >
-            <p className="mb-3 flex items-center justify-center gap-3 text-center text-sm font-semibold leading-relaxed text-primary sm:text-base">
-                <span aria-hidden="true" className="h-px w-8 bg-primary/30" />
-                {surahNames.join(" · ")}
-                <span aria-hidden="true" className="h-px w-8 bg-primary/30" />
-            </p>
             <dl
                 dir="ltr"
-                className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 text-center sm:gap-4"
+                className="relative grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-2xl bg-muted/25 px-3 py-3 text-center sm:gap-6 sm:px-5 sm:py-3.5"
             >
                 <div className="flex min-w-0 justify-start">
                     {leftHizbs.length > 0 && (
@@ -120,13 +118,22 @@ export default function PageDivisionSummary({
                         </div>
                     )}
                 </div>
-                <div className="justify-self-center rounded-2xl bg-primary/10 px-3 py-1.5 text-primary sm:px-5">
-                    <dt className="text-[9px] font-semibold tracking-[0.14em] uppercase">
-                        {t("juz")}
-                    </dt>
-                    <dd className="mt-0.5 text-base font-semibold text-foreground sm:text-lg">
-                        <LocalizedNumberList values={juzs} />
-                    </dd>
+                <div className="min-w-24 justify-self-center border-border/60 border-x px-3 sm:min-w-36 sm:px-6">
+                    <p
+                        dir="auto"
+                        className="max-w-48 truncate text-sm font-semibold leading-relaxed text-primary sm:text-base"
+                        title={surahNames.join(" · ")}
+                    >
+                        {surahNames.join(" · ")}
+                    </p>
+                    <div className="mt-1 flex items-baseline justify-center gap-1.5">
+                        <dt className="text-[9px] font-semibold tracking-[0.12em] text-muted-foreground uppercase sm:text-[10px]">
+                            {t("juz")}
+                        </dt>
+                        <dd className="text-lg font-bold text-foreground sm:text-xl">
+                            <LocalizedNumberList values={juzs} />
+                        </dd>
+                    </div>
                 </div>
                 <div className="flex min-w-0 justify-end">
                     {rightHizb && (

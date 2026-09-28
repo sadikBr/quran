@@ -237,6 +237,7 @@ export default async function SurahPage({
                     <Surah
                         surah={displayedSurah}
                         ayahs={ayahsWithAudio}
+                        showSurahHeading
                         translatedAyahs={
                             preferences.showTranslation
                                 ? (translatedSurahData?.ayahs ?? [])
@@ -245,6 +246,7 @@ export default async function SurahPage({
                         showTranslation={preferences.showTranslation}
                         translationEdition={translatedSurahData?.edition}
                         divisionMarkers={[...markerByDisplayedAyah.values()]}
+                        riwayah={preferences.riwayah}
                     />
                 </div>
             </div>

@@ -149,6 +149,7 @@ export default async function QuranPage({ page }: { page: number }) {
                         showTranslation={preferences.showTranslation}
                         translationEdition={translatedPageData?.data.edition}
                         divisionMarkers={[...markerByAyah.values()]}
+                        riwayah="hafs"
                     />
                 );
             })}

@@ -19,13 +19,23 @@ export default function FocusModeToggle({
         return () => document.body.classList.remove("focus-mode");
     }, [isFocused]);
 
+    function toggleFocusMode() {
+        const nextIsFocused = !isFocused;
+        setIsFocused(nextIsFocused);
+        window.dispatchEvent(
+            new CustomEvent("quran-focus-mode-change", {
+                detail: nextIsFocused,
+            }),
+        );
+    }
+
     return (
         <button
             type="button"
             aria-label={isFocused ? t("disable") : t("enable")}
             title={isFocused ? t("disable") : t("enable")}
             aria-pressed={isFocused}
-            onClick={() => setIsFocused((current) => !current)}
+            onClick={toggleFocusMode}
             className={cn(
                 "inline-flex size-10 shrink-0 items-center justify-center text-muted-foreground transition-[background-color,color] hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 embedded

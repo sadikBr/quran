@@ -2,6 +2,7 @@
     "Reader": {
         "header": {
             "brand": "Quran Reader",
+            "readerLabel": "Reading space",
             "navigation": "Quran navigation",
             "search": "Search Quran",
             "surahIndex": "Surah index",
@@ -19,7 +20,9 @@
             "disable": "Exit focus mode"
         },
         "controls": {
-            "label": "Reading controls"
+            "label": "Reading controls",
+            "open": "Open reading controls",
+            "close": "Close reading controls"
         },
         "index": {
             "sectionsLabel": "Browse the Quran by division",
