@@ -3,7 +3,7 @@ import {
     BookMarked,
     BookOpen,
     CalendarCheck2,
-    ChartNoAxesCombined,
+    type LucideIcon,
     UsersRound,
 } from "lucide-react";
 import { headers } from "next/headers";
@@ -36,12 +36,65 @@ import getWirdHistory from "@/features/wird/server/get-wird-history";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
-const upcomingFeatures = [
-    {
-        icon: ChartNoAxesCombined,
-        key: "progressInsights" as const,
-    },
-];
+function DashboardShortcut({
+    href,
+    icon: Icon,
+    eyebrow,
+    title,
+    description,
+    isArabic,
+    emphasized = false,
+}: {
+    href: string;
+    icon: LucideIcon;
+    eyebrow: string;
+    title: string;
+    description: string;
+    isArabic: boolean;
+    emphasized?: boolean;
+}) {
+    return (
+        <Link
+            href={href}
+            className={cn(
+                "group flex min-h-48 flex-col justify-between overflow-hidden rounded-2xl p-5 outline-none ring-1 transition-[background-color,box-shadow,transform] hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring sm:p-6",
+                emphasized
+                    ? "bg-primary/[0.075] ring-primary/15 hover:bg-primary/[0.095]"
+                    : "bg-muted/35 ring-border/50 hover:bg-muted/55",
+            )}
+        >
+            <div className="flex items-start justify-between gap-4">
+                <span
+                    className={cn(
+                        "flex size-10 shrink-0 items-center justify-center rounded-xl",
+                        emphasized
+                            ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                            : "bg-primary/10 text-primary",
+                    )}
+                >
+                    <Icon aria-hidden="true" className="size-5" />
+                </span>
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-[background-color,color,transform] group-hover:bg-primary/10 group-hover:text-primary group-hover:ltr:translate-x-0.5 group-hover:rtl:-translate-x-0.5">
+                    <ArrowRight
+                        aria-hidden="true"
+                        className={cn("size-4", isArabic && "rotate-180")}
+                    />
+                </span>
+            </div>
+            <div className="mt-7">
+                <p className="text-[0.7rem] font-semibold tracking-[0.14em] text-primary uppercase">
+                    {eyebrow}
+                </p>
+                <h3 className="mt-1.5 text-lg font-semibold tracking-tight">
+                    {title}
+                </h3>
+                <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                    {description}
+                </p>
+            </div>
+        </Link>
+    );
+}
 
 export default async function DashboardPage() {
     const session = await auth.api.getSession({
@@ -313,224 +366,149 @@ export default async function DashboardPage() {
                         </div>
                     </section>
 
-                    <section className="relative mt-8 overflow-hidden rounded-3xl bg-primary/[0.07] px-5 py-6 ring-1 ring-primary/15 sm:px-7">
-                        <div
-                            aria-hidden="true"
-                            className="pointer-events-none absolute -top-20 -end-16 size-44 rounded-full bg-primary/[0.08] blur-3xl"
-                        />
-                        <div className="relative grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-8">
-                            <div className="flex min-w-0 items-start gap-4">
-                                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm shadow-primary/20">
-                                    <CalendarCheck2
-                                        aria-hidden="true"
-                                        className="size-5"
-                                    />
-                                </span>
-                                <div className="min-w-0">
-                                    <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
-                                        {weeklyT("dashboard.eyebrow")}
-                                    </p>
-                                    <h2 className="mt-1.5 text-lg font-semibold tracking-tight sm:text-xl">
-                                        {weeklyT("dashboard.title")}
-                                    </h2>
-                                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                        {assignedWork.length > 0
-                                            ? weeklyT("dashboard.active", {
-                                                  count: assignedWork.length,
-                                                  ready: readyAssignmentCount,
-                                              })
-                                            : weeklyT("dashboard.empty")}
-                                    </p>
-                                </div>
-                            </div>
-                            <Button
-                                asChild
-                                variant={
+                    <section
+                        className="mt-12"
+                        aria-labelledby="dashboard-tools"
+                    >
+                        <div className="max-w-2xl">
+                            <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                {t("tools.eyebrow")}
+                            </p>
+                            <h2
+                                id="dashboard-tools"
+                                className="mt-2 text-2xl font-semibold tracking-tight"
+                            >
+                                {t("tools.title")}
+                            </h2>
+                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                {t("tools.description")}
+                            </p>
+                        </div>
+
+                        <div className="mt-6 grid gap-4 md:grid-cols-2">
+                            <DashboardShortcut
+                                href="/weekly"
+                                icon={CalendarCheck2}
+                                eyebrow={weeklyT("dashboard.eyebrow")}
+                                title={weeklyT("dashboard.title")}
+                                description={
                                     assignedWork.length > 0
-                                        ? "default"
-                                        : "outline"
+                                        ? weeklyT("dashboard.active", {
+                                              count: assignedWork.length,
+                                              ready: readyAssignmentCount,
+                                          })
+                                        : weeklyT("dashboard.empty")
                                 }
-                                className="w-full rounded-xl sm:w-auto"
-                            >
-                                <Link href="/weekly">
-                                    {weeklyT("dashboard.open")}
-                                    <ArrowRight
-                                        aria-hidden="true"
-                                        className={cn(
-                                            "size-4",
-                                            preferences.language === "ar" &&
-                                                "rotate-180",
-                                        )}
-                                    />
-                                </Link>
-                            </Button>
-                        </div>
-                    </section>
+                                isArabic={preferences.language === "ar"}
+                                emphasized={assignedWork.length > 0}
+                            />
 
-                    <section className="relative mt-8 overflow-hidden rounded-3xl bg-primary/[0.06] px-5 py-6 ring-1 ring-primary/12 sm:px-7">
-                        <div className="grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-8">
-                            <div className="flex min-w-0 items-start gap-4">
-                                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                                    <BookMarked
-                                        aria-hidden="true"
-                                        className="size-5"
-                                    />
-                                </span>
-                                <div className="min-w-0">
-                                    <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
-                                        {practiceT("dashboard.eyebrow")}
-                                    </p>
-                                    <h2 className="mt-1.5 text-lg font-semibold tracking-tight sm:text-xl">
-                                        {practiceAssignment
-                                            ? practiceT(
-                                                  `kinds.${practiceAssignment.kind}`,
-                                              )
-                                            : practiceT("dashboard.emptyTitle")}
-                                    </h2>
-                                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                        {practiceAssignment
-                                            ? practiceT("range", {
-                                                  startSurah:
-                                                      surahs.find(
-                                                          (surah) =>
-                                                              surah.number ===
-                                                              practiceAssignment
-                                                                  .start
-                                                                  .surahNumber,
-                                                      )?.[
-                                                          preferences.language ===
-                                                          "ar"
-                                                              ? "name"
-                                                              : "englishName"
-                                                      ] ?? "",
-                                                  startAyah:
-                                                      practiceAssignment.start
-                                                          .ayahNumber,
-                                                  endSurah:
-                                                      surahs.find(
-                                                          (surah) =>
-                                                              surah.number ===
-                                                              practiceAssignment
-                                                                  .end
-                                                                  .surahNumber,
-                                                      )?.[
-                                                          preferences.language ===
-                                                          "ar"
-                                                              ? "name"
-                                                              : "englishName"
-                                                      ] ?? "",
-                                                  endAyah:
-                                                      practiceAssignment.end
-                                                          .ayahNumber,
-                                              })
-                                            : practiceT(
-                                                  "dashboard.emptyDescription",
-                                              )}
-                                    </p>
-                                </div>
-                            </div>
-                            <Button
-                                asChild
-                                variant={
-                                    practiceAssignment ? "default" : "outline"
+                            <WirdDashboardCard
+                                wird={dailyWird}
+                                history={wirdHistory}
+                                khatmahProgress={
+                                    khatmahPlan
+                                        ? khatmahPlan.progressPercentage
+                                        : null
                                 }
-                                className="w-full rounded-xl sm:w-auto"
-                            >
-                                <Link href={"/practice"}>
-                                    {practiceT(
-                                        practiceAssignment
-                                            ? "dashboard.open"
-                                            : "dashboard.setup",
-                                    )}
-                                    <ArrowRight
-                                        aria-hidden="true"
-                                        className={cn(
-                                            "size-4",
-                                            preferences.language === "ar" &&
-                                                "rotate-180",
-                                        )}
-                                    />
-                                </Link>
-                            </Button>
+                                isArabic={preferences.language === "ar"}
+                                labels={{
+                                    eyebrow: wirdT("dashboard.eyebrow"),
+                                    emptyTitle: wirdT("dashboard.emptyTitle"),
+                                    emptyDescription: wirdT(
+                                        "dashboard.emptyDescription",
+                                    ),
+                                    setup: wirdT("dashboard.setup"),
+                                    open: wirdT("dashboard.open"),
+                                    completed: wirdT("dashboard.completed"),
+                                    pending: wirdT("dashboard.pending"),
+                                    restDay: wirdT("dashboard.restDay"),
+                                    khatmahProgress: wirdT(
+                                        "dashboard.khatmahProgress",
+                                    ),
+                                    streak: wirdT("dashboard.streak", {
+                                        count: wirdHistory.currentStreak,
+                                    }),
+                                    goal: dailyWird
+                                        ? wirdT("today.goal", {
+                                              amount: dailyWird.amount,
+                                              unit: wirdT(
+                                                  `units.${dailyWird.unit}`,
+                                              ),
+                                          })
+                                        : undefined,
+                                }}
+                            />
+
+                            <DashboardShortcut
+                                href="/practice"
+                                icon={BookMarked}
+                                eyebrow={practiceT("dashboard.eyebrow")}
+                                title={
+                                    practiceAssignment
+                                        ? practiceT(
+                                              `kinds.${practiceAssignment.kind}`,
+                                          )
+                                        : practiceT("dashboard.emptyTitle")
+                                }
+                                description={
+                                    practiceAssignment
+                                        ? practiceT("range", {
+                                              startSurah:
+                                                  surahs.find(
+                                                      (surah) =>
+                                                          surah.number ===
+                                                          practiceAssignment
+                                                              .start
+                                                              .surahNumber,
+                                                  )?.[
+                                                      preferences.language ===
+                                                      "ar"
+                                                          ? "name"
+                                                          : "englishName"
+                                                  ] ?? "",
+                                              startAyah:
+                                                  practiceAssignment.start
+                                                      .ayahNumber,
+                                              endSurah:
+                                                  surahs.find(
+                                                      (surah) =>
+                                                          surah.number ===
+                                                          practiceAssignment.end
+                                                              .surahNumber,
+                                                  )?.[
+                                                      preferences.language ===
+                                                      "ar"
+                                                          ? "name"
+                                                          : "englishName"
+                                                  ] ?? "",
+                                              endAyah:
+                                                  practiceAssignment.end
+                                                      .ayahNumber,
+                                          })
+                                        : practiceT(
+                                              "dashboard.emptyDescription",
+                                          )
+                                }
+                                isArabic={preferences.language === "ar"}
+                                emphasized={Boolean(practiceAssignment)}
+                            />
+
+                            <DashboardShortcut
+                                href="/groups"
+                                icon={UsersRound}
+                                eyebrow={groupsT("dashboard.eyebrow")}
+                                title={groupsT("dashboard.title")}
+                                description={groupsT(
+                                    groups.length > 0
+                                        ? "dashboard.activeDescription"
+                                        : "dashboard.emptyDescription",
+                                    { count: groups.length },
+                                )}
+                                isArabic={preferences.language === "ar"}
+                            />
                         </div>
                     </section>
-
-                    <section className="relative mt-8 overflow-hidden rounded-3xl bg-muted/45 px-5 py-6 ring-1 ring-border/50 sm:px-7">
-                        <div className="grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-8">
-                            <div className="flex min-w-0 items-start gap-4">
-                                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                                    <UsersRound
-                                        aria-hidden="true"
-                                        className="size-5"
-                                    />
-                                </span>
-                                <div className="min-w-0">
-                                    <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
-                                        {groupsT("dashboard.eyebrow")}
-                                    </p>
-                                    <h2 className="mt-1.5 text-lg font-semibold tracking-tight sm:text-xl">
-                                        {groupsT("dashboard.title")}
-                                    </h2>
-                                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                        {groupsT(
-                                            groups.length > 0
-                                                ? "dashboard.activeDescription"
-                                                : "dashboard.emptyDescription",
-                                            { count: groups.length },
-                                        )}
-                                    </p>
-                                </div>
-                            </div>
-                            <Button
-                                asChild
-                                variant="outline"
-                                className="w-full rounded-xl sm:w-auto"
-                            >
-                                <Link href="/groups">
-                                    {groupsT("dashboard.open")}
-                                    <ArrowRight
-                                        aria-hidden="true"
-                                        className={cn(
-                                            "size-4",
-                                            preferences.language === "ar" &&
-                                                "rotate-180",
-                                        )}
-                                    />
-                                </Link>
-                            </Button>
-                        </div>
-                    </section>
-
-                    <WirdDashboardCard
-                        wird={dailyWird}
-                        history={wirdHistory}
-                        khatmahProgress={
-                            khatmahPlan ? khatmahPlan.progressPercentage : null
-                        }
-                        isArabic={preferences.language === "ar"}
-                        labels={{
-                            eyebrow: wirdT("dashboard.eyebrow"),
-                            emptyTitle: wirdT("dashboard.emptyTitle"),
-                            emptyDescription: wirdT(
-                                "dashboard.emptyDescription",
-                            ),
-                            setup: wirdT("dashboard.setup"),
-                            open: wirdT("dashboard.open"),
-                            completed: wirdT("dashboard.completed"),
-                            pending: wirdT("dashboard.pending"),
-                            restDay: wirdT("dashboard.restDay"),
-                            khatmahProgress: wirdT("dashboard.khatmahProgress"),
-                            streak: wirdT("dashboard.streak", {
-                                count: wirdHistory.currentStreak,
-                            }),
-                            goal: dailyWird
-                                ? wirdT("today.goal", {
-                                      amount: dailyWird.amount,
-                                      unit: wirdT(`units.${dailyWird.unit}`),
-                                  })
-                                : undefined,
-                        }}
-                    />
 
                     <QuranAudioProvider>
                         <SavedAyahsSection
@@ -538,46 +516,6 @@ export default async function DashboardPage() {
                             readingMode={preferences.readingMode}
                         />
                     </QuranAudioProvider>
-
-                    <section className="mt-16" aria-labelledby="coming-soon">
-                        <div className="max-w-xl">
-                            <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                {t("upcoming.eyebrow")}
-                            </p>
-                            <h2
-                                id="coming-soon"
-                                className="mt-2 text-xl font-semibold tracking-tight"
-                            >
-                                {t("upcoming.title")}
-                            </h2>
-                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                {t("upcoming.description")}
-                            </p>
-                        </div>
-                        <div className="mt-8 grid gap-8 sm:grid-cols-2 sm:gap-12">
-                            {upcomingFeatures.map(({ icon: Icon, key }) => (
-                                <article key={key} className="flex gap-4">
-                                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
-                                        <Icon
-                                            aria-hidden="true"
-                                            className="size-5"
-                                        />
-                                    </span>
-                                    <div>
-                                        <p className="text-[0.65rem] font-semibold tracking-[0.16em] text-primary uppercase">
-                                            {t("upcoming.inDevelopment")}
-                                        </p>
-                                        <h3 className="mt-1 font-semibold">
-                                            {t(`upcoming.${key}.title`)}
-                                        </h3>
-                                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                            {t(`upcoming.${key}.description`)}
-                                        </p>
-                                    </div>
-                                </article>
-                            ))}
-                        </div>
-                    </section>
                 </section>
             </div>
         </main>
