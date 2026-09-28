@@ -216,6 +216,16 @@ export default async function PracticePage() {
                                                 {assignment.instructions}
                                             </p>
                                         )}
+                                        {assignment.reviewNote && (
+                                            <div className="mt-4 rounded-xl bg-primary/[0.07] px-4 py-3 ring-1 ring-primary/10">
+                                                <p className="text-xs font-semibold text-primary">
+                                                    {t("reader.feedbackTitle")}
+                                                </p>
+                                                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                                    {assignment.reviewNote}
+                                                </p>
+                                            </div>
+                                        )}
                                         <Button
                                             asChild
                                             className="mt-5 rounded-xl"

@@ -179,6 +179,17 @@ export default async function WeeklyPage() {
                     </p>
                 )}
 
+                {assignment.reviewNote && (
+                    <div className="mt-4 rounded-xl bg-primary/[0.07] px-4 py-3 ring-1 ring-primary/10">
+                        <p className="text-xs font-semibold text-primary">
+                            {t("card.feedback")}
+                        </p>
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                            {assignment.reviewNote}
+                        </p>
+                    </div>
+                )}
+
                 <div className="mt-5">
                     <div className="flex items-center justify-between gap-4 text-xs">
                         <span className="text-muted-foreground">

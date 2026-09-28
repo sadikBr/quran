@@ -3,6 +3,7 @@ import {
     ArrowRight,
     BookMarked,
     CalendarDays,
+    ClipboardCheck,
     RefreshCcw,
     Shield,
     UserRound,
@@ -276,6 +277,35 @@ export default async function GroupPage({
                                                     {assignment.instructions}
                                                 </p>
                                             )}
+                                            {assignment.reviewNote && (
+                                                <div className="mt-4 rounded-xl bg-primary/[0.06] px-4 py-3 ring-1 ring-primary/10">
+                                                    <p className="text-xs font-semibold text-primary">
+                                                        {t(
+                                                            "assignments.feedback",
+                                                        )}
+                                                    </p>
+                                                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                                        {assignment.reviewNote}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {isAdmin &&
+                                                assignment.status ===
+                                                    "submitted" && (
+                                                    <Button
+                                                        asChild
+                                                        className="mt-4 rounded-xl"
+                                                    >
+                                                        <Link
+                                                            href={`/groups/${group.id}/review/${assignment.id}`}
+                                                        >
+                                                            <ClipboardCheck className="size-4" />
+                                                            {t(
+                                                                "assignments.reviewNow",
+                                                            )}
+                                                        </Link>
+                                                    </Button>
+                                                )}
                                             {isMine && (
                                                 <Button
                                                     asChild

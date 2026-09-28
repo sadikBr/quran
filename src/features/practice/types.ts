@@ -31,6 +31,9 @@ export interface PracticeAssignment {
     assignedByName: string | null;
     instructions: string | null;
     dueAt: Date | null;
+    reviewNote: string | null;
+    submittedAt: Date | null;
+    reviewedAt: Date | null;
 }
 
 export function referenceOrder(reference: QuranReference) {

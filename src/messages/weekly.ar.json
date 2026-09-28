@@ -42,6 +42,7 @@
             "continue": "متابعة التدرّب",
             "start": "بدء التدرّب",
             "reviewPending": "جاهز للتسميع",
+            "feedback": "ملاحظة المشرف",
             "kinds": {
                 "memorization": "حفظ جديد",
                 "revision": "مراجعة المحفوظ"

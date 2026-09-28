@@ -40,6 +40,9 @@ function mapAssignment(result: AssignmentRow): PracticeAssignment {
         assignedByName: result.assignedByName,
         instructions: result.instructions,
         dueAt: result.dueAt,
+        reviewNote: result.reviewNote,
+        submittedAt: result.submittedAt,
+        reviewedAt: result.reviewedAt,
     };
 }
 

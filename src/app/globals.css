@@ -401,6 +401,15 @@ body.focus-mode .quran-focus-chrome {
     font-family: "Uthmanic Warsh", Amiri, Ayah, sans-serif;
 }
 
+/* Reviews can use a different riwayah from the reviewing admin's preference. */
+.ayah.assignment-review-quran[data-riwayah="hafs"] {
+    font-family: Amiri, Ayah, sans-serif;
+}
+
+.ayah.assignment-review-quran[data-riwayah="warsh"] {
+    font-family: "Uthmanic Warsh", Amiri, Ayah, sans-serif;
+}
+
 [data-quran-scroll-container] {
     overscroll-behavior-y: contain;
     scroll-padding-block: 6rem;

@@ -187,6 +187,17 @@ export default function PracticeReader({
                 </div>
             </section>
 
+            {assignment.source === "group" && assignment.reviewNote && (
+                <section className="mt-6 rounded-2xl bg-primary/[0.07] px-5 py-4 ring-1 ring-primary/15">
+                    <p className="text-xs font-semibold text-primary">
+                        {t("feedbackTitle")}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                        {assignment.reviewNote}
+                    </p>
+                </section>
+            )}
+
             {assignment.source === "group" && reachedEnd && (
                 <section className="mt-6 rounded-2xl bg-primary/[0.08] p-5 text-center ring-1 ring-primary/15 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:text-start">
                     <div>

@@ -19,6 +19,8 @@ export interface GroupAssignmentSummary {
     status: "in_progress" | "submitted" | "completed" | "needs_revision";
     dueAt: Date | null;
     instructions: string | null;
+    reviewNote: string | null;
+    reviewedAt: Date | null;
 }
 
 export default async function getGroupAssignments(
@@ -26,13 +28,12 @@ export default async function getGroupAssignments(
     requestingUserId: string,
     isAdmin: boolean,
 ): Promise<GroupAssignmentSummary[]> {
+    const visibleStatuses = isAdmin
+        ? ["in_progress", "submitted", "needs_revision", "completed"]
+        : ["in_progress", "submitted", "needs_revision"];
     const conditions = [
         eq(practiceAssignment.groupId, groupId),
-        inArray(practiceAssignment.status, [
-            "in_progress",
-            "submitted",
-            "needs_revision",
-        ]),
+        inArray(practiceAssignment.status, visibleStatuses),
     ];
     if (!isAdmin)
         conditions.push(eq(practiceAssignment.assigneeId, requestingUserId));
@@ -51,6 +52,8 @@ export default async function getGroupAssignments(
             status: practiceAssignment.status,
             dueAt: practiceAssignment.dueAt,
             instructions: practiceAssignment.instructions,
+            reviewNote: practiceAssignment.reviewNote,
+            reviewedAt: practiceAssignment.reviewedAt,
         })
         .from(practiceAssignment)
         .innerJoin(user, eq(practiceAssignment.assigneeId, user.id))

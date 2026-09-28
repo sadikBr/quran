@@ -99,6 +99,8 @@
                 "warsh": "Warsh"
             },
             "open": "Open practice",
+            "reviewNow": "Review now",
+            "feedback": "Admin feedback",
             "delete": "Delete assignment",
             "deleting": "Deleting…",
             "deleteConfirm": "Delete this member assignment? Their saved progress for it will also be removed.",
@@ -110,6 +112,30 @@
                 "needs_revision": "Needs more work",
                 "completed": "Completed"
             }
+        },
+        "review": {
+            "eyebrow": "ADMIN REVIEW",
+            "title": "Review {name}’s assignment",
+            "description": "Use the Quran text while listening, then record the outcome of this review.",
+            "back": "Back to {group}",
+            "submitted": "Submitted {date}",
+            "learner": "Learner",
+            "assignment": "Assignment",
+            "quranText": "Quran text for review",
+            "instructions": "Original instructions",
+            "decisionTitle": "Record the result",
+            "decisionDescription": "Your decision determines what the learner sees next.",
+            "note": "Feedback (optional)",
+            "notePlaceholder": "Add a short, practical note for the learner…",
+            "needsRevision": "Needs more work",
+            "complete": "Mark completed",
+            "revisionHint": "Returning the assignment resets its saved checkpoint so the learner can make a fresh pass through the range.",
+            "completedSuccess": "The assignment has been completed.",
+            "revisionSuccess": "The assignment was returned for more work.",
+            "error": "We couldn’t save this review. The assignment may already have been reviewed.",
+            "notReadyTitle": "This assignment is not waiting for review",
+            "notReadyDescription": "The learner may still be working on it, or another admin has already reviewed it.",
+            "returnToGroup": "Return to group"
         },
         "dashboard": {
             "eyebrow": "Your Quran circles",

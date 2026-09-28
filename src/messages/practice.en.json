@@ -76,6 +76,7 @@
             "submitted": "Your assignment is ready for review.",
             "awaitingReview": "Your admin can now review this assignment with you.",
             "submitError": "We couldn’t submit this assignment. Please try again.",
+            "feedbackTitle": "Feedback from your admin",
             "saveError": "We could not save your practice place."
         },
         "dashboard": {
