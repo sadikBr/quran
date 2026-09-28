@@ -36,9 +36,10 @@ export default async function getAyahActionsData(
         auth.api.getSession({ headers: await headers() }),
     ]);
     const riwayah = riwayahOverride ?? preferences.riwayah;
-    const [{ ayahs, surahMeta }, { reciters }, warshChapter] =
+    const [{ ayahs, surahMeta }, translationSurah, { reciters }, warshChapter] =
         await Promise.all([
             getSurahData(String(surahNumber), preferences.arabicEdition),
+            getSurahData(String(surahNumber), preferences.translationEdition),
             getAvailableReciters(),
             riwayah === "warsh"
                 ? getWarshChapter(surahNumber)
@@ -59,6 +60,16 @@ export default async function getAyahActionsData(
         : ayahNumber;
     const ayah = ayahs.find((item) => item.numberInSurah === hafsAyahNumber);
     if (!ayah) return null;
+    const translationAyahNumbers = warshVerse
+        ? warshVerse.number_in_hafs
+        : [ayah.numberInSurah];
+    const translationText = translationSurah.ayahs
+        .filter((item) => translationAyahNumbers.includes(item.numberInSurah))
+        .map((item) => item.text)
+        .join(" ")
+        .replace(/<[^>]*>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
 
     const arabicText = warshVerse
         ? warshVerse.text
@@ -100,8 +111,14 @@ export default async function getAyahActionsData(
 
     return {
         surahName: surahMeta.englishName,
+        surahArabicName: surahMeta.name,
+        riwayah,
         ayahNumber,
         arabicText,
+        translationText,
+        translationEditionName:
+            translationSurah.edition.englishName ||
+            translationSurah.edition.name,
         tafsirText: tafsirAyah.text,
         tafsirEditionName:
             preferences.language === "ar"

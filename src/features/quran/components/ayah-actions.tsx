@@ -9,6 +9,7 @@ import {
     Copy,
     FolderHeart,
     FolderPlus,
+    ImageDown,
     LoaderCircle,
     NotebookPen,
     Pause,
@@ -38,6 +39,7 @@ import type {
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import getTafsirAyah from "../server/get-tafsir-ayah";
 import type { Edition } from "../types";
+import AyahShareCard from "./ayah-share-card";
 import EditionCombobox from "./edition-combobox";
 import { useQuranAudio } from "./quran-audio-provider";
 import TajweedText, { getPlainQuranText } from "./tajweed-text";
@@ -203,8 +205,12 @@ function QuranAyahPreview({
 
 export type AyahActionsProps = {
     surahName: string;
+    surahArabicName: string;
+    riwayah: "hafs" | "warsh";
     ayahNumber: number;
     arabicText: string;
+    translationText: string;
+    translationEditionName: string;
     tafsirText: string;
     tafsirEditionName: string;
     tafsirEditionIdentifier: string;
@@ -246,8 +252,11 @@ function SurahTitle({
 
 export default function AyahActions({
     surahName,
+    riwayah,
     ayahNumber,
     arabicText,
+    translationText,
+    translationEditionName,
     tafsirText,
     tafsirEditionName,
     tafsirEditionIdentifier,
@@ -283,6 +292,7 @@ export default function AyahActions({
     const [isChangingTafsir, setIsChangingTafsir] = useState(false);
     const [isReflectionVisible, setIsReflectionVisible] = useState(false);
     const [isCollectionsVisible, setIsCollectionsVisible] = useState(false);
+    const [isShareVisible, setIsShareVisible] = useState(false);
     const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
     const [collections, setCollections] = useState(initialCollections);
     const [collectionIds, setCollectionIds] = useState(initialCollectionIds);
@@ -469,6 +479,21 @@ export default function AyahActions({
                 : t("actions.reflectionRemoved"),
         );
         onSavedAyahChangeAction?.();
+    }
+
+    if (isShareVisible) {
+        return (
+            <AyahShareCard
+                arabicText={getPlainQuranText(arabicText)}
+                translationText={translationText}
+                translationEditionName={translationEditionName}
+                surahName={surahName}
+                surahNumber={surahNumber}
+                ayahNumber={ayahNumber}
+                riwayah={riwayah}
+                onBack={() => setIsShareVisible(false)}
+            />
+        );
     }
 
     if (isCollectionsVisible) {
@@ -961,6 +986,23 @@ export default function AyahActions({
                         </span>
                         <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
                             {t("actions.copyArabicDescription")}
+                        </span>
+                    </span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setIsShareVisible(true)}
+                    className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 sm:py-3.5"
+                >
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
+                        <ImageDown aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1 py-0.5">
+                        <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
+                            {t("actions.shareAyah")}
+                        </span>
+                        <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
+                            {t("actions.shareAyahDescription")}
                         </span>
                     </span>
                 </button>
