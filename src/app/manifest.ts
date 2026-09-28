@@ -11,6 +11,21 @@ export default function manifest(): MetadataRoute.Manifest {
         display: "standalone",
         background_color: "#181512",
         theme_color: "#ff6b0a",
+        shortcuts: [
+            {
+                name: "Offline Quran",
+                short_name: "Offline",
+                description: "Read the complete Quran without internet.",
+                url: "/offline",
+                icons: [
+                    {
+                        src: "/icon-192.png",
+                        sizes: "192x192",
+                        type: "image/png",
+                    },
+                ],
+            },
+        ],
         icons: [
             {
                 src: "/icon-192.png",

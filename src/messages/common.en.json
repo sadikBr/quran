@@ -27,6 +27,9 @@
             "reflectionSaveFailed": "We couldn’t save your reflection. Please try again.",
             "networkOffline": "You’re offline. Already loaded content remains available, but new Quran pages may not load.",
             "networkRestored": "You’re back online.",
+            "offlineTitle": "You’re offline",
+            "offlineReady": "The complete Quran is ready on this device.",
+            "openOfflineQuran": "Open Quran",
             "signOutFailed": "We couldn’t sign you out. Please try again."
         }
     }

@@ -101,6 +101,17 @@ Wird and sends a notification that opens `/wird/read`. Two once-daily UTC cron
 entries cover Morocco's seasonal UTC offset; the endpoint sends only during the
 local 11 PM hour and records each delivery to prevent duplicates.
 
+## Offline Quran
+
+The installed app automatically downloads a compact, versioned copy of the
+complete Quran for Hafs and Warsh, together with the Saheeh International
+English translation. The service worker also stores the offline reader and its
+essential fonts and assets. Chrome is asked to make the storage persistent, and
+the download state can be checked or refreshed from Settings.
+
+Quran text remains available without a connection at `/offline`. Audio, tafsir,
+account updates, bookmarks, and progress syncing still require the network.
+
 ## Planned work
 
 - Memorization progress and review scheduling

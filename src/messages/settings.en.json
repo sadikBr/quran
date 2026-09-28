@@ -18,6 +18,10 @@
                 "eyebrow": "REMINDERS",
                 "title": "Return before the day ends"
             },
+            "offline": {
+                "eyebrow": "OFFLINE READING",
+                "title": "Keep the Quran with you"
+            },
             "quranText": {
                 "eyebrow": "QURAN TEXT",
                 "title": "Choose your editions"
@@ -87,6 +91,19 @@
                 "blocked": "Notifications are blocked",
                 "disabled": "Reminder is off on this device",
                 "enabled": "Reminder is active on this device"
+            }
+        },
+        "offline": {
+            "title": "Complete offline Quran",
+            "description": "Hafs, Warsh, and an English translation are kept on this device automatically. Audio still needs an internet connection.",
+            "progress": "Downloading… {progress, number}%",
+            "refresh": "Update offline Quran",
+            "status": {
+                "idle": "Preparing the offline library",
+                "downloading": "Saving the complete Quran",
+                "ready": "Complete Quran available offline",
+                "error": "Download paused — it will retry online",
+                "unsupported": "Offline storage is not supported here"
             }
         },
         "arabicEdition": {

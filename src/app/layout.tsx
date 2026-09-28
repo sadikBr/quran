@@ -13,6 +13,7 @@ import ConnectionStatus from "@/components/connection-status";
 import ContentProtection from "@/components/content-protection";
 import NavigationFeedback from "@/components/navigation-feedback";
 import { ThemeProvider } from "@/components/theme-provider";
+import OfflineLibraryManager from "@/features/offline/components/offline-library-manager";
 import ThemePreferenceSync from "@/features/settings/components/theme-preference-sync";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { SettingsProvider } from "@/features/settings/settings-provider";
@@ -104,6 +105,7 @@ export default async function RootLayout({
                         <SettingsProvider preferences={preferences}>
                             <ContentProtection />
                             <ConnectionStatus />
+                            <OfflineLibraryManager />
                             <NavigationFeedback />
                             <ThemePreferenceSync />
                             <Toaster

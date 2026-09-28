@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import PushNotificationSetting from "@/features/notifications/components/push-notification-setting";
+import OfflineLibrarySetting from "@/features/offline/components/offline-library-setting";
 import EditionCombobox from "@/features/quran/components/edition-combobox";
 import ReciterCombobox from "@/features/quran/components/reciter-combobox";
 import type { Edition, Reciter } from "@/features/quran/types";
@@ -503,6 +504,18 @@ export default function SettingsForm({
                         <PushNotificationSetting
                             vapidPublicKey={vapidPublicKey}
                         />
+                    </SettingsSection>
+
+                    <SettingsSection
+                        eyebrow={t("sections.offline.eyebrow")}
+                        title={t("sections.offline.title")}
+                    >
+                        <PreferenceCard
+                            title={t("offline.title")}
+                            description={t("offline.description")}
+                        >
+                            <OfflineLibrarySetting />
+                        </PreferenceCard>
                     </SettingsSection>
                 </div>
 
