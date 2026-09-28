@@ -71,6 +71,8 @@ export default function GroupForms({
             <div className="grid grid-cols-2 gap-2 rounded-2xl bg-background/45 p-1.5">
                 <button
                     type="button"
+                    disabled={isSubmitting}
+                    aria-pressed={mode === "create"}
                     onClick={() => setMode("create")}
                     className={cn(
                         "flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors",
@@ -84,6 +86,8 @@ export default function GroupForms({
                 </button>
                 <button
                     type="button"
+                    disabled={isSubmitting}
+                    aria-pressed={mode === "join"}
                     onClick={() => setMode("join")}
                     className={cn(
                         "flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors",
@@ -117,7 +121,11 @@ export default function GroupForms({
                 </div>
 
                 {mode === "create" ? (
-                    <form action={create} className="mt-6 space-y-5">
+                    <form
+                        action={create}
+                        aria-busy={isSubmitting}
+                        className="mt-6 space-y-5"
+                    >
                         <div>
                             <Label htmlFor="group-name">
                                 {t("create.name")}
@@ -126,6 +134,7 @@ export default function GroupForms({
                                 id="group-name"
                                 name="name"
                                 required
+                                disabled={isSubmitting}
                                 minLength={2}
                                 maxLength={80}
                                 placeholder={t("create.namePlaceholder")}
@@ -140,6 +149,7 @@ export default function GroupForms({
                                 id="group-description"
                                 name="description"
                                 maxLength={300}
+                                disabled={isSubmitting}
                                 placeholder={t("create.detailsPlaceholder")}
                                 className="mt-2 min-h-24 rounded-xl bg-background/70"
                             />
@@ -160,7 +170,11 @@ export default function GroupForms({
                         </Button>
                     </form>
                 ) : (
-                    <form action={join} className="mt-6 space-y-5">
+                    <form
+                        action={join}
+                        aria-busy={isSubmitting}
+                        className="mt-6 space-y-5"
+                    >
                         <div>
                             <Label htmlFor="invite-code">
                                 {t("join.code")}
@@ -169,6 +183,7 @@ export default function GroupForms({
                                 id="invite-code"
                                 name="inviteCode"
                                 required
+                                disabled={isSubmitting}
                                 defaultValue={initialInviteCode}
                                 placeholder={t("join.codePlaceholder")}
                                 autoCapitalize="characters"

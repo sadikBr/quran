@@ -4,6 +4,7 @@ import {
     ArrowRight,
     Bookmark,
     BookOpen,
+    Check,
     ChevronLeft,
     ChevronRight,
     Ellipsis,
@@ -15,6 +16,7 @@ import {
     Search,
     SearchX,
     Trash2,
+    X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -74,6 +76,9 @@ export default function SavedAyahsSection({
     const [isCreatingCollection, setIsCreatingCollection] = useState(false);
     const [collectionDraft, setCollectionDraft] = useState("");
     const [pendingCollectionId, setPendingCollectionId] = useState<
+        string | null
+    >(null);
+    const [confirmingCollectionId, setConfirmingCollectionId] = useState<
         string | null
     >(null);
     const [requestedPage, setRequestedPage] = useState(1);
@@ -170,6 +175,7 @@ export default function SavedAyahsSection({
             current.filter((item) => item.id !== collection.id),
         );
         if (collectionFilter === collection.id) setCollectionFilter("all");
+        setConfirmingCollectionId(null);
         toast.success(t("saved.collectionDeleted", { name: collection.name }));
         router.refresh();
     }
@@ -398,19 +404,54 @@ export default function SavedAyahsSection({
                                         {collection.ayahCount}
                                     </span>
                                 </button>
+                                {confirmingCollectionId === collection.id && (
+                                    <button
+                                        type="button"
+                                        disabled={
+                                            pendingCollectionId ===
+                                            collection.id
+                                        }
+                                        onClick={() =>
+                                            setConfirmingCollectionId(null)
+                                        }
+                                        aria-label={t(
+                                            "saved.cancelDeleteCollection",
+                                        )}
+                                        className="flex size-7 items-center justify-center rounded-full opacity-70 transition-opacity hover:bg-background/30 hover:opacity-100 disabled:opacity-30"
+                                    >
+                                        <X className="size-3" />
+                                    </button>
+                                )}
                                 <button
                                     type="button"
                                     disabled={
                                         pendingCollectionId === collection.id
                                     }
-                                    onClick={() => removeCollection(collection)}
-                                    aria-label={t("saved.deleteCollection", {
-                                        name: collection.name,
-                                    })}
+                                    onClick={() => {
+                                        if (
+                                            confirmingCollectionId ===
+                                            collection.id
+                                        ) {
+                                            removeCollection(collection);
+                                            return;
+                                        }
+                                        setConfirmingCollectionId(
+                                            collection.id,
+                                        );
+                                    }}
+                                    aria-label={t(
+                                        confirmingCollectionId === collection.id
+                                            ? "saved.confirmDeleteCollection"
+                                            : "saved.deleteCollection",
+                                        { name: collection.name },
+                                    )}
                                     className="me-1 flex size-7 items-center justify-center rounded-full opacity-55 transition-opacity hover:bg-destructive/12 hover:text-destructive hover:opacity-100 disabled:opacity-30"
                                 >
                                     {pendingCollectionId === collection.id ? (
                                         <LoaderCircle className="size-3 animate-spin" />
+                                    ) : confirmingCollectionId ===
+                                      collection.id ? (
+                                        <Check className="size-3" />
                                     ) : (
                                         <Trash2 className="size-3" />
                                     )}

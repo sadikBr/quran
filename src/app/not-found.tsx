@@ -1,6 +1,7 @@
+import { BookOpen, LayoutDashboard, SearchX } from "lucide-react";
 import Link from "next/link";
 import { createTranslator } from "next-intl";
-
+import PageBackground from "@/components/page-background";
 import { Button } from "@/components/ui/button";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages } from "@/i18n/config";
@@ -17,27 +18,40 @@ export default async function NotFound() {
         <main
             lang={preferences.language}
             dir={preferences.language === "ar" ? "rtl" : "ltr"}
-            className="flex min-h-screen items-center justify-center p-6"
+            className="relative isolate grid min-h-dvh place-items-center overflow-hidden bg-background p-4 sm:p-6"
         >
-            <section className="flex max-w-md flex-col items-center gap-5 text-center">
-                <p className="text-7xl font-semibold tracking-[0.2em] text-primary">
+            <PageBackground />
+            <section className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-card/75 p-6 text-center shadow-lg ring-1 ring-primary/12 backdrop-blur-xl sm:p-10">
+                <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                    <SearchX aria-hidden="true" className="size-6" />
+                </span>
+                <p className="mt-5 text-sm font-bold tracking-[0.18em] text-primary">
                     {t("notFound.code")}
                 </p>
-                <div className="space-y-2">
-                    <h1 className="text-3xl font-semibold">
-                        {t("notFound.title")}
-                    </h1>
-                    <p className="text-muted-foreground">
-                        {t("notFound.description")}
-                    </p>
-                </div>
-                <div className="flex flex-wrap justify-center gap-3">
-                    <Button asChild>
-                        <Link href="/quran">{t("notFound.browse")}</Link>
+                <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">
+                    {t("notFound.title")}
+                </h1>
+                <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-muted-foreground">
+                    {t("notFound.description")}
+                </p>
+                <div className="mt-7 grid gap-2 min-[420px]:grid-cols-2">
+                    <Button asChild className="min-h-11 rounded-xl">
+                        <Link href="/quran">
+                            <BookOpen aria-hidden="true" className="size-4" />
+                            {t("notFound.browse")}
+                        </Link>
                     </Button>
-                    <Button asChild variant="outline">
-                        <Link href="/quran/page/1">
-                            {t("notFound.openFirstPage")}
+                    <Button
+                        asChild
+                        variant="outline"
+                        className="min-h-11 rounded-xl"
+                    >
+                        <Link href="/dashboard">
+                            <LayoutDashboard
+                                aria-hidden="true"
+                                className="size-4"
+                            />
+                            {t("error.dashboard")}
                         </Link>
                     </Button>
                 </div>

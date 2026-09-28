@@ -26,9 +26,9 @@ export default function StickyAppHeader({
         <header
             data-scrolled={hasScrolled}
             className={cn(
-                "sticky top-0 z-20 isolate flex h-20 items-center justify-between gap-4",
+                "sticky top-0 z-20 isolate flex h-[calc(4rem+env(safe-area-inset-top))] items-center justify-between gap-3 pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] sm:gap-4 [&>a]:min-w-0 [&>a>span:last-child]:truncate",
                 hasScrolled &&
-                    "before:absolute before:inset-y-0 before:left-1/2 before:-z-10 before:w-screen before:-translate-x-1/2 before:bg-background/85 before:backdrop-blur-md before:content-['']",
+                    "before:absolute before:inset-y-0 before:left-1/2 before:-z-10 before:w-screen before:-translate-x-1/2 before:border-border/35 before:border-b before:bg-background/88 before:shadow-sm before:backdrop-blur-md before:content-['']",
                 className,
             )}
         >

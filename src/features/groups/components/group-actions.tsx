@@ -2,11 +2,13 @@
 
 import {
     Ellipsis,
+    LoaderCircle,
     LogOut,
     Shield,
     ShieldOff,
     Trash2,
     UserMinus,
+    X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -46,6 +48,7 @@ export function MemberActions({
     const t = useTranslations("Groups.detail");
     const router = useRouter();
     const [pending, setPending] = useState(false);
+    const [confirmingRemoval, setConfirmingRemoval] = useState(false);
 
     async function changeRole() {
         setPending(true);
@@ -61,7 +64,6 @@ export function MemberActions({
     }
 
     async function remove() {
-        if (!window.confirm(t("confirmRemove"))) return;
         setPending(true);
         const result = await removeGroupMember({ groupId, membershipId });
         setPending(false);
@@ -71,7 +73,11 @@ export function MemberActions({
     }
 
     return (
-        <DropdownMenu>
+        <DropdownMenu
+            onOpenChange={(open) => {
+                if (!open) setConfirmingRemoval(false);
+            }}
+        >
             <DropdownMenuTrigger asChild>
                 <Button
                     type="button"
@@ -89,9 +95,29 @@ export function MemberActions({
                     {role === "admin" ? <ShieldOff /> : <Shield />}
                     {t(role === "admin" ? "makeMember" : "makeAdmin")}
                 </DropdownMenuItem>
-                <DropdownMenuItem variant="destructive" onSelect={remove}>
-                    <UserMinus />
-                    {t("remove")}
+                <DropdownMenuItem
+                    variant="destructive"
+                    disabled={pending}
+                    onSelect={(event) => {
+                        if (!confirmingRemoval) {
+                            event.preventDefault();
+                            setConfirmingRemoval(true);
+                            return;
+                        }
+                        remove();
+                    }}
+                    className={
+                        confirmingRemoval
+                            ? "max-w-72 whitespace-normal"
+                            : undefined
+                    }
+                >
+                    {pending ? (
+                        <LoaderCircle className="animate-spin" />
+                    ) : (
+                        <UserMinus />
+                    )}
+                    {confirmingRemoval ? t("confirmRemove") : t("remove")}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -110,9 +136,11 @@ export function GroupDangerActions({
     const t = useTranslations("Groups.detail");
     const router = useRouter();
     const [pending, setPending] = useState(false);
+    const [confirming, setConfirming] = useState<"leave" | "delete" | null>(
+        null,
+    );
 
     async function leave() {
-        if (!window.confirm(t("confirmLeave"))) return;
         setPending(true);
         const result = await leaveGroup({ groupId });
         setPending(false);
@@ -122,13 +150,51 @@ export function GroupDangerActions({
     }
 
     async function removeGroup() {
-        if (!window.confirm(t("confirmDelete"))) return;
         setPending(true);
         const result = await deleteGroup({ groupId });
         setPending(false);
         if (!result.success) return showFailure(undefined, t);
         router.push("/groups");
         router.refresh();
+    }
+
+    if (confirming) {
+        const isDeleting = confirming === "delete";
+        return (
+            <div className="mt-10 rounded-2xl border border-destructive/15 bg-destructive/[0.035] p-4">
+                <p className="text-sm leading-6 text-muted-foreground">
+                    {t(isDeleting ? "confirmDelete" : "confirmLeave")}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        disabled={pending}
+                        onClick={isDeleting ? removeGroup : leave}
+                        className="rounded-xl"
+                    >
+                        {pending ? (
+                            <LoaderCircle className="size-4 animate-spin" />
+                        ) : isDeleting ? (
+                            <Trash2 className="size-4" />
+                        ) : (
+                            <LogOut className="size-4" />
+                        )}
+                        {t(isDeleting ? "delete" : "leave")}
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        disabled={pending}
+                        onClick={() => setConfirming(null)}
+                        className="rounded-xl"
+                    >
+                        <X className="size-4" />
+                        {t("cancel")}
+                    </Button>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -138,7 +204,7 @@ export function GroupDangerActions({
                     type="button"
                     variant="outline"
                     disabled={pending}
-                    onClick={leave}
+                    onClick={() => setConfirming("leave")}
                     className="rounded-xl"
                 >
                     <LogOut aria-hidden="true" className="size-4" />
@@ -150,7 +216,7 @@ export function GroupDangerActions({
                     type="button"
                     variant="destructive"
                     disabled={pending}
-                    onClick={removeGroup}
+                    onClick={() => setConfirming("delete")}
                     className="rounded-xl"
                 >
                     <Trash2 aria-hidden="true" className="size-4" />

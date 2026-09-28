@@ -56,6 +56,8 @@
             "collectionDeleted": "حُذفت مجموعة «{name}».",
             "collectionDeleteFailed": "تعذّر حذف هذه المجموعة.",
             "deleteCollection": "حذف مجموعة {name}",
+            "confirmDeleteCollection": "تأكيد حذف مجموعة {name}",
+            "cancelDeleteCollection": "إلغاء حذف المجموعة",
             "allCollections": "الكل {count, number}",
             "unfiled": "بلا مجموعة",
             "emptyTitle": "لم تحفظ أي آية بعد",

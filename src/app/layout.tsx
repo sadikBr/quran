@@ -11,6 +11,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import ConnectionStatus from "@/components/connection-status";
 import ContentProtection from "@/components/content-protection";
+import NavigationFeedback from "@/components/navigation-feedback";
 import { ThemeProvider } from "@/components/theme-provider";
 import ThemePreferenceSync from "@/features/settings/components/theme-preference-sync";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -103,6 +104,7 @@ export default async function RootLayout({
                         <SettingsProvider preferences={preferences}>
                             <ContentProtection />
                             <ConnectionStatus />
+                            <NavigationFeedback />
                             <ThemePreferenceSync />
                             <Toaster
                                 closeButton

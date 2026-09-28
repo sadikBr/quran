@@ -208,7 +208,28 @@
 @layer base {
     body {
         letter-spacing: var(--tracking-normal);
+        min-width: 20rem;
     }
+}
+
+@keyframes navigation-progress {
+    0% {
+        transform: translateX(-110%);
+    }
+    55% {
+        transform: translateX(130%);
+    }
+    100% {
+        transform: translateX(310%);
+    }
+}
+
+.animate-navigation-progress {
+    animation: navigation-progress 1.15s ease-in-out infinite;
+}
+
+[dir="rtl"] .animate-navigation-progress {
+    animation-direction: reverse;
 }
 
 body.focus-mode .quran-focus-chrome {
@@ -304,6 +325,13 @@ body.focus-mode .quran-focus-chrome {
         @apply bg-background text-foreground;
         -webkit-user-select: none;
         user-select: none;
+    }
+
+    a,
+    button,
+    [role="button"] {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
     }
 
     input,

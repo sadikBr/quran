@@ -78,6 +78,11 @@ export default function MemorizationDashboardCard({
                         })}
                     </div>
                     <div
+                        role="progressbar"
+                        aria-label={labels.title}
+                        aria-valuemin={0}
+                        aria-valuemax={60}
+                        aria-valuenow={count}
                         className="relative grid size-24 shrink-0 place-items-center rounded-full p-2"
                         style={{
                             background: `conic-gradient(var(--primary) ${percentage}%, color-mix(in oklch, var(--muted), transparent 5%) 0)`,

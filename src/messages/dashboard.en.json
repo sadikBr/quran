@@ -56,6 +56,8 @@
             "collectionDeleted": "“{name}” was deleted.",
             "collectionDeleteFailed": "We could not delete that collection.",
             "deleteCollection": "Delete {name}",
+            "confirmDeleteCollection": "Confirm deleting {name}",
+            "cancelDeleteCollection": "Cancel deleting collection",
             "allCollections": "All {count, number}",
             "unfiled": "Unfiled",
             "emptyTitle": "Nothing saved yet",

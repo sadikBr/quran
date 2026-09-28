@@ -13,6 +13,7 @@ import {
     UsersRound,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useState } from "react";
@@ -24,6 +25,7 @@ import {
 } from "@/features/settings/preferences";
 import updatePreferences from "@/features/settings/server/update-preferences";
 import { useSettings } from "@/features/settings/settings-provider";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
     DropdownMenu,
@@ -81,6 +83,7 @@ export default function UserMenu({
     labels?: UserMenuLabels;
 }) {
     const { resolvedTheme, setTheme } = useTheme();
+    const pathname = usePathname();
     const locale = useLocale();
     const commonT = useTranslations("Common");
     const groupsT = useTranslations("Groups");
@@ -88,6 +91,8 @@ export default function UserMenu({
     const { setPreferences, ...preferences } = useSettings();
     const [selectedTheme, setSelectedTheme] = useState(preferences.theme);
     const [isSigningOut, setIsSigningOut] = useState(false);
+    const isCurrent = (href: string) =>
+        pathname === href || pathname.startsWith(`${href}/`);
 
     async function changeTheme(theme: Theme) {
         const previousTheme = selectedTheme;
@@ -147,7 +152,10 @@ export default function UserMenu({
                     </Avatar>
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 p-1.5">
+            <DropdownMenuContent
+                align="end"
+                className="w-[min(16rem,calc(100vw-1rem))] p-1.5"
+            >
                 <DropdownMenuLabel className="flex items-center justify-between gap-3 px-2.5 py-2.5">
                     <div>
                         <p className="text-sm font-semibold text-foreground">
@@ -193,31 +201,70 @@ export default function UserMenu({
                     </>
                 )}
                 <DropdownMenuItem asChild>
-                    <Link href="/dashboard">
+                    <Link
+                        href="/dashboard"
+                        aria-current={
+                            isCurrent("/dashboard") ? "page" : undefined
+                        }
+                        className={cn(
+                            isCurrent("/dashboard") &&
+                                "bg-primary/8 text-primary",
+                        )}
+                    >
                         <LayoutDashboard aria-hidden="true" />
                         {labels.dashboard}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Link href="/weekly">
+                    <Link
+                        href="/weekly"
+                        aria-current={isCurrent("/weekly") ? "page" : undefined}
+                        className={cn(
+                            isCurrent("/weekly") && "bg-primary/8 text-primary",
+                        )}
+                    >
                         <CalendarCheck2 aria-hidden="true" />
                         {weeklyT("header")}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Link href="/groups">
+                    <Link
+                        href="/groups"
+                        aria-current={isCurrent("/groups") ? "page" : undefined}
+                        className={cn(
+                            isCurrent("/groups") && "bg-primary/8 text-primary",
+                        )}
+                    >
                         <UsersRound aria-hidden="true" />
                         {groupsT("header")}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Link href="/profile">
+                    <Link
+                        href="/profile"
+                        aria-current={
+                            isCurrent("/profile") ? "page" : undefined
+                        }
+                        className={cn(
+                            isCurrent("/profile") &&
+                                "bg-primary/8 text-primary",
+                        )}
+                    >
                         <UserRound aria-hidden="true" />
                         {labels.profile}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Link href="/settings">
+                    <Link
+                        href="/settings"
+                        aria-current={
+                            isCurrent("/settings") ? "page" : undefined
+                        }
+                        className={cn(
+                            isCurrent("/settings") &&
+                                "bg-primary/8 text-primary",
+                        )}
+                    >
                         <Settings aria-hidden="true" />
                         {labels.settings}
                     </Link>

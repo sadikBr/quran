@@ -84,7 +84,14 @@ export default function WirdDashboardCard({
                     )}
                 </div>
                 {khatmahProgress !== null && (
-                    <div className="mt-2 h-1 overflow-hidden rounded-full bg-primary/15">
+                    <div
+                        role="progressbar"
+                        aria-label={labels.khatmahProgress}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={khatmahProgress}
+                        className="mt-2 h-1 overflow-hidden rounded-full bg-primary/15"
+                    >
                         <div
                             className="h-full rounded-full bg-primary"
                             style={{ width: `${khatmahProgress}%` }}

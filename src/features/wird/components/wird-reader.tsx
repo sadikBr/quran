@@ -108,7 +108,14 @@ export default function WirdReader({
                         />
                     )}
                 </div>
-                <div className="mt-3 h-1 overflow-hidden rounded-full bg-muted">
+                <div
+                    role="progressbar"
+                    aria-label={t("progress")}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={percentage}
+                    className="mt-3 h-1 overflow-hidden rounded-full bg-muted"
+                >
                     <div
                         className="h-full rounded-full bg-primary transition-[width] duration-500"
                         style={{ width: `${percentage}%` }}

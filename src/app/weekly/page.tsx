@@ -202,7 +202,17 @@ export default async function WeeklyPage() {
                             {assignment.percentage}%
                         </strong>
                     </div>
-                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-background/80">
+                    <div
+                        role="progressbar"
+                        aria-label={t("card.progress", {
+                            completed: assignment.completedAyahs,
+                            total: assignment.totalAyahs,
+                        })}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={assignment.percentage}
+                        className="mt-2 h-1.5 overflow-hidden rounded-full bg-background/80"
+                    >
                         <div
                             className="h-full rounded-full bg-primary transition-[width]"
                             style={{ width: `${assignment.percentage}%` }}
@@ -306,7 +316,14 @@ export default async function WeeklyPage() {
                                     {overallPercentage}%
                                 </strong>
                             </div>
-                            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-background/80">
+                            <div
+                                role="progressbar"
+                                aria-label={t("summary.progress")}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-valuenow={overallPercentage}
+                                className="mt-2 h-1.5 overflow-hidden rounded-full bg-background/80"
+                            >
                                 <div
                                     className="h-full rounded-full bg-primary"
                                     style={{ width: `${overallPercentage}%` }}
