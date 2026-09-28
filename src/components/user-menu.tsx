@@ -9,6 +9,7 @@ import {
     Settings,
     Sun,
     UserRound,
+    UsersRound,
 } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -81,6 +82,7 @@ export default function UserMenu({
     const { resolvedTheme, setTheme } = useTheme();
     const locale = useLocale();
     const commonT = useTranslations("Common");
+    const groupsT = useTranslations("Groups");
     const { setPreferences, ...preferences } = useSettings();
     const [selectedTheme, setSelectedTheme] = useState(preferences.theme);
     const [isSigningOut, setIsSigningOut] = useState(false);
@@ -192,6 +194,12 @@ export default function UserMenu({
                     <Link href="/dashboard">
                         <LayoutDashboard aria-hidden="true" />
                         {labels.dashboard}
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href="/groups">
+                        <UsersRound aria-hidden="true" />
+                        {groupsT("header")}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

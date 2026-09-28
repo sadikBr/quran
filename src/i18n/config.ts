@@ -3,6 +3,7 @@ import englishAuthMessages from "@/messages/auth.en.json";
 import englishCommonMessages from "@/messages/common.en.json";
 import englishDashboardMessages from "@/messages/dashboard.en.json";
 import englishHomeMessages from "@/messages/en.json";
+import englishGroupsMessages from "@/messages/groups.en.json";
 import englishPracticeMessages from "@/messages/practice.en.json";
 import englishProfileMessages from "@/messages/profile.en.json";
 import englishReaderMessages from "@/messages/reader.en.json";
@@ -13,6 +14,7 @@ const englishMessages = {
     ...englishAuthMessages,
     ...englishCommonMessages,
     ...englishHomeMessages,
+    ...englishGroupsMessages,
     ...englishDashboardMessages,
     ...englishProfileMessages,
     ...englishPracticeMessages,
@@ -34,6 +36,7 @@ const messageLoaders: Record<
             common,
             home,
             dashboard,
+            groups,
             profile,
             practice,
             reader,
@@ -44,6 +47,7 @@ const messageLoaders: Record<
             import("@/messages/common.ar.json"),
             import("@/messages/ar.json"),
             import("@/messages/dashboard.ar.json"),
+            import("@/messages/groups.ar.json"),
             import("@/messages/profile.ar.json"),
             import("@/messages/practice.ar.json"),
             import("@/messages/reader.ar.json"),
@@ -57,6 +61,7 @@ const messageLoaders: Record<
                 ...common.default,
                 ...home.default,
                 ...dashboard.default,
+                ...groups.default,
                 ...profile.default,
                 ...practice.default,
                 ...reader.default,

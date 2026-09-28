@@ -1,6 +1,7 @@
 import { index, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt } from "../helpers";
 import { user } from "./auth-schema";
+import { memorizationGroup } from "./memorization-group";
 
 export const practiceAssignment = pgTable(
     "practice_assignment",
@@ -12,8 +13,9 @@ export const practiceAssignment = pgTable(
         assignedById: text("assigned_by_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
-        // Reserved for the group feature. Personal practice has no group.
-        groupId: text("group_id"),
+        groupId: text("group_id").references(() => memorizationGroup.id, {
+            onDelete: "cascade",
+        }),
         kind: text("kind").notNull(),
         riwayah: text("riwayah").notNull(),
         startSurahNumber: integer("start_surah_number").notNull(),

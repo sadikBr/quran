@@ -1,0 +1,73 @@
+{
+    "Groups": {
+        "header": "Memorization groups",
+        "back": "Back to dashboard",
+        "eyebrow": "LEARN TOGETHER",
+        "title": "Your Quran circles",
+        "description": "Create a private group for your family, friends, or students. Weekly assignments will live here next.",
+        "emptyTitle": "Begin your first Quran circle",
+        "emptyDescription": "Create a group to organize learners, or join one using an invitation code.",
+        "members": "{count, plural, one {# member} other {# members}}",
+        "role": {
+            "admin": "Admin",
+            "member": "Member"
+        },
+        "open": "Open group",
+        "create": {
+            "title": "Create a group",
+            "description": "You will become its first admin and receive a private invitation code.",
+            "name": "Group name",
+            "namePlaceholder": "e.g. Our family Quran circle",
+            "details": "Short description (optional)",
+            "detailsPlaceholder": "Who is this group for?",
+            "submit": "Create group",
+            "submitting": "Creating…",
+            "success": "Your group is ready.",
+            "error": "We couldn’t create the group. Please try again."
+        },
+        "join": {
+            "title": "Join a group",
+            "description": "Enter the invitation code shared with you by a group admin.",
+            "code": "Invitation code",
+            "codePlaceholder": "Enter code",
+            "submit": "Join group",
+            "submitting": "Joining…",
+            "success": "You joined the group.",
+            "notFound": "That invitation code is not valid.",
+            "error": "We couldn’t join the group. Please try again."
+        },
+        "detail": {
+            "back": "All groups",
+            "memberHeading": "Group members",
+            "memberDescription": "Admins can manage access now. Member assignments will be added in the next stage.",
+            "you": "You",
+            "inviteHeading": "Invite someone",
+            "inviteDescription": "Share this private link or code with someone you want to add.",
+            "inviteCode": "Invitation code",
+            "copyCode": "Copy code",
+            "copyLink": "Copy invitation link",
+            "copied": "Copied to clipboard.",
+            "adminOnly": "Only group admins can see the invitation code.",
+            "actions": "Member actions",
+            "makeAdmin": "Make admin",
+            "makeMember": "Make member",
+            "remove": "Remove from group",
+            "leave": "Leave group",
+            "delete": "Delete group",
+            "confirmRemove": "Remove this person from the group?",
+            "confirmLeave": "Leave this group? You will need a new invitation to return.",
+            "confirmDelete": "Delete this group permanently? This cannot be undone.",
+            "lastAdmin": "Choose another admin before removing or changing the final admin.",
+            "updated": "Group membership updated.",
+            "failed": "We couldn’t update the group. Please try again."
+        },
+        "dashboard": {
+            "eyebrow": "Your Quran circles",
+            "title": "Learn and revise together",
+            "emptyDescription": "Create a group for family, friends, or students and prepare for shared weekly assignments.",
+            "activeDescription": "You belong to {count, plural, one {# memorization group} other {# memorization groups}}.",
+            "open": "Open groups"
+        },
+        "loading": "Loading your groups…"
+    }
+}

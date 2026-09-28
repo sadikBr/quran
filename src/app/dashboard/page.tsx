@@ -3,6 +3,7 @@ import {
     BookMarked,
     BookOpen,
     ChartNoAxesCombined,
+    UsersRound,
 } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -14,6 +15,7 @@ import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
+import { getGroupsForUser } from "@/features/groups/server/get-groups";
 import getKhatmahPlan from "@/features/khatmah/server/get-khatmah-plan";
 import getPracticeAssignment from "@/features/practice/server/get-practice-assignment";
 import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
@@ -54,12 +56,13 @@ export default async function DashboardPage() {
             getSurahsMeta().catch(() => []),
             getQuranNavigationMeta().catch(() => null),
         ]);
-    const [dailyWird, wirdHistory, khatmahPlan, practiceAssignment] =
+    const [dailyWird, wirdHistory, khatmahPlan, practiceAssignment, groups] =
         await Promise.all([
             getDailyWird(session.user.id, preferences.arabicEdition),
             getWirdHistory(session.user.id),
             getKhatmahPlan(session.user.id),
             getPracticeAssignment(session.user.id),
+            getGroupsForUser(session.user.id),
         ]);
     const warshChapters =
         preferences.riwayah === "warsh" ? await getWarshChapters() : [];
@@ -107,6 +110,11 @@ export default async function DashboardPage() {
         locale: preferences.language,
         messages,
         namespace: "Practice",
+    });
+    const groupsT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Groups",
     });
     const savedNumber =
         preferences.readingMode === "page"
@@ -360,6 +368,52 @@ export default async function DashboardPage() {
                                             ? "dashboard.open"
                                             : "dashboard.setup",
                                     )}
+                                    <ArrowRight
+                                        aria-hidden="true"
+                                        className={cn(
+                                            "size-4",
+                                            preferences.language === "ar" &&
+                                                "rotate-180",
+                                        )}
+                                    />
+                                </Link>
+                            </Button>
+                        </div>
+                    </section>
+
+                    <section className="relative mt-8 overflow-hidden rounded-3xl bg-muted/45 px-5 py-6 ring-1 ring-border/50 sm:px-7">
+                        <div className="grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-8">
+                            <div className="flex min-w-0 items-start gap-4">
+                                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                                    <UsersRound
+                                        aria-hidden="true"
+                                        className="size-5"
+                                    />
+                                </span>
+                                <div className="min-w-0">
+                                    <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
+                                        {groupsT("dashboard.eyebrow")}
+                                    </p>
+                                    <h2 className="mt-1.5 text-lg font-semibold tracking-tight sm:text-xl">
+                                        {groupsT("dashboard.title")}
+                                    </h2>
+                                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                        {groupsT(
+                                            groups.length > 0
+                                                ? "dashboard.activeDescription"
+                                                : "dashboard.emptyDescription",
+                                            { count: groups.length },
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+                            <Button
+                                asChild
+                                variant="outline"
+                                className="w-full rounded-xl sm:w-auto"
+                            >
+                                <Link href="/groups">
+                                    {groupsT("dashboard.open")}
                                     <ArrowRight
                                         aria-hidden="true"
                                         className={cn(
