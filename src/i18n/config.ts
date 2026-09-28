@@ -4,6 +4,7 @@ import englishCommonMessages from "@/messages/common.en.json";
 import englishDashboardMessages from "@/messages/dashboard.en.json";
 import englishHomeMessages from "@/messages/en.json";
 import englishGroupsMessages from "@/messages/groups.en.json";
+import englishMemorizationMessages from "@/messages/memorization.en.json";
 import englishPracticeMessages from "@/messages/practice.en.json";
 import englishProfileMessages from "@/messages/profile.en.json";
 import englishReaderMessages from "@/messages/reader.en.json";
@@ -16,6 +17,7 @@ const englishMessages = {
     ...englishCommonMessages,
     ...englishHomeMessages,
     ...englishGroupsMessages,
+    ...englishMemorizationMessages,
     ...englishDashboardMessages,
     ...englishProfileMessages,
     ...englishPracticeMessages,
@@ -39,6 +41,7 @@ const messageLoaders: Record<
             home,
             dashboard,
             groups,
+            memorization,
             profile,
             practice,
             reader,
@@ -51,6 +54,7 @@ const messageLoaders: Record<
             import("@/messages/ar.json"),
             import("@/messages/dashboard.ar.json"),
             import("@/messages/groups.ar.json"),
+            import("@/messages/memorization.ar.json"),
             import("@/messages/profile.ar.json"),
             import("@/messages/practice.ar.json"),
             import("@/messages/reader.ar.json"),
@@ -66,6 +70,7 @@ const messageLoaders: Record<
                 ...home.default,
                 ...dashboard.default,
                 ...groups.default,
+                ...memorization.default,
                 ...profile.default,
                 ...practice.default,
                 ...reader.default,

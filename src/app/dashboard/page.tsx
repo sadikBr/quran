@@ -18,6 +18,8 @@ import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import { getGroupsForUser } from "@/features/groups/server/get-groups";
 import getKhatmahPlan from "@/features/khatmah/server/get-khatmah-plan";
+import MemorizationDashboardCard from "@/features/memorization/components/memorization-dashboard-card";
+import getMemorizationProgress from "@/features/memorization/server/get-memorization-progress";
 import {
     getAssignedPracticeAssignments,
     getPracticeAssignments,
@@ -128,6 +130,7 @@ export default async function DashboardPage() {
         practiceAssignments,
         assignedWork,
         groups,
+        completedHizbs,
     ] = await Promise.all([
         getDailyWird(session.user.id, preferences.arabicEdition),
         getWirdHistory(session.user.id),
@@ -135,6 +138,7 @@ export default async function DashboardPage() {
         getPracticeAssignments(session.user.id),
         getAssignedPracticeAssignments(session.user.id),
         getGroupsForUser(session.user.id),
+        getMemorizationProgress(session.user.id),
     ]);
     const practiceAssignment = practiceAssignments[0] ?? null;
     const warshChapters =
@@ -193,6 +197,11 @@ export default async function DashboardPage() {
         locale: preferences.language,
         messages,
         namespace: "Weekly",
+    });
+    const memorizationT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Memorization",
     });
     const readyAssignmentCount = assignedWork.filter(
         (assignment) => assignment.status === "submitted",
@@ -373,6 +382,19 @@ export default async function DashboardPage() {
                             </div>
                         </div>
                     </section>
+
+                    <MemorizationDashboardCard
+                        completedHizbs={completedHizbs}
+                        isArabic={preferences.language === "ar"}
+                        labels={{
+                            eyebrow: memorizationT("dashboard.eyebrow"),
+                            title: memorizationT("dashboard.title", {
+                                completed: completedHizbs.length,
+                            }),
+                            description: memorizationT("dashboard.description"),
+                            open: memorizationT("dashboard.open"),
+                        }}
+                    />
 
                     <section
                         className="mt-12"

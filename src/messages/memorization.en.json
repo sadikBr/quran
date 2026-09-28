@@ -1,0 +1,31 @@
+{
+    "Memorization": {
+        "header": "Memorization journey",
+        "back": "Back to dashboard",
+        "eyebrow": "YOUR QURAN JOURNEY",
+        "title": "Build your way to 60 hizbs",
+        "description": "Keep a simple record of what you have memorized. Mark each hizb when it feels secure, and reopen it whenever it needs more work.",
+        "dashboard": {
+            "eyebrow": "Quran memorization",
+            "title": "{completed}/60 hizbs completed",
+            "description": "Your whole-Quran memorization goal, one hizb at a time.",
+            "open": "Open memorization map"
+        },
+        "progressEyebrow": "WHOLE-QURAN GOAL",
+        "startTitle": "Your 60-hizb journey starts here",
+        "progressTitle": "{completed, plural, one {One hizb secured} other {# hizbs secured}}",
+        "completeTitle": "The whole Quran—60 out of 60",
+        "progressDescription": "{remaining, plural, one {One hizb remains. Keep going gently and consistently.} other {# hizbs remain. Every completed hizb is a meaningful step forward.}}",
+        "completeDescription": "A beautiful milestone. Keep the map honest by reopening any hizb that needs renewed revision.",
+        "nextHizb": "Next open milestone: Hizb {number}",
+        "mapEyebrow": "THE 30 JUZ MAP",
+        "mapTitle": "Your memorization map",
+        "mapDescription": "Tap a hizb to mark it complete. Each juz contains two hizbs and lights up when both are secure.",
+        "juz": "Juz {number}",
+        "completeHizb": "Mark Hizb {number} complete",
+        "reopenHizb": "Mark Hizb {number} as needing more work",
+        "markedComplete": "Hizb {number} marked complete.",
+        "markedInProgress": "Hizb {number} is open for more work.",
+        "updateFailed": "We could not update your memorization progress."
+    }
+}
