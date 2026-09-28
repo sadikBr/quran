@@ -240,37 +240,56 @@ body.focus-mode .quran-focus-chrome {
 }
 
 .quran-font-step-1 {
-    --quran-reader-font-size: 1.5rem;
+    --quran-reader-font-size: clamp(1.5rem, calc(1.125rem + 1.875vw), 1.875rem);
     --quran-display-font-size: 1.125rem;
     --quran-basmala-font-size: 3.25rem;
 }
 
 .quran-font-step-2 {
-    --quran-reader-font-size: 1.7rem;
+    --quran-reader-font-size: clamp(1.7rem, calc(1.35rem + 1.75vw), 2.05rem);
     --quran-display-font-size: 1.25rem;
     --quran-basmala-font-size: 3.5rem;
 }
 
 .quran-font-step-3 {
-    --quran-reader-font-size: 1.875rem;
+    --quran-reader-font-size: clamp(1.875rem, calc(1.5rem + 1.875vw), 2.25rem);
     --quran-display-font-size: 1.5rem;
     --quran-basmala-font-size: 3.75rem;
 }
 
 .quran-font-step-4 {
-    --quran-reader-font-size: 2.125rem;
+    --quran-reader-font-size: clamp(2.125rem, calc(1.7rem + 2.125vw), 2.55rem);
     --quran-display-font-size: 1.65rem;
     --quran-basmala-font-size: 4rem;
 }
 
 .quran-font-step-5 {
-    --quran-reader-font-size: 2.375rem;
+    --quran-reader-font-size: clamp(2.375rem, calc(1.875rem + 2.5vw), 2.875rem);
     --quran-display-font-size: 1.8rem;
     --quran-basmala-font-size: 4.25rem;
 }
 
 .quran-reader-text {
     font-size: var(--quran-reader-font-size);
+}
+
+.quran-reading-surface {
+    --quran-reading-line-height: 2.5;
+    --quran-reading-word-spacing: 0.025em;
+}
+
+.quran-reading-surface[data-riwayah="warsh"] {
+    --quran-reading-line-height: 2.72;
+    --quran-reading-word-spacing: 0.055em;
+}
+
+.quran-reading-flow {
+    font-kerning: normal;
+    font-synthesis: none;
+    font-variant-ligatures: common-ligatures contextual;
+    line-height: var(--quran-reading-line-height);
+    text-wrap: pretty;
+    word-spacing: var(--quran-reading-word-spacing);
 }
 
 .quran-display-text {
@@ -310,6 +329,18 @@ body.focus-mode .quran-focus-chrome {
         --quran-reader-font-size: 2.875rem;
         --quran-display-font-size: 2.1rem;
         --quran-basmala-font-size: 5.1rem;
+    }
+}
+
+@media (max-width: 639px) {
+    .quran-reading-surface {
+        --quran-reading-line-height: 2.4;
+        --quran-reading-word-spacing: 0.015em;
+    }
+
+    .quran-reading-surface[data-riwayah="warsh"] {
+        --quran-reading-line-height: 2.6;
+        --quran-reading-word-spacing: 0.04em;
     }
 }
 

@@ -3,7 +3,6 @@
 import { Search, SearchX, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSettings } from "@/features/settings/settings-provider";
@@ -82,59 +81,54 @@ export default function QuranIndex({
         return filteredSurahs;
     }, [revelationTypeFilter, searchFilter, surahs]);
 
-    function updateFilter(newFilter: RevelationType) {
-        if (revelationTypeFilter === newFilter) {
-            setRevelationTypeFilter(undefined);
-            return;
-        }
-
-        setRevelationTypeFilter(newFilter);
-    }
-
-    function clearFilters() {
-        setRevelationTypeFilter(undefined);
-        setSearchFilter("");
-    }
-
     const sections: IndexSection[] = ["surahs", "juz", "hizb"];
+    const revelationFilters = [
+        { key: "all", value: undefined, label: t("index.all") },
+        {
+            key: "meccan",
+            value: RevelationType.Meccan,
+            label: t("index.meccan"),
+        },
+        {
+            key: "medinan",
+            value: RevelationType.Medinan,
+            label: t("index.medinan"),
+        },
+    ] as const;
 
     return (
         <div
             data-quran-scroll-container
             className="mx-auto h-full max-w-5xl overflow-y-auto p-4"
         >
-            <div
-                role="tablist"
-                aria-label={t("index.sectionsLabel")}
-                className="mb-7 flex border-b border-border/70"
-            >
-                {sections.map((section) => (
-                    <button
-                        key={section}
-                        type="button"
-                        role="tab"
-                        aria-selected={activeSection === section}
-                        aria-controls={`${section}-index-panel`}
-                        onClick={() => setActiveSection(section)}
-                        className={`relative min-w-20 px-4 py-3 text-sm font-semibold outline-none transition-colors after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:min-w-28 ${
-                            activeSection === section
-                                ? "text-primary after:bg-primary"
-                                : "text-muted-foreground after:bg-transparent hover:text-foreground"
-                        }`}
-                    >
-                        {t(`index.${section}Tab`)}
-                    </button>
-                ))}
-            </div>
-
-            {activeSection === "surahs" ? (
+            <div className="mb-9">
                 <div
-                    id="surahs-index-panel"
-                    role="tabpanel"
-                    className="outline-none"
+                    role="tablist"
+                    aria-label={t("index.sectionsLabel")}
+                    className="grid grid-cols-3 border-border/60 border-b"
                 >
-                    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="relative w-full max-w-xl">
+                    {sections.map((section) => (
+                        <button
+                            key={section}
+                            type="button"
+                            role="tab"
+                            aria-selected={activeSection === section}
+                            aria-controls={`${section}-index-panel`}
+                            onClick={() => setActiveSection(section)}
+                            className={`relative min-w-0 px-2 py-3.5 text-sm font-semibold outline-none transition-colors after:absolute after:inset-x-[22%] after:-bottom-px after:h-0.5 after:origin-center after:rounded-full after:bg-primary after:transition-transform focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-4 sm:py-4 ${
+                                activeSection === section
+                                    ? "text-primary after:scale-x-100"
+                                    : "text-muted-foreground after:scale-x-0 hover:text-foreground"
+                            }`}
+                        >
+                            {t(`index.${section}Tab`)}
+                        </button>
+                    ))}
+                </div>
+
+                {activeSection === "surahs" && (
+                    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-8">
+                        <div className="relative min-w-0 flex-1 border-border/70 border-b transition-colors focus-within:border-primary">
                             <Label htmlFor="search-filter" className="sr-only">
                                 {t("index.searchLabel")}
                             </Label>
@@ -145,69 +139,63 @@ export default function QuranIndex({
                             <Input
                                 id="search-filter"
                                 value={searchFilter}
-                                onChange={(e) =>
-                                    setSearchFilter(e.target.value)
+                                onChange={(event) =>
+                                    setSearchFilter(event.target.value)
                                 }
                                 placeholder={t("index.searchPlaceholder")}
-                                className="h-11 border-0 bg-muted/55 ps-10 shadow-none placeholder:text-muted-foreground/75 focus-visible:bg-muted/75 focus-visible:ring-1"
+                                className="h-12 rounded-none border-0 bg-transparent ps-10 pe-10 shadow-none placeholder:text-muted-foreground/70 focus-visible:ring-0"
                             />
+                            {searchFilter !== "" && (
+                                <button
+                                    type="button"
+                                    onClick={() => setSearchFilter("")}
+                                    aria-label={t("index.clearFilters")}
+                                    className="absolute top-1/2 end-1 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                    <X aria-hidden="true" className="size-4" />
+                                </button>
+                            )}
                         </div>
-                        <fieldset className="flex self-start rounded-full border-0 bg-muted/55 p-1 sm:self-auto">
+
+                        <fieldset className="flex shrink-0 items-center justify-center gap-1 self-center sm:self-auto">
                             <legend className="sr-only">
                                 {t("index.filterLegend")}
                             </legend>
-                            <button
-                                type="button"
-                                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                                    revelationTypeFilter ===
-                                    RevelationType.Meccan
-                                        ? "bg-primary text-primary-foreground shadow-sm"
-                                        : "text-muted-foreground hover:text-foreground"
-                                }`}
-                                aria-pressed={
-                                    revelationTypeFilter ===
-                                    RevelationType.Meccan
-                                }
-                                onClick={() =>
-                                    updateFilter(RevelationType.Meccan)
-                                }
-                            >
-                                {t("index.meccan")}
-                            </button>
-                            <button
-                                type="button"
-                                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                                    revelationTypeFilter ===
-                                    RevelationType.Medinan
-                                        ? "bg-primary text-primary-foreground shadow-sm"
-                                        : "text-muted-foreground hover:text-foreground"
-                                }`}
-                                aria-pressed={
-                                    revelationTypeFilter ===
-                                    RevelationType.Medinan
-                                }
-                                onClick={() =>
-                                    updateFilter(RevelationType.Medinan)
-                                }
-                            >
-                                {t("index.medinan")}
-                            </button>
+                            {revelationFilters.map((filter) => {
+                                const isActive =
+                                    revelationTypeFilter === filter.value;
+
+                                return (
+                                    <button
+                                        key={filter.key}
+                                        type="button"
+                                        className={`relative min-w-16 px-3 py-2 text-sm font-medium transition-colors after:absolute after:bottom-0 after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-primary after:transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                                            isActive
+                                                ? "text-primary after:scale-100"
+                                                : "text-muted-foreground after:scale-0 hover:text-foreground"
+                                        }`}
+                                        aria-pressed={isActive}
+                                        onClick={() =>
+                                            setRevelationTypeFilter(
+                                                filter.value,
+                                            )
+                                        }
+                                    >
+                                        {filter.label}
+                                    </button>
+                                );
+                            })}
                         </fieldset>
                     </div>
+                )}
+            </div>
 
-                    {(revelationTypeFilter !== undefined ||
-                        searchFilter !== "") && (
-                        <Button
-                            onClick={clearFilters}
-                            variant="ghost"
-                            size="sm"
-                            className="-mt-3 mb-4 gap-1.5 px-1 text-muted-foreground hover:bg-transparent hover:text-foreground"
-                        >
-                            <X aria-hidden="true" className="size-3.5" />
-                            {t("index.clearFilters")}
-                        </Button>
-                    )}
-
+            {activeSection === "surahs" ? (
+                <div
+                    id="surahs-index-panel"
+                    role="tabpanel"
+                    className="outline-none"
+                >
                     {surahsToDisplay.length > 0 ? (
                         surahsToDisplay.map((surah) => (
                             <SurahFrame

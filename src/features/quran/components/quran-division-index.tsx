@@ -33,6 +33,10 @@ export default function QuranDivisionIndex({
 }) {
     const t = useTranslations("Reader.index");
     const locale = useLocale();
+    const numberFormatter = new Intl.NumberFormat(locale, {
+        minimumIntegerDigits: 2,
+        useGrouping: false,
+    });
     const surahsByNumber = new Map(
         surahs.map((surah) => [surah.number, surah]),
     );
@@ -51,7 +55,7 @@ export default function QuranDivisionIndex({
                 </p>
             </div>
 
-            <div className="grid border-t border-border/70 md:grid-cols-2 md:[&>*:nth-child(odd)]:border-e">
+            <div className="grid gap-x-14 gap-y-1 md:grid-cols-2">
                 {references.map((reference) => {
                     const surah = surahsByNumber.get(reference.surahNumber);
                     const surahName =
@@ -68,34 +72,29 @@ export default function QuranDivisionIndex({
                                 surah: surahName ?? reference.surahNumber,
                                 ayah: reference.ayahNumber,
                             })}
-                            className="group flex min-w-0 items-center gap-4 border-b border-border/70 px-2 py-4 outline-none transition-colors hover:bg-muted/35 focus-visible:bg-muted/45 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-4"
+                            className="group grid min-w-0 grid-cols-[3.25rem_minmax(0,1fr)_auto] items-center gap-x-4 rounded-md px-1 py-5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
-                            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                                {reference.number.toLocaleString(locale)}
+                            <span className="text-center text-3xl font-medium tracking-tight text-primary/45 tabular-nums transition-colors group-hover:text-primary group-focus-visible:text-primary">
+                                {numberFormatter.format(reference.number)}
                             </span>
-                            <span className="min-w-0 flex-1">
-                                <span className="block font-semibold text-foreground">
-                                    {t(kind, { number: reference.number })}
-                                </span>
-                                <span className="mt-1 block truncate text-xs text-muted-foreground">
+                            <span className="min-w-0">
+                                <span className="block truncate text-sm font-semibold text-foreground transition-colors group-hover:text-primary group-focus-visible:text-primary">
                                     {t("beginsAt", {
                                         surah:
                                             surahName ?? reference.surahNumber,
                                         ayah: reference.ayahNumber,
                                     })}
                                 </span>
-                            </span>
-                            <span className="shrink-0 text-end">
-                                <span className="block text-xs font-medium text-foreground">
+                                <span className="mt-1 block text-xs text-muted-foreground">
                                     {t("page", {
                                         number: reference.pageNumber,
                                     })}
                                 </span>
-                                <ChevronRight
-                                    aria-hidden="true"
-                                    className="ms-auto mt-1 size-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
-                                />
                             </span>
+                            <ChevronRight
+                                aria-hidden="true"
+                                className="size-4 shrink-0 text-muted-foreground/65 transition-[color,transform] group-hover:translate-x-1 group-hover:text-primary group-focus-visible:text-primary rtl:rotate-180 rtl:group-hover:-translate-x-1"
+                            />
                         </Link>
                     );
                 })}

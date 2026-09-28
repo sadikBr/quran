@@ -30,6 +30,7 @@
             "juzTab": "Juz",
             "hizbTab": "Hizb",
             "searchLabel": "Search surahs",
+            "all": "All",
             "searchPlaceholder": "Search by name or meaning",
             "filterLegend": "Filter by revelation type",
             "meccan": "Meccan",

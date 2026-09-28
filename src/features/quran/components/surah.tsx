@@ -60,7 +60,7 @@ export default function Surah({
 
     return (
         <>
-            <div className="rtl">
+            <div className="rtl quran-reading-surface" data-riwayah={riwayah}>
                 {beginsAtSurahStart && showSurahHeading && (
                     <header className="mb-4 flex items-center justify-center gap-3 text-primary">
                         <span
@@ -93,7 +93,7 @@ export default function Surah({
                 <div
                     dir="rtl"
                     lang="ar"
-                    className="mt-0 py-2 text-justify leading-[2.5] sm:py-3 sm:leading-[2.7]"
+                    className="quran-reading-flow mt-0 py-2 text-justify sm:py-3"
                     style={{ textAlignLast: "center" }}
                 >
                     {readingAyahs.map((ayah) => {
