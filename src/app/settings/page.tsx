@@ -7,6 +7,7 @@ import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import UserMenu from "@/components/user-menu";
+import { env } from "@/data/env/server";
 import { auth } from "@/features/auth/auth";
 import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
@@ -174,6 +175,7 @@ export default async function SettingsPage() {
 
                     <SettingsForm
                         preferences={preferences}
+                        vapidPublicKey={env.VAPID_PUBLIC_KEY ?? null}
                         arabicEditions={arabicEditions}
                         reciters={localizedReciters}
                         translationEditions={translationEditions}

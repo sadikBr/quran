@@ -9,6 +9,9 @@ export const env = createEnv({
         DB_PASSWORD: z.string().min(1),
         DB_PORT: z.string().min(1),
         PRODUCTION_URLS: z.string().min(1),
+        VAPID_PUBLIC_KEY: z.string().min(1).optional(),
+        VAPID_PRIVATE_KEY: z.string().min(1).optional(),
+        CRON_SECRET: z.string().min(16).optional(),
     },
     createFinalSchema: (env) => {
         return z.object(env).transform((values) => {

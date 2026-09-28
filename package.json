@@ -11,7 +11,8 @@
         "format": "biome format --write",
         "db:push": "drizzle-kit push",
         "db:generate": "drizzle-kit generate",
-        "db:migrate": "drizzle-kit migrate"
+        "db:migrate": "drizzle-kit migrate",
+        "push:keys": "web-push generate-vapid-keys --json"
     },
     "dependencies": {
         "@base-ui/react": "^1.8.0",
@@ -35,6 +36,7 @@
         "react-dom": "19.2.3",
         "sonner": "^2.0.7",
         "tailwind-merge": "^3.4.0",
+        "web-push": "^3.6.7",
         "zod": "^4.3.4"
     },
     "devDependencies": {
@@ -44,6 +46,7 @@
         "@types/pg": "^8.16.0",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "@types/web-push": "^3.6.4",
         "babel-plugin-react-compiler": "1.0.0",
         "drizzle-kit": "^0.31.8",
         "tailwindcss": "^4",

@@ -1,0 +1,12 @@
+{
+    "crons": [
+        {
+            "path": "/api/cron/wird-reminder",
+            "schedule": "0 22 * * *"
+        },
+        {
+            "path": "/api/cron/wird-reminder",
+            "schedule": "0 23 * * *"
+        }
+    ]
+}

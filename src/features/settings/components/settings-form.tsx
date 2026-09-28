@@ -15,6 +15,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import PushNotificationSetting from "@/features/notifications/components/push-notification-setting";
 import EditionCombobox from "@/features/quran/components/edition-combobox";
 import ReciterCombobox from "@/features/quran/components/reciter-combobox";
 import type { Edition, Reciter } from "@/features/quran/types";
@@ -60,12 +61,14 @@ const TRANSLATION_NAME_KEYS = {
 
 export default function SettingsForm({
     preferences,
+    vapidPublicKey,
     arabicEditions,
     reciters,
     translationEditions,
     tafsirEditions,
 }: {
     preferences: Preferences;
+    vapidPublicKey: string | null;
     arabicEditions: Edition[];
     reciters: Reciter[];
     translationEditions: Edition[];
@@ -491,6 +494,15 @@ export default function SettingsForm({
                                 />
                             </div>
                         </PreferenceCard>
+                    </SettingsSection>
+
+                    <SettingsSection
+                        eyebrow={t("sections.notifications.eyebrow")}
+                        title={t("sections.notifications.title")}
+                    >
+                        <PushNotificationSetting
+                            vapidPublicKey={vapidPublicKey}
+                        />
                     </SettingsSection>
                 </div>
 

@@ -54,6 +54,21 @@ Quran data is retrieved from [Al Quran Cloud](https://alquran.cloud/api). The se
    DB_PORT=
    ```
 
+   To enable daily Wird push reminders, generate a VAPID key pair:
+
+   ```bash
+   bun run push:keys
+   ```
+
+   Add the generated keys and a private cron secret to both your local
+   environment and the Vercel project:
+
+   ```text
+   VAPID_PUBLIC_KEY=
+   VAPID_PRIVATE_KEY=
+   CRON_SECRET=
+   ```
+
 3. Push the current Drizzle schema to the database:
 
    ```bash
@@ -75,7 +90,16 @@ bun run start     # Run the production server
 bun run lint      # Run Biome checks
 bun run format    # Format files with Biome
 bun run db:push   # Push the Drizzle schema to PostgreSQL
+bun run push:keys # Generate the Web Push VAPID key pair
 ```
+
+## Daily Wird reminders
+
+Users can enable the reminder per device from Settings. At approximately 11 PM
+in `Africa/Casablanca`, the scheduled function checks for an incomplete daily
+Wird and sends a notification that opens `/wird/read`. Two once-daily UTC cron
+entries cover Morocco's seasonal UTC offset; the endpoint sends only during the
+local 11 PM hour and records each delivery to prevent duplicates.
 
 ## Planned work
 
