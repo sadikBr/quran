@@ -118,6 +118,7 @@ export default async function GroupPage({
     };
     const dateFormatter = new Intl.DateTimeFormat(preferences.language, {
         dateStyle: "medium",
+        timeZone: "UTC",
     });
 
     return (

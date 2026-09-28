@@ -2,6 +2,7 @@ import {
     ArrowRight,
     BookMarked,
     BookOpen,
+    CalendarCheck2,
     ChartNoAxesCombined,
     UsersRound,
 } from "lucide-react";
@@ -17,7 +18,10 @@ import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import { getGroupsForUser } from "@/features/groups/server/get-groups";
 import getKhatmahPlan from "@/features/khatmah/server/get-khatmah-plan";
-import getPracticeAssignment from "@/features/practice/server/get-practice-assignment";
+import {
+    getAssignedPracticeAssignments,
+    getPracticeAssignments,
+} from "@/features/practice/server/get-practice-assignment";
 import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
@@ -56,14 +60,22 @@ export default async function DashboardPage() {
             getSurahsMeta().catch(() => []),
             getQuranNavigationMeta().catch(() => null),
         ]);
-    const [dailyWird, wirdHistory, khatmahPlan, practiceAssignment, groups] =
-        await Promise.all([
-            getDailyWird(session.user.id, preferences.arabicEdition),
-            getWirdHistory(session.user.id),
-            getKhatmahPlan(session.user.id),
-            getPracticeAssignment(session.user.id),
-            getGroupsForUser(session.user.id),
-        ]);
+    const [
+        dailyWird,
+        wirdHistory,
+        khatmahPlan,
+        practiceAssignments,
+        assignedWork,
+        groups,
+    ] = await Promise.all([
+        getDailyWird(session.user.id, preferences.arabicEdition),
+        getWirdHistory(session.user.id),
+        getKhatmahPlan(session.user.id),
+        getPracticeAssignments(session.user.id),
+        getAssignedPracticeAssignments(session.user.id),
+        getGroupsForUser(session.user.id),
+    ]);
+    const practiceAssignment = practiceAssignments[0] ?? null;
     const warshChapters =
         preferences.riwayah === "warsh" ? await getWarshChapters() : [];
     const warshBySurah = new Map(
@@ -116,6 +128,14 @@ export default async function DashboardPage() {
         messages,
         namespace: "Groups",
     });
+    const weeklyT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Weekly",
+    });
+    const readyAssignmentCount = assignedWork.filter(
+        (assignment) => assignment.status === "submitted",
+    ).length;
     const savedNumber =
         preferences.readingMode === "page"
             ? readingProgress.lastPageNumber
@@ -290,6 +310,60 @@ export default async function DashboardPage() {
                                     </Link>
                                 </Button>
                             </div>
+                        </div>
+                    </section>
+
+                    <section className="relative mt-8 overflow-hidden rounded-3xl bg-primary/[0.07] px-5 py-6 ring-1 ring-primary/15 sm:px-7">
+                        <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute -top-20 -end-16 size-44 rounded-full bg-primary/[0.08] blur-3xl"
+                        />
+                        <div className="relative grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-8">
+                            <div className="flex min-w-0 items-start gap-4">
+                                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm shadow-primary/20">
+                                    <CalendarCheck2
+                                        aria-hidden="true"
+                                        className="size-5"
+                                    />
+                                </span>
+                                <div className="min-w-0">
+                                    <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
+                                        {weeklyT("dashboard.eyebrow")}
+                                    </p>
+                                    <h2 className="mt-1.5 text-lg font-semibold tracking-tight sm:text-xl">
+                                        {weeklyT("dashboard.title")}
+                                    </h2>
+                                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                        {assignedWork.length > 0
+                                            ? weeklyT("dashboard.active", {
+                                                  count: assignedWork.length,
+                                                  ready: readyAssignmentCount,
+                                              })
+                                            : weeklyT("dashboard.empty")}
+                                    </p>
+                                </div>
+                            </div>
+                            <Button
+                                asChild
+                                variant={
+                                    assignedWork.length > 0
+                                        ? "default"
+                                        : "outline"
+                                }
+                                className="w-full rounded-xl sm:w-auto"
+                            >
+                                <Link href="/weekly">
+                                    {weeklyT("dashboard.open")}
+                                    <ArrowRight
+                                        aria-hidden="true"
+                                        className={cn(
+                                            "size-4",
+                                            preferences.language === "ar" &&
+                                                "rotate-180",
+                                        )}
+                                    />
+                                </Link>
+                            </Button>
                         </div>
                     </section>
 

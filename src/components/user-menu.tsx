@@ -2,6 +2,7 @@
 
 import {
     BookOpen,
+    CalendarCheck2,
     LayoutDashboard,
     LoaderCircle,
     LogOut,
@@ -83,6 +84,7 @@ export default function UserMenu({
     const locale = useLocale();
     const commonT = useTranslations("Common");
     const groupsT = useTranslations("Groups");
+    const weeklyT = useTranslations("Weekly");
     const { setPreferences, ...preferences } = useSettings();
     const [selectedTheme, setSelectedTheme] = useState(preferences.theme);
     const [isSigningOut, setIsSigningOut] = useState(false);
@@ -194,6 +196,12 @@ export default function UserMenu({
                     <Link href="/dashboard">
                         <LayoutDashboard aria-hidden="true" />
                         {labels.dashboard}
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href="/weekly">
+                        <CalendarCheck2 aria-hidden="true" />
+                        {weeklyT("header")}
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

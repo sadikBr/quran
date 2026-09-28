@@ -8,6 +8,7 @@ import englishPracticeMessages from "@/messages/practice.en.json";
 import englishProfileMessages from "@/messages/profile.en.json";
 import englishReaderMessages from "@/messages/reader.en.json";
 import englishSettingsMessages from "@/messages/settings.en.json";
+import englishWeeklyMessages from "@/messages/weekly.en.json";
 import englishWirdMessages from "@/messages/wird.en.json";
 
 const englishMessages = {
@@ -21,6 +22,7 @@ const englishMessages = {
     ...englishReaderMessages,
     ...englishSettingsMessages,
     ...englishWirdMessages,
+    ...englishWeeklyMessages,
 };
 
 export type AppMessages = typeof englishMessages;
@@ -42,6 +44,7 @@ const messageLoaders: Record<
             reader,
             settings,
             wird,
+            weekly,
         ] = await Promise.all([
             import("@/messages/auth.ar.json"),
             import("@/messages/common.ar.json"),
@@ -53,6 +56,7 @@ const messageLoaders: Record<
             import("@/messages/reader.ar.json"),
             import("@/messages/settings.ar.json"),
             import("@/messages/wird.ar.json"),
+            import("@/messages/weekly.ar.json"),
         ]);
 
         return {
@@ -67,6 +71,7 @@ const messageLoaders: Record<
                 ...reader.default,
                 ...settings.default,
                 ...wird.default,
+                ...weekly.default,
             },
         };
     },

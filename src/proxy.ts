@@ -8,7 +8,7 @@ export async function proxy(request: NextRequest) {
     });
     const pathname = new URL(request.url).pathname;
     const isProtected =
-        ["/dashboard", "/profile", "/settings"].includes(pathname) ||
+        ["/dashboard", "/profile", "/settings", "/weekly"].includes(pathname) ||
         pathname.startsWith("/wird");
 
     if (session && !isProtected) {
@@ -27,6 +27,7 @@ export const config = {
         "/dashboard",
         "/profile",
         "/settings",
+        "/weekly",
         "/wird/:path*",
         "/sign-in",
         "/sign-up",

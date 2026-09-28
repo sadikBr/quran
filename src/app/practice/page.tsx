@@ -202,6 +202,7 @@ export default async function PracticePage() {
                                                             {
                                                                 dateStyle:
                                                                     "medium",
+                                                                timeZone: "UTC",
                                                             },
                                                         ).format(
                                                             assignment.dueAt,

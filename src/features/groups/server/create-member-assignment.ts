@@ -96,7 +96,9 @@ export default async function createMemberAssignment(input: unknown) {
             endSurahNumber: end.surahNumber,
             endAyahNumber: end.ayahNumber,
             status: "in_progress",
-            dueAt: new Date(`${parsed.data.dueDate}T23:59:59.999Z`),
+            // Noon UTC keeps this calendar-only deadline on the same displayed
+            // date across the application's supported time zone.
+            dueAt: new Date(`${parsed.data.dueDate}T12:00:00.000Z`),
             instructions: parsed.data.instructions || null,
         });
     } catch {
