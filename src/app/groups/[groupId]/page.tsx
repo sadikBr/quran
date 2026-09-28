@@ -3,7 +3,10 @@ import {
     ArrowRight,
     BookMarked,
     CalendarDays,
+    ChevronDown,
+    CirclePlus,
     ClipboardCheck,
+    History,
     RefreshCcw,
     Shield,
     UserRound,
@@ -26,7 +29,9 @@ import {
 } from "@/features/groups/components/group-actions";
 import GroupInvite from "@/features/groups/components/group-invite";
 import MemberAssignmentForm from "@/features/groups/components/member-assignment-form";
-import getGroupAssignments from "@/features/groups/server/get-group-assignments";
+import getGroupAssignments, {
+    type GroupAssignmentSummary,
+} from "@/features/groups/server/get-group-assignments";
 import { getGroupForUser } from "@/features/groups/server/get-groups";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
@@ -60,6 +65,8 @@ export default async function GroupPage({
         getGroupForUser(groupId, session.user.id),
     ]);
     if (!group) notFound();
+    const currentUserId = session.user.id;
+    const currentGroupId = group.id;
 
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
@@ -121,6 +128,171 @@ export default async function GroupPage({
         dateStyle: "medium",
         timeZone: "UTC",
     });
+    const assignmentMembers = group.members
+        .filter((member) => isAdmin || member.userId === currentUserId)
+        .map((member) => ({
+            member,
+            assignments: assignments.filter(
+                (assignment) => assignment.assigneeId === member.userId,
+            ),
+        }))
+        .sort((first, second) => {
+            const priority = (memberAssignments: GroupAssignmentSummary[]) =>
+                memberAssignments.some(
+                    (assignment) => assignment.status === "submitted",
+                )
+                    ? 2
+                    : memberAssignments.some(
+                            (assignment) => assignment.status !== "completed",
+                        )
+                      ? 1
+                      : 0;
+
+            return (
+                priority(second.assignments) - priority(first.assignments) ||
+                first.member.name.localeCompare(
+                    second.member.name,
+                    preferences.language,
+                )
+            );
+        });
+
+    function renderAssignment(
+        assignment: GroupAssignmentSummary,
+        isHistory = false,
+    ) {
+        const Icon =
+            assignment.kind === "memorization" ? BookMarked : RefreshCcw;
+        const isMine = assignment.assigneeId === currentUserId;
+
+        return (
+            <article
+                key={assignment.id}
+                className={cn(
+                    "grid gap-4 px-4 py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5",
+                    isHistory && "bg-background/25",
+                )}
+            >
+                <div className="flex min-w-0 items-start gap-3.5">
+                    <span
+                        className={cn(
+                            "flex size-9 shrink-0 items-center justify-center rounded-xl",
+                            isHistory
+                                ? "bg-muted text-muted-foreground"
+                                : "bg-primary/10 text-primary",
+                        )}
+                    >
+                        <Icon aria-hidden="true" className="size-4.5" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-semibold text-primary">
+                                {practiceT(`kinds.${assignment.kind}`)}
+                            </span>
+                            <span
+                                className={cn(
+                                    "rounded-full px-2.5 py-0.5 text-[0.7rem] ring-1",
+                                    assignment.status === "submitted"
+                                        ? "bg-primary/10 font-semibold text-primary ring-primary/20"
+                                        : assignment.status === "needs_revision"
+                                          ? "bg-destructive/8 text-destructive ring-destructive/15"
+                                          : "bg-background/70 text-muted-foreground ring-border/50",
+                                )}
+                            >
+                                {t(`assignments.statuses.${assignment.status}`)}
+                            </span>
+                        </div>
+                        <h4 className="mt-2 font-semibold leading-7">
+                            {practiceT("range", {
+                                startSurah:
+                                    surahName(assignment.startSurahNumber) ??
+                                    assignment.startSurahNumber,
+                                startAyah: assignment.startAyahNumber,
+                                endSurah:
+                                    surahName(assignment.endSurahNumber) ??
+                                    assignment.endSurahNumber,
+                                endAyah: assignment.endAyahNumber,
+                            })}
+                        </h4>
+                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+                            {assignment.dueAt && (
+                                <span className="inline-flex items-center gap-1.5">
+                                    <CalendarDays
+                                        aria-hidden="true"
+                                        className="size-3.5"
+                                    />
+                                    {t("assignments.due", {
+                                        date: dateFormatter.format(
+                                            assignment.dueAt,
+                                        ),
+                                    })}
+                                </span>
+                            )}
+                            <span>
+                                {t("assignments.riwayah", {
+                                    riwayah: t(
+                                        `assignments.riwayahs.${assignment.riwayah}`,
+                                    ),
+                                })}
+                            </span>
+                        </div>
+                        {assignment.instructions && (
+                            <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                                {assignment.instructions}
+                            </p>
+                        )}
+                        {assignment.reviewNote && (
+                            <div className="mt-3 rounded-xl bg-primary/[0.055] px-3.5 py-2.5 ring-1 ring-primary/10">
+                                <p className="text-xs font-semibold text-primary">
+                                    {t("assignments.feedback")}
+                                </p>
+                                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                    {assignment.reviewNote}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5 sm:max-w-52 sm:justify-end">
+                    {isAdmin && assignment.status === "submitted" && (
+                        <Button asChild size="sm" className="rounded-xl">
+                            <Link
+                                href={`/groups/${currentGroupId}/review/${assignment.id}`}
+                            >
+                                <ClipboardCheck className="size-4" />
+                                {t("assignments.reviewNow")}
+                            </Link>
+                        </Button>
+                    )}
+                    {isMine && !isHistory && (
+                        <Button
+                            asChild
+                            variant="ghost"
+                            size="sm"
+                            className="rounded-xl text-primary hover:text-primary"
+                        >
+                            <Link href={`/practice/${assignment.id}/read`}>
+                                {t("assignments.open")}
+                                <ArrowRight
+                                    className={cn(
+                                        "size-4",
+                                        isArabic && "rotate-180",
+                                    )}
+                                />
+                            </Link>
+                        </Button>
+                    )}
+                    {isAdmin && (
+                        <DeleteAssignmentButton
+                            groupId={currentGroupId}
+                            assignmentId={assignment.id}
+                        />
+                    )}
+                </div>
+            </article>
+        );
+    }
 
     return (
         <main
@@ -206,135 +378,165 @@ export default async function GroupPage({
                         </p>
 
                         {assignments.length > 0 ? (
-                            <div className="mt-6 grid gap-4 lg:grid-cols-2">
-                                {assignments.map((assignment) => {
-                                    const Icon =
-                                        assignment.kind === "memorization"
-                                            ? BookMarked
-                                            : RefreshCcw;
-                                    const isMine =
-                                        assignment.assigneeId ===
-                                        session.user.id;
-                                    return (
-                                        <article
-                                            key={assignment.id}
-                                            className="rounded-3xl bg-muted/40 p-5 ring-1 ring-border/50 sm:p-6"
-                                        >
-                                            <div className="flex items-start justify-between gap-3">
-                                                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                                    <Icon className="size-5" />
-                                                </span>
-                                                <span className="rounded-full bg-background/70 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
-                                                    {t(
-                                                        `assignments.statuses.${assignment.status}`,
-                                                    )}
-                                                </span>
-                                            </div>
-                                            <p className="mt-4 text-xs font-semibold text-primary">
-                                                {t("assignments.assignedTo", {
-                                                    name: assignment.assigneeName,
-                                                })}
-                                            </p>
-                                            <h3 className="mt-2 font-semibold leading-7">
-                                                {practiceT("range", {
-                                                    startSurah:
-                                                        surahName(
-                                                            assignment.startSurahNumber,
-                                                        ) ??
-                                                        assignment.startSurahNumber,
-                                                    startAyah:
-                                                        assignment.startAyahNumber,
-                                                    endSurah:
-                                                        surahName(
-                                                            assignment.endSurahNumber,
-                                                        ) ??
-                                                        assignment.endSurahNumber,
-                                                    endAyah:
-                                                        assignment.endAyahNumber,
-                                                })}
-                                            </h3>
-                                            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
-                                                {assignment.dueAt && (
-                                                    <span className="inline-flex items-center gap-1.5">
-                                                        <CalendarDays className="size-3.5" />
-                                                        {t("assignments.due", {
-                                                            date: dateFormatter.format(
-                                                                assignment.dueAt,
-                                                            ),
-                                                        })}
-                                                    </span>
-                                                )}
-                                                <span>
-                                                    {t("assignments.riwayah", {
-                                                        riwayah: t(
-                                                            `assignments.riwayahs.${assignment.riwayah}`,
-                                                        ),
-                                                    })}
-                                                </span>
-                                            </div>
-                                            {assignment.instructions && (
-                                                <p className="mt-4 rounded-xl bg-background/55 px-4 py-3 text-sm leading-6 text-muted-foreground">
-                                                    {assignment.instructions}
-                                                </p>
-                                            )}
-                                            {assignment.reviewNote && (
-                                                <div className="mt-4 rounded-xl bg-primary/[0.06] px-4 py-3 ring-1 ring-primary/10">
-                                                    <p className="text-xs font-semibold text-primary">
-                                                        {t(
-                                                            "assignments.feedback",
+                            <div className="mt-6 divide-y divide-border/55 overflow-hidden rounded-3xl bg-muted/30 ring-1 ring-border/50">
+                                {assignmentMembers.map(
+                                    ({ member, assignments: memberWork }) => {
+                                        const currentAssignments =
+                                            memberWork.filter(
+                                                (assignment) =>
+                                                    assignment.status !==
+                                                    "completed",
+                                            );
+                                        const completedAssignments =
+                                            memberWork.filter(
+                                                (assignment) =>
+                                                    assignment.status ===
+                                                    "completed",
+                                            );
+                                        const readyCount =
+                                            currentAssignments.filter(
+                                                (assignment) =>
+                                                    assignment.status ===
+                                                    "submitted",
+                                            ).length;
+
+                                        return (
+                                            <details
+                                                key={member.id}
+                                                className="group/member bg-background/20 open:bg-background/40"
+                                                open={
+                                                    readyCount > 0 ||
+                                                    (!isAdmin &&
+                                                        currentAssignments.length >
+                                                            0)
+                                                }
+                                            >
+                                                <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/45 focus-visible:bg-muted/45 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">
+                                                    <Avatar className="size-11 shrink-0 border border-primary/15">
+                                                        {member.image && (
+                                                            <AvatarImage
+                                                                src={
+                                                                    member.image
+                                                                }
+                                                                alt=""
+                                                            />
                                                         )}
-                                                    </p>
-                                                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                                        {assignment.reviewNote}
-                                                    </p>
-                                                </div>
-                                            )}
-                                            {isAdmin &&
-                                                assignment.status ===
-                                                    "submitted" && (
-                                                    <Button
-                                                        asChild
-                                                        className="mt-4 rounded-xl"
-                                                    >
-                                                        <Link
-                                                            href={`/groups/${group.id}/review/${assignment.id}`}
-                                                        >
-                                                            <ClipboardCheck className="size-4" />
+                                                        <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
+                                                            {initials(
+                                                                member.name,
+                                                            ) || (
+                                                                <UserRound className="size-4" />
+                                                            )}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="min-w-0 flex-1">
+                                                        <h3 className="truncate font-semibold">
+                                                            {member.name}
+                                                        </h3>
+                                                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                                                            <span>
+                                                                {t(
+                                                                    "assignments.currentCount",
+                                                                    {
+                                                                        count: currentAssignments.length,
+                                                                    },
+                                                                )}
+                                                            </span>
+                                                            {completedAssignments.length >
+                                                                0 && (
+                                                                <span>
+                                                                    {t(
+                                                                        "assignments.completedCount",
+                                                                        {
+                                                                            count: completedAssignments.length,
+                                                                        },
+                                                                    )}
+                                                                </span>
+                                                            )}
+                                                            {readyCount > 0 && (
+                                                                <span className="font-semibold text-primary sm:hidden">
+                                                                    {t(
+                                                                        "assignments.readyCount",
+                                                                        {
+                                                                            count: readyCount,
+                                                                        },
+                                                                    )}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    {readyCount > 0 && (
+                                                        <span className="hidden rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:inline-flex">
                                                             {t(
-                                                                "assignments.reviewNow",
+                                                                "assignments.readyCount",
+                                                                {
+                                                                    count: readyCount,
+                                                                },
                                                             )}
-                                                        </Link>
-                                                    </Button>
-                                                )}
-                                            {isMine && (
-                                                <Button
-                                                    asChild
-                                                    variant="ghost"
-                                                    className="mt-4 -ms-3 rounded-xl text-primary hover:text-primary"
-                                                >
-                                                    <Link
-                                                        href={`/practice/${assignment.id}/read`}
-                                                    >
-                                                        {t("assignments.open")}
-                                                        <ArrowRight
-                                                            className={cn(
-                                                                "size-4",
-                                                                isArabic &&
-                                                                    "rotate-180",
+                                                        </span>
+                                                    )}
+                                                    <ChevronDown
+                                                        aria-hidden="true"
+                                                        className="size-4 shrink-0 text-muted-foreground transition-transform group-open/member:rotate-180"
+                                                    />
+                                                </summary>
+
+                                                <div className="border-t border-border/50">
+                                                    {currentAssignments.length >
+                                                    0 ? (
+                                                        <div className="divide-y divide-border/45">
+                                                            {currentAssignments.map(
+                                                                (assignment) =>
+                                                                    renderAssignment(
+                                                                        assignment,
+                                                                    ),
                                                             )}
-                                                        />
-                                                    </Link>
-                                                </Button>
-                                            )}
-                                            {isAdmin && (
-                                                <DeleteAssignmentButton
-                                                    groupId={group.id}
-                                                    assignmentId={assignment.id}
-                                                />
-                                            )}
-                                        </article>
-                                    );
-                                })}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="px-5 py-5 text-sm text-muted-foreground">
+                                                            {t(
+                                                                "assignments.noCurrentForMember",
+                                                            )}
+                                                        </p>
+                                                    )}
+
+                                                    {completedAssignments.length >
+                                                        0 && (
+                                                        <details className="group/history border-t border-border/45">
+                                                            <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-3 text-xs font-semibold text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+                                                                <History
+                                                                    aria-hidden="true"
+                                                                    className="size-3.5"
+                                                                />
+                                                                {t(
+                                                                    "assignments.history",
+                                                                    {
+                                                                        count: completedAssignments.length,
+                                                                    },
+                                                                )}
+                                                                <ChevronDown
+                                                                    aria-hidden="true"
+                                                                    className="ms-auto size-3.5 transition-transform group-open/history:rotate-180"
+                                                                />
+                                                            </summary>
+                                                            <div className="divide-y divide-border/40 border-t border-border/40">
+                                                                {completedAssignments.map(
+                                                                    (
+                                                                        assignment,
+                                                                    ) =>
+                                                                        renderAssignment(
+                                                                            assignment,
+                                                                            true,
+                                                                        ),
+                                                                )}
+                                                            </div>
+                                                        </details>
+                                                    )}
+                                                </div>
+                                            </details>
+                                        );
+                                    },
+                                )}
                             </div>
                         ) : (
                             <div className="mt-6 rounded-3xl bg-muted/35 p-7 text-center ring-1 ring-border/50">
@@ -353,20 +555,30 @@ export default async function GroupPage({
                         )}
 
                         {isAdmin && (
-                            <div className="mt-8 rounded-3xl bg-primary/[0.06] p-5 ring-1 ring-primary/12 sm:p-7">
-                                <h3 className="text-lg font-semibold">
-                                    {t("assignments.createTitle")}
-                                </h3>
-                                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                    {t("assignments.createDescription")}
-                                </p>
-                                <MemberAssignmentForm
-                                    groupId={group.id}
-                                    members={group.members}
-                                    surahs={assignmentSurahs}
-                                    locale={preferences.language}
-                                />
-                            </div>
+                            <details className="group/create mt-6 overflow-hidden rounded-2xl bg-primary/[0.055] ring-1 ring-primary/12">
+                                <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 outline-none hover:bg-primary/[0.04] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
+                                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                        <CirclePlus className="size-4.5" />
+                                    </span>
+                                    <div className="min-w-0 flex-1">
+                                        <h3 className="font-semibold">
+                                            {t("assignments.createTitle")}
+                                        </h3>
+                                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                            {t("assignments.createDescription")}
+                                        </p>
+                                    </div>
+                                    <ChevronDown className="size-4 text-muted-foreground transition-transform group-open/create:rotate-180" />
+                                </summary>
+                                <div className="border-t border-primary/10 p-5 sm:p-7">
+                                    <MemberAssignmentForm
+                                        groupId={group.id}
+                                        members={group.members}
+                                        surahs={assignmentSurahs}
+                                        locale={preferences.language}
+                                    />
+                                </div>
+                            </details>
                         )}
                     </section>
 

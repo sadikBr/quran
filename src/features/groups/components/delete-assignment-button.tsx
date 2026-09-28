@@ -39,7 +39,7 @@ export default function DeleteAssignmentButton({
             size="sm"
             disabled={pending}
             onClick={remove}
-            className="mt-4 rounded-xl text-destructive hover:text-destructive"
+            className="rounded-xl text-destructive hover:text-destructive"
         >
             {pending ? (
                 <LoaderCircle className="size-4 animate-spin" />
