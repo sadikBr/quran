@@ -10,8 +10,12 @@ import { auth } from "@/features/auth/auth";
 import WeeklyPlanEditor from "@/features/groups/components/weekly-plan-editor";
 import { getGroupForUser } from "@/features/groups/server/get-groups";
 import getWeeklyPlannerData from "@/features/groups/server/get-weekly-planner-data";
+import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
-import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
+import {
+    getWarshChapters,
+    getWarshNavigationMeta,
+} from "@/features/quran/server/get-warsh-mushaf";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
@@ -34,10 +38,19 @@ export default async function WeeklyPlanPage({
     if (!group) notFound();
     if (group.role !== "admin") redirect(`/groups/${groupId}`);
 
-    const [planner, surahs, warshChapters, messages] = await Promise.all([
+    const [
+        planner,
+        surahs,
+        warshChapters,
+        hafsNavigation,
+        warshNavigation,
+        messages,
+    ] = await Promise.all([
         getWeeklyPlannerData(groupId),
         getSurahsMeta(),
         getWarshChapters(),
+        getQuranNavigationMeta(),
+        getWarshNavigationMeta(),
         getMessages(preferences.language),
     ]);
     const warshCounts = new Map(
@@ -142,6 +155,10 @@ export default async function WeeklyPlanPage({
                         members={group.members}
                         surahs={assignmentSurahs}
                         planner={planner}
+                        navigationByRiwayah={{
+                            hafs: hafsNavigation,
+                            warsh: warshNavigation,
+                        }}
                         locale={preferences.language}
                     />
                 </section>

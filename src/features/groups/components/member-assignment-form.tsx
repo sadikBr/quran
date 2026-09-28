@@ -18,13 +18,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { GroupMemberDetails } from "@/features/groups/types";
-import {
-    AyahCombobox,
-    SurahCombobox,
-} from "@/features/practice/components/practice-range-form";
+import QuranRangeSelector from "@/features/practice/components/quran-range-selector";
 import type { PracticeKind, QuranReference } from "@/features/practice/types";
-import { referenceOrder } from "@/features/practice/types";
 import { normalizeSearchText } from "@/features/quran/helpers/normalize-quran-search";
+import type { QuranNavigationMeta } from "@/features/quran/navigation-types";
 import { cn } from "@/lib/utils";
 import createMemberAssignment from "../server/create-member-assignment";
 
@@ -46,11 +43,13 @@ export default function MemberAssignmentForm({
     groupId,
     members,
     surahs,
+    navigationByRiwayah,
     locale,
 }: {
     groupId: string;
     members: GroupMemberDetails[];
     surahs: AssignmentSurah[];
+    navigationByRiwayah: Record<"hafs" | "warsh", QuranNavigationMeta>;
     locale: string;
 }) {
     const t = useTranslations("Groups.assignments");
@@ -83,23 +82,6 @@ export default function MemberAssignmentForm({
             })),
         [assignee?.riwayah, surahs],
     );
-    const startSurah = surahOptions.find(
-        (surah) => surah.number === start.surahNumber,
-    );
-    const endSurah = surahOptions.find(
-        (surah) => surah.number === end.surahNumber,
-    );
-    const availableEndSurahs = surahOptions.filter(
-        (surah) => surah.number >= start.surahNumber,
-    );
-    const minimumEndAyah =
-        end.surahNumber === start.surahNumber ? start.ayahNumber : 1;
-
-    function changeStart(nextStart: QuranReference) {
-        setStart(nextStart);
-        if (referenceOrder(end) < referenceOrder(nextStart)) setEnd(nextStart);
-    }
-
     async function submit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (!assignee) return;
@@ -210,80 +192,17 @@ export default function MemberAssignmentForm({
                 </div>
             </fieldset>
 
-            <div className="grid gap-5 md:grid-cols-2">
-                <fieldset className="rounded-2xl bg-background/40 p-4 ring-1 ring-border/50">
-                    <legend className="px-2 text-sm font-semibold text-primary">
-                        {t("start")}
-                    </legend>
-                    <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-3">
-                        <div>
-                            <Label>{t("surah")}</Label>
-                            <SurahCombobox
-                                options={surahOptions}
-                                value={start.surahNumber}
-                                locale={locale}
-                                onValueChange={(surahNumber) =>
-                                    changeStart({ surahNumber, ayahNumber: 1 })
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label>{t("ayah")}</Label>
-                            <AyahCombobox
-                                options={Array.from(
-                                    { length: startSurah?.numberOfAyahs ?? 1 },
-                                    (_, index) => ({ number: index + 1 }),
-                                )}
-                                value={start.ayahNumber}
-                                onValueChange={(ayahNumber) =>
-                                    changeStart({ ...start, ayahNumber })
-                                }
-                            />
-                        </div>
-                    </div>
-                </fieldset>
-
-                <fieldset className="rounded-2xl bg-background/40 p-4 ring-1 ring-border/50">
-                    <legend className="px-2 text-sm font-semibold text-primary">
-                        {t("end")}
-                    </legend>
-                    <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-3">
-                        <div>
-                            <Label>{t("surah")}</Label>
-                            <SurahCombobox
-                                options={availableEndSurahs}
-                                value={end.surahNumber}
-                                locale={locale}
-                                onValueChange={(surahNumber) =>
-                                    setEnd({ surahNumber, ayahNumber: 1 })
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label>{t("ayah")}</Label>
-                            <AyahCombobox
-                                options={Array.from(
-                                    {
-                                        length: Math.max(
-                                            0,
-                                            (endSurah?.numberOfAyahs ?? 1) -
-                                                minimumEndAyah +
-                                                1,
-                                        ),
-                                    },
-                                    (_, index) => ({
-                                        number: minimumEndAyah + index,
-                                    }),
-                                )}
-                                value={Math.max(end.ayahNumber, minimumEndAyah)}
-                                onValueChange={(ayahNumber) =>
-                                    setEnd({ ...end, ayahNumber })
-                                }
-                            />
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
+            <QuranRangeSelector
+                surahs={surahOptions}
+                navigation={navigationByRiwayah[assignee?.riwayah ?? "hafs"]}
+                locale={locale}
+                start={start}
+                end={end}
+                onChange={(range) => {
+                    setStart(range.start);
+                    setEnd(range.end);
+                }}
+            />
 
             <div className="grid gap-5 md:grid-cols-2">
                 <div>

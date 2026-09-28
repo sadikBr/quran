@@ -20,12 +20,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    AyahCombobox,
-    SurahCombobox,
-} from "@/features/practice/components/practice-range-form";
-import type { QuranReference } from "@/features/practice/types";
-import { referenceOrder } from "@/features/practice/types";
+import QuranRangeSelector from "@/features/practice/components/quran-range-selector";
+import type { QuranNavigationMeta } from "@/features/quran/navigation-types";
 import { cn } from "@/lib/utils";
 import saveWeeklyPlan from "../server/save-weekly-plan";
 import type { GroupMemberDetails } from "../types";
@@ -74,12 +70,14 @@ export default function WeeklyPlanEditor({
     members,
     surahs,
     planner,
+    navigationByRiwayah,
     locale,
 }: {
     groupId: string;
     members: GroupMemberDetails[];
     surahs: AssignmentSurah[];
     planner: WeeklyPlannerData;
+    navigationByRiwayah: Record<"hafs" | "warsh", QuranNavigationMeta>;
     locale: string;
 }) {
     const t = useTranslations("Groups.planner");
@@ -275,13 +273,6 @@ export default function WeeklyPlanEditor({
                     const endSurah = surahOptions.find(
                         (surah) => surah.number === entry.end.surahNumber,
                     );
-                    const availableEndSurahs = surahOptions.filter(
-                        (surah) => surah.number >= entry.start.surahNumber,
-                    );
-                    const minimumEndAyah =
-                        entry.end.surahNumber === entry.start.surahNumber
-                            ? entry.start.ayahNumber
-                            : 1;
                     const startName =
                         locale === "ar"
                             ? startSurah?.name
@@ -290,18 +281,6 @@ export default function WeeklyPlanEditor({
                         locale === "ar"
                             ? endSurah?.name
                             : endSurah?.englishName;
-
-                    function changeStart(start: QuranReference) {
-                        updateEntry(member.userId, (current) => ({
-                            ...current,
-                            start,
-                            end:
-                                referenceOrder(current.end) <
-                                referenceOrder(start)
-                                    ? start
-                                    : current.end,
-                        }));
-                    }
 
                     return (
                         <article key={member.id} className="bg-background/20">
@@ -423,152 +402,28 @@ export default function WeeklyPlanEditor({
                                         </div>
                                     </fieldset>
 
-                                    <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                                        <fieldset className="rounded-2xl bg-background/55 p-4 ring-1 ring-border/50">
-                                            <legend className="px-2 text-sm font-semibold text-primary">
-                                                {assignmentsT("start")}
-                                            </legend>
-                                            <div className="grid grid-cols-[minmax(0,1fr)_6.5rem] gap-3">
-                                                <div>
-                                                    <Label>
-                                                        {assignmentsT("surah")}
-                                                    </Label>
-                                                    <SurahCombobox
-                                                        options={surahOptions}
-                                                        value={
-                                                            entry.start
-                                                                .surahNumber
-                                                        }
-                                                        locale={locale}
-                                                        onValueChange={(
-                                                            surahNumber,
-                                                        ) =>
-                                                            changeStart({
-                                                                surahNumber,
-                                                                ayahNumber: 1,
-                                                            })
-                                                        }
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <Label>
-                                                        {assignmentsT("ayah")}
-                                                    </Label>
-                                                    <AyahCombobox
-                                                        options={Array.from(
-                                                            {
-                                                                length:
-                                                                    startSurah?.numberOfAyahs ??
-                                                                    1,
-                                                            },
-                                                            (_, index) => ({
-                                                                number:
-                                                                    index + 1,
-                                                            }),
-                                                        )}
-                                                        value={
-                                                            entry.start
-                                                                .ayahNumber
-                                                        }
-                                                        onValueChange={(
-                                                            ayahNumber,
-                                                        ) =>
-                                                            changeStart({
-                                                                ...entry.start,
-                                                                ayahNumber,
-                                                            })
-                                                        }
-                                                    />
-                                                </div>
-                                            </div>
-                                        </fieldset>
-
-                                        <fieldset className="rounded-2xl bg-background/55 p-4 ring-1 ring-border/50">
-                                            <legend className="px-2 text-sm font-semibold text-primary">
-                                                {assignmentsT("end")}
-                                            </legend>
-                                            <div className="grid grid-cols-[minmax(0,1fr)_6.5rem] gap-3">
-                                                <div>
-                                                    <Label>
-                                                        {assignmentsT("surah")}
-                                                    </Label>
-                                                    <SurahCombobox
-                                                        options={
-                                                            availableEndSurahs
-                                                        }
-                                                        value={
-                                                            entry.end
-                                                                .surahNumber
-                                                        }
-                                                        locale={locale}
-                                                        onValueChange={(
-                                                            surahNumber,
-                                                        ) =>
-                                                            updateEntry(
-                                                                member.userId,
-                                                                (current) => ({
-                                                                    ...current,
-                                                                    end: {
-                                                                        surahNumber,
-                                                                        ayahNumber:
-                                                                            surahNumber ===
-                                                                            current
-                                                                                .start
-                                                                                .surahNumber
-                                                                                ? current
-                                                                                      .start
-                                                                                      .ayahNumber
-                                                                                : 1,
-                                                                    },
-                                                                }),
-                                                            )
-                                                        }
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <Label>
-                                                        {assignmentsT("ayah")}
-                                                    </Label>
-                                                    <AyahCombobox
-                                                        options={Array.from(
-                                                            {
-                                                                length: Math.max(
-                                                                    0,
-                                                                    (endSurah?.numberOfAyahs ??
-                                                                        1) -
-                                                                        minimumEndAyah +
-                                                                        1,
-                                                                ),
-                                                            },
-                                                            (_, index) => ({
-                                                                number:
-                                                                    minimumEndAyah +
-                                                                    index,
-                                                            }),
-                                                        )}
-                                                        value={Math.max(
-                                                            entry.end
-                                                                .ayahNumber,
-                                                            minimumEndAyah,
-                                                        )}
-                                                        onValueChange={(
-                                                            ayahNumber,
-                                                        ) =>
-                                                            updateEntry(
-                                                                member.userId,
-                                                                (current) => ({
-                                                                    ...current,
-                                                                    end: {
-                                                                        ...current.end,
-                                                                        ayahNumber,
-                                                                    },
-                                                                }),
-                                                            )
-                                                        }
-                                                    />
-                                                </div>
-                                            </div>
-                                        </fieldset>
+                                    <div className="mt-5">
+                                        <QuranRangeSelector
+                                            surahs={surahOptions}
+                                            navigation={
+                                                navigationByRiwayah[
+                                                    member.riwayah
+                                                ]
+                                            }
+                                            locale={locale}
+                                            start={entry.start}
+                                            end={entry.end}
+                                            onChange={({ start, end }) =>
+                                                updateEntry(
+                                                    member.userId,
+                                                    (current) => ({
+                                                        ...current,
+                                                        start,
+                                                        end,
+                                                    }),
+                                                )
+                                            }
+                                        />
                                     </div>
 
                                     <div className="mt-5 max-w-2xl">

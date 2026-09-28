@@ -29,8 +29,22 @@
         "form": {
             "createTitle": "Choose your first range",
             "editTitle": "Manage your practice ranges",
-            "description": "Choose the first and last ayah. Endpoints are included, and surahs must remain in Quran order.",
+            "description": "Choose an exact ayah range, or select complete quarters, hizbs, or juzs. Division boundaries follow your selected riwayah.",
             "kindLabel": "I am preparing for",
+            "rangeUnitLabel": "Select the range by",
+            "rangeUnits": {
+                "ayah": "Ayah",
+                "quarter": "Quarter",
+                "hizb": "Hizb",
+                "juz": "Juz"
+            },
+            "divisionLabels": {
+                "quarter": "Quarter {number}",
+                "hizb": "Hizb {number}",
+                "juz": "Juz {number}"
+            },
+            "searchDivision": "Type a division number…",
+            "noDivisions": "No matching division found.",
             "kinds": {
                 "memorization": "Memorization",
                 "revision": "Revision"

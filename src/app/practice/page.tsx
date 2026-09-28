@@ -14,8 +14,12 @@ import {
     getAssignedPracticeAssignments,
     getPracticeAssignments,
 } from "@/features/practice/server/get-practice-assignment";
+import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
-import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
+import {
+    getWarshChapters,
+    getWarshNavigationMeta,
+} from "@/features/quran/server/get-warsh-mushaf";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
@@ -33,8 +37,14 @@ export default async function PracticePage() {
             getReadingProgress(),
             getSurahsMeta(),
         ]);
-    const warshChapters =
-        preferences.riwayah === "warsh" ? await getWarshChapters() : [];
+    const [warshChapters, navigation] = await Promise.all([
+        preferences.riwayah === "warsh"
+            ? getWarshChapters()
+            : Promise.resolve([]),
+        preferences.riwayah === "warsh"
+            ? getWarshNavigationMeta()
+            : getQuranNavigationMeta(),
+    ]);
     const warshCounts = new Map(
         warshChapters.map((chapter) => [chapter.id, chapter.verses.length]),
     );
@@ -343,6 +353,7 @@ export default async function PracticePage() {
                         </p>
                         <PracticeRangeForm
                             surahs={options}
+                            navigation={navigation}
                             assignments={assignments}
                             locale={preferences.language}
                         />

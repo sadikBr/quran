@@ -6,157 +6,20 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-    Combobox,
-    ComboboxContent,
-    ComboboxEmpty,
-    ComboboxInput,
-    ComboboxItem,
-    ComboboxList,
-} from "@/components/ui/combobox";
-import { normalizeSearchText } from "@/features/quran/helpers/normalize-quran-search";
+import type { QuranNavigationMeta } from "@/features/quran/navigation-types";
 import { cn } from "@/lib/utils";
 import savePracticeAssignment from "../server/save-practice-assignment";
-import {
-    type PracticeAssignment,
-    type PracticeKind,
-    referenceOrder,
-} from "../types";
-
-export interface SurahOption {
-    number: number;
-    name: string;
-    englishName: string;
-    numberOfAyahs: number;
-}
-
-export interface AyahOption {
-    number: number;
-}
-
-export function SurahCombobox({
-    options,
-    value,
-    locale,
-    onValueChange,
-}: {
-    options: SurahOption[];
-    value: number;
-    locale: string;
-    onValueChange: (value: number) => void;
-}) {
-    const t = useTranslations("Practice.form");
-    const selected =
-        options.find((surah) => surah.number === value) ?? options[0] ?? null;
-    const label = (surah: SurahOption) =>
-        `${surah.number}. ${locale === "ar" ? surah.name : surah.englishName}`;
-
-    return (
-        <Combobox
-            items={options}
-            value={selected}
-            onValueChange={(surah) => {
-                if (surah) onValueChange(surah.number);
-            }}
-            itemToStringLabel={label}
-            itemToStringValue={(surah) => String(surah.number)}
-            isItemEqualToValue={(surah, selectedSurah) =>
-                surah.number === selectedSurah.number
-            }
-            filter={(surah, query) =>
-                normalizeSearchText(
-                    `${surah.number} ${surah.name} ${surah.englishName}`,
-                ).includes(normalizeSearchText(query))
-            }
-            autoHighlight
-        >
-            <ComboboxInput
-                aria-label={t("searchSurah")}
-                placeholder={t("searchSurah")}
-                className="mt-2 h-12 w-full rounded-xl border-0 bg-background/70 shadow-none ring-1 ring-border/60 focus-within:ring-primary/40"
-            />
-            <ComboboxContent
-                dir={locale === "ar" ? "rtl" : "ltr"}
-                className="w-[min(24rem,calc(100vw-2rem))] min-w-0 rounded-xl bg-popover/98 p-1 shadow-xl ring-primary/10 backdrop-blur-md"
-            >
-                <ComboboxEmpty className="px-4 py-7">
-                    {t("noSurahs")}
-                </ComboboxEmpty>
-                <ComboboxList className="max-h-72 p-1">
-                    {(surah: SurahOption) => (
-                        <ComboboxItem
-                            key={surah.number}
-                            value={surah}
-                            className="rounded-lg px-3 py-2.5 pe-9 data-highlighted:bg-primary/8"
-                        >
-                            {label(surah)}
-                        </ComboboxItem>
-                    )}
-                </ComboboxList>
-            </ComboboxContent>
-        </Combobox>
-    );
-}
-
-export function AyahCombobox({
-    options,
-    value,
-    onValueChange,
-}: {
-    options: AyahOption[];
-    value: number;
-    onValueChange: (value: number) => void;
-}) {
-    const t = useTranslations("Practice.form");
-    const selected =
-        options.find((ayah) => ayah.number === value) ?? options[0] ?? null;
-
-    return (
-        <Combobox
-            items={options}
-            value={selected}
-            onValueChange={(ayah) => {
-                if (ayah) onValueChange(ayah.number);
-            }}
-            itemToStringLabel={(ayah) => String(ayah.number)}
-            itemToStringValue={(ayah) => String(ayah.number)}
-            isItemEqualToValue={(ayah, selectedAyah) =>
-                ayah.number === selectedAyah.number
-            }
-            autoHighlight
-        >
-            <ComboboxInput
-                inputMode="numeric"
-                aria-label={t("searchAyah")}
-                placeholder={t("searchAyah")}
-                className="mt-2 h-12 w-full rounded-xl border-0 bg-background/70 shadow-none ring-1 ring-border/60 focus-within:ring-primary/40"
-            />
-            <ComboboxContent className="w-(--anchor-width) min-w-0 rounded-xl bg-popover/98 p-1 shadow-xl ring-primary/10 backdrop-blur-md">
-                <ComboboxEmpty className="px-4 py-7">
-                    {t("noAyahs")}
-                </ComboboxEmpty>
-                <ComboboxList className="max-h-64 p-1">
-                    {(ayah: AyahOption) => (
-                        <ComboboxItem
-                            key={ayah.number}
-                            value={ayah}
-                            className="rounded-lg px-3 py-2.5 pe-9 data-highlighted:bg-primary/8"
-                        >
-                            {ayah.number}
-                        </ComboboxItem>
-                    )}
-                </ComboboxList>
-            </ComboboxContent>
-        </Combobox>
-    );
-}
+import type { PracticeAssignment, PracticeKind } from "../types";
+import QuranRangeSelector, { type SurahOption } from "./quran-range-selector";
 
 export default function PracticeRangeForm({
     surahs,
+    navigation,
     assignments,
     locale,
 }: {
     surahs: SurahOption[];
+    navigation: QuranNavigationMeta;
     assignments: PracticeAssignment[];
     locale: string;
 }) {
@@ -175,15 +38,6 @@ export default function PracticeRangeForm({
         initialAssignment?.end ?? { surahNumber: 1, ayahNumber: 7 },
     );
     const [isSaving, setIsSaving] = useState(false);
-    const startSurah = surahs.find(
-        (surah) => surah.number === start.surahNumber,
-    );
-    const endSurah = surahs.find((surah) => surah.number === end.surahNumber);
-    const availableEndSurahs = surahs.filter(
-        (surah) => surah.number >= start.surahNumber,
-    );
-    const minimumEndAyah =
-        end.surahNumber === start.surahNumber ? start.ayahNumber : 1;
     const activeAssignment = assignments.find((item) => item.kind === kind);
 
     function changeKind(nextKind: PracticeKind) {
@@ -193,22 +47,6 @@ export default function PracticeRangeForm({
         );
         setStart(savedAssignment?.start ?? { surahNumber: 1, ayahNumber: 1 });
         setEnd(savedAssignment?.end ?? { surahNumber: 1, ayahNumber: 7 });
-    }
-
-    function changeStartSurah(surahNumber: number) {
-        const nextStart = { surahNumber, ayahNumber: 1 };
-        setStart(nextStart);
-        if (referenceOrder(end) < referenceOrder(nextStart)) {
-            setEnd(nextStart);
-        }
-    }
-
-    function changeStartAyah(ayahNumber: number) {
-        const nextStart = { ...start, ayahNumber };
-        setStart(nextStart);
-        if (referenceOrder(end) < referenceOrder(nextStart)) {
-            setEnd(nextStart);
-        }
     }
 
     async function save() {
@@ -261,81 +99,17 @@ export default function PracticeRangeForm({
                 </div>
             </fieldset>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-                {[
-                    {
-                        key: "start" as const,
-                        value: start,
-                        surah: startSurah,
-                        surahOptions: surahs,
-                        minimumAyah: 1,
-                    },
-                    {
-                        key: "end" as const,
-                        value: end,
-                        surah: endSurah,
-                        surahOptions: availableEndSurahs,
-                        minimumAyah: minimumEndAyah,
-                    },
-                ].map((field) => (
-                    <fieldset
-                        key={field.key}
-                        className="rounded-2xl bg-muted/35 p-4 ring-1 ring-border/40 sm:p-5"
-                    >
-                        <legend className="px-2 text-sm font-semibold text-primary">
-                            {t(`${field.key}.title`)}
-                        </legend>
-                        <div className="mt-1 text-xs font-medium text-muted-foreground">
-                            <p>{t("surah")}</p>
-                            <SurahCombobox
-                                options={field.surahOptions}
-                                value={field.value.surahNumber}
-                                locale={locale}
-                                onValueChange={(surahNumber) => {
-                                    if (field.key === "start") {
-                                        changeStartSurah(surahNumber);
-                                    } else {
-                                        setEnd({
-                                            surahNumber,
-                                            ayahNumber:
-                                                surahNumber ===
-                                                start.surahNumber
-                                                    ? start.ayahNumber
-                                                    : 1,
-                                        });
-                                    }
-                                }}
-                            />
-                        </div>
-                        <div className="mt-4 text-xs font-medium text-muted-foreground">
-                            <p>{t("ayah")}</p>
-                            <AyahCombobox
-                                options={Array.from(
-                                    {
-                                        length: Math.max(
-                                            0,
-                                            (field.surah?.numberOfAyahs ?? 0) -
-                                                field.minimumAyah +
-                                                1,
-                                        ),
-                                    },
-                                    (_, index) => ({
-                                        number: field.minimumAyah + index,
-                                    }),
-                                )}
-                                value={field.value.ayahNumber}
-                                onValueChange={(ayahNumber) => {
-                                    if (field.key === "start") {
-                                        changeStartAyah(ayahNumber);
-                                    } else {
-                                        setEnd({ ...end, ayahNumber });
-                                    }
-                                }}
-                            />
-                        </div>
-                    </fieldset>
-                ))}
-            </div>
+            <QuranRangeSelector
+                surahs={surahs}
+                navigation={navigation}
+                locale={locale}
+                start={start}
+                end={end}
+                onChange={(range) => {
+                    setStart(range.start);
+                    setEnd(range.end);
+                }}
+            />
 
             <div className="flex justify-end">
                 <Button

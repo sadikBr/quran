@@ -34,8 +34,12 @@ import getGroupAssignments, {
     type GroupAssignmentSummary,
 } from "@/features/groups/server/get-group-assignments";
 import { getGroupForUser } from "@/features/groups/server/get-groups";
+import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
-import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
+import {
+    getWarshChapters,
+    getWarshNavigationMeta,
+} from "@/features/quran/server/get-warsh-mushaf";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
@@ -106,10 +110,18 @@ export default async function GroupPage({
         settings: homeT("account.settings"),
         signOut: homeT("account.signOut"),
     };
-    const [assignments, surahs, warshChapters] = await Promise.all([
+    const [
+        assignments,
+        surahs,
+        warshChapters,
+        hafsNavigation,
+        warshNavigation,
+    ] = await Promise.all([
         getGroupAssignments(group.id, session.user.id, isAdmin),
         getSurahsMeta(),
         isAdmin ? getWarshChapters() : Promise.resolve([]),
+        isAdmin ? getQuranNavigationMeta() : Promise.resolve(null),
+        isAdmin ? getWarshNavigationMeta() : Promise.resolve(null),
     ]);
     const warshCounts = new Map(
         warshChapters.map((chapter) => [chapter.id, chapter.verses.length]),
@@ -589,7 +601,7 @@ export default async function GroupPage({
                             </div>
                         )}
 
-                        {isAdmin && (
+                        {isAdmin && hafsNavigation && warshNavigation && (
                             <details className="group/create mt-6 overflow-hidden rounded-2xl bg-primary/[0.055] ring-1 ring-primary/12">
                                 <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 outline-none hover:bg-primary/[0.04] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
                                     <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -610,6 +622,10 @@ export default async function GroupPage({
                                         groupId={group.id}
                                         members={group.members}
                                         surahs={assignmentSurahs}
+                                        navigationByRiwayah={{
+                                            hafs: hafsNavigation,
+                                            warsh: warshNavigation,
+                                        }}
                                         locale={preferences.language}
                                     />
                                 </div>
