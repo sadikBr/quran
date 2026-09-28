@@ -3,7 +3,6 @@
 import {
     ArrowRight,
     Bookmark,
-    BookOpen,
     Check,
     ChevronLeft,
     ChevronRight,
@@ -178,6 +177,48 @@ export default function SavedAyahsSection({
         setConfirmingCollectionId(null);
         toast.success(t("saved.collectionDeleted", { name: collection.name }));
         router.refresh();
+    }
+
+    if (savedAyahs.length === 0) {
+        return (
+            <section
+                className="mt-12 sm:mt-16"
+                aria-labelledby="saved-ayahs-title"
+            >
+                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                    {t("saved.eyebrow")}
+                </p>
+                <div className="mt-4 grid gap-5 border-primary/15 border-t pt-6 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <Bookmark aria-hidden="true" className="size-5" />
+                    </span>
+                    <div className="min-w-0">
+                        <h2
+                            id="saved-ayahs-title"
+                            className="text-xl font-semibold tracking-tight"
+                        >
+                            {t("saved.emptyTitle")}
+                        </h2>
+                        <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+                            {t("saved.emptyDescription")}
+                        </p>
+                    </div>
+                    <Button
+                        asChild
+                        variant="ghost"
+                        className="w-fit rounded-full px-4 text-primary hover:text-primary"
+                    >
+                        <Link href="/quran">
+                            {t("saved.emptyAction")}
+                            <ArrowRight
+                                aria-hidden="true"
+                                className={locale === "ar" ? "rotate-180" : ""}
+                            />
+                        </Link>
+                    </Button>
+                </div>
+            </section>
+        );
     }
 
     return (
@@ -462,21 +503,7 @@ export default function SavedAyahsSection({
                 </div>
             )}
 
-            {savedAyahs.length === 0 ? (
-                <div className="flex gap-4 py-9">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        <BookOpen aria-hidden="true" className="size-5" />
-                    </span>
-                    <div>
-                        <h3 className="font-semibold">
-                            {t("saved.emptyTitle")}
-                        </h3>
-                        <p className="mt-1 max-w-lg text-sm leading-6 text-muted-foreground">
-                            {t("saved.emptyDescription")}
-                        </p>
-                    </div>
-                </div>
-            ) : filteredAyahs.length === 0 ? (
+            {filteredAyahs.length === 0 ? (
                 <div className="flex flex-col items-center py-12 text-center">
                     <span className="flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground">
                         <SearchX aria-hidden="true" className="size-5" />

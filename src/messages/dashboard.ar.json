@@ -62,6 +62,7 @@
             "unfiled": "بلا مجموعة",
             "emptyTitle": "لم تحفظ أي آية بعد",
             "emptyDescription": "افتح خيارات أي آية أثناء القراءة لتحفظها أو تدوّن خاطرة حولها.",
+            "emptyAction": "افتح المصحف",
             "noSearchResults": "لا توجد آيات تطابق بحثك.",
             "clearSearch": "مسح البحث وخيارات التصفية",
             "ayah": "الآية {number, number}",

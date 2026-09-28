@@ -113,40 +113,42 @@ export default async function GroupsPage({
                     </div>
 
                     {groups.length > 0 ? (
-                        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+                        <div className="mt-10 divide-y divide-border/60 border-border/60 border-y">
                             {groups.map((group) => (
                                 <article
                                     key={group.id}
-                                    className="group relative overflow-hidden rounded-3xl bg-primary/[0.06] p-6 ring-1 ring-primary/12 transition-colors hover:bg-primary/[0.09]"
+                                    className="group grid gap-5 px-2 py-6 transition-colors hover:bg-muted/20 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:px-3"
                                 >
-                                    <div className="flex items-start justify-between gap-4">
-                                        <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                                            <UsersRound className="size-5" />
-                                        </span>
-                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-background/60 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
-                                            {group.role === "admin" && (
-                                                <Shield className="size-3 text-primary" />
-                                            )}
-                                            {t(`role.${group.role}`)}
-                                        </span>
-                                    </div>
-                                    <h2 className="mt-5 text-xl font-semibold">
-                                        {group.name}
-                                    </h2>
-                                    {group.description && (
-                                        <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
-                                            {group.description}
+                                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                        <UsersRound className="size-5" />
+                                    </span>
+                                    <div className="min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h2 className="text-lg font-semibold">
+                                                {group.name}
+                                            </h2>
+                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-background/60 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
+                                                {group.role === "admin" && (
+                                                    <Shield className="size-3 text-primary" />
+                                                )}
+                                                {t(`role.${group.role}`)}
+                                            </span>
+                                        </div>
+                                        {group.description && (
+                                            <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
+                                                {group.description}
+                                            </p>
+                                        )}
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            {t("members", {
+                                                count: group.memberCount,
+                                            })}
                                         </p>
-                                    )}
-                                    <p className="mt-4 text-sm text-muted-foreground">
-                                        {t("members", {
-                                            count: group.memberCount,
-                                        })}
-                                    </p>
+                                    </div>
                                     <Button
                                         asChild
                                         variant="ghost"
-                                        className="mt-5 -ms-3 rounded-xl text-primary hover:text-primary"
+                                        className="w-fit rounded-full text-primary hover:text-primary"
                                     >
                                         <Link href={`/groups/${group.id}`}>
                                             {t("open")}
@@ -162,16 +164,18 @@ export default async function GroupsPage({
                             ))}
                         </div>
                     ) : (
-                        <div className="mt-10 rounded-3xl bg-primary/[0.06] p-7 text-center ring-1 ring-primary/12 sm:p-10">
-                            <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                                <UsersRound className="size-6" />
+                        <div className="mt-10 flex items-start gap-4 border-primary/15 border-t pt-6">
+                            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                <UsersRound className="size-5" />
                             </span>
-                            <h2 className="mt-5 text-xl font-semibold">
-                                {t("emptyTitle")}
-                            </h2>
-                            <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">
-                                {t("emptyDescription")}
-                            </p>
+                            <div>
+                                <h2 className="text-xl font-semibold">
+                                    {t("emptyTitle")}
+                                </h2>
+                                <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
+                                    {t("emptyDescription")}
+                                </p>
+                            </div>
                         </div>
                     )}
 

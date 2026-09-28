@@ -1,10 +1,11 @@
 import {
     ArrowRight,
+    BookMarked,
     BookOpen,
     BookText,
-    Headphones,
-    Languages,
+    MoonStar,
     Search,
+    UsersRound,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -20,21 +21,20 @@ import getReadingProgress from "@/features/reading-progress/server/get-reading-p
 import getPreferences from "@/features/settings/server/get-preferences";
 import getDailyWird from "@/features/wird/server/get-daily-wird";
 import { getMessages, getTextDirection } from "@/i18n/config";
-import QuranInfo from "@/lib/quran-info";
 import { cn } from "@/lib/utils";
 
 const readerTools = [
     {
-        icon: BookOpen,
-        key: "place",
+        icon: MoonStar,
+        key: "rhythm",
     },
     {
-        icon: Headphones,
-        key: "recitation",
+        icon: BookMarked,
+        key: "practice",
     },
     {
-        icon: Languages,
-        key: "meaning",
+        icon: UsersRound,
+        key: "groups",
     },
 ] as const;
 
@@ -214,23 +214,47 @@ export default async function Home() {
                             </p>
                         </div>
 
-                        <div className="me-auto max-w-2xl pt-16">
+                        <div className="me-auto max-w-3xl pt-12 pb-12 sm:pt-16 sm:pb-16">
                             <p className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                                 <span className="h-px w-8 bg-primary" />
                                 {t("hero.eyebrow")}
                             </p>
-                            <h1 className="text-4xl font-semibold leading-[1.04] tracking-tight text-balance sm:text-6xl lg:text-7xl">
+                            <h1 className="text-4xl font-semibold leading-[1.08] tracking-tight text-balance sm:text-6xl lg:text-7xl">
                                 {t("hero.title")}
                             </h1>
                             <p className="mt-6 max-w-xl text-base leading-7 text-foreground/70 sm:text-lg sm:leading-8 dark:text-white/70">
                                 {t("hero.description")}
                             </p>
 
-                            <div className="mt-8 flex flex-wrap gap-3">
+                            <div className="mt-7 flex items-center gap-3 text-foreground/70 dark:text-white/70">
+                                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-background/30 text-primary backdrop-blur-sm dark:bg-white/10">
+                                    {hasPendingWird ? (
+                                        <MoonStar className="size-4" />
+                                    ) : (
+                                        <BookOpen className="size-4" />
+                                    )}
+                                </span>
+                                <div>
+                                    <p className="text-[0.62rem] font-semibold tracking-[0.14em] uppercase">
+                                        {hasPendingWird
+                                            ? t("hero.todayWird")
+                                            : savedNumber === null
+                                              ? t("progress.startingPlace")
+                                              : t("progress.continueFrom")}
+                                    </p>
+                                    <p className="mt-0.5 text-sm font-semibold text-foreground dark:text-white">
+                                        {hasPendingWird
+                                            ? t("hero.wirdReady")
+                                            : readingPlace}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 grid gap-2 sm:flex sm:flex-wrap sm:gap-3">
                                 <Button
                                     asChild
                                     size="lg"
-                                    className="h-12 rounded-full px-7 shadow-lg shadow-black/20"
+                                    className="h-12 w-full rounded-full px-7 shadow-lg shadow-black/20 sm:w-auto"
                                 >
                                     <Link href={href}>
                                         {continueReadingLabel}
@@ -247,7 +271,7 @@ export default async function Home() {
                                     asChild
                                     size="lg"
                                     variant="ghost"
-                                    className="h-12 rounded-full border border-foreground/15 bg-background/20 px-7 text-foreground hover:bg-background/40 hover:text-foreground dark:border-white/15 dark:bg-white/8 dark:text-white dark:hover:bg-white/14 dark:hover:text-white"
+                                    className="h-12 w-full rounded-full border border-foreground/15 bg-background/20 px-7 text-foreground hover:bg-background/40 hover:text-foreground sm:w-auto dark:border-white/15 dark:bg-white/8 dark:text-white dark:hover:bg-white/14 dark:hover:text-white"
                                 >
                                     <Link href="/quran">
                                         {t("hero.explore")}
@@ -256,8 +280,8 @@ export default async function Home() {
                                 <Button
                                     asChild
                                     size="lg"
-                                    variant="ghost"
-                                    className="h-12 rounded-full px-5 text-foreground/75 hover:bg-background/35 hover:text-foreground dark:text-white/75 dark:hover:bg-white/10 dark:hover:text-white"
+                                    variant="link"
+                                    className="h-12 justify-start rounded-full px-3 text-foreground/75 hover:text-foreground sm:w-auto dark:text-white/75 dark:hover:text-white"
                                 >
                                     <Link href="/quran/search">
                                         <Search
@@ -267,42 +291,6 @@ export default async function Home() {
                                         {t("hero.search")}
                                     </Link>
                                 </Button>
-                            </div>
-                        </div>
-
-                        <div className="mt-12 mb-12 flex flex-wrap gap-x-10 gap-y-5 text-foreground/65 sm:mb-16 lg:mb-20 dark:text-white/70">
-                            <div>
-                                <p className="text-[0.62rem] font-semibold tracking-[0.16em] uppercase">
-                                    {savedNumber === null
-                                        ? t("progress.startingPlace")
-                                        : t("progress.continueFrom")}
-                                </p>
-                                <p className="mt-1 text-sm font-semibold text-foreground dark:text-white">
-                                    {readingPlace}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-[0.62rem] font-semibold tracking-[0.16em] uppercase">
-                                    {t("progress.readingMode")}
-                                </p>
-                                <p className="mt-1 text-sm font-semibold text-foreground capitalize dark:text-white">
-                                    {t(
-                                        preferences.readingMode === "page"
-                                            ? "progress.modePage"
-                                            : "progress.modeSurah",
-                                    )}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-[0.62rem] font-semibold tracking-[0.16em] uppercase">
-                                    {t("progress.completeText")}
-                                </p>
-                                <p className="mt-1 text-sm font-semibold text-foreground dark:text-white">
-                                    {t("progress.textSummary", {
-                                        surahs: QuranInfo.maxSurahNumber,
-                                        pages: QuranInfo.maxPageNumber,
-                                    })}
-                                </p>
                             </div>
                         </div>
                     </div>

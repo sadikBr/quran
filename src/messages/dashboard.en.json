@@ -62,6 +62,7 @@
             "unfiled": "Unfiled",
             "emptyTitle": "Nothing saved yet",
             "emptyDescription": "Open an ayah’s actions while reading to bookmark it or write a private reflection.",
+            "emptyAction": "Open the Quran",
             "noSearchResults": "No saved ayahs match this search.",
             "clearSearch": "Clear search and filters",
             "ayah": "Ayah {number, number}",

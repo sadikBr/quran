@@ -11,9 +11,11 @@
         },
         "hero": {
             "intro": "A quiet place to read, listen, and reflect",
-            "eyebrow": "Read without the noise",
-            "title": "Make room for the Quran.",
-            "description": "A focused reader that keeps the Arabic clear, remembers your place, and brings recitation, translation, and tafsir close when you need them.",
+            "eyebrow": "Your Quran journey, in one place",
+            "title": "Read, memorize, and keep going together.",
+            "description": "A calm reader for your daily Wird, focused memorization practice, and the weekly work you share with your Quran circle.",
+            "todayWird": "Today’s Wird",
+            "wirdReady": "Your daily portion is ready",
             "beginReading": "Begin reading",
             "continueReading": "Continue reading",
             "startWird": "Read today’s Wird",
@@ -33,9 +35,24 @@
             "textSummary": "{surahs, number} surahs · {pages, number} pages"
         },
         "tools": {
-            "eyebrow": "Made for returning",
-            "title": "Everything useful. Nothing between you and the page.",
-            "description": "The reader stays simple by default and reveals more only when you ask for it.",
+            "eyebrow": "From reading to mastery",
+            "title": "A clear path for your daily relationship with the Quran.",
+            "description": "Read at your pace, practise what you memorize, and keep up with your circle without letting the tools become noise.",
+            "rhythm": {
+                "eyebrow": "A Wird with clear boundaries",
+                "title": "Build a daily rhythm that fits your life.",
+                "description": "Choose your portion once, then return each day to a clear starting point and saved progress."
+            },
+            "practice": {
+                "eyebrow": "Practise with intention",
+                "title": "New memorization or revision.",
+                "description": "Choose an exact range, hide the text while reciting, and reveal it only when you need a prompt."
+            },
+            "groups": {
+                "eyebrow": "Community and accountability",
+                "title": "Weekly work tailored to every member.",
+                "description": "Admins prepare an appropriate range for each learner, listen to their recitation, and decide what is complete or needs more revision."
+            },
             "place": {
                 "eyebrow": "Your place is remembered",
                 "title": "Leave and return without losing the thread.",

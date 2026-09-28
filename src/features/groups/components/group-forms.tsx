@@ -67,17 +67,17 @@ export default function GroupForms({
     }
 
     return (
-        <section className="mt-10 overflow-hidden rounded-3xl bg-muted/40 p-2 ring-1 ring-border/50 sm:p-3">
-            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-background/45 p-1.5">
+        <section className="mt-14 border-primary/15 border-t pt-6 sm:mt-16">
+            <div className="grid grid-cols-2 gap-1 rounded-full bg-muted/50 p-1 sm:inline-grid sm:min-w-80">
                 <button
                     type="button"
                     disabled={isSubmitting}
                     aria-pressed={mode === "create"}
                     onClick={() => setMode("create")}
                     className={cn(
-                        "flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors",
+                        "flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors",
                         mode === "create"
-                            ? "bg-background text-primary shadow-sm"
+                            ? "bg-primary text-primary-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground",
                     )}
                 >
@@ -90,9 +90,9 @@ export default function GroupForms({
                     aria-pressed={mode === "join"}
                     onClick={() => setMode("join")}
                     className={cn(
-                        "flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold transition-colors",
+                        "flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors",
                         mode === "join"
-                            ? "bg-background text-primary shadow-sm"
+                            ? "bg-primary text-primary-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground",
                     )}
                 >
@@ -101,9 +101,9 @@ export default function GroupForms({
                 </button>
             </div>
 
-            <div className="p-4 sm:p-6">
+            <div className="mt-8 grid gap-8 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-12">
                 <div className="flex items-start gap-3">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                         {mode === "create" ? (
                             <UsersRound aria-hidden="true" className="size-5" />
                         ) : (
@@ -124,7 +124,7 @@ export default function GroupForms({
                     <form
                         action={create}
                         aria-busy={isSubmitting}
-                        className="mt-6 space-y-5"
+                        className="space-y-5"
                     >
                         <div>
                             <Label htmlFor="group-name">
@@ -138,7 +138,7 @@ export default function GroupForms({
                                 minLength={2}
                                 maxLength={80}
                                 placeholder={t("create.namePlaceholder")}
-                                className="mt-2 h-12 rounded-xl bg-background/70"
+                                className="mt-2 h-12 rounded-xl bg-muted/30"
                             />
                         </div>
                         <div>
@@ -151,13 +151,13 @@ export default function GroupForms({
                                 maxLength={300}
                                 disabled={isSubmitting}
                                 placeholder={t("create.detailsPlaceholder")}
-                                className="mt-2 min-h-24 rounded-xl bg-background/70"
+                                className="mt-2 min-h-24 rounded-xl bg-muted/30"
                             />
                         </div>
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="h-11 w-full rounded-xl sm:w-auto"
+                            className="h-11 w-full rounded-full sm:w-auto"
                         >
                             {isSubmitting && (
                                 <LoaderCircle className="size-4 animate-spin" />
@@ -173,7 +173,7 @@ export default function GroupForms({
                     <form
                         action={join}
                         aria-busy={isSubmitting}
-                        className="mt-6 space-y-5"
+                        className="space-y-5"
                     >
                         <div>
                             <Label htmlFor="invite-code">
@@ -187,13 +187,13 @@ export default function GroupForms({
                                 defaultValue={initialInviteCode}
                                 placeholder={t("join.codePlaceholder")}
                                 autoCapitalize="characters"
-                                className="mt-2 h-12 rounded-xl bg-background/70 font-mono uppercase tracking-[0.18em]"
+                                className="mt-2 h-12 rounded-xl bg-muted/30 font-mono uppercase tracking-[0.18em]"
                             />
                         </div>
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="h-11 w-full rounded-xl sm:w-auto"
+                            className="h-11 w-full rounded-full sm:w-auto"
                         >
                             {isSubmitting && (
                                 <LoaderCircle className="size-4 animate-spin" />

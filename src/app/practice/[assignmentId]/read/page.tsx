@@ -46,17 +46,20 @@ export default async function PracticeReaderPage({
                 isArabic && "arabic-ui",
             )}
         >
-            <header className="sticky top-0 z-30 border-border/60 border-b bg-background/90 backdrop-blur-md">
-                <div className="mx-auto flex h-16 max-w-4xl items-center justify-between gap-4 px-4">
+            <header className="sticky top-0 z-30 bg-background/92 backdrop-blur-xl">
+                <div className="mx-auto flex h-14 max-w-4xl items-center justify-between gap-4 px-3 sm:px-5">
                     <Link
                         href="/practice"
-                        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground sm:text-sm"
                     >
                         <ArrowLeft
                             aria-hidden="true"
-                            className={cn("size-4", isArabic && "rotate-180")}
+                            className={cn(
+                                "size-3.5 transition-transform group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5",
+                                isArabic && "rotate-180",
+                            )}
                         />
-                        <span className="hidden sm:inline">{t("back")}</span>
+                        <span>{t("back")}</span>
                     </Link>
                     <div className="flex items-center gap-2 text-sm font-semibold">
                         <BookMarked

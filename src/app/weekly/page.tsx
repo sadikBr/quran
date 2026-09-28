@@ -111,18 +111,16 @@ export default async function WeeklyPage() {
             <article
                 key={assignment.id}
                 className={cn(
-                    "relative overflow-hidden rounded-3xl bg-muted/40 p-5 ring-1 ring-border/50 sm:p-6",
+                    "relative px-1 py-6 sm:px-3 sm:py-7",
                     assignment.period === "overdue" &&
-                        "bg-destructive/[0.035] ring-destructive/15",
-                    assignment.status === "submitted" &&
-                        "bg-primary/[0.055] ring-primary/15",
+                        "border-s-2 border-s-destructive/40 ps-4",
                 )}
             >
                 <div className="flex items-start justify-between gap-3">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         <Icon aria-hidden="true" className="size-5" />
                     </span>
-                    <span className="rounded-full bg-background/70 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
+                    <span className="rounded-full bg-muted/60 px-3 py-1 text-xs text-muted-foreground">
                         {t(`card.statuses.${assignment.status}`)}
                     </span>
                 </div>
@@ -286,8 +284,8 @@ export default async function WeeklyPage() {
                         {t("back")}
                     </Link>
 
-                    <div className="mt-9 grid gap-8 md:grid-cols-[minmax(0,1fr)_18rem] md:items-end">
-                        <div className="max-w-2xl">
+                    <div className="mt-9">
+                        <div className="max-w-3xl">
                             <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
                                 {t("eyebrow")}
                             </p>
@@ -298,23 +296,35 @@ export default async function WeeklyPage() {
                                 {t("description")}
                             </p>
                         </div>
-                        <div className="rounded-2xl bg-primary/[0.07] px-5 py-4 ring-1 ring-primary/15">
-                            <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-                                <CalendarDays className="size-4" />
-                                {t("weekRange", {
-                                    start: dateFormatter.format(
-                                        weekly.weekStart,
-                                    ),
-                                    end: dateFormatter.format(weekly.weekEnd),
-                                })}
-                            </div>
-                            <div className="mt-3 flex items-end justify-between gap-4">
-                                <span className="text-xs text-muted-foreground">
-                                    {t("summary.progress")}
+
+                        <div className="mt-7 grid items-center gap-4 border-border/50 border-y py-4 sm:grid-cols-[auto_minmax(8rem,1fr)_auto] sm:gap-6">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-primary">
+                                <span className="inline-flex items-center gap-2">
+                                    <CalendarDays className="size-4" />
+                                    {t("weekRange", {
+                                        start: dateFormatter.format(
+                                            weekly.weekStart,
+                                        ),
+                                        end: dateFormatter.format(
+                                            weekly.weekEnd,
+                                        ),
+                                    })}
                                 </span>
-                                <strong className="text-2xl text-primary">
-                                    {overallPercentage}%
-                                </strong>
+                                {weekly.assignments.length > 0 && (
+                                    <span className="text-muted-foreground">
+                                        {t("summary.active", {
+                                            count: weekly.assignments.length,
+                                        })}
+                                    </span>
+                                )}
+                                {readyCount > 0 && (
+                                    <span className="inline-flex items-center gap-1.5">
+                                        <CheckCircle2 className="size-3.5" />
+                                        {t("summary.ready", {
+                                            count: readyCount,
+                                        })}
+                                    </span>
+                                )}
                             </div>
                             <div
                                 role="progressbar"
@@ -322,99 +332,88 @@ export default async function WeeklyPage() {
                                 aria-valuemin={0}
                                 aria-valuemax={100}
                                 aria-valuenow={overallPercentage}
-                                className="mt-2 h-1.5 overflow-hidden rounded-full bg-background/80"
+                                className="h-1.5 overflow-hidden rounded-full bg-primary/10"
                             >
                                 <div
                                     className="h-full rounded-full bg-primary"
                                     style={{ width: `${overallPercentage}%` }}
                                 />
                             </div>
+                            <strong className="text-2xl font-semibold text-primary tabular-nums sm:text-end">
+                                {overallPercentage}%
+                            </strong>
                         </div>
                     </div>
 
                     {weekly.assignments.length > 0 ? (
-                        <>
-                            <div className="mt-8 flex flex-wrap gap-2">
-                                <span className="rounded-full bg-muted/60 px-4 py-2 text-sm text-muted-foreground ring-1 ring-border/50">
-                                    {t("summary.active", {
-                                        count: weekly.assignments.length,
-                                    })}
-                                </span>
-                                {readyCount > 0 && (
-                                    <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary ring-1 ring-primary/15">
-                                        <CheckCircle2 className="size-4" />
-                                        {t("summary.ready", {
-                                            count: readyCount,
-                                        })}
-                                    </span>
-                                )}
-                            </div>
-
-                            {sectionOrder.map((period) => {
-                                const assignments = weekly.assignments.filter(
-                                    (assignment) =>
-                                        assignment.period === period,
-                                );
-                                if (assignments.length === 0) return null;
-                                const SectionIcon =
-                                    period === "overdue"
-                                        ? AlertCircle
-                                        : period === "this_week"
-                                          ? CalendarCheck2
-                                          : Clock3;
-                                return (
-                                    <section key={period} className="mt-12">
-                                        <div className="flex items-start gap-3">
-                                            <span
-                                                className={cn(
-                                                    "flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary",
-                                                    period === "overdue" &&
-                                                        "bg-destructive/10 text-destructive",
+                        sectionOrder.map((period) => {
+                            const assignments = weekly.assignments.filter(
+                                (assignment) => assignment.period === period,
+                            );
+                            if (assignments.length === 0) return null;
+                            const SectionIcon =
+                                period === "overdue"
+                                    ? AlertCircle
+                                    : period === "this_week"
+                                      ? CalendarCheck2
+                                      : Clock3;
+                            return (
+                                <section key={period} className="mt-12">
+                                    <div className="flex items-start gap-3">
+                                        <span
+                                            className={cn(
+                                                "flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary",
+                                                period === "overdue" &&
+                                                    "bg-destructive/10 text-destructive",
+                                            )}
+                                        >
+                                            <SectionIcon className="size-5" />
+                                        </span>
+                                        <div>
+                                            <h2 className="text-xl font-semibold">
+                                                {t(`sections.${period}.title`)}
+                                            </h2>
+                                            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                                {t(
+                                                    `sections.${period}.description`,
                                                 )}
-                                            >
-                                                <SectionIcon className="size-5" />
-                                            </span>
-                                            <div>
-                                                <h2 className="text-xl font-semibold">
-                                                    {t(
-                                                        `sections.${period}.title`,
-                                                    )}
-                                                </h2>
-                                                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                                    {t(
-                                                        `sections.${period}.description`,
-                                                    )}
-                                                </p>
-                                            </div>
+                                            </p>
                                         </div>
-                                        <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                                            {assignments.map(assignmentCard)}
-                                        </div>
-                                    </section>
-                                );
-                            })}
-                        </>
+                                    </div>
+                                    <div className="mt-5 divide-y divide-border/60 border-border/60 border-y">
+                                        {assignments.map(assignmentCard)}
+                                    </div>
+                                </section>
+                            );
+                        })
                     ) : (
-                        <section className="mt-10 rounded-3xl bg-muted/35 p-8 text-center ring-1 ring-border/50 sm:p-12">
-                            <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                                <CalendarCheck2 className="size-6" />
-                            </span>
-                            <h2 className="mt-5 text-xl font-semibold">
-                                {t("empty.title")}
-                            </h2>
-                            <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">
-                                {t("empty.description")}
-                            </p>
-                            <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
-                                <Button asChild className="rounded-xl">
+                        <section className="mt-8 grid gap-6 py-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:py-8">
+                            <div className="flex items-start gap-4">
+                                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                    <CalendarCheck2 className="size-5" />
+                                </span>
+                                <div>
+                                    <h2 className="text-xl font-semibold">
+                                        {t("empty.title")}
+                                    </h2>
+                                    <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
+                                        {t("empty.description")}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="grid gap-2 sm:flex">
+                                <Button
+                                    asChild
+                                    className="w-full rounded-full sm:w-auto"
+                                >
                                     <Link href="/practice">
                                         {t("empty.practice")}
                                     </Link>
                                 </Button>
                                 <Button
                                     asChild
-                                    variant="outline"
-                                    className="rounded-xl"
+                                    variant="ghost"
+                                    className="w-full rounded-full sm:w-auto"
                                 >
                                     <Link href="/groups">
                                         {t("empty.groups")}

@@ -136,27 +136,35 @@ export default function PracticeReader({
     }
 
     return (
-        <div className="mx-auto w-full max-w-4xl px-3 pb-[max(5rem,env(safe-area-inset-bottom))] sm:px-4">
-            <section className="sticky top-16 z-20 -mx-3 border-border/50 border-b bg-background/92 px-3 py-4 backdrop-blur-md sm:-mx-4 sm:px-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
-                            {t(`kinds.${assignment.kind}`)}
-                        </p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                            {t("progressSummary", {
-                                completed: completedAyahs,
-                                total: ayahs.length,
-                                percentage,
-                            })}
-                        </p>
+        <div className="mx-auto w-full max-w-4xl px-3 pb-[max(5rem,env(safe-area-inset-bottom))] sm:px-5">
+            <section className="sticky top-14 z-20 -mx-3 border-border/45 border-y bg-background/92 px-3 shadow-[0_14px_32px_-30px_hsl(var(--foreground)/0.55)] backdrop-blur-xl sm:-mx-5 sm:px-5">
+                <div className="flex min-h-16 items-center justify-between gap-3 py-2">
+                    <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                        <strong
+                            className="shrink-0 text-lg font-semibold text-primary tabular-nums sm:text-xl"
+                            dir="ltr"
+                        >
+                            {percentage}%
+                        </strong>
+                        <span className="h-7 w-px bg-border/60" />
+                        <div className="min-w-0">
+                            <p className="text-[0.68rem] font-semibold tracking-[0.12em] text-primary uppercase">
+                                {t(`kinds.${assignment.kind}`)}
+                            </p>
+                            <p className="mt-0.5 truncate text-xs text-muted-foreground sm:text-sm">
+                                {t("progressCount", {
+                                    completed: completedAyahs,
+                                    total: ayahs.length,
+                                })}
+                            </p>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-1">
                         <Button
                             type="button"
-                            size="sm"
+                            size="icon"
                             variant={hideText ? "secondary" : "ghost"}
-                            className="rounded-full"
+                            className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary min-[420px]:w-auto min-[420px]:gap-1.5 min-[420px]:px-3"
                             onClick={() => {
                                 setHideText((value) => !value);
                                 setRevealedAyahs(new Set());
@@ -167,7 +175,9 @@ export default function PracticeReader({
                             ) : (
                                 <EyeOff aria-hidden="true" className="size-4" />
                             )}
-                            {t(hideText ? "showText" : "hideText")}
+                            <span className="hidden min-[420px]:inline">
+                                {t(hideText ? "showText" : "hideText")}
+                            </span>
                         </Button>
                         {audioQueue.length > 0 && (
                             <QuranAudioQueue
@@ -175,6 +185,8 @@ export default function PracticeReader({
                                 continuousRecitation={continuousRecitation}
                                 showReadAll
                                 scope="practice"
+                                embedded
+                                className="shrink-0"
                             />
                         )}
                     </div>
@@ -189,10 +201,10 @@ export default function PracticeReader({
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={percentage}
-                    className="mt-3 h-1 overflow-hidden rounded-full bg-muted"
+                    className="absolute inset-x-0 bottom-0 h-0.5 overflow-hidden bg-muted/70"
                 >
                     <div
-                        className="h-full rounded-full bg-primary transition-[width] duration-500"
+                        className="h-full bg-primary transition-[width] duration-500"
                         style={{ width: `${percentage}%` }}
                     />
                 </div>

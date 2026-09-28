@@ -75,6 +75,7 @@
                 "revision": "Revision practice"
             },
             "progressSummary": "{completed, number} of {total, number} ayahs · {percentage, number}%",
+            "progressCount": "{completed, number} of {total, number} ayahs completed",
             "showText": "Show text",
             "hideText": "Hide text",
             "revealAyah": "Reveal ayah {number, number}",

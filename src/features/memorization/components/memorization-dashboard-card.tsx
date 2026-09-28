@@ -23,85 +23,91 @@ export default function MemorizationDashboardCard({
     return (
         <Link
             href="/memorization"
-            className="group relative mt-6 block overflow-hidden rounded-3xl bg-gradient-to-br from-primary/[0.12] via-primary/[0.065] to-muted/30 p-5 outline-none ring-1 ring-primary/15 transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-ring sm:p-7"
+            className="group flex min-h-64 flex-col justify-between bg-black/10 px-6 py-8 text-white outline-none transition-colors hover:bg-black/15 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80 sm:px-10 lg:min-h-0 lg:px-8 lg:py-12"
         >
-            <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-24 -end-20 size-60 rounded-full bg-primary/10 blur-3xl"
-            />
-            <div className="relative grid items-center gap-6 md:grid-cols-[minmax(0,1fr)_auto]">
-                <div className="flex items-start gap-4">
-                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm shadow-primary/20">
-                        {count === 60 ? (
-                            <Trophy className="size-5" />
-                        ) : (
-                            <Sparkles className="size-5" />
-                        )}
+            <div className="flex min-w-0 items-start gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-white">
+                    {count === 60 ? (
+                        <Trophy className="size-5" />
+                    ) : (
+                        <Sparkles className="size-5" />
+                    )}
+                </span>
+                <div className="min-w-0">
+                    <p className="text-xs font-semibold tracking-[0.16em] text-white/65 uppercase">
+                        {labels.eyebrow}
+                    </p>
+                    <h2 className="mt-1 text-lg font-semibold tracking-tight">
+                        {labels.title}
+                    </h2>
+                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/65 sm:text-sm">
+                        {labels.description}
+                    </p>
+                    <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-white">
+                        {labels.open}
+                        <ArrowRight
+                            className={cn(
+                                "size-4 transition-transform group-hover:ltr:translate-x-1 group-hover:rtl:-translate-x-1",
+                                isArabic && "rotate-180",
+                            )}
+                        />
                     </span>
-                    <div className="min-w-0">
-                        <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                            {labels.eyebrow}
-                        </p>
-                        <h2 className="mt-1.5 text-xl font-semibold tracking-tight sm:text-2xl">
-                            {labels.title}
-                        </h2>
-                        <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-                            {labels.description}
-                        </p>
-                        <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
-                            {labels.open}
-                            <ArrowRight
-                                className={cn(
-                                    "size-4 transition-transform group-hover:ltr:translate-x-1 group-hover:rtl:-translate-x-1",
-                                    isArabic && "rotate-180",
-                                )}
-                            />
+                </div>
+            </div>
+
+            <div className="mt-8 flex items-end gap-4">
+                <div
+                    role="progressbar"
+                    aria-label={labels.title}
+                    aria-valuemin={0}
+                    aria-valuemax={60}
+                    aria-valuenow={count}
+                    className="relative grid size-24 shrink-0 place-items-center"
+                >
+                    <svg
+                        aria-hidden="true"
+                        viewBox="0 0 100 100"
+                        className="absolute inset-0 size-full -rotate-90"
+                    >
+                        <circle
+                            cx="50"
+                            cy="50"
+                            r="43"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="5"
+                            className="text-white/15"
+                        />
+                        <circle
+                            cx="50"
+                            cy="50"
+                            r="43"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="5"
+                            strokeLinecap="round"
+                            pathLength="100"
+                            strokeDasharray={`${percentage} 100`}
+                            className="text-white/90"
+                        />
+                    </svg>
+                    <div className="relative text-center" dir="ltr">
+                        {count === 60 && (
+                            <Check className="mx-auto mb-1 size-4 text-white" />
+                        )}
+                        <span className="text-2xl font-bold leading-none tabular-nums">
+                            {count}
+                        </span>
+                        <span className="ms-1 text-xs font-semibold text-white/55 tabular-nums">
+                            /60
                         </span>
                     </div>
                 </div>
-
-                <div className="flex items-center justify-center gap-5 md:justify-end">
-                    <div className="hidden grid-cols-10 gap-1 sm:grid">
-                        {Array.from({ length: 60 }, (_, index) => {
-                            const hizbNumber = index + 1;
-                            return (
-                                <span
-                                    key={hizbNumber}
-                                    aria-hidden="true"
-                                    className={`size-2 rounded-full ${
-                                        completed.has(hizbNumber)
-                                            ? "bg-primary"
-                                            : "bg-foreground/10"
-                                    }`}
-                                />
-                            );
-                        })}
-                    </div>
+                <div className="mb-2 h-1 flex-1 overflow-hidden rounded-full bg-white/15">
                     <div
-                        role="progressbar"
-                        aria-label={labels.title}
-                        aria-valuemin={0}
-                        aria-valuemax={60}
-                        aria-valuenow={count}
-                        className="relative grid size-24 shrink-0 place-items-center rounded-full p-2"
-                        style={{
-                            background: `conic-gradient(var(--primary) ${percentage}%, color-mix(in oklch, var(--muted), transparent 5%) 0)`,
-                        }}
-                    >
-                        <div className="grid size-full place-items-center rounded-full bg-background/95 text-center shadow-inner">
-                            <div>
-                                {count === 60 && (
-                                    <Check className="mx-auto size-4 text-primary" />
-                                )}
-                                <span className="block text-2xl font-bold leading-none">
-                                    {count}
-                                </span>
-                                <span className="mt-1 block text-[0.65rem] font-semibold text-muted-foreground">
-                                    / 60
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                        className="h-full rounded-full bg-white"
+                        style={{ width: `${percentage}%` }}
+                    />
                 </div>
             </div>
         </Link>
