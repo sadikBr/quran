@@ -15,6 +15,7 @@ export interface GroupMemberDetails {
     email: string;
     image: string | null;
     role: GroupRole;
+    riwayah: "hafs" | "warsh";
     joinedAt: Date;
 }
 

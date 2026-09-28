@@ -25,6 +25,8 @@ export const practiceAssignment = pgTable(
         progressSurahNumber: integer("progress_surah_number"),
         progressAyahNumber: integer("progress_ayah_number"),
         status: text("status").notNull().default("in_progress"),
+        instructions: text("instructions"),
+        dueAt: timestamp("due_at", { withTimezone: true }),
         reviewNote: text("review_note"),
         submittedAt: timestamp("submitted_at", { withTimezone: true }),
         reviewedAt: timestamp("reviewed_at", { withTimezone: true }),

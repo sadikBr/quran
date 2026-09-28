@@ -58,6 +58,7 @@ export default async function updatePracticeProgress(input: unknown) {
             progressSurahNumber: reference.surahNumber,
             progressAyahNumber: reference.ayahNumber,
             status: "in_progress",
+            submittedAt: null,
             updatedAt: new Date(),
         })
         .where(

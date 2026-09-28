@@ -2,7 +2,12 @@ import "server-only";
 
 import { and, asc, count, eq, inArray } from "drizzle-orm";
 import db from "@/drizzle/db";
-import { groupMember, memorizationGroup, user } from "@/drizzle/schema";
+import {
+    groupMember,
+    memorizationGroup,
+    user,
+    userSettings,
+} from "@/drizzle/schema";
 import type { GroupDetails, GroupRole, GroupSummary } from "../types";
 
 export async function getGroupsForUser(
@@ -84,10 +89,12 @@ export async function getGroupForUser(
             email: user.email,
             image: user.image,
             role: groupMember.role,
+            riwayah: userSettings.riwayah,
             joinedAt: groupMember.createdAt,
         })
         .from(groupMember)
         .innerJoin(user, eq(groupMember.userId, user.id))
+        .leftJoin(userSettings, eq(groupMember.userId, userSettings.userId))
         .where(eq(groupMember.groupId, groupId))
         .orderBy(asc(user.name));
 
@@ -101,6 +108,7 @@ export async function getGroupForUser(
         members: members.map((member) => ({
             ...member,
             role: member.role as GroupRole,
+            riwayah: member.riwayah ?? "hafs",
         })),
     };
 }

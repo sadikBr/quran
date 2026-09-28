@@ -10,7 +10,10 @@ import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import DeletePracticeButton from "@/features/practice/components/delete-practice-button";
 import PracticeRangeForm from "@/features/practice/components/practice-range-form";
-import { getPracticeAssignments } from "@/features/practice/server/get-practice-assignment";
+import {
+    getAssignedPracticeAssignments,
+    getPracticeAssignments,
+} from "@/features/practice/server/get-practice-assignment";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
@@ -22,10 +25,11 @@ export default async function PracticePage() {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) redirect("/sign-in");
 
-    const [preferences, assignments, readingProgress, surahs] =
+    const [preferences, assignments, assignedWork, readingProgress, surahs] =
         await Promise.all([
             getPreferences(),
             getPracticeAssignments(session.user.id),
+            getAssignedPracticeAssignments(session.user.id),
             getReadingProgress(),
             getSurahsMeta(),
         ]);
@@ -48,6 +52,11 @@ export default async function PracticePage() {
         locale: preferences.language,
         messages,
         namespace: "Home",
+    });
+    const groupsT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Groups.assignments",
     });
     const continueReadingHref = `/quran/${preferences.readingMode}/${
         preferences.readingMode === "page"
@@ -125,6 +134,111 @@ export default async function PracticePage() {
                             {t("description")}
                         </p>
                     </div>
+
+                    {assignedWork.length > 0 && (
+                        <section className="mt-10">
+                            <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                {groupsT("eyebrow")}
+                            </p>
+                            <h2 className="mt-2 text-xl font-semibold">
+                                {groupsT("title")}
+                            </h2>
+                            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                                {assignedWork.map((assignment) => (
+                                    <article
+                                        key={assignment.id}
+                                        className="rounded-3xl bg-primary/[0.07] p-6 ring-1 ring-primary/15"
+                                    >
+                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                            <span className="text-xs font-semibold tracking-[0.12em] text-primary uppercase">
+                                                {groupsT(
+                                                    `kinds.${assignment.kind}`,
+                                                )}
+                                            </span>
+                                            <span className="rounded-full bg-background/70 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
+                                                {groupsT(
+                                                    `statuses.${assignment.status}`,
+                                                )}
+                                            </span>
+                                        </div>
+                                        <h3 className="mt-4 font-semibold leading-7">
+                                            {t("range", {
+                                                startSurah:
+                                                    surahName(
+                                                        assignment.start
+                                                            .surahNumber,
+                                                    ) ?? "",
+                                                startAyah:
+                                                    assignment.start.ayahNumber,
+                                                endSurah:
+                                                    surahName(
+                                                        assignment.end
+                                                            .surahNumber,
+                                                    ) ?? "",
+                                                endAyah:
+                                                    assignment.end.ayahNumber,
+                                            })}
+                                        </h3>
+                                        <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+                                            {assignment.groupName && (
+                                                <p>
+                                                    {groupsT("fromGroup", {
+                                                        group: assignment.groupName,
+                                                    })}
+                                                </p>
+                                            )}
+                                            {assignment.assignedByName && (
+                                                <p>
+                                                    {groupsT("assignedBy", {
+                                                        name: assignment.assignedByName,
+                                                    })}
+                                                </p>
+                                            )}
+                                            {assignment.dueAt && (
+                                                <p>
+                                                    {groupsT("due", {
+                                                        date: new Intl.DateTimeFormat(
+                                                            preferences.language,
+                                                            {
+                                                                dateStyle:
+                                                                    "medium",
+                                                            },
+                                                        ).format(
+                                                            assignment.dueAt,
+                                                        ),
+                                                    })}
+                                                </p>
+                                            )}
+                                        </div>
+                                        {assignment.instructions && (
+                                            <p className="mt-4 rounded-xl bg-background/55 px-4 py-3 text-sm leading-6 text-muted-foreground">
+                                                {assignment.instructions}
+                                            </p>
+                                        )}
+                                        <Button
+                                            asChild
+                                            className="mt-5 rounded-xl"
+                                        >
+                                            <Link
+                                                href={`/practice/${assignment.id}/read`}
+                                            >
+                                                {assignment.progress
+                                                    ? t("continue")
+                                                    : t("start")}
+                                                <ArrowRight
+                                                    className={cn(
+                                                        "size-4",
+                                                        isArabic &&
+                                                            "rotate-180",
+                                                    )}
+                                                />
+                                            </Link>
+                                        </Button>
+                                    </article>
+                                ))}
+                            </div>
+                        </section>
+                    )}
 
                     {assignments.length > 0 && (
                         <div className="mt-10 grid gap-4 lg:grid-cols-2">

@@ -25,6 +25,12 @@ export interface PracticeAssignment {
     end: QuranReference;
     progress: QuranReference | null;
     status: "in_progress" | "submitted" | "completed" | "needs_revision";
+    source: "personal" | "group";
+    groupId: string | null;
+    groupName: string | null;
+    assignedByName: string | null;
+    instructions: string | null;
+    dueAt: Date | null;
 }
 
 export function referenceOrder(reference: QuranReference) {

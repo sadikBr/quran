@@ -1,6 +1,13 @@
 "use client";
 
-import { Check, Eye, EyeOff, MapPin } from "lucide-react";
+import {
+    Check,
+    CheckCircle2,
+    Eye,
+    EyeOff,
+    LoaderCircle,
+    MapPin,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -11,6 +18,7 @@ import getAyahAudioStreams from "@/features/quran/helpers/get-ayah-audio-streams
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
 import type { PracticeReaderGroup } from "../reader-types";
+import submitPracticeAssignment from "../server/submit-practice-assignment";
 import updatePracticeProgress from "../server/update-practice-progress";
 import type { PracticeAssignment, QuranReference } from "../types";
 import { referenceOrder } from "../types";
@@ -29,6 +37,8 @@ export default function PracticeReader({
     const locale = useLocale();
     const t = useTranslations("Practice.reader");
     const [progress, setProgress] = useState(assignment.progress);
+    const [status, setStatus] = useState(assignment.status);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [savingReference, setSavingReference] =
         useState<QuranReference | null>(null);
     const [hideText, setHideText] = useState(assignment.kind === "revision");
@@ -56,6 +66,9 @@ export default function PracticeReader({
     const percentage = ayahs.length
         ? Math.round((completedAyahs / ayahs.length) * 100)
         : 0;
+    const reachedEnd =
+        progress?.surahNumber === assignment.end.surahNumber &&
+        progress?.ayahNumber === assignment.end.ayahNumber;
     const next = ayahs[Math.min(completedAyahs, ayahs.length - 1)];
     const audioQueue = useMemo(
         () =>
@@ -95,7 +108,22 @@ export default function PracticeReader({
         }
 
         setProgress(reference);
+        if (status === "submitted") setStatus("in_progress");
         toast.success(t(result.completed ? "rangeReached" : "saved"));
+    }
+
+    async function submitForReview() {
+        setIsSubmitting(true);
+        const result = await submitPracticeAssignment({
+            assignmentId: assignment.id,
+        });
+        setIsSubmitting(false);
+        if (!result.success) {
+            toast.error(t("submitError"));
+            return;
+        }
+        setStatus("submitted");
+        toast.success(t("submitted"));
     }
 
     function toggleReveal(key: string) {
@@ -158,6 +186,37 @@ export default function PracticeReader({
                     />
                 </div>
             </section>
+
+            {assignment.source === "group" && reachedEnd && (
+                <section className="mt-6 rounded-2xl bg-primary/[0.08] p-5 text-center ring-1 ring-primary/15 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:text-start">
+                    <div>
+                        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-primary sm:justify-start">
+                            <CheckCircle2 className="size-4" />
+                            {t("assignmentReached")}
+                        </div>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                            {t(
+                                status === "submitted"
+                                    ? "awaitingReview"
+                                    : "submitDescription",
+                            )}
+                        </p>
+                    </div>
+                    {status !== "submitted" && (
+                        <Button
+                            type="button"
+                            disabled={isSubmitting}
+                            onClick={submitForReview}
+                            className="mt-4 w-full rounded-xl sm:mt-0 sm:w-auto sm:shrink-0"
+                        >
+                            {isSubmitting && (
+                                <LoaderCircle className="size-4 animate-spin" />
+                            )}
+                            {t(isSubmitting ? "submitting" : "submitForReview")}
+                        </Button>
+                    )}
+                </section>
+            )}
 
             <div className="mt-7 space-y-12">
                 {groups.map((group) => {

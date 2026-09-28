@@ -23,18 +23,18 @@ import {
     referenceOrder,
 } from "../types";
 
-interface SurahOption {
+export interface SurahOption {
     number: number;
     name: string;
     englishName: string;
     numberOfAyahs: number;
 }
 
-interface AyahOption {
+export interface AyahOption {
     number: number;
 }
 
-function SurahCombobox({
+export function SurahCombobox({
     options,
     value,
     locale,
@@ -98,7 +98,7 @@ function SurahCombobox({
     );
 }
 
-function AyahCombobox({
+export function AyahCombobox({
     options,
     value,
     onValueChange,

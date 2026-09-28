@@ -61,6 +61,56 @@
             "updated": "Group membership updated.",
             "failed": "We couldn’t update the group. Please try again."
         },
+        "assignments": {
+            "eyebrow": "WEEKLY WORK",
+            "title": "Member assignments",
+            "description": "Give each learner their own memorization or revision range. Ranges may continue across surahs.",
+            "emptyTitle": "No active assignments",
+            "emptyDescriptionAdmin": "Create the first assignment for a member of this group.",
+            "emptyDescriptionMember": "Your group admin has not assigned you a range yet.",
+            "createTitle": "Create an assignment",
+            "createDescription": "The range will use the selected learner’s riwayah and Quran numbering.",
+            "member": "Learner",
+            "searchMember": "Type a member’s name or email…",
+            "noMembers": "No matching member found.",
+            "kind": "Assignment type",
+            "kinds": {
+                "memorization": "New memorization",
+                "revision": "Revision"
+            },
+            "start": "Range begins",
+            "end": "Range ends",
+            "surah": "Surah",
+            "ayah": "Ayah",
+            "dueDate": "Due date",
+            "instructions": "Instructions (optional)",
+            "instructionsPlaceholder": "Add a short note for this learner…",
+            "submit": "Assign range",
+            "submitting": "Assigning…",
+            "success": "The assignment has been given to this learner.",
+            "error": "We couldn’t create this assignment. Check the selected range and try again.",
+            "assignedTo": "Assigned to {name}",
+            "assignedBy": "Assigned by {name}",
+            "fromGroup": "From {group}",
+            "due": "Due {date}",
+            "riwayah": "{riwayah} numbering",
+            "riwayahs": {
+                "hafs": "Hafs",
+                "warsh": "Warsh"
+            },
+            "open": "Open practice",
+            "delete": "Delete assignment",
+            "deleting": "Deleting…",
+            "deleteConfirm": "Delete this member assignment? Their saved progress for it will also be removed.",
+            "deleteSuccess": "The assignment was deleted.",
+            "deleteError": "We couldn’t delete this assignment.",
+            "statuses": {
+                "in_progress": "In progress",
+                "submitted": "Ready for review",
+                "needs_revision": "Needs more work",
+                "completed": "Completed"
+            }
+        },
         "dashboard": {
             "eyebrow": "Your Quran circles",
             "title": "Learn and revise together",

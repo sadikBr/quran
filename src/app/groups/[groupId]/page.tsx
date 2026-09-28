@@ -1,4 +1,13 @@
-import { ArrowLeft, Shield, UserRound, UsersRound } from "lucide-react";
+import {
+    ArrowLeft,
+    ArrowRight,
+    BookMarked,
+    CalendarDays,
+    RefreshCcw,
+    Shield,
+    UserRound,
+    UsersRound,
+} from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -6,14 +15,20 @@ import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
+import DeleteAssignmentButton from "@/features/groups/components/delete-assignment-button";
 import {
     GroupDangerActions,
     MemberActions,
 } from "@/features/groups/components/group-actions";
 import GroupInvite from "@/features/groups/components/group-invite";
+import MemberAssignmentForm from "@/features/groups/components/member-assignment-form";
+import getGroupAssignments from "@/features/groups/server/get-group-assignments";
 import { getGroupForUser } from "@/features/groups/server/get-groups";
+import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
+import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
@@ -56,6 +71,11 @@ export default async function GroupPage({
         messages,
         namespace: "Home",
     });
+    const practiceT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Practice",
+    });
     const isArabic = preferences.language === "ar";
     const isAdmin = group.role === "admin";
     const canLeave =
@@ -77,6 +97,28 @@ export default async function GroupPage({
         settings: homeT("account.settings"),
         signOut: homeT("account.signOut"),
     };
+    const [assignments, surahs, warshChapters] = await Promise.all([
+        getGroupAssignments(group.id, session.user.id, isAdmin),
+        getSurahsMeta(),
+        isAdmin ? getWarshChapters() : Promise.resolve([]),
+    ]);
+    const warshCounts = new Map(
+        warshChapters.map((chapter) => [chapter.id, chapter.verses.length]),
+    );
+    const assignmentSurahs = surahs.map((surah) => ({
+        number: surah.number,
+        name: surah.name,
+        englishName: surah.englishName,
+        hafsAyahCount: surah.numberOfAyahs,
+        warshAyahCount: warshCounts.get(surah.number) ?? surah.numberOfAyahs,
+    }));
+    const surahName = (surahNumber: number) => {
+        const surah = surahs.find((item) => item.number === surahNumber);
+        return preferences.language === "ar" ? surah?.name : surah?.englishName;
+    };
+    const dateFormatter = new Intl.DateTimeFormat(preferences.language, {
+        dateStyle: "medium",
+    });
 
     return (
         <main
@@ -149,6 +191,153 @@ export default async function GroupPage({
                             <GroupInvite inviteCode={group.inviteCode} />
                         </section>
                     )}
+
+                    <section className="mt-12">
+                        <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                            {t("assignments.eyebrow")}
+                        </p>
+                        <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                            {t("assignments.title")}
+                        </h2>
+                        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                            {t("assignments.description")}
+                        </p>
+
+                        {assignments.length > 0 ? (
+                            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+                                {assignments.map((assignment) => {
+                                    const Icon =
+                                        assignment.kind === "memorization"
+                                            ? BookMarked
+                                            : RefreshCcw;
+                                    const isMine =
+                                        assignment.assigneeId ===
+                                        session.user.id;
+                                    return (
+                                        <article
+                                            key={assignment.id}
+                                            className="rounded-3xl bg-muted/40 p-5 ring-1 ring-border/50 sm:p-6"
+                                        >
+                                            <div className="flex items-start justify-between gap-3">
+                                                <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                                    <Icon className="size-5" />
+                                                </span>
+                                                <span className="rounded-full bg-background/70 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
+                                                    {t(
+                                                        `assignments.statuses.${assignment.status}`,
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <p className="mt-4 text-xs font-semibold text-primary">
+                                                {t("assignments.assignedTo", {
+                                                    name: assignment.assigneeName,
+                                                })}
+                                            </p>
+                                            <h3 className="mt-2 font-semibold leading-7">
+                                                {practiceT("range", {
+                                                    startSurah:
+                                                        surahName(
+                                                            assignment.startSurahNumber,
+                                                        ) ??
+                                                        assignment.startSurahNumber,
+                                                    startAyah:
+                                                        assignment.startAyahNumber,
+                                                    endSurah:
+                                                        surahName(
+                                                            assignment.endSurahNumber,
+                                                        ) ??
+                                                        assignment.endSurahNumber,
+                                                    endAyah:
+                                                        assignment.endAyahNumber,
+                                                })}
+                                            </h3>
+                                            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+                                                {assignment.dueAt && (
+                                                    <span className="inline-flex items-center gap-1.5">
+                                                        <CalendarDays className="size-3.5" />
+                                                        {t("assignments.due", {
+                                                            date: dateFormatter.format(
+                                                                assignment.dueAt,
+                                                            ),
+                                                        })}
+                                                    </span>
+                                                )}
+                                                <span>
+                                                    {t("assignments.riwayah", {
+                                                        riwayah: t(
+                                                            `assignments.riwayahs.${assignment.riwayah}`,
+                                                        ),
+                                                    })}
+                                                </span>
+                                            </div>
+                                            {assignment.instructions && (
+                                                <p className="mt-4 rounded-xl bg-background/55 px-4 py-3 text-sm leading-6 text-muted-foreground">
+                                                    {assignment.instructions}
+                                                </p>
+                                            )}
+                                            {isMine && (
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    className="mt-4 -ms-3 rounded-xl text-primary hover:text-primary"
+                                                >
+                                                    <Link
+                                                        href={`/practice/${assignment.id}/read`}
+                                                    >
+                                                        {t("assignments.open")}
+                                                        <ArrowRight
+                                                            className={cn(
+                                                                "size-4",
+                                                                isArabic &&
+                                                                    "rotate-180",
+                                                            )}
+                                                        />
+                                                    </Link>
+                                                </Button>
+                                            )}
+                                            {isAdmin && (
+                                                <DeleteAssignmentButton
+                                                    groupId={group.id}
+                                                    assignmentId={assignment.id}
+                                                />
+                                            )}
+                                        </article>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="mt-6 rounded-3xl bg-muted/35 p-7 text-center ring-1 ring-border/50">
+                                <BookMarked className="mx-auto size-6 text-primary" />
+                                <h3 className="mt-4 font-semibold">
+                                    {t("assignments.emptyTitle")}
+                                </h3>
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    {t(
+                                        isAdmin
+                                            ? "assignments.emptyDescriptionAdmin"
+                                            : "assignments.emptyDescriptionMember",
+                                    )}
+                                </p>
+                            </div>
+                        )}
+
+                        {isAdmin && (
+                            <div className="mt-8 rounded-3xl bg-primary/[0.06] p-5 ring-1 ring-primary/12 sm:p-7">
+                                <h3 className="text-lg font-semibold">
+                                    {t("assignments.createTitle")}
+                                </h3>
+                                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                    {t("assignments.createDescription")}
+                                </p>
+                                <MemberAssignmentForm
+                                    groupId={group.id}
+                                    members={group.members}
+                                    surahs={assignmentSurahs}
+                                    locale={preferences.language}
+                                />
+                            </div>
+                        )}
+                    </section>
 
                     <section className="mt-10">
                         <h2 className="text-xl font-semibold">
