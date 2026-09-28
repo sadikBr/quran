@@ -7,13 +7,20 @@ import {
     ChevronLeft,
     ChevronRight,
     Ellipsis,
+    FolderHeart,
+    FolderPlus,
+    LoaderCircle,
     NotebookPen,
+    Plus,
     Search,
     SearchX,
+    Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
     Combobox,
@@ -25,7 +32,11 @@ import {
 } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import type { ReadingMode } from "@/features/settings/preferences";
-import type { SavedAyah } from "../types";
+import {
+    createBookmarkCollection,
+    deleteBookmarkCollection,
+} from "../server/manage-bookmark-collections";
+import type { BookmarkCollection, SavedAyah } from "../types";
 import SavedAyahActions from "./saved-ayah-actions";
 
 const AYAH_ITEMS_PER_PAGE = 5;
@@ -42,21 +53,32 @@ function normalizeSearch(value: string) {
 
 export default function SavedAyahsSection({
     savedAyahs,
+    collections: initialCollections,
     readingMode,
 }: {
     savedAyahs: SavedAyah[];
+    collections: BookmarkCollection[];
     readingMode: ReadingMode;
 }) {
     const t = useTranslations("Dashboard");
     const locale = useLocale();
+    const router = useRouter();
     const numberFormatter = useMemo(
         () => new Intl.NumberFormat(locale, { useGrouping: false }),
         [locale],
     );
     const [query, setQuery] = useState("");
     const [surahFilter, setSurahFilter] = useState("all");
+    const [collectionFilter, setCollectionFilter] = useState("all");
+    const [collections, setCollections] = useState(initialCollections);
+    const [isCreatingCollection, setIsCreatingCollection] = useState(false);
+    const [collectionDraft, setCollectionDraft] = useState("");
+    const [pendingCollectionId, setPendingCollectionId] = useState<
+        string | null
+    >(null);
     const [requestedPage, setRequestedPage] = useState(1);
     const [activeAyah, setActiveAyah] = useState<SavedAyah | null>(null);
+    useEffect(() => setCollections(initialCollections), [initialCollections]);
     const surahs = useMemo(
         () =>
             Array.from(
@@ -78,16 +100,24 @@ export default function SavedAyahsSection({
             const matchesSurah =
                 surahFilter === "all" ||
                 ayah.surahNumber.toString() === surahFilter;
+            const matchesCollection =
+                collectionFilter === "all" ||
+                (collectionFilter === "unfiled"
+                    ? ayah.collections.length === 0
+                    : ayah.collections.some(
+                          (collection) => collection.id === collectionFilter,
+                      ));
             const searchableText = normalizeSearch(
                 `${ayah.surahName} ${ayah.surahNumber} ${ayah.ayahNumber} ${ayah.arabicText} ${ayah.reflection ?? ""}`,
             );
 
             return (
                 matchesSurah &&
+                matchesCollection &&
                 (!normalizedQuery || searchableText.includes(normalizedQuery))
             );
         });
-    }, [query, savedAyahs, surahFilter]);
+    }, [collectionFilter, query, savedAyahs, surahFilter]);
     const pageCount = Math.max(
         1,
         Math.ceil(filteredAyahs.length / AYAH_ITEMS_PER_PAGE),
@@ -98,6 +128,51 @@ export default function SavedAyahsSection({
         firstVisibleIndex,
         firstVisibleIndex + AYAH_ITEMS_PER_PAGE,
     );
+
+    async function createCollection() {
+        const name = collectionDraft.trim();
+        if (!name) return;
+        setPendingCollectionId("new");
+        const result = await createBookmarkCollection({ name });
+        setPendingCollectionId(null);
+
+        if (!result.success || !result.collection) {
+            toast.error(t("saved.collectionCreateFailed"));
+            return;
+        }
+
+        setCollections((current) => {
+            if (current.some((item) => item.id === result.collection?.id)) {
+                return current;
+            }
+            return [
+                ...current,
+                { ...result.collection, ayahCount: 0 } as BookmarkCollection,
+            ];
+        });
+        setCollectionDraft("");
+        setIsCreatingCollection(false);
+        toast.success(t("saved.collectionCreated"));
+        router.refresh();
+    }
+
+    async function removeCollection(collection: BookmarkCollection) {
+        setPendingCollectionId(collection.id);
+        const result = await deleteBookmarkCollection(collection.id);
+        setPendingCollectionId(null);
+
+        if (!result.success) {
+            toast.error(t("saved.collectionDeleteFailed"));
+            return;
+        }
+
+        setCollections((current) =>
+            current.filter((item) => item.id !== collection.id),
+        );
+        if (collectionFilter === collection.id) setCollectionFilter("all");
+        toast.success(t("saved.collectionDeleted", { name: collection.name }));
+        router.refresh();
+    }
 
     return (
         <section className="mt-16" aria-labelledby="saved-ayahs-title">
@@ -202,6 +277,150 @@ export default function SavedAyahsSection({
                 )}
             </div>
 
+            {savedAyahs.length > 0 && (
+                <div className="mt-5 rounded-2xl bg-primary/[0.055] p-3.5 ring-1 ring-primary/12 sm:p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                            <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                <FolderHeart className="size-4" />
+                            </span>
+                            <div>
+                                <h3 className="text-sm font-semibold">
+                                    {t("saved.collectionsTitle")}
+                                </h3>
+                                <p className="text-xs text-muted-foreground">
+                                    {t("saved.collectionsDescription")}
+                                </p>
+                            </div>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                                setIsCreatingCollection((value) => !value)
+                            }
+                            className="rounded-xl text-primary hover:text-primary"
+                        >
+                            <Plus />
+                            {t("saved.newCollection")}
+                        </Button>
+                    </div>
+
+                    {isCreatingCollection && (
+                        <form
+                            className="mt-3 flex gap-2 rounded-xl bg-background/70 p-2"
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                createCollection();
+                            }}
+                        >
+                            <Input
+                                autoFocus
+                                value={collectionDraft}
+                                maxLength={40}
+                                onChange={(event) =>
+                                    setCollectionDraft(event.target.value)
+                                }
+                                placeholder={t("saved.collectionPlaceholder")}
+                                aria-label={t("saved.collectionName")}
+                                className="h-10 border-0 bg-transparent shadow-none"
+                            />
+                            <Button
+                                type="submit"
+                                size="sm"
+                                disabled={
+                                    pendingCollectionId === "new" ||
+                                    !collectionDraft.trim()
+                                }
+                                className="h-10 shrink-0 rounded-lg"
+                            >
+                                {pendingCollectionId === "new" ? (
+                                    <LoaderCircle className="animate-spin" />
+                                ) : (
+                                    <FolderPlus />
+                                )}
+                                {t("saved.createCollection")}
+                            </Button>
+                        </form>
+                    )}
+
+                    <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setCollectionFilter("all");
+                                setRequestedPage(1);
+                            }}
+                            className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors ${
+                                collectionFilter === "all"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-background/70 text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            {t("saved.allCollections", {
+                                count: savedAyahs.length,
+                            })}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setCollectionFilter("unfiled");
+                                setRequestedPage(1);
+                            }}
+                            className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors ${
+                                collectionFilter === "unfiled"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-background/70 text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            {t("saved.unfiled")}
+                        </button>
+                        {collections.map((collection) => (
+                            <div
+                                key={collection.id}
+                                className={`flex shrink-0 items-center overflow-hidden rounded-full transition-colors ${
+                                    collectionFilter === collection.id
+                                        ? "bg-primary text-primary-foreground"
+                                        : "bg-background/70 text-muted-foreground"
+                                }`}
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setCollectionFilter(collection.id);
+                                        setRequestedPage(1);
+                                    }}
+                                    className="py-2 ps-3.5 pe-2 text-xs font-semibold hover:text-foreground"
+                                >
+                                    {collection.name}
+                                    <span className="ms-1.5 opacity-65">
+                                        {collection.ayahCount}
+                                    </span>
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={
+                                        pendingCollectionId === collection.id
+                                    }
+                                    onClick={() => removeCollection(collection)}
+                                    aria-label={t("saved.deleteCollection", {
+                                        name: collection.name,
+                                    })}
+                                    className="me-1 flex size-7 items-center justify-center rounded-full opacity-55 transition-opacity hover:bg-destructive/12 hover:text-destructive hover:opacity-100 disabled:opacity-30"
+                                >
+                                    {pendingCollectionId === collection.id ? (
+                                        <LoaderCircle className="size-3 animate-spin" />
+                                    ) : (
+                                        <Trash2 className="size-3" />
+                                    )}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {savedAyahs.length === 0 ? (
                 <div className="flex gap-4 py-9">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -232,6 +451,7 @@ export default function SavedAyahsSection({
                         onClick={() => {
                             setQuery("");
                             setSurahFilter("all");
+                            setCollectionFilter("all");
                             setRequestedPage(1);
                         }}
                     >
@@ -345,6 +565,28 @@ export default function SavedAyahsSection({
                                             </Button>
                                         </div>
                                     </div>
+                                    {ayah.collections.length > 0 && (
+                                        <div className="mt-3 flex flex-wrap gap-1.5">
+                                            {ayah.collections.map(
+                                                (collection) => (
+                                                    <button
+                                                        key={collection.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setCollectionFilter(
+                                                                collection.id,
+                                                            );
+                                                            setRequestedPage(1);
+                                                        }}
+                                                        className="inline-flex items-center gap-1.5 rounded-full bg-primary/8 px-2.5 py-1 text-[0.7rem] font-medium text-primary transition-colors hover:bg-primary/14"
+                                                    >
+                                                        <FolderHeart className="size-3" />
+                                                        {collection.name}
+                                                    </button>
+                                                ),
+                                            )}
+                                        </div>
+                                    )}
                                     <Link
                                         href={href}
                                         className="mt-4 block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"

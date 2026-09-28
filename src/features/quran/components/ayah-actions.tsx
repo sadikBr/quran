@@ -4,8 +4,11 @@ import {
     ArrowLeft,
     Bookmark,
     BookOpenText,
+    Check,
     ChevronDown,
     Copy,
+    FolderHeart,
+    FolderPlus,
     LoaderCircle,
     NotebookPen,
     Pause,
@@ -18,12 +21,20 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+    createBookmarkCollection,
+    updateBookmarkCollections,
+} from "@/features/saved-ayahs/server/manage-bookmark-collections";
 import {
     updateBookmark,
     updateReflection,
 } from "@/features/saved-ayahs/server/update-saved-ayah";
-import type { SavedAyahMetadata } from "@/features/saved-ayahs/types";
+import type {
+    BookmarkCollection,
+    SavedAyahMetadata,
+} from "@/features/saved-ayahs/types";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import getTafsirAyah from "../server/get-tafsir-ayah";
 import type { Edition } from "../types";
@@ -206,6 +217,8 @@ export type AyahActionsProps = {
     canSaveAyah: boolean;
     initialBookmarked: boolean;
     initialReflection: string;
+    initialCollections: BookmarkCollection[];
+    initialCollectionIds: string[];
     savedAyahMetadata: SavedAyahMetadata;
     closeOnCopy?: boolean;
     onSavedAyahChangeAction?: () => void;
@@ -247,6 +260,8 @@ export default function AyahActions({
     canSaveAyah,
     initialBookmarked,
     initialReflection,
+    initialCollections,
+    initialCollectionIds,
     savedAyahMetadata,
     closeOnCopy = false,
     onSavedAyahChangeAction,
@@ -267,11 +282,17 @@ export default function AyahActions({
     });
     const [isChangingTafsir, setIsChangingTafsir] = useState(false);
     const [isReflectionVisible, setIsReflectionVisible] = useState(false);
+    const [isCollectionsVisible, setIsCollectionsVisible] = useState(false);
     const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
+    const [collections, setCollections] = useState(initialCollections);
+    const [collectionIds, setCollectionIds] = useState(initialCollectionIds);
+    const [collectionDraft, setCollectionDraft] = useState("");
     const [reflection, setReflection] = useState(initialReflection);
     const [reflectionDraft, setReflectionDraft] = useState(initialReflection);
     const [isSavingBookmark, setIsSavingBookmark] = useState(false);
     const [isSavingReflection, setIsSavingReflection] = useState(false);
+    const [isSavingCollections, setIsSavingCollections] = useState(false);
+    const [isCreatingCollection, setIsCreatingCollection] = useState(false);
     const {
         activeAyahNumber,
         isPlaying,
@@ -350,6 +371,69 @@ export default function AyahActions({
                 ? t("actions.bookmarked")
                 : t("actions.bookmarkRemoved"),
         );
+        if (!nextBookmarkedState) {
+            setCollectionIds([]);
+            setIsCollectionsVisible(false);
+        } else {
+            setIsCollectionsVisible(true);
+        }
+        onSavedAyahChangeAction?.();
+    }
+
+    async function toggleCollection(collectionId: string) {
+        const previousIds = collectionIds;
+        const nextIds = collectionIds.includes(collectionId)
+            ? collectionIds.filter((id) => id !== collectionId)
+            : [...collectionIds, collectionId];
+        setCollectionIds(nextIds);
+        setIsSavingCollections(true);
+        const result = await updateBookmarkCollections({
+            globalAyahNumber,
+            collectionIds: nextIds,
+        });
+        setIsSavingCollections(false);
+
+        if (!result.success) {
+            setCollectionIds(previousIds);
+            toast.error(t("actions.collectionUpdateFailed"));
+            return;
+        }
+        onSavedAyahChangeAction?.();
+    }
+
+    async function createCollection(suggestedName?: string) {
+        const name = (suggestedName ?? collectionDraft).trim();
+        if (!name) return;
+
+        setIsCreatingCollection(true);
+        const result = await createBookmarkCollection({
+            name,
+            globalAyahNumber,
+        });
+        setIsCreatingCollection(false);
+
+        if (!result.success || !result.collection) {
+            toast.error(t("actions.collectionCreateFailed"));
+            return;
+        }
+        const newCollection = result.collection;
+
+        setCollections((current) => {
+            if (current.some((item) => item.id === newCollection.id)) {
+                return current;
+            }
+            return [
+                ...current,
+                { ...newCollection, ayahCount: 1 } as BookmarkCollection,
+            ];
+        });
+        setCollectionIds((current) =>
+            current.includes(newCollection.id)
+                ? current
+                : [...current, newCollection.id],
+        );
+        setCollectionDraft("");
+        toast.success(t("actions.collectionCreated"));
         onSavedAyahChangeAction?.();
     }
 
@@ -385,6 +469,161 @@ export default function AyahActions({
                 : t("actions.reflectionRemoved"),
         );
         onSavedAyahChangeAction?.();
+    }
+
+    if (isCollectionsVisible) {
+        return (
+            <div dir={direction} className="pb-1">
+                <button
+                    type="button"
+                    onClick={() => setIsCollectionsVisible(false)}
+                    className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                    <ArrowLeft
+                        aria-hidden="true"
+                        className="size-4 rtl:rotate-180"
+                    />
+                    {t("actions.back")}
+                </button>
+                <header className="relative mt-7 pe-9">
+                    <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                        <FolderHeart className="size-5" />
+                    </div>
+                    <h1
+                        id="ayah-actions-title"
+                        className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+                    >
+                        {t("actions.organizeBookmark")}
+                    </h1>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                        {t("actions.organizeDescription")}
+                    </p>
+                </header>
+
+                <div className="mt-6 space-y-2" aria-busy={isSavingCollections}>
+                    {collections.length === 0 ? (
+                        <div className="rounded-2xl bg-muted/40 px-5 py-6 text-center">
+                            <p className="font-medium">
+                                {t("actions.noCollections")}
+                            </p>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                {t("actions.noCollectionsDescription")}
+                            </p>
+                            <div className="mt-4 flex flex-wrap justify-center gap-2">
+                                {(
+                                    [
+                                        "duas",
+                                        "study",
+                                        "memorization",
+                                        "reflections",
+                                    ] as const
+                                ).map((suggestion) => (
+                                    <button
+                                        key={suggestion}
+                                        type="button"
+                                        disabled={isCreatingCollection}
+                                        onClick={() =>
+                                            createCollection(
+                                                t(
+                                                    `actions.collectionSuggestions.${suggestion}`,
+                                                ),
+                                            )
+                                        }
+                                        className="rounded-full bg-background px-3 py-1.5 text-xs font-medium text-primary ring-1 ring-primary/15 transition-colors hover:bg-primary/8 disabled:opacity-50"
+                                    >
+                                        {t(
+                                            `actions.collectionSuggestions.${suggestion}`,
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        collections.map((collection) => {
+                            const selected = collectionIds.includes(
+                                collection.id,
+                            );
+                            return (
+                                <button
+                                    key={collection.id}
+                                    type="button"
+                                    disabled={isSavingCollections}
+                                    aria-pressed={selected}
+                                    onClick={() =>
+                                        toggleCollection(collection.id)
+                                    }
+                                    className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-start transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
+                                        selected
+                                            ? "bg-primary/12 text-foreground ring-1 ring-primary/20"
+                                            : "bg-muted/35 text-foreground hover:bg-muted/60"
+                                    }`}
+                                >
+                                    <span
+                                        className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${
+                                            selected
+                                                ? "bg-primary text-primary-foreground"
+                                                : "bg-background text-muted-foreground"
+                                        }`}
+                                    >
+                                        {selected ? (
+                                            <Check className="size-4" />
+                                        ) : (
+                                            <FolderHeart className="size-4" />
+                                        )}
+                                    </span>
+                                    <span className="min-w-0 flex-1 truncate font-medium">
+                                        {collection.name}
+                                    </span>
+                                </button>
+                            );
+                        })
+                    )}
+                </div>
+
+                <form
+                    className="mt-5 rounded-2xl border border-dashed border-primary/25 bg-primary/[0.035] p-4"
+                    onSubmit={(event) => {
+                        event.preventDefault();
+                        createCollection();
+                    }}
+                >
+                    <label
+                        htmlFor="new-bookmark-collection"
+                        className="text-sm font-semibold"
+                    >
+                        {t("actions.newCollection")}
+                    </label>
+                    <div className="mt-2 flex gap-2">
+                        <Input
+                            id="new-bookmark-collection"
+                            value={collectionDraft}
+                            maxLength={40}
+                            onChange={(event) =>
+                                setCollectionDraft(event.target.value)
+                            }
+                            placeholder={t("actions.collectionPlaceholder")}
+                            className="h-11 bg-background/80"
+                        />
+                        <Button
+                            type="submit"
+                            disabled={
+                                isCreatingCollection || !collectionDraft.trim()
+                            }
+                            className="h-11 shrink-0"
+                        >
+                            {isCreatingCollection ? (
+                                <LoaderCircle className="animate-spin" />
+                            ) : (
+                                <FolderPlus />
+                            )}
+                            <span className="hidden sm:inline">
+                                {t("actions.createCollection")}
+                            </span>
+                        </Button>
+                    </div>
+                </form>
+            </div>
+        );
     }
 
     if (isReflectionVisible) {
@@ -685,6 +924,29 @@ export default function AyahActions({
                         </span>
                     </span>
                 </button>
+                {isBookmarked && (
+                    <button
+                        type="button"
+                        onClick={() => setIsCollectionsVisible(true)}
+                        className="group flex w-full min-w-0 items-center gap-3.5 rounded-xl px-2 py-3 text-start transition-colors hover:bg-primary/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3 sm:py-3.5"
+                    >
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/9 text-primary transition-[background-color,transform] duration-200 group-hover:bg-primary/15 motion-safe:group-hover:-translate-y-0.5 [&_svg]:size-4.5">
+                            <FolderHeart aria-hidden="true" />
+                        </span>
+                        <span className="min-w-0 flex-1 py-0.5">
+                            <span className="block text-sm font-medium leading-5 text-card-foreground sm:text-base sm:leading-6">
+                                {t("actions.organizeBookmark")}
+                            </span>
+                            <span className="mt-0.5 block break-words text-xs leading-5 text-muted-foreground sm:text-sm">
+                                {collectionIds.length > 0
+                                    ? t("actions.inCollections", {
+                                          count: collectionIds.length,
+                                      })
+                                    : t("actions.chooseCollections")}
+                            </span>
+                        </span>
+                    </button>
+                )}
                 <button
                     type="button"
                     onClick={copyArabicText}

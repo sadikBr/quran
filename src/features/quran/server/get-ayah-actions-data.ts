@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { auth } from "@/features/auth/auth";
+import getBookmarkCollections from "@/features/saved-ayahs/server/get-bookmark-collections";
 import getSavedAyah from "@/features/saved-ayahs/server/get-saved-ayah";
 import type { Riwayah } from "@/features/settings/preferences";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -69,15 +70,17 @@ export default async function getAyahActionsData(
             ? stripBasmalaPrefix(ayah.text)
             : ayah.text;
 
-    const [tafsirAyah, tafsirEditions, savedAyah] = await Promise.all([
-        getAyah(ayah.number),
-        session
-            ? getAvailableQuranEditions().then((editions) =>
-                  editions.filter((edition) => edition.type === "tafsir"),
-              )
-            : [],
-        session ? getSavedAyah(session.user.id, ayah.number) : null,
-    ]);
+    const [tafsirAyah, tafsirEditions, savedAyah, bookmarkCollections] =
+        await Promise.all([
+            getAyah(ayah.number),
+            session
+                ? getAvailableQuranEditions().then((editions) =>
+                      editions.filter((edition) => edition.type === "tafsir"),
+                  )
+                : [],
+            session ? getSavedAyah(session.user.id, ayah.number) : null,
+            session ? getBookmarkCollections(session.user.id) : [],
+        ]);
     const savedWarshVerse =
         savedAyah && warshChapter
             ? warshChapter.verses.find(
@@ -121,6 +124,8 @@ export default async function getAyahActionsData(
         canSaveAyah: Boolean(session),
         initialBookmarked: resolvedSavedAyah?.isBookmarked ?? false,
         initialReflection: resolvedSavedAyah?.reflection ?? "",
+        initialCollections: bookmarkCollections,
+        initialCollectionIds: resolvedSavedAyah?.collectionIds ?? [],
         savedAyahMetadata: {
             globalAyahNumber: ayah.number,
             surahNumber,

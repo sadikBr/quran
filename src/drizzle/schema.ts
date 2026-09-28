@@ -1,4 +1,5 @@
 export * from "./schema/auth-schema";
+export * from "./schema/bookmark-collection";
 export * from "./schema/enums";
 export * from "./schema/khatmah-history";
 export * from "./schema/khatmah-plan";

@@ -4,7 +4,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import db from "@/drizzle/db";
-import { savedAyah } from "@/drizzle/schema";
+import { savedAyah, savedAyahCollection } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
 import { bookmarkUpdateSchema, reflectionUpdateSchema } from "../types";
 
@@ -49,6 +49,17 @@ export async function updateBookmark(
                 });
 
             if (!isBookmarked) {
+                await transaction
+                    .delete(savedAyahCollection)
+                    .where(
+                        and(
+                            eq(savedAyahCollection.userId, userId),
+                            eq(
+                                savedAyahCollection.globalAyahNumber,
+                                metadata.globalAyahNumber,
+                            ),
+                        ),
+                    );
                 await transaction
                     .delete(savedAyah)
                     .where(

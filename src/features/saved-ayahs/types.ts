@@ -28,6 +28,14 @@ export const reflectionUpdateSchema = savedAyahMetadataSchema.extend({
 
 export type SavedAyahMetadata = z.infer<typeof savedAyahMetadataSchema>;
 
+export const bookmarkCollectionNameSchema = z.string().trim().min(1).max(40);
+
+export interface BookmarkCollection {
+    id: string;
+    name: string;
+    ayahCount: number;
+}
+
 export interface SavedAyah {
     globalAyahNumber: number;
     surahNumber: number;
@@ -37,4 +45,5 @@ export interface SavedAyah {
     arabicText: string;
     isBookmarked: boolean;
     reflection: string | null;
+    collections: BookmarkCollection[];
 }

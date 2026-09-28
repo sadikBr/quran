@@ -28,6 +28,7 @@ import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import SavedAyahsSection from "@/features/saved-ayahs/components/saved-ayahs-section";
+import getBookmarkCollections from "@/features/saved-ayahs/server/get-bookmark-collections";
 import getSavedAyahs from "@/features/saved-ayahs/server/get-saved-ayahs";
 import getPreferences from "@/features/settings/server/get-preferences";
 import WirdDashboardCard from "@/features/wird/components/wird-dashboard-card";
@@ -105,14 +106,21 @@ export default async function DashboardPage() {
         redirect("/sign-in");
     }
 
-    const [preferences, readingProgress, savedAyahs, surahs, hafsNavigation] =
-        await Promise.all([
-            getPreferences(),
-            getReadingProgress(),
-            getSavedAyahs(session.user.id),
-            getSurahsMeta().catch(() => []),
-            getQuranNavigationMeta().catch(() => null),
-        ]);
+    const [
+        preferences,
+        readingProgress,
+        savedAyahs,
+        bookmarkCollections,
+        surahs,
+        hafsNavigation,
+    ] = await Promise.all([
+        getPreferences(),
+        getReadingProgress(),
+        getSavedAyahs(session.user.id),
+        getBookmarkCollections(session.user.id),
+        getSurahsMeta().catch(() => []),
+        getQuranNavigationMeta().catch(() => null),
+    ]);
     const [
         dailyWird,
         wirdHistory,
@@ -513,6 +521,7 @@ export default async function DashboardPage() {
                     <QuranAudioProvider>
                         <SavedAyahsSection
                             savedAyahs={localizedSavedAyahs}
+                            collections={bookmarkCollections}
                             readingMode={preferences.readingMode}
                         />
                     </QuranAudioProvider>

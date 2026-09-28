@@ -2,7 +2,7 @@ import "server-only";
 
 import { and, eq } from "drizzle-orm";
 import db from "@/drizzle/db";
-import { savedAyah } from "@/drizzle/schema";
+import { savedAyah, savedAyahCollection } from "@/drizzle/schema";
 
 export default async function getSavedAyah(
     userId: string,
@@ -23,5 +23,20 @@ export default async function getSavedAyah(
         )
         .limit(1);
 
-    return result ?? null;
+    if (!result) return null;
+
+    const memberships = await db
+        .select({ collectionId: savedAyahCollection.collectionId })
+        .from(savedAyahCollection)
+        .where(
+            and(
+                eq(savedAyahCollection.userId, userId),
+                eq(savedAyahCollection.globalAyahNumber, globalAyahNumber),
+            ),
+        );
+
+    return {
+        ...result,
+        collectionIds: memberships.map((item) => item.collectionId),
+    };
 }
