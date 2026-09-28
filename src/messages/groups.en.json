@@ -106,6 +106,7 @@
             "readyCount": "{count, plural, one {# ready for review} other {# ready for review}}",
             "noCurrentForMember": "This member has no current assignment.",
             "history": "Completed history ({count, number})",
+            "completedOn": "Completed {date}",
             "delete": "Delete assignment",
             "deleting": "Deleting…",
             "deleteConfirm": "Delete this member assignment? Their saved progress for it will also be removed.",

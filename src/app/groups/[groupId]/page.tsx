@@ -215,7 +215,19 @@ export default async function GroupPage({
                             })}
                         </h4>
                         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
-                            {assignment.dueAt && (
+                            {isHistory && assignment.reviewedAt ? (
+                                <span className="inline-flex items-center gap-1.5">
+                                    <CalendarDays
+                                        aria-hidden="true"
+                                        className="size-3.5"
+                                    />
+                                    {t("assignments.completedOn", {
+                                        date: dateFormatter.format(
+                                            assignment.reviewedAt,
+                                        ),
+                                    })}
+                                </span>
+                            ) : assignment.dueAt ? (
                                 <span className="inline-flex items-center gap-1.5">
                                     <CalendarDays
                                         aria-hidden="true"
@@ -227,7 +239,7 @@ export default async function GroupPage({
                                         ),
                                     })}
                                 </span>
-                            )}
+                            ) : null}
                             <span>
                                 {t("assignments.riwayah", {
                                     riwayah: t(
@@ -387,11 +399,18 @@ export default async function GroupPage({
                                                     assignment.status !==
                                                     "completed",
                                             );
-                                        const completedAssignments =
-                                            memberWork.filter(
+                                        const completedAssignments = memberWork
+                                            .filter(
                                                 (assignment) =>
                                                     assignment.status ===
                                                     "completed",
+                                            )
+                                            .sort(
+                                                (first, second) =>
+                                                    (second.reviewedAt?.getTime() ??
+                                                        0) -
+                                                    (first.reviewedAt?.getTime() ??
+                                                        0),
                                             );
                                         const readyCount =
                                             currentAssignments.filter(
