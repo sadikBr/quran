@@ -26,7 +26,7 @@ export default function QuranAudioQueue({
     queue: QuranAudioQueueItem[];
     continuousRecitation: boolean;
     showReadAll?: boolean;
-    scope?: "page" | "surah" | "wird";
+    scope?: "page" | "surah" | "wird" | "practice";
     className?: string;
     embedded?: boolean;
 }) {
@@ -59,7 +59,9 @@ export default function QuranAudioQueue({
             ? "audio.surahRecitation"
             : scope === "wird"
               ? "audio.wirdRecitation"
-              : "audio.pageRecitation",
+              : scope === "practice"
+                ? "audio.practiceRecitation"
+                : "audio.pageRecitation",
     );
 
     return (

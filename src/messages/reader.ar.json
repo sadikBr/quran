@@ -92,6 +92,7 @@
             "pageRecitation": "تلاوة الصفحة كاملة",
             "surahRecitation": "تلاوة السورة كاملة",
             "wirdRecitation": "تلاوة الورد",
+            "practiceRecitation": "تلاوة مقطع التدرّب",
             "restart": "إعادة {scope} من البداية",
             "retry": "إعادة تشغيل {scope}",
             "loading": "جارٍ إعداد {scope}",

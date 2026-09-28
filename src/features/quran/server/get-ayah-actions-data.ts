@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { auth } from "@/features/auth/auth";
 import getSavedAyah from "@/features/saved-ayahs/server/get-saved-ayah";
+import type { Riwayah } from "@/features/settings/preferences";
 import getPreferences from "@/features/settings/server/get-preferences";
 import type { AyahActionsProps } from "../components/ayah-actions";
 import { getPlainQuranText } from "../components/tajweed-text";
@@ -27,16 +28,18 @@ export type AyahActionsData = Omit<
 export default async function getAyahActionsData(
     surahNumber: number,
     ayahNumber: number,
+    riwayahOverride?: Riwayah,
 ): Promise<AyahActionsData | null> {
     const [preferences, session] = await Promise.all([
         getPreferences(),
         auth.api.getSession({ headers: await headers() }),
     ]);
+    const riwayah = riwayahOverride ?? preferences.riwayah;
     const [{ ayahs, surahMeta }, { reciters }, warshChapter] =
         await Promise.all([
             getSurahData(String(surahNumber), preferences.arabicEdition),
             getAvailableReciters(),
-            preferences.riwayah === "warsh"
+            riwayah === "warsh"
                 ? getWarshChapter(surahNumber)
                 : Promise.resolve(null),
         ]);

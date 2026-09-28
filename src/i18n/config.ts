@@ -3,6 +3,7 @@ import englishAuthMessages from "@/messages/auth.en.json";
 import englishCommonMessages from "@/messages/common.en.json";
 import englishDashboardMessages from "@/messages/dashboard.en.json";
 import englishHomeMessages from "@/messages/en.json";
+import englishPracticeMessages from "@/messages/practice.en.json";
 import englishProfileMessages from "@/messages/profile.en.json";
 import englishReaderMessages from "@/messages/reader.en.json";
 import englishSettingsMessages from "@/messages/settings.en.json";
@@ -14,6 +15,7 @@ const englishMessages = {
     ...englishHomeMessages,
     ...englishDashboardMessages,
     ...englishProfileMessages,
+    ...englishPracticeMessages,
     ...englishReaderMessages,
     ...englishSettingsMessages,
     ...englishWirdMessages,
@@ -27,17 +29,27 @@ const messageLoaders: Record<
 > = {
     en: async () => ({ default: englishMessages }),
     ar: async () => {
-        const [auth, common, home, dashboard, profile, reader, settings, wird] =
-            await Promise.all([
-                import("@/messages/auth.ar.json"),
-                import("@/messages/common.ar.json"),
-                import("@/messages/ar.json"),
-                import("@/messages/dashboard.ar.json"),
-                import("@/messages/profile.ar.json"),
-                import("@/messages/reader.ar.json"),
-                import("@/messages/settings.ar.json"),
-                import("@/messages/wird.ar.json"),
-            ]);
+        const [
+            auth,
+            common,
+            home,
+            dashboard,
+            profile,
+            practice,
+            reader,
+            settings,
+            wird,
+        ] = await Promise.all([
+            import("@/messages/auth.ar.json"),
+            import("@/messages/common.ar.json"),
+            import("@/messages/ar.json"),
+            import("@/messages/dashboard.ar.json"),
+            import("@/messages/profile.ar.json"),
+            import("@/messages/practice.ar.json"),
+            import("@/messages/reader.ar.json"),
+            import("@/messages/settings.ar.json"),
+            import("@/messages/wird.ar.json"),
+        ]);
 
         return {
             default: {
@@ -46,6 +58,7 @@ const messageLoaders: Record<
                 ...home.default,
                 ...dashboard.default,
                 ...profile.default,
+                ...practice.default,
                 ...reader.default,
                 ...settings.default,
                 ...wird.default,

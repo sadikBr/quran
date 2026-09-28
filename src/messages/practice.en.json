@@ -1,0 +1,86 @@
+{
+    "Practice": {
+        "header": "Quran practice",
+        "back": "Back to dashboard",
+        "eyebrow": "YOUR PRACTICE RANGE",
+        "title": "Prepare what you need to memorize.",
+        "description": "Choose an exact range for memorization or revision. The range may begin and end in different surahs.",
+        "kinds": {
+            "memorization": "Memorization",
+            "revision": "Revision"
+        },
+        "riwayahs": {
+            "hafs": "Hafs ‘an ‘Asim",
+            "warsh": "Warsh ‘an Nafi‘"
+        },
+        "range": "From {startSurah}, ayah {startAyah, number}, to {endSurah}, ayah {endAyah, number}",
+        "riwayah": "This range follows {riwayah} numbering.",
+        "start": "Start practice",
+        "continue": "Continue practice",
+        "delete": {
+            "action": "Delete range",
+            "confirm": "Delete this practice range?",
+            "confirmAction": "Delete",
+            "cancel": "Keep practice range",
+            "deleting": "Deleting…",
+            "success": "The practice range was deleted.",
+            "error": "We could not delete this practice range."
+        },
+        "form": {
+            "createTitle": "Choose your first range",
+            "editTitle": "Manage your practice ranges",
+            "description": "Choose the first and last ayah. Endpoints are included, and surahs must remain in Quran order.",
+            "kindLabel": "I am preparing for",
+            "kinds": {
+                "memorization": "Memorization",
+                "revision": "Revision"
+            },
+            "start": {
+                "title": "Range begins"
+            },
+            "end": {
+                "title": "Range ends"
+            },
+            "surah": "Surah",
+            "ayah": "Ayah",
+            "searchSurah": "Type a surah name or number…",
+            "searchAyah": "Type an ayah number…",
+            "noSurahs": "No matching surah found.",
+            "noAyahs": "No matching ayah found.",
+            "create": "Create practice range",
+            "update": "Update practice range",
+            "saving": "Saving…",
+            "success": "Your practice range is ready.",
+            "error": "We could not save this range. Check the selected ayahs and try again."
+        },
+        "reader": {
+            "title": "Practice reader",
+            "back": "Back to practice overview",
+            "kinds": {
+                "memorization": "Memorization practice",
+                "revision": "Revision practice"
+            },
+            "progressSummary": "{completed, number} of {total, number} ayahs · {percentage, number}%",
+            "showText": "Show text",
+            "hideText": "Hide text",
+            "revealAyah": "Reveal ayah {number, number}",
+            "hideAyah": "Hide ayah {number, number} again",
+            "markReached": "I reached here",
+            "reached": "Reached",
+            "saved": "Your practice place has been saved.",
+            "rangeReached": "You reached the end of this range.",
+            "saveError": "We could not save your practice place."
+        },
+        "dashboard": {
+            "eyebrow": "Memorization practice",
+            "emptyTitle": "Prepare an ayah range",
+            "emptyDescription": "Choose exactly what you want to memorize or revise, even across surahs.",
+            "setup": "Choose a range",
+            "open": "Open practice"
+        },
+        "loading": {
+            "overview": "Preparing your practice range",
+            "reader": "Preparing the practice reader"
+        }
+    }
+}

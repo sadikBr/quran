@@ -92,6 +92,7 @@
             "pageRecitation": "Page recitation",
             "surahRecitation": "Surah recitation",
             "wirdRecitation": "Wird recitation",
+            "practiceRecitation": "Practice recitation",
             "restart": "Restart {scope}",
             "retry": "Retry {scope}",
             "loading": "Loading {scope}",

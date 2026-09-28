@@ -16,11 +16,13 @@ export default function Ayah({
     surahNumber,
     highlightEnabled = true,
     hidePrintedDivisionMarker = false,
+    actionsHref,
 }: {
     ayah: AyahType;
     surahNumber: number;
     highlightEnabled?: boolean;
     hidePrintedDivisionMarker?: boolean;
+    actionsHref?: string;
 }) {
     const ayahRef = useRef<HTMLSpanElement>(null);
     const t = useTranslations("Reader");
@@ -31,7 +33,8 @@ export default function Ayah({
         activeAyahNumber === playbackAyahNumber &&
         playbackStatus !== "idle" &&
         playbackStatus !== "error";
-    const actionsHref = `/quran/ayah/${surahNumber}/${ayah.numberInSurah}`;
+    const resolvedActionsHref =
+        actionsHref ?? `/quran/ayah/${surahNumber}/${ayah.numberInSurah}`;
     const displayedText = hidePrintedDivisionMarker
         ? ayah.text.replace("۞", "").trimStart()
         : ayah.text;
@@ -95,7 +98,7 @@ export default function Ayah({
                 <AyahPlayer ayah={ayah} />
                 <span className="relative inline-block align-[0.08em]">
                     <Link
-                        href={actionsHref}
+                        href={resolvedActionsHref}
                         scroll={false}
                         className="frame relative inline-block rounded-sm text-sidebar-accent transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         aria-label={t("ayah.openActions", {

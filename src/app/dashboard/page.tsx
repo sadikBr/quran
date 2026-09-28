@@ -1,4 +1,9 @@
-import { ArrowRight, BookOpen, ChartNoAxesCombined } from "lucide-react";
+import {
+    ArrowRight,
+    BookMarked,
+    BookOpen,
+    ChartNoAxesCombined,
+} from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -10,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import getKhatmahPlan from "@/features/khatmah/server/get-khatmah-plan";
+import getPracticeAssignment from "@/features/practice/server/get-practice-assignment";
 import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
@@ -48,11 +54,13 @@ export default async function DashboardPage() {
             getSurahsMeta().catch(() => []),
             getQuranNavigationMeta().catch(() => null),
         ]);
-    const [dailyWird, wirdHistory, khatmahPlan] = await Promise.all([
-        getDailyWird(session.user.id, preferences.arabicEdition),
-        getWirdHistory(session.user.id),
-        getKhatmahPlan(session.user.id),
-    ]);
+    const [dailyWird, wirdHistory, khatmahPlan, practiceAssignment] =
+        await Promise.all([
+            getDailyWird(session.user.id, preferences.arabicEdition),
+            getWirdHistory(session.user.id),
+            getKhatmahPlan(session.user.id),
+            getPracticeAssignment(session.user.id),
+        ]);
     const warshChapters =
         preferences.riwayah === "warsh" ? await getWarshChapters() : [];
     const warshBySurah = new Map(
@@ -94,6 +102,11 @@ export default async function DashboardPage() {
         locale: preferences.language,
         messages,
         namespace: "Wird",
+    });
+    const practiceT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Practice",
     });
     const savedNumber =
         preferences.readingMode === "page"
@@ -269,6 +282,94 @@ export default async function DashboardPage() {
                                     </Link>
                                 </Button>
                             </div>
+                        </div>
+                    </section>
+
+                    <section className="relative mt-8 overflow-hidden rounded-3xl bg-primary/[0.06] px-5 py-6 ring-1 ring-primary/12 sm:px-7">
+                        <div className="grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-8">
+                            <div className="flex min-w-0 items-start gap-4">
+                                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                                    <BookMarked
+                                        aria-hidden="true"
+                                        className="size-5"
+                                    />
+                                </span>
+                                <div className="min-w-0">
+                                    <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">
+                                        {practiceT("dashboard.eyebrow")}
+                                    </p>
+                                    <h2 className="mt-1.5 text-lg font-semibold tracking-tight sm:text-xl">
+                                        {practiceAssignment
+                                            ? practiceT(
+                                                  `kinds.${practiceAssignment.kind}`,
+                                              )
+                                            : practiceT("dashboard.emptyTitle")}
+                                    </h2>
+                                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                        {practiceAssignment
+                                            ? practiceT("range", {
+                                                  startSurah:
+                                                      surahs.find(
+                                                          (surah) =>
+                                                              surah.number ===
+                                                              practiceAssignment
+                                                                  .start
+                                                                  .surahNumber,
+                                                      )?.[
+                                                          preferences.language ===
+                                                          "ar"
+                                                              ? "name"
+                                                              : "englishName"
+                                                      ] ?? "",
+                                                  startAyah:
+                                                      practiceAssignment.start
+                                                          .ayahNumber,
+                                                  endSurah:
+                                                      surahs.find(
+                                                          (surah) =>
+                                                              surah.number ===
+                                                              practiceAssignment
+                                                                  .end
+                                                                  .surahNumber,
+                                                      )?.[
+                                                          preferences.language ===
+                                                          "ar"
+                                                              ? "name"
+                                                              : "englishName"
+                                                      ] ?? "",
+                                                  endAyah:
+                                                      practiceAssignment.end
+                                                          .ayahNumber,
+                                              })
+                                            : practiceT(
+                                                  "dashboard.emptyDescription",
+                                              )}
+                                    </p>
+                                </div>
+                            </div>
+                            <Button
+                                asChild
+                                variant={
+                                    practiceAssignment ? "default" : "outline"
+                                }
+                                className="w-full rounded-xl sm:w-auto"
+                            >
+                                <Link href={"/practice"}>
+                                    {practiceT(
+                                        practiceAssignment
+                                            ? "dashboard.open"
+                                            : "dashboard.setup",
+                                    )}
+                                    <ArrowRight
+                                        aria-hidden="true"
+                                        className={cn(
+                                            "size-4",
+                                            preferences.language === "ar" &&
+                                                "rotate-180",
+                                        )}
+                                    />
+                                </Link>
+                            </Button>
                         </div>
                     </section>
 
