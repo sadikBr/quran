@@ -16,7 +16,7 @@
             },
             "notifications": {
                 "eyebrow": "REMINDERS",
-                "title": "Return before the day ends"
+                "title": "Stay on track"
             },
             "offline": {
                 "eyebrow": "OFFLINE READING",
@@ -76,11 +76,11 @@
             "manual": "Ayah by ayah"
         },
         "notifications": {
-            "title": "Daily Wird reminder",
-            "description": "If today’s Wird is still incomplete, remind me around 11 PM Morocco time so I can preserve my streak.",
+            "title": "Wird and meeting reminders",
+            "description": "Remind me before scheduled circle meetings, and around 11 PM Morocco time when today’s Wird is still incomplete.",
             "enable": "Enable",
             "disable": "Disable",
-            "enabledFeedback": "Your daily Wird reminder is enabled on this device.",
+            "enabledFeedback": "Wird and meeting reminders are enabled on this device.",
             "disabledFeedback": "Notifications have been disabled on this device.",
             "errorFeedback": "We could not update notification settings.",
             "blockedHint": "Notifications are blocked in Chrome. Allow them for this app in your browser or system settings, then return here.",
@@ -89,8 +89,8 @@
                 "unsupported": "Push notifications are not supported here",
                 "unconfigured": "Push notifications need deployment setup",
                 "blocked": "Notifications are blocked",
-                "disabled": "Reminder is off on this device",
-                "enabled": "Reminder is active on this device"
+                "disabled": "Reminders are off on this device",
+                "enabled": "Reminders are active on this device"
             }
         },
         "offline": {

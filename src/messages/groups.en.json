@@ -180,6 +180,12 @@
             "title": "Learn and revise together",
             "emptyDescription": "Create a group for family, friends, or students and prepare for shared weekly assignments.",
             "activeDescription": "You belong to {count, plural, one {# memorization group} other {# memorization groups}}.",
+            "nextMeetingEyebrow": "Next circle meeting",
+            "nextMeetingDescription": "{date} · Open the circle for details.",
+            "meetingNowEyebrow": "Meeting open now",
+            "meetingNowDescription": "Your circle’s meeting room is ready to join.",
+            "openMeeting": "Open meeting",
+            "openMeetingDetails": "View meeting",
             "open": "Open groups"
         },
         "meeting": {

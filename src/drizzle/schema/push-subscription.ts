@@ -1,7 +1,15 @@
 import { relations } from "drizzle-orm";
-import { date, index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+    date,
+    index,
+    pgTable,
+    text,
+    timestamp,
+    uniqueIndex,
+} from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt } from "../helpers";
 import { user } from "./auth-schema";
+import { groupMeeting } from "./memorization-group";
 
 export const pushSubscription = pgTable(
     "push_subscription",
@@ -28,10 +36,56 @@ export const pushSubscription = pgTable(
 
 export const pushSubscriptionRelations = relations(
     pushSubscription,
-    ({ one }) => ({
+    ({ one, many }) => ({
         user: one(user, {
             fields: [pushSubscription.userId],
             references: [user.id],
+        }),
+        meetingReminderDeliveries: many(groupMeetingReminderDelivery),
+    }),
+);
+
+export const groupMeetingReminderDelivery = pgTable(
+    "group_meeting_reminder_delivery",
+    {
+        id,
+        meetingId: text("meeting_id")
+            .notNull()
+            .references(() => groupMeeting.id, { onDelete: "cascade" }),
+        subscriptionId: text("subscription_id")
+            .notNull()
+            .references(() => pushSubscription.id, { onDelete: "cascade" }),
+        occurrenceStartsAt: timestamp("occurrence_starts_at", {
+            withTimezone: true,
+        }).notNull(),
+        sentAt: timestamp("sent_at", { withTimezone: true }),
+        createdAt,
+    },
+    (table) => [
+        uniqueIndex("group_meeting_reminder_delivery_once_idx").on(
+            table.meetingId,
+            table.subscriptionId,
+            table.occurrenceStartsAt,
+        ),
+        index("group_meeting_reminder_delivery_meeting_idx").on(
+            table.meetingId,
+        ),
+        index("group_meeting_reminder_delivery_subscription_idx").on(
+            table.subscriptionId,
+        ),
+    ],
+);
+
+export const groupMeetingReminderDeliveryRelations = relations(
+    groupMeetingReminderDelivery,
+    ({ one }) => ({
+        meeting: one(groupMeeting, {
+            fields: [groupMeetingReminderDelivery.meetingId],
+            references: [groupMeeting.id],
+        }),
+        subscription: one(pushSubscription, {
+            fields: [groupMeetingReminderDelivery.subscriptionId],
+            references: [pushSubscription.id],
         }),
     }),
 );

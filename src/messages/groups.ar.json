@@ -180,6 +180,12 @@
             "title": "حفظٌ ومراجعةٌ بصحبةٍ صالحة",
             "emptyDescription": "أنشئ حلقة لأهلك أو أصدقائك أو طلابك، تمهيدًا للتكاليف الأسبوعية المشتركة.",
             "activeDescription": "أنت عضو في {count, plural, one {حلقة واحدة} two {حلقتين} few {# حِلَق} many {# حلقة} other {# حلقة}}.",
+            "nextMeetingEyebrow": "موعد حلقتك القادم",
+            "nextMeetingDescription": "{date} · افتح الحلقة للاطّلاع على التفاصيل.",
+            "meetingNowEyebrow": "الاجتماع مفتوح الآن",
+            "meetingNowDescription": "غرفة اجتماع حلقتك جاهزة للانضمام.",
+            "openMeeting": "فتح الاجتماع",
+            "openMeetingDetails": "عرض الموعد",
             "open": "عرض الحِلَق"
         },
         "meeting": {

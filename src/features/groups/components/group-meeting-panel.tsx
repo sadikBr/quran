@@ -20,16 +20,13 @@ import type {
     MeetingOccurrenceState,
     MeetingScheduleSlot,
 } from "../meeting-types";
+import { getMeetingDisplayTimezone } from "../server/meeting-schedule";
 import saveGroupMeeting from "../server/save-group-meeting";
 import MeetingScheduleFields from "./meeting-schedule-fields";
 
 function formatOccurrence(value: string, locale: string, timezone: string) {
     const instant = new Date(value);
-    const displayTimezone =
-        timezone === "Africa/Casablanca" &&
-        instant >= new Date("2026-09-20T01:00:00Z")
-            ? "UTC"
-            : timezone;
+    const displayTimezone = getMeetingDisplayTimezone(timezone, instant);
 
     return new Intl.DateTimeFormat(locale, {
         weekday: "long",

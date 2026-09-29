@@ -10,7 +10,7 @@ export function isValidTimezone(timezone: string) {
 
 const MOROCCO_STANDARD_TIME_START = new Date("2026-09-20T01:00:00Z");
 
-function calculationZone(timezone: string, instant: Date) {
+export function getMeetingDisplayTimezone(timezone: string, instant: Date) {
     if (
         timezone === "Africa/Casablanca" &&
         instant >= MOROCCO_STANDARD_TIME_START
@@ -71,7 +71,7 @@ export function calculateMeetingState({
     }
 
     const zonedNow = DateTime.fromJSDate(now, {
-        zone: calculationZone(timezone, now),
+        zone: getMeetingDisplayTimezone(timezone, now),
     });
     const weekStart = zonedNow.startOf("week");
     const candidates = schedule.flatMap((slot) => {

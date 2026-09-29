@@ -3,11 +3,13 @@ import {
     BookMarked,
     BookOpen,
     CalendarCheck2,
+    CalendarClock,
     Check,
     type LucideIcon,
     MoonStar,
     Sparkles,
     UsersRound,
+    Video,
 } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -20,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import { getGroupsForUser } from "@/features/groups/server/get-groups";
+import { getNextGroupMeetingForUser } from "@/features/groups/server/get-next-group-meeting";
+import { getMeetingDisplayTimezone } from "@/features/groups/server/meeting-schedule";
 import getMemorizationProgress from "@/features/memorization/server/get-memorization-progress";
 import {
     getAssignedPracticeAssignments,
@@ -122,12 +126,14 @@ export default async function DashboardPage() {
         assignedWork,
         groups,
         completedHizbs,
+        nextGroupMeeting,
     ] = await Promise.all([
         getDailyWird(session.user.id, preferences.arabicEdition),
         getPracticeAssignments(session.user.id),
         getAssignedPracticeAssignments(session.user.id),
         getGroupsForUser(session.user.id),
         getMemorizationProgress(session.user.id),
+        getNextGroupMeetingForUser(session.user.id),
     ]);
     const practiceAssignment = practiceAssignments[0] ?? null;
     const warshChapters =
@@ -195,6 +201,18 @@ export default async function DashboardPage() {
     const readyAssignmentCount = assignedWork.filter(
         (assignment) => assignment.status === "submitted",
     ).length;
+    const nextMeetingLabel =
+        nextGroupMeeting?.status === "upcoming"
+            ? new Intl.DateTimeFormat(preferences.language, {
+                  weekday: "long",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  timeZone: getMeetingDisplayTimezone(
+                      nextGroupMeeting.timezone,
+                      new Date(nextGroupMeeting.startsAt),
+                  ),
+              }).format(new Date(nextGroupMeeting.startsAt))
+            : null;
     const localizedSurahName = (surahNumber: number) => {
         const surah = surahs.find((item) => item.number === surahNumber);
         return (
@@ -375,7 +393,76 @@ export default async function DashboardPage() {
                         </p>
                     </div>
 
-                    <section className="mt-8 border-border/50 border-y sm:mt-10">
+                    {nextGroupMeeting && (
+                        <Link
+                            href={`/groups/${nextGroupMeeting.groupId}`}
+                            className="group mx-1 mt-7 flex min-w-0 flex-col gap-4 rounded-2xl border border-primary/20 bg-card/55 px-4 py-4 shadow-sm shadow-primary/5 outline-none transition-[background-color,border-color] hover:border-primary/30 hover:bg-primary/[0.045] focus-visible:ring-2 focus-visible:ring-ring sm:mx-2 sm:px-5 lg:mx-0 lg:flex-row lg:items-center lg:justify-between lg:rounded-none lg:border-x-0 lg:bg-transparent lg:px-3 lg:shadow-none"
+                        >
+                            <div className="flex min-w-0 items-center gap-3.5">
+                                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+                                    {nextGroupMeeting.status === "active" ? (
+                                        <Video
+                                            aria-hidden="true"
+                                            className="size-5"
+                                        />
+                                    ) : (
+                                        <CalendarClock
+                                            aria-hidden="true"
+                                            className="size-5"
+                                        />
+                                    )}
+                                </span>
+                                <div className="min-w-0">
+                                    <p className="text-[0.65rem] font-semibold tracking-[0.14em] text-primary uppercase">
+                                        {groupsT(
+                                            nextGroupMeeting.status === "active"
+                                                ? "dashboard.meetingNowEyebrow"
+                                                : "dashboard.nextMeetingEyebrow",
+                                        )}
+                                    </p>
+                                    <h2 className="mt-1 truncate text-lg font-semibold tracking-tight">
+                                        {nextGroupMeeting.groupName}
+                                    </h2>
+                                    <p className="mt-0.5 text-xs leading-5 text-muted-foreground sm:text-sm">
+                                        {nextGroupMeeting.status === "active"
+                                            ? groupsT(
+                                                  "dashboard.meetingNowDescription",
+                                              )
+                                            : groupsT(
+                                                  "dashboard.nextMeetingDescription",
+                                                  {
+                                                      date:
+                                                          nextMeetingLabel ??
+                                                          "",
+                                                  },
+                                              )}
+                                    </p>
+                                </div>
+                            </div>
+                            <span className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-stretch rounded-lg bg-primary/10 px-4 text-sm font-semibold text-primary transition-colors group-hover:bg-primary/15 lg:min-h-0 lg:self-auto lg:bg-transparent lg:px-0 group-hover:lg:bg-transparent">
+                                {groupsT(
+                                    nextGroupMeeting.status === "active"
+                                        ? "dashboard.openMeeting"
+                                        : "dashboard.openMeetingDetails",
+                                )}
+                                <ArrowRight
+                                    aria-hidden="true"
+                                    className={cn(
+                                        "size-4 transition-transform group-hover:ltr:translate-x-1 group-hover:rtl:-translate-x-1",
+                                        preferences.language === "ar" &&
+                                            "rotate-180",
+                                    )}
+                                />
+                            </span>
+                        </Link>
+                    )}
+
+                    <section
+                        className={cn(
+                            "border-border/50 border-y",
+                            nextGroupMeeting ? "mt-4 sm:mt-5" : "mt-8 sm:mt-10",
+                        )}
+                    >
                         <div className="grid sm:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_minmax(15rem,0.75fr)_minmax(15rem,0.75fr)]">
                             <div className="min-w-0 px-2 py-7 sm:col-span-2 sm:px-5 sm:py-8 lg:col-span-1 lg:px-7 lg:py-9">
                                 <div className="flex min-w-0 items-start gap-3 sm:gap-4">

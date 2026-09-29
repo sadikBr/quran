@@ -4,6 +4,10 @@ import webpush from "web-push";
 import { env } from "@/data/env/server";
 import db from "@/drizzle/db";
 import { pushSubscription, userSettings, userWird } from "@/drizzle/schema";
+import {
+    configureWebPush,
+    isExpiredPushSubscription,
+} from "@/features/notifications/server/web-push";
 import getWirdDate from "@/features/wird/server/wird-date";
 
 export const runtime = "nodejs";
@@ -31,13 +35,6 @@ function notificationCopy(language: "ar" | "en") {
           };
 }
 
-function isExpiredSubscription(error: unknown) {
-    if (!error || typeof error !== "object" || !("statusCode" in error)) {
-        return false;
-    }
-    return error.statusCode === 404 || error.statusCode === 410;
-}
-
 export async function GET(request: Request) {
     if (
         !env.CRON_SECRET ||
@@ -45,7 +42,7 @@ export async function GET(request: Request) {
     ) {
         return NextResponse.json({ success: false }, { status: 401 });
     }
-    if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY) {
+    if (!configureWebPush()) {
         return NextResponse.json(
             { success: false, reason: "Push is not configured." },
             { status: 503 },
@@ -56,17 +53,6 @@ export async function GET(request: Request) {
     if (casablancaHour(now) !== "23") {
         return NextResponse.json({ success: true, skipped: "outside-window" });
     }
-
-    const subject =
-        env.PRODUCTION_URLS.split(",")
-            .map((value) => value.trim())
-            .find((value) => value.startsWith("https://")) ??
-        "https://quran.brahimsadik.com";
-    webpush.setVapidDetails(
-        subject,
-        env.VAPID_PUBLIC_KEY,
-        env.VAPID_PRIVATE_KEY,
-    );
 
     const today = getWirdDate(now);
     const subscriptions = await db
@@ -125,7 +111,7 @@ export async function GET(request: Request) {
                 .where(eq(pushSubscription.id, subscription.id));
             sent += 1;
         } catch (error) {
-            if (!isExpiredSubscription(error)) continue;
+            if (!isExpiredPushSubscription(error)) continue;
             await db
                 .delete(pushSubscription)
                 .where(eq(pushSubscription.id, subscription.id));
