@@ -9,6 +9,7 @@ import {
     LayoutDashboard,
     Menu,
     MoonStar,
+    Search,
     Sparkles,
     UsersRound,
     X,
@@ -61,7 +62,17 @@ const destinations = [
         href: "/quran",
         label: "quran",
         icon: BookOpen,
-        matches: (pathname: string) => pathname.startsWith("/quran"),
+        matches: (pathname: string) =>
+            (pathname.startsWith("/quran") &&
+                !pathname.startsWith("/quran/search")) ||
+            pathname === "/offline",
+    },
+    {
+        href: "/quran/search",
+        label: "search",
+        icon: Search,
+        matches: (pathname: string) =>
+            pathname.replace(/\/$/, "") === "/quran/search",
     },
     {
         href: "/assignments",
@@ -102,7 +113,13 @@ export default function AppPrimaryNav() {
         { title: "overview", links: ["/", "/dashboard"] },
         {
             title: "reading",
-            links: ["/quran", "/wird", "/practice", "/memorization"],
+            links: [
+                "/quran",
+                "/quran/search",
+                "/wird",
+                "/practice",
+                "/memorization",
+            ],
         },
         { title: "together", links: ["/assignments", "/groups"] },
     ] as const;

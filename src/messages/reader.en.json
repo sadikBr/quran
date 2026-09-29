@@ -49,6 +49,7 @@
             "openDivision": "Open {division}, beginning at {surah}, ayah {ayah, number}"
         },
         "search": {
+            "tryExample": "Try a word to begin, or type a phrase you remember.",
             "eyebrow": "QURAN SEARCH",
             "title": "Find an ayah.",
             "description": "Search the Arabic Quran or your selected English translation.",

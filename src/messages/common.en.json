@@ -9,6 +9,7 @@
             "description": "Read the Quran, listen to recitations, and keep your place."
         },
         "navigation": {
+            "search": "Search the Quran",
             "close": "Close menu",
             "overview": "Your space",
             "reading": "Read and memorize",

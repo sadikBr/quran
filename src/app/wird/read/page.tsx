@@ -1,8 +1,8 @@
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
+import AppPrimaryNav from "@/components/app-primary-nav";
 import { auth } from "@/features/auth/auth";
 import getPreferences from "@/features/settings/server/get-preferences";
 import WirdReader from "@/features/wird/components/wird-reader";
@@ -41,20 +41,8 @@ export default async function WirdReaderPage() {
             )}
         >
             <header className="sticky top-0 z-30 bg-background/92 backdrop-blur-xl">
-                <div className="mx-auto flex h-14 max-w-4xl items-center justify-between gap-4 px-3 sm:px-5">
-                    <Link
-                        href="/wird"
-                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground sm:text-sm"
-                    >
-                        <ArrowLeft
-                            aria-hidden="true"
-                            className={cn(
-                                "size-3.5 transition-transform group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5",
-                                isArabic && "rotate-180",
-                            )}
-                        />
-                        <span>{t("back")}</span>
-                    </Link>
+                <div className="mx-auto flex h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] max-w-4xl items-center justify-between gap-4 px-3 sm:px-5">
+                    <AppPrimaryNav />
                     <div className="flex items-center gap-2 text-sm font-semibold">
                         <BookOpen
                             aria-hidden="true"

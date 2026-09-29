@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
+import AppPrimaryNav from "@/components/app-primary-nav";
 import { Button } from "@/components/ui/button";
 
 export default function MeetingWaitingRoom({
@@ -41,7 +42,8 @@ export default function MeetingWaitingRoom({
 
     return (
         <main className="flex min-h-dvh flex-col bg-background">
-            <header className="flex h-12 items-center border-border/60 border-b px-3 sm:px-4">
+            <header className="flex h-[calc(4rem+env(safe-area-inset-top))] shrink-0 items-center justify-between gap-3 border-border/60 border-b bg-background px-3 pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] sm:px-4">
+                <AppPrimaryNav />
                 <Button
                     asChild
                     variant="ghost"

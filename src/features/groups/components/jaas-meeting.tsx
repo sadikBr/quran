@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
+import AppPrimaryNav from "@/components/app-primary-nav";
 import { Button } from "@/components/ui/button";
 
 const JaaSMeeting = dynamic(
@@ -95,12 +96,13 @@ export default function JaasMeeting({
 
     return (
         <div className="flex h-dvh min-h-[34rem] flex-col overflow-hidden bg-[#11100f]">
-            <header className="flex h-12 shrink-0 items-center border-white/10 border-b bg-[#171513] px-3 sm:px-4">
+            <header className="flex h-[calc(4rem+env(safe-area-inset-top))] shrink-0 items-center justify-between gap-3 border-border/60 border-b bg-background px-3 pt-[env(safe-area-inset-top)] text-foreground sm:h-[calc(5rem+env(safe-area-inset-top))] sm:px-4">
+                <AppPrimaryNav />
                 <Button
                     asChild
                     variant="ghost"
                     size="sm"
-                    className="rounded-xl text-white/80 hover:bg-white/8 hover:text-white"
+                    className="rounded-xl text-muted-foreground hover:text-foreground"
                 >
                     <Link href={`/groups/${groupId}`} onClick={leaveMeeting}>
                         <LogOut className="size-4" />

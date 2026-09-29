@@ -137,7 +137,7 @@ export default async function Home() {
             <PageBackground />
             <div className="mx-auto flex min-h-dvh max-w-6xl flex-col px-4 sm:px-6">
                 <StickyAppHeader
-                    navigation={Boolean(session)}
+                    navigation
                     className="-mx-4 px-4 text-foreground transition-colors data-[scrolled=true]:text-foreground sm:-mx-6 sm:px-6 dark:text-white"
                 >
                     <Link

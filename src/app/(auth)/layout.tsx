@@ -2,6 +2,7 @@ import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { createTranslator } from "next-intl";
 import type { ReactNode } from "react";
+import AppPrimaryNav from "@/components/app-primary-nav";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -27,7 +28,8 @@ export default async function AuthLayout({
         >
             <PageBackground />
             <StickyAppHeader className="px-4">
-                <div className="mx-auto flex h-20 w-full max-w-5xl items-center">
+                <div className="mx-auto flex h-full w-full max-w-5xl items-center justify-between gap-4">
+                    <AppPrimaryNav />
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md text-sm font-semibold tracking-wide outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"

@@ -28,12 +28,14 @@ type SearchStatus = "idle" | "loading" | "success" | "error";
 function HighlightedSnippet({
     snippet,
     className,
+    direction = "auto",
 }: {
     snippet: QuranSearchSnippet;
     className?: string;
+    direction?: "rtl" | "ltr" | "auto";
 }) {
     return (
-        <p className={className}>
+        <p dir={direction} className={className}>
             {snippet.leadingEllipsis && "…"}
             {snippet.before}
             {snippet.before && snippet.match && " "}
@@ -69,10 +71,13 @@ function SearchResultRow({
                 surah: surahName,
                 ayah: result.ayahNumber,
             })}
-            className="group block py-5 outline-none transition-colors hover:bg-muted/30 focus-visible:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-2"
+            className="group block rounded-xl border border-border/55 bg-background/70 p-4 outline-none transition-[border-color,background-color,box-shadow] hover:border-primary/30 hover:bg-background hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring sm:p-5"
         >
             <div className="flex min-w-0 items-start gap-4">
-                <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                <span
+                    title={t("ayah", { number: result.ayahNumber })}
+                    className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary"
+                >
                     {result.ayahNumber.toLocaleString(locale)}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -92,17 +97,19 @@ function SearchResultRow({
                     {result.field === "arabic" ? (
                         <HighlightedSnippet
                             snippet={result.snippet}
-                            className="ayah quran-display-text mt-3 text-end leading-[2.15] text-foreground"
+                            direction="rtl"
+                            className="ayah quran-display-text mt-3 text-start leading-[2.15] text-foreground"
                         />
                     ) : (
                         <>
                             <HighlightedSnippet
                                 snippet={result.snippet}
-                                className="mt-3 text-sm leading-7 text-foreground sm:text-base"
+                                direction="ltr"
+                                className="mt-3 text-start text-sm leading-7 text-foreground sm:text-base"
                             />
                             <p
                                 dir="rtl"
-                                className="ayah quran-display-text mt-3 line-clamp-2 text-end leading-[1.9] text-muted-foreground"
+                                className="ayah quran-display-text mt-3 line-clamp-2 text-start leading-[1.9] text-muted-foreground"
                             >
                                 {result.arabicText}
                             </p>
@@ -138,7 +145,7 @@ export default function QuranSearch({
         const url = new URL(window.location.href);
         if (trimmedQuery) url.searchParams.set("q", trimmedQuery);
         else url.searchParams.delete("q");
-        window.history.replaceState({}, "", url);
+        window.history.replaceState(window.history.state, "", url);
 
         if (trimmedQuery.length < 2) {
             setStatus("idle");
@@ -147,6 +154,7 @@ export default function QuranSearch({
         }
 
         const controller = new AbortController();
+        setStatus("loading");
         const timeout = window.setTimeout(async () => {
             setStatus("loading");
 
@@ -200,61 +208,67 @@ export default function QuranSearch({
     }
 
     return (
-        <div className="h-full overflow-y-auto">
-            <div className="mx-auto w-full max-w-4xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12">
-                <Link
-                    href="/quran"
-                    className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                    {locale === "ar" ? (
-                        <ArrowRight aria-hidden="true" className="size-4" />
-                    ) : (
-                        <ArrowLeft aria-hidden="true" className="size-4" />
-                    )}
-                    {t("backToSurahs")}
-                </Link>
+        <div className="h-full overflow-y-auto bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--primary)_6%,transparent),transparent_55%)]">
+            <div className="mx-auto w-full max-w-4xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+                <div className="rounded-2xl border border-primary/15 bg-card/70 p-5 shadow-sm sm:rounded-3xl sm:p-8">
+                    <header className="max-w-2xl">
+                        <span className="mb-5 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                            <Search aria-hidden="true" className="size-5" />
+                        </span>
+                        <p className="text-xs font-semibold tracking-[0.22em] text-primary">
+                            {t("eyebrow")}
+                        </p>
+                        <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-4xl">
+                            {t("title")}
+                        </h1>
+                        <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                            {t("description")}
+                        </p>
+                    </header>
 
-                <header className="mt-8 max-w-2xl">
-                    <p className="text-xs font-semibold tracking-[0.22em] text-primary">
-                        {t("eyebrow")}
+                    <div className="relative mt-6">
+                        <Label htmlFor="quran-search" className="sr-only">
+                            {t("label")}
+                        </Label>
+                        <Search
+                            aria-hidden="true"
+                            className="pointer-events-none absolute top-1/2 start-4 size-5 -translate-y-1/2 text-primary"
+                        />
+                        <Input
+                            id="quran-search"
+                            type="search"
+                            inputMode="search"
+                            autoComplete="off"
+                            dir={
+                                trimmedQuery
+                                    ? "auto"
+                                    : locale === "ar"
+                                      ? "rtl"
+                                      : "ltr"
+                            }
+                            aria-describedby="search-hint"
+                            value={query}
+                            onChange={(event) => setQuery(event.target.value)}
+                            placeholder={t("placeholder")}
+                            className="h-14 rounded-xl border-border/80 bg-background px-12 text-start text-base shadow-sm placeholder:text-sm placeholder:text-muted-foreground/70 focus-visible:border-primary/50 focus-visible:ring-2 focus-visible:ring-primary/15 sm:h-16 sm:text-lg [&::-webkit-search-cancel-button]:appearance-none"
+                        />
+                        {query && (
+                            <button
+                                type="button"
+                                onClick={() => setQuery("")}
+                                aria-label={t("clear")}
+                                className="absolute top-1/2 end-1 flex size-11 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                <X aria-hidden="true" className="size-4" />
+                            </button>
+                        )}
+                    </div>
+                    <p
+                        id="search-hint"
+                        className="mt-3 text-xs leading-6 text-muted-foreground"
+                    >
+                        {t("promptDescription")}
                     </p>
-                    <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-5xl">
-                        {t("title")}
-                    </h1>
-                    <p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">
-                        {t("description")}
-                    </p>
-                </header>
-
-                <div className="relative mt-8 sm:mt-10">
-                    <Label htmlFor="quran-search" className="sr-only">
-                        {t("label")}
-                    </Label>
-                    <Search
-                        aria-hidden="true"
-                        className="pointer-events-none absolute top-1/2 start-4 size-5 -translate-y-1/2 text-primary"
-                    />
-                    <Input
-                        id="quran-search"
-                        type="search"
-                        inputMode="search"
-                        autoComplete="off"
-                        autoFocus
-                        value={query}
-                        onChange={(event) => setQuery(event.target.value)}
-                        placeholder={t("placeholder")}
-                        className="h-14 rounded-xl border-0 bg-muted/65 px-12 text-base shadow-none placeholder:text-muted-foreground/70 focus-visible:bg-muted/85 focus-visible:ring-1 sm:h-16 sm:text-lg [&::-webkit-search-cancel-button]:appearance-none"
-                    />
-                    {query && (
-                        <button
-                            type="button"
-                            onClick={() => setQuery("")}
-                            aria-label={t("clear")}
-                            className="absolute top-1/2 end-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                            <X aria-hidden="true" className="size-4" />
-                        </button>
-                    )}
                 </div>
 
                 <section
@@ -263,7 +277,7 @@ export default function QuranSearch({
                     className="mt-9"
                 >
                     {status === "idle" && (
-                        <div className="flex min-h-64 flex-col items-center justify-center text-center">
+                        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/70 px-5 py-9 text-center sm:py-12">
                             <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                                 <BookOpenText
                                     aria-hidden="true"
@@ -274,8 +288,27 @@ export default function QuranSearch({
                                 {t("promptTitle")}
                             </h2>
                             <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                                {t("promptDescription")}
+                                {t("tryExample")}
                             </p>
+                            <div className="mt-5 flex flex-wrap justify-center gap-2">
+                                {(locale === "ar"
+                                    ? ["الرحمن", "الصبر", "نور"]
+                                    : ["mercy", "patience", "light"]
+                                ).map((example) => (
+                                    <button
+                                        key={example}
+                                        type="button"
+                                        onClick={() => setQuery(example)}
+                                        className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border/65 bg-card px-4 text-sm text-foreground transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    >
+                                        <Search
+                                            aria-hidden="true"
+                                            className="size-3.5 text-primary"
+                                        />
+                                        {example}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     )}
 
@@ -359,24 +392,24 @@ export default function QuranSearch({
                                 </p>
                             </div>
 
-                            <div>
+                            <div className="mt-6 space-y-6">
                                 {groupedResults.map(
                                     ([surahNumber, results]) => (
                                         <section
                                             key={surahNumber}
                                             aria-labelledby={`search-surah-${surahNumber}`}
-                                            className="border-b border-border/60 last:border-b-0"
+                                            className="rounded-2xl bg-muted/30 p-3 sm:p-4"
                                         >
                                             <h2
                                                 id={`search-surah-${surahNumber}`}
-                                                className="pt-7 text-xs font-semibold tracking-[0.18em] text-primary"
+                                                className="flex items-center gap-2 px-2 pb-3 pt-1 text-sm font-semibold text-primary"
                                             >
                                                 {locale === "ar"
                                                     ? results[0].surahArabicName
                                                     : results[0]
                                                           .surahEnglishName}
                                             </h2>
-                                            <div className="divide-y divide-border/45">
+                                            <div className="space-y-2">
                                                 {results.map((result) => (
                                                     <SearchResultRow
                                                         key={`${result.field}-${result.globalAyahNumber}-${result.ayahNumber}`}

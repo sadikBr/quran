@@ -1,15 +1,14 @@
 "use client";
 
 import {
-    ArrowUpRight,
     BookOpen,
     ChevronLeft,
     ChevronRight,
     CloudOff,
     Languages,
 } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import AppPrimaryNav from "@/components/app-primary-nav";
 import { Button } from "@/components/ui/button";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
@@ -140,7 +139,8 @@ export default function OfflineQuranReader({
             />
 
             <header className="sticky top-0 z-30 border-b border-border/40 bg-background/88 backdrop-blur-xl">
-                <div className="mx-auto flex h-[4.5rem] max-w-6xl items-center justify-between gap-4 px-4 sm:h-20 sm:px-6">
+                <div className="mx-auto flex h-[calc(4rem+env(safe-area-inset-top))] max-w-6xl items-center justify-between gap-4 px-4 pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] sm:px-6">
+                    <AppPrimaryNav />
                     <div className="flex min-w-0 items-center gap-3">
                         <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm shadow-primary/20">
                             <BookOpen className="size-5" aria-hidden="true" />
@@ -158,18 +158,6 @@ export default function OfflineQuranReader({
                             </p>
                         </div>
                     </div>
-                    <Link
-                        href="/quran"
-                        className="group inline-flex h-9 items-center gap-2 rounded-xl px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:text-sm"
-                    >
-                        <span className="hidden sm:inline">
-                            {labels.backOnline}
-                        </span>
-                        <ArrowUpRight
-                            aria-hidden="true"
-                            className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 rtl:-rotate-90 rtl:group-hover:-translate-x-0.5"
-                        />
-                    </Link>
                 </div>
             </header>
 

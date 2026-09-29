@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import BackToTopButton from "@/features/quran/components/back-to-top-button";
 import QuranHeader from "@/features/quran/components/quran-header";
-import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -11,16 +10,7 @@ export default async function QuranIndexLayout({
 }: {
     children: ReactNode;
 }) {
-    const [preferences, readingProgress] = await Promise.all([
-        getPreferences(),
-        getReadingProgress(),
-    ]);
-    const savedNumber =
-        preferences.readingMode === "page"
-            ? readingProgress.lastPageNumber
-            : readingProgress.lastSurahNumber;
-    const hasSavedProgress = savedNumber !== null;
-    const startReadingHref = `/quran/${preferences.readingMode}/${savedNumber ?? 1}`;
+    const preferences = await getPreferences();
 
     return (
         <div
@@ -31,11 +21,14 @@ export default async function QuranIndexLayout({
                 preferences.language === "ar" && "arabic-ui",
             )}
         >
-            <QuranHeader
-                startReadingHref={startReadingHref}
-                hasSavedProgress={hasSavedProgress}
-            />
-            <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
+            <QuranHeader />
+            <main
+                id="quran-reader-main"
+                tabIndex={-1}
+                className="min-h-0 flex-1 overflow-hidden"
+            >
+                {children}
+            </main>
             <BackToTopButton />
         </div>
     );
