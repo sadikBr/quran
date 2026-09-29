@@ -77,7 +77,10 @@ export default function UserMenu({
     labels?: UserMenuLabels;
 }) {
     const { resolvedTheme, setTheme } = useTheme();
-    const isDarkTheme = resolvedTheme === "dark" || resolvedTheme === "emerald";
+    const isDarkTheme =
+        resolvedTheme === "dark" ||
+        resolvedTheme === "emerald" ||
+        resolvedTheme === "sapphire";
     const locale = useLocale();
     const commonT = useTranslations("Common");
     const isAdmin = useIsPlatformAdmin();

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *, .emerald *));
+@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *));
 
 @theme inline {
     --color-background: var(--background);
@@ -144,7 +144,8 @@
 }
 
 .dark,
-.emerald {
+.emerald,
+.sapphire {
     color-scheme: dark;
     --background: oklch(0.2161 0.0061 56.0434);
     --foreground: oklch(0.9699 0.0013 106.4238);
@@ -246,6 +247,71 @@
     --sidebar-accent-foreground: #f5e4b5;
     --sidebar-border: #416356;
     --sidebar-ring: #d8b766;
+}
+
+.sapphire {
+    --background: #101b30;
+    --foreground: #f1f0eb;
+    --card: #1b2b46;
+    --card-foreground: #f1f0eb;
+    --popover: #1b2b46;
+    --popover-foreground: #f1f0eb;
+    --primary: #e2c78d;
+    --primary-foreground: #152139;
+    --division: #b0c9ef;
+    --secondary: #2b4165;
+    --secondary-foreground: #f1f0eb;
+    --muted: #15233b;
+    --muted-foreground: #aebcd2;
+    --accent: #2b4165;
+    --accent-foreground: #f3dfb6;
+    --destructive: #f09899;
+    --destructive-foreground: #35171f;
+    --border: #3b506d;
+    --input: #5c7395;
+    --ring: #e2c78d;
+    --chart-1: #e2c78d;
+    --chart-2: #9bbce9;
+    --chart-3: #b6a5df;
+    --chart-4: #85c5cd;
+    --chart-5: #dfaaa0;
+    --sidebar: #15233b;
+    --sidebar-foreground: #f1f0eb;
+    --sidebar-primary: #e2c78d;
+    --sidebar-primary-foreground: #152139;
+    --sidebar-accent: #2b4165;
+    --sidebar-accent-foreground: #f3dfb6;
+    --sidebar-border: #3b506d;
+    --sidebar-ring: #e2c78d;
+}
+
+.sapphire .home-landscape {
+    background-color: #38557c;
+    background-blend-mode: luminosity;
+}
+
+.sapphire .home-landscape-shade {
+    background-image: linear-gradient(
+        90deg,
+        rgb(16 27 48 / 85%) 0%,
+        rgb(16 27 48 / 45%) 45%,
+        rgb(16 27 48 / 8%) 100%
+    );
+}
+
+.sapphire .home-session-shade {
+    background: transparent;
+}
+
+@media (max-width: 1023px) {
+    .sapphire .home-landscape-shade {
+        background-image: linear-gradient(
+            180deg,
+            rgb(16 27 48 / 12%) 0%,
+            rgb(16 27 48 / 45%) 45%,
+            rgb(16 27 48 / 85%) 100%
+        );
+    }
 }
 
 /* Keep the home landscape tonal rather than brown in the emerald palette. */

@@ -22,9 +22,12 @@ function savedStatus(): OfflineLibraryStatus {
 
 export default function OfflineLibrarySetting() {
     const t = useTranslations("Settings.offline");
-    const [status, setStatus] = useState<OfflineLibraryStatus>(savedStatus);
-    const supported =
-        typeof navigator !== "undefined" && "serviceWorker" in navigator;
+    // Browser storage and capabilities are unknown during server rendering.
+    // Keep the first client render identical, then load this device's status.
+    const [status, setStatus] = useState<OfflineLibraryStatus>({
+        state: "idle",
+    });
+    const [supported, setSupported] = useState<boolean | null>(null);
 
     useEffect(() => {
         function handleStatus(event: Event) {
@@ -32,6 +35,8 @@ export default function OfflineLibrarySetting() {
         }
 
         window.addEventListener(OFFLINE_STATUS_EVENT, handleStatus);
+        setSupported("serviceWorker" in navigator);
+        setStatus(savedStatus());
         navigator.serviceWorker?.controller?.postMessage({
             type: "GET_QURAN_LIBRARY_STATUS",
         });
@@ -50,13 +55,14 @@ export default function OfflineLibrarySetting() {
         status.total && status.current !== undefined
             ? Math.round((status.current / status.total) * 100)
             : 0;
-    const StateIcon = !supported
-        ? WifiOff
-        : status.state === "ready"
-          ? Check
-          : status.state === "error"
+    const StateIcon =
+        supported === false
             ? WifiOff
-            : CloudDownload;
+            : status.state === "ready"
+              ? Check
+              : status.state === "error"
+                ? WifiOff
+                : CloudDownload;
 
     return (
         <div className="space-y-3">
@@ -67,7 +73,7 @@ export default function OfflineLibrarySetting() {
                     </span>
                     <div className="min-w-0">
                         <p className="text-sm font-medium">
-                            {!supported
+                            {supported === false
                                 ? t("status.unsupported")
                                 : t(`status.${status.state}`)}
                         </p>

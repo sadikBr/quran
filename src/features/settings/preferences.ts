@@ -1,6 +1,12 @@
 import z from "zod";
 
-export const THEMES = ["system", "light", "dark", "emerald"] as const;
+export const THEMES = [
+    "system",
+    "light",
+    "dark",
+    "emerald",
+    "sapphire",
+] as const;
 export const LANGUAGES = ["en", "ar"] as const;
 export const READING_MODES = ["page", "surah"] as const;
 export const RIWAYAHS = ["hafs", "warsh"] as const;
