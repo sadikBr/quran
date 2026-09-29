@@ -1223,3 +1223,47 @@ body.focus-mode .quran-focus-chrome {
         );
     }
 }
+
+/* Keep the left-hand landmark in frame without changing theme overlays. */
+@media (width >= 64rem) {
+    .home-landscape-frame .home-landscape,
+    .home-landscape-frame .home-landscape-light {
+        background-position: left bottom;
+    }
+}
+
+/* Frame the landscape independently of the stacked mobile hero's height.
+   Keep the lower-left landmark visible instead of fading the entire scene. */
+@media (width < 64rem) {
+    .home-landscape-frame {
+        /* Fade every composited layer into the actual page beneath it, and
+           finish before the clipped edge to avoid fractional-pixel seams. */
+        mask-image: linear-gradient(
+            to bottom,
+            #000 0%,
+            #000 65%,
+            rgb(0 0 0 / 85%) 78%,
+            rgb(0 0 0 / 40%) 90%,
+            transparent calc(100% - 2px),
+            transparent 100%
+        );
+    }
+    .home-landscape-frame .home-landscape,
+    .home-landscape-frame .home-landscape-light {
+        background-position: left bottom;
+    }
+    .home-landscape-frame .home-landscape-shade,
+    .home-landscape-frame .home-landscape-light-shade {
+        background-image: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--background) 18%, transparent) 0%,
+            color-mix(in srgb, var(--background) 12%, transparent) 35%,
+            color-mix(in srgb, var(--background) 20%, transparent) 48%,
+            color-mix(in srgb, var(--background) 36%, transparent) 60%,
+            color-mix(in srgb, var(--background) 58%, transparent) 72%,
+            color-mix(in srgb, var(--background) 80%, transparent) 84%,
+            color-mix(in srgb, var(--background) 95%, transparent) 94%,
+            var(--background) 100%
+        );
+    }
+}

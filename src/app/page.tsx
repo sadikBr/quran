@@ -133,9 +133,9 @@ export default async function Home() {
                 >
                     <div
                         aria-hidden="true"
-                        className="absolute inset-x-0 -top-20 bottom-0 overflow-hidden"
+                        className="home-landscape-frame absolute inset-x-0 -top-20 h-80 overflow-hidden sm:h-96 lg:bottom-0 lg:h-auto"
                     >
-                        <span className="home-landscape-light absolute inset-0 bg-[url('/meccan-home-light-v1.webp')] bg-cover bg-position-[center_60%] sm:bg-bottom dark:hidden" />
+                        <span className="home-landscape-light absolute inset-0 bg-[url('/meccan-home-light-v1.webp')] bg-cover bg-position-[left_60%] lg:bg-bottom dark:hidden" />
                         <span
                             className={cn(
                                 "home-landscape-light-shade absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,246,0.9)_0%,rgba(255,252,246,0.62)_48%,rgba(255,252,246,0.12)_100%)] max-lg:bg-[linear-gradient(180deg,rgba(255,252,246,0.22)_0%,rgba(255,252,246,0.6)_44%,rgba(255,252,246,0.94)_100%)] dark:hidden",
@@ -143,7 +143,7 @@ export default async function Home() {
                                     "max-lg:scale-x-100 lg:-scale-x-100",
                             )}
                         />
-                        <span className="home-landscape absolute inset-0 hidden bg-[url('/meccan-surah-background-v2.webp')] bg-cover bg-position-[center_60%] sm:bg-bottom dark:block" />
+                        <span className="home-landscape absolute inset-0 hidden bg-[url('/meccan-surah-background-v2.webp')] bg-cover bg-position-[left_60%] lg:bg-bottom dark:block" />
                         <span
                             className={cn(
                                 "home-landscape-shade absolute inset-0 hidden bg-[linear-gradient(90deg,rgba(12,11,10,0.94)_0%,rgba(12,11,10,0.7)_48%,rgba(12,11,10,0.18)_100%)] max-lg:bg-[linear-gradient(180deg,rgba(12,11,10,0.38)_0%,rgba(12,11,10,0.68)_42%,rgba(12,11,10,0.96)_100%)] dark:block",
@@ -153,7 +153,7 @@ export default async function Home() {
                         />
                         <span className="absolute inset-0 hidden bg-[radial-gradient(circle_at_72%_20%,rgba(255,255,255,0.08),transparent_32%)] dark:block" />
                         {session && (
-                            <span className="home-session-shade absolute inset-0 bg-background/35 dark:bg-background/25" />
+                            <span className="home-session-shade absolute inset-0 bg-transparent lg:bg-background/35 lg:dark:bg-background/25" />
                         )}
                     </div>
                     <span
