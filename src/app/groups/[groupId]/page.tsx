@@ -409,8 +409,8 @@ export default async function GroupPage({
             )}
         >
             <PageBackground />
-            <div className="mx-auto max-w-5xl px-4">
-                <StickyAppHeader className="-mx-4 px-4">
+            <div className="mx-auto max-w-5xl px-4 sm:px-6">
+                <StickyAppHeader className="-mx-4 px-4 sm:-mx-6 sm:px-6">
                     <Link href="/groups" className="flex items-center gap-3">
                         <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                             <UsersRound className="size-5" />

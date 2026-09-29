@@ -206,7 +206,7 @@ export default function SavedAyahsSection({
                     <Button
                         asChild
                         variant="ghost"
-                        className="w-fit rounded-full px-4 text-primary hover:text-primary"
+                        className="w-fit rounded-xl px-4 text-primary hover:text-primary"
                     >
                         <Link href="/quran">
                             {t("saved.emptyAction")}

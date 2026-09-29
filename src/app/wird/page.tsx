@@ -121,8 +121,8 @@ export default async function WirdPage() {
             )}
         >
             <PageBackground />
-            <div className="mx-auto max-w-5xl px-4">
-                <StickyAppHeader className="-mx-4 px-4">
+            <div className="mx-auto max-w-5xl px-4 sm:px-6">
+                <StickyAppHeader className="-mx-4 px-4 sm:-mx-6 sm:px-6">
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"

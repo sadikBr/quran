@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
@@ -100,6 +100,7 @@ export default function SignUpPage() {
                 <CardContent className="px-6 py-6 sm:px-8">
                     <form
                         id="signup-form"
+                        aria-busy={loading}
                         onSubmit={(e) => {
                             e.preventDefault();
                             form.handleSubmit();
@@ -128,7 +129,8 @@ export default function SignUpPage() {
                                                 }
                                                 aria-invalid={isInvalid}
                                                 placeholder="example@example.com"
-                                                autoComplete="off"
+                                                autoComplete="email"
+                                                inputMode="email"
                                             />
                                             {isInvalid && (
                                                 <FieldError
@@ -164,7 +166,7 @@ export default function SignUpPage() {
                                                 }
                                                 aria-invalid={isInvalid}
                                                 placeholder="********"
-                                                autoComplete="off"
+                                                autoComplete="new-password"
                                             />
                                             {isInvalid && (
                                                 <FieldError
@@ -200,7 +202,7 @@ export default function SignUpPage() {
                                                 }
                                                 aria-invalid={isInvalid}
                                                 placeholder="********"
-                                                autoComplete="off"
+                                                autoComplete="new-password"
                                             />
                                             {isInvalid && (
                                                 <FieldError
@@ -237,7 +239,7 @@ export default function SignUpPage() {
                                                 placeholder={t(
                                                     "fields.namePlaceholder",
                                                 )}
-                                                autoComplete="off"
+                                                autoComplete="name"
                                             />
                                             {isInvalid && (
                                                 <FieldError
@@ -274,7 +276,8 @@ export default function SignUpPage() {
                                                 placeholder={t(
                                                     "fields.imagePlaceholder",
                                                 )}
-                                                autoComplete="off"
+                                                autoComplete="url"
+                                                inputMode="url"
                                             />
                                             {isInvalid && (
                                                 <FieldError
@@ -295,15 +298,26 @@ export default function SignUpPage() {
                         <Button
                             type="button"
                             variant="outline"
+                            disabled={loading}
                             onClick={() => form.reset()}
                         >
                             {t("actions.reset")}
                         </Button>
-                        <Button type="submit" form="signup-form">
+                        <Button
+                            type="submit"
+                            form="signup-form"
+                            disabled={loading}
+                        >
+                            {loading && (
+                                <LoaderCircle
+                                    aria-hidden="true"
+                                    className="size-4 animate-spin"
+                                />
+                            )}
                             {loading
                                 ? t("signUp.submitting")
                                 : t("signUp.submit")}
-                            <ArrowRight aria-hidden="true" />
+                            {!loading && <ArrowRight aria-hidden="true" />}
                         </Button>
                     </Field>
                     <p className="text-center text-sm text-muted-foreground">

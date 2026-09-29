@@ -254,7 +254,7 @@ export default async function Home() {
                                 <Button
                                     asChild
                                     size="lg"
-                                    className="h-12 w-full rounded-full px-7 shadow-lg shadow-black/20 sm:w-auto"
+                                    className="h-12 w-full rounded-xl px-7 shadow-lg shadow-black/20 sm:w-auto"
                                 >
                                     <Link href={href}>
                                         {continueReadingLabel}
@@ -271,7 +271,7 @@ export default async function Home() {
                                     asChild
                                     size="lg"
                                     variant="ghost"
-                                    className="h-12 w-full rounded-full border border-foreground/15 bg-background/20 px-7 text-foreground hover:bg-background/40 hover:text-foreground sm:w-auto dark:border-white/15 dark:bg-white/8 dark:text-white dark:hover:bg-white/14 dark:hover:text-white"
+                                    className="h-12 w-full rounded-xl border border-foreground/15 bg-background/20 px-7 text-foreground hover:bg-background/40 hover:text-foreground sm:w-auto dark:border-white/15 dark:bg-white/8 dark:text-white dark:hover:bg-white/14 dark:hover:text-white"
                                 >
                                     <Link href="/quran">
                                         {t("hero.explore")}
@@ -281,7 +281,7 @@ export default async function Home() {
                                     asChild
                                     size="lg"
                                     variant="link"
-                                    className="h-12 justify-start rounded-full px-3 text-foreground/75 hover:text-foreground sm:w-auto dark:text-white/75 dark:hover:text-white"
+                                    className="h-12 justify-start rounded-xl px-3 text-foreground/75 hover:text-foreground sm:w-auto dark:text-white/75 dark:hover:text-white"
                                 >
                                     <Link href="/quran/search">
                                         <Search
@@ -353,7 +353,7 @@ export default async function Home() {
                     <p className="mx-auto mt-3 max-w-lg leading-7 text-muted-foreground">
                         {t("closing.description")}
                     </p>
-                    <Button asChild className="mt-7 rounded-full px-6">
+                    <Button asChild className="mt-7 rounded-xl px-6">
                         <Link href="/quran">
                             {t("closing.browse")}
                             <ArrowRight

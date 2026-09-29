@@ -209,9 +209,32 @@
 }
 
 @layer base {
+    html {
+        scroll-behavior: smooth;
+        scrollbar-gutter: stable;
+    }
+
     body {
         letter-spacing: var(--tracking-normal);
-        min-width: 20rem;
+        min-width: 0;
+        min-height: 100dvh;
+        overflow-x: clip;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection {
+        background: color-mix(in oklab, var(--primary) 24%, transparent);
+        color: var(--foreground);
+    }
+
+    button,
+    a,
+    input,
+    select,
+    textarea,
+    summary {
+        -webkit-tap-highlight-color: transparent;
     }
 }
 

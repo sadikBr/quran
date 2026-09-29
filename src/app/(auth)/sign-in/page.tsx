@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
@@ -88,6 +88,7 @@ export default function SignInPage() {
                 <CardContent className="px-6 py-6 sm:px-8">
                     <form
                         id="signin-form"
+                        aria-busy={loading}
                         onSubmit={(e) => {
                             e.preventDefault();
                             form.handleSubmit();
@@ -116,7 +117,8 @@ export default function SignInPage() {
                                                 }
                                                 aria-invalid={isInvalid}
                                                 placeholder="example@example.com"
-                                                autoComplete="off"
+                                                autoComplete="email"
+                                                inputMode="email"
                                             />
                                             {isInvalid && (
                                                 <FieldError
@@ -152,7 +154,7 @@ export default function SignInPage() {
                                                 }
                                                 aria-invalid={isInvalid}
                                                 placeholder="********"
-                                                autoComplete="off"
+                                                autoComplete="current-password"
                                             />
                                             {isInvalid && (
                                                 <FieldError
@@ -173,15 +175,26 @@ export default function SignInPage() {
                         <Button
                             type="button"
                             variant="outline"
+                            disabled={loading}
                             onClick={() => form.reset()}
                         >
                             {t("actions.reset")}
                         </Button>
-                        <Button type="submit" form="signin-form">
+                        <Button
+                            type="submit"
+                            form="signin-form"
+                            disabled={loading}
+                        >
+                            {loading && (
+                                <LoaderCircle
+                                    aria-hidden="true"
+                                    className="size-4 animate-spin"
+                                />
+                            )}
                             {loading
                                 ? t("signIn.submitting")
                                 : t("signIn.submit")}
-                            <ArrowRight aria-hidden="true" />
+                            {!loading && <ArrowRight aria-hidden="true" />}
                         </Button>
                     </Field>
                     <p className="text-center text-sm text-muted-foreground">

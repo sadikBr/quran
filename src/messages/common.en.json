@@ -1,6 +1,9 @@
 {
     "Common": {
         "brand": "Quran Reader",
+        "accessibility": {
+            "skipToContent": "Skip to main content"
+        },
         "metadata": {
             "title": "Read Quran & Track Your Memorization",
             "description": "Read the Quran, listen to recitations, and keep your place."

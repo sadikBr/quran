@@ -487,7 +487,7 @@ export default async function DashboardPage() {
                                 <div className="mt-6 grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:ps-14">
                                     <Button
                                         asChild
-                                        className="min-h-11 w-full rounded-full px-5 shadow-sm shadow-primary/15 sm:w-auto"
+                                        className="min-h-11 w-full rounded-xl px-5 shadow-sm shadow-primary/15 sm:w-auto"
                                     >
                                         <Link href={focusHref}>
                                             {focusAction}
@@ -505,7 +505,7 @@ export default async function DashboardPage() {
                                             <Button
                                                 asChild
                                                 variant="ghost"
-                                                className="min-h-11 w-full rounded-full px-4 sm:w-auto"
+                                                className="min-h-11 w-full rounded-xl px-4 sm:w-auto"
                                             >
                                                 <Link href="/weekly">
                                                     {weeklyT("dashboard.open")}

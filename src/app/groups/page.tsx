@@ -68,8 +68,8 @@ export default async function GroupsPage({
             )}
         >
             <PageBackground />
-            <div className="mx-auto max-w-5xl px-4">
-                <StickyAppHeader className="-mx-4 px-4">
+            <div className="mx-auto max-w-5xl px-4 sm:px-6">
+                <StickyAppHeader className="-mx-4 px-4 sm:-mx-6 sm:px-6">
                     <Link
                         href="/"
                         className="flex items-center gap-3 rounded-md"
@@ -148,7 +148,7 @@ export default async function GroupsPage({
                                     <Button
                                         asChild
                                         variant="ghost"
-                                        className="w-fit rounded-full text-primary hover:text-primary"
+                                        className="w-fit rounded-xl text-primary hover:text-primary"
                                     >
                                         <Link href={`/groups/${group.id}`}>
                                             {t("open")}

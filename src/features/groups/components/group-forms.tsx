@@ -76,14 +76,14 @@ export default function GroupForms({
 
     return (
         <section className="mt-14 border-primary/15 border-t pt-6 sm:mt-16">
-            <div className="grid grid-cols-2 gap-1 rounded-full bg-muted/50 p-1 sm:inline-grid sm:min-w-80">
+            <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted/50 p-1 sm:inline-grid sm:min-w-80">
                 <button
                     type="button"
                     disabled={isSubmitting}
                     aria-pressed={mode === "create"}
                     onClick={() => setMode("create")}
                     className={cn(
-                        "flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors",
+                        "flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         mode === "create"
                             ? "bg-primary text-primary-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground",
@@ -98,7 +98,7 @@ export default function GroupForms({
                     aria-pressed={mode === "join"}
                     onClick={() => setMode("join")}
                     className={cn(
-                        "flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors",
+                        "flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         mode === "join"
                             ? "bg-primary text-primary-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground",
@@ -174,7 +174,7 @@ export default function GroupForms({
                         <Button
                             type="submit"
                             disabled={isSubmitting || !timezone}
-                            className="h-11 w-full rounded-full sm:w-auto"
+                            className="h-11 w-full rounded-xl sm:w-auto"
                         >
                             {isSubmitting && (
                                 <LoaderCircle className="size-4 animate-spin" />
@@ -210,7 +210,7 @@ export default function GroupForms({
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="h-11 w-full rounded-full sm:w-auto"
+                            className="h-11 w-full rounded-xl sm:w-auto"
                         >
                             {isSubmitting && (
                                 <LoaderCircle className="size-4 animate-spin" />

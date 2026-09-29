@@ -206,7 +206,7 @@ export default function PushNotificationSetting({
                             ? disableNotifications
                             : enableNotifications
                     }
-                    className="rounded-full"
+                    className="rounded-lg"
                 >
                     {isUpdating && (
                         <LoaderCircle

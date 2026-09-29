@@ -69,6 +69,11 @@ export default async function RootLayout({
 }>) {
     const preferences = await getPreferences();
     const messages = await getMessages(preferences.language);
+    const t = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Common",
+    });
 
     return (
         <html
@@ -103,6 +108,12 @@ export default async function RootLayout({
                         disableTransitionOnChange
                     >
                         <SettingsProvider preferences={preferences}>
+                            <a
+                                href="#main-content"
+                                className="fixed top-3 start-3 z-[100] -translate-y-20 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg outline-none transition-transform focus:translate-y-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            >
+                                {t("accessibility.skipToContent")}
+                            </a>
                             <ContentProtection />
                             <ConnectionStatus />
                             <OfflineLibraryManager />
@@ -110,23 +121,29 @@ export default async function RootLayout({
                             <ThemePreferenceSync />
                             <Toaster
                                 closeButton
-                                position="top-right"
+                                position={
+                                    preferences.language === "ar"
+                                        ? "top-left"
+                                        : "top-right"
+                                }
                                 toastOptions={{
                                     duration: 5000,
                                     unstyled: true,
                                     classNames: {
                                         toast: "font-sans relative flex w-full items-start gap-3 rounded-xl border border-border bg-card px-4 py-3 text-card-foreground shadow-lg",
-                                        content: "min-w-0 flex-1 pr-5",
+                                        content: "min-w-0 flex-1 pe-5",
                                         title: "font-sans text-sm font-semibold tracking-normal",
                                         description:
                                             "mt-1 font-sans text-sm leading-5 text-muted-foreground",
                                         closeButton:
-                                            "absolute top-2.5 right-2.5 flex size-6 items-center justify-center rounded-md border-0 bg-transparent text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                                            "absolute top-2.5 end-2.5 flex size-6 items-center justify-center rounded-md border-0 bg-transparent text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                                         error: "border-destructive/30",
                                     },
                                 }}
                             />
-                            {children}
+                            <div id="main-content" tabIndex={-1}>
+                                {children}
+                            </div>
                         </SettingsProvider>
                     </ThemeProvider>
                 </NextIntlClientProvider>
