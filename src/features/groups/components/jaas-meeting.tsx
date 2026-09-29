@@ -19,18 +19,18 @@ function getMeetingUrl({
     locale: string;
     displayName: string;
 }) {
-    const url = new URL(
-        `https://8x8.vc/${encodeURIComponent(appId)}/${encodeURIComponent(roomName)}`,
-    );
+    const url = new URL(`https://8x8.vc/${appId}/${roomName}`);
     url.searchParams.set("jwt", token);
     url.searchParams.set("lang", locale === "ar" ? "ar" : "en");
     url.hash = new URLSearchParams({
-        "config.prejoinConfig.enabled": "true",
-        "config.prejoinConfig.hideDisplayName": "true",
+        jwt: JSON.stringify(token),
+        "config.prejoinConfig.enabled": "false",
+        "config.disableInitialGUM": "true",
         "config.startWithAudioMuted": "true",
         "config.startWithVideoMuted": "true",
         "config.disableDeepLinking": "true",
         "userInfo.displayName": JSON.stringify(displayName),
+        "appData.localStorageContent": JSON.stringify("{}"),
     }).toString();
 
     return url.toString();
@@ -55,10 +55,17 @@ export default function JaasMeeting({
 }) {
     const t = useTranslations("Groups.meeting.room");
     const [loaded, setLoaded] = useState(false);
+    const [failed, setFailed] = useState(false);
     const meetingUrl = useMemo(
         () => getMeetingUrl({ appId, roomName, token, locale, displayName }),
         [appId, displayName, locale, roomName, token],
     );
+
+    useEffect(() => {
+        if (loaded || failed) return;
+        const timeout = window.setTimeout(() => setFailed(true), 20_000);
+        return () => window.clearTimeout(timeout);
+    }, [failed, loaded]);
 
     useEffect(() => {
         if (!isHost) return;
@@ -104,16 +111,38 @@ export default function JaasMeeting({
                     className="h-full w-full border-0"
                     allow="autoplay; camera; clipboard-write; display-capture; fullscreen; microphone; screen-wake-lock; speaker-selection"
                     allowFullScreen
-                    onLoad={() => setLoaded(true)}
+                    onLoad={() => {
+                        setFailed(false);
+                        setLoaded(true);
+                    }}
+                    onError={() => setFailed(true)}
                 />
                 {!loaded && (
-                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-background">
+                    <div className="absolute inset-0 flex items-center justify-center bg-background">
                         <div className="text-center">
                             <Video className="mx-auto size-7 text-primary" />
-                            <LoaderCircle className="mx-auto mt-3 size-5 animate-spin text-primary/70" />
-                            <p className="mt-4 text-sm text-muted-foreground">
-                                {t("loading")}
-                            </p>
+                            {failed ? (
+                                <>
+                                    <p className="mt-4 text-sm text-muted-foreground">
+                                        {t("loadError")}
+                                    </p>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="mt-5 rounded-xl"
+                                        onClick={() => window.location.reload()}
+                                    >
+                                        {t("retry")}
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <LoaderCircle className="mx-auto mt-3 size-5 animate-spin text-primary/70" />
+                                    <p className="mt-4 text-sm text-muted-foreground">
+                                        {t("loading")}
+                                    </p>
+                                </>
+                            )}
                         </div>
                     </div>
                 )}

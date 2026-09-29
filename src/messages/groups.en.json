@@ -223,6 +223,8 @@
             },
             "room": {
                 "loading": "Preparing your private meeting room…",
+                "loadError": "The meeting room couldn’t be loaded.",
+                "retry": "Try again",
                 "leave": "Leave meeting",
                 "waitingEyebrow": "WAITING FOR THE HOST",
                 "waitingTitle": "The meeting will begin shortly",
