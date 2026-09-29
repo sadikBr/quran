@@ -1,5 +1,13 @@
 import { relations } from "drizzle-orm";
-import { index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+    boolean,
+    index,
+    integer,
+    pgTable,
+    text,
+    timestamp,
+    uniqueIndex,
+} from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt } from "../helpers";
 import { user } from "./auth-schema";
 
@@ -45,6 +53,57 @@ export const groupMember = pgTable(
     ],
 );
 
+export const groupMeeting = pgTable(
+    "group_meeting",
+    {
+        id,
+        groupId: text("group_id")
+            .notNull()
+            .references(() => memorizationGroup.id, { onDelete: "cascade" }),
+        hostUserId: text("host_user_id")
+            .notNull()
+            .references(() => user.id, { onDelete: "cascade" }),
+        roomName: text("room_name").notNull(),
+        timezone: text("timezone").notNull(),
+        activeWindowMinutes: integer("active_window_minutes")
+            .notNull()
+            .default(180),
+        hostActiveUntil: timestamp("host_active_until", {
+            withTimezone: true,
+        }),
+        enabled: boolean("enabled").notNull().default(true),
+        createdAt,
+        updatedAt,
+    },
+    (table) => [
+        uniqueIndex("group_meeting_group_idx").on(table.groupId),
+        uniqueIndex("group_meeting_room_idx").on(table.roomName),
+        index("group_meeting_host_idx").on(table.hostUserId),
+    ],
+);
+
+export const groupMeetingSchedule = pgTable(
+    "group_meeting_schedule",
+    {
+        id,
+        meetingId: text("meeting_id")
+            .notNull()
+            .references(() => groupMeeting.id, { onDelete: "cascade" }),
+        weekday: integer("weekday").notNull(),
+        localTime: text("local_time").notNull(),
+        createdAt,
+        updatedAt,
+    },
+    (table) => [
+        uniqueIndex("group_meeting_schedule_slot_idx").on(
+            table.meetingId,
+            table.weekday,
+            table.localTime,
+        ),
+        index("group_meeting_schedule_meeting_idx").on(table.meetingId),
+    ],
+);
+
 export const memorizationGroupRelations = relations(
     memorizationGroup,
     ({ one, many }) => ({
@@ -53,6 +112,7 @@ export const memorizationGroupRelations = relations(
             references: [user.id],
         }),
         members: many(groupMember),
+        meeting: one(groupMeeting),
     }),
 );
 
@@ -66,3 +126,28 @@ export const groupMemberRelations = relations(groupMember, ({ one }) => ({
         references: [user.id],
     }),
 }));
+
+export const groupMeetingRelations = relations(
+    groupMeeting,
+    ({ one, many }) => ({
+        group: one(memorizationGroup, {
+            fields: [groupMeeting.groupId],
+            references: [memorizationGroup.id],
+        }),
+        host: one(user, {
+            fields: [groupMeeting.hostUserId],
+            references: [user.id],
+        }),
+        schedule: many(groupMeetingSchedule),
+    }),
+);
+
+export const groupMeetingScheduleRelations = relations(
+    groupMeetingSchedule,
+    ({ one }) => ({
+        meeting: one(groupMeeting, {
+            fields: [groupMeetingSchedule.meetingId],
+            references: [groupMeeting.id],
+        }),
+    }),
+);

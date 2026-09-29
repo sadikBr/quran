@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import db from "@/drizzle/db";
-import { groupMember, memorizationGroup } from "@/drizzle/schema";
+import { groupMeeting, groupMember, memorizationGroup } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
 
 const memberInputSchema = z.object({
@@ -46,6 +46,20 @@ async function adminCount(groupId: string) {
     return result?.value ?? 0;
 }
 
+async function isMeetingHost(groupId: string, userId: string) {
+    const [meeting] = await db
+        .select({ id: groupMeeting.id })
+        .from(groupMeeting)
+        .where(
+            and(
+                eq(groupMeeting.groupId, groupId),
+                eq(groupMeeting.hostUserId, userId),
+            ),
+        )
+        .limit(1);
+    return Boolean(meeting);
+}
+
 export async function updateMemberRole(input: unknown) {
     const parsed = memberInputSchema
         .extend({ role: z.enum(["admin", "member"]) })
@@ -58,7 +72,7 @@ export async function updateMemberRole(input: unknown) {
     }
 
     const [target] = await db
-        .select({ role: groupMember.role })
+        .select({ role: groupMember.role, userId: groupMember.userId })
         .from(groupMember)
         .where(
             and(
@@ -68,6 +82,13 @@ export async function updateMemberRole(input: unknown) {
         )
         .limit(1);
     if (!target) return { success: false as const, reason: "not_found" };
+
+    if (
+        parsed.data.role === "member" &&
+        (await isMeetingHost(parsed.data.groupId, target.userId))
+    ) {
+        return { success: false as const, reason: "meeting_host" };
+    }
 
     if (
         target.role === "admin" &&
@@ -96,7 +117,7 @@ export async function removeGroupMember(input: unknown) {
     }
 
     const [target] = await db
-        .select({ role: groupMember.role })
+        .select({ role: groupMember.role, userId: groupMember.userId })
         .from(groupMember)
         .where(
             and(
@@ -106,6 +127,9 @@ export async function removeGroupMember(input: unknown) {
         )
         .limit(1);
     if (!target) return { success: false as const, reason: "not_found" };
+    if (await isMeetingHost(parsed.data.groupId, target.userId)) {
+        return { success: false as const, reason: "meeting_host" };
+    }
     if (
         target.role === "admin" &&
         (await adminCount(parsed.data.groupId)) <= 1
@@ -140,6 +164,9 @@ export async function leaveGroup(input: unknown) {
         )
         .limit(1);
     if (!membership) return { success: false as const, reason: "not_found" };
+    if (await isMeetingHost(parsed.data.groupId, userId)) {
+        return { success: false as const, reason: "meeting_host" };
+    }
     if (
         membership.role === "admin" &&
         (await adminCount(parsed.data.groupId)) <= 1

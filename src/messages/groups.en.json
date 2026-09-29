@@ -59,6 +59,7 @@
             "confirmDelete": "Delete this group permanently? This cannot be undone.",
             "cancel": "Cancel",
             "lastAdmin": "Choose another admin before removing or changing the final admin.",
+            "meetingHost": "Choose another meeting host before changing or removing this admin.",
             "updated": "Group membership updated.",
             "failed": "We couldn’t update the group. Please try again."
         },
@@ -180,6 +181,54 @@
             "emptyDescription": "Create a group for family, friends, or students and prepare for shared weekly assignments.",
             "activeDescription": "You belong to {count, plural, one {# memorization group} other {# memorization groups}}.",
             "open": "Open groups"
+        },
+        "meeting": {
+            "eyebrow": "GROUP MEETING",
+            "liveEyebrow": "MEETING OPEN",
+            "setupTitle": "Choose your weekly meeting times",
+            "setupDescriptionAdmin": "Add the days and times when your circle meets. The room will open for three hours at each scheduled time.",
+            "setupDescriptionMember": "A group admin has not scheduled the meeting yet.",
+            "liveTitle": "Your Quran circle is meeting now",
+            "pausedTitle": "Group meetings are paused",
+            "closesIn": "The room remains open for {hours, plural, =0 {} one {# hour } other {# hours }}{minutes, plural, =0 {} one {# minute} other {# minutes}}.",
+            "hostedBy": "Hosted by {name}. Members enter once the host starts the meeting.",
+            "start": "Start meeting",
+            "join": "Join meeting",
+            "notOpen": "Available at meeting time",
+            "providerUnavailable": "Video setup required",
+            "configure": "Set meeting schedule",
+            "editSchedule": "Edit meeting schedule",
+            "scheduleTitle": "Weekly meeting times",
+            "scheduleDescription": "Add every day and time when this circle normally meets.",
+            "day": "Meeting day",
+            "time": "Meeting time",
+            "addSlot": "Add another time",
+            "removeSlot": "Remove meeting time",
+            "timezone": "Group timezone",
+            "timezoneHint": "Times will stay fixed in this timezone, including when daylight-saving rules change.",
+            "hostNote": "{name} is the designated meeting moderator.",
+            "you": "You",
+            "save": "Save schedule",
+            "saving": "Saving…",
+            "saved": "The meeting schedule has been saved.",
+            "saveError": "We couldn’t save this schedule. Check the times and timezone.",
+            "weekdays": {
+                "1": "Monday",
+                "2": "Tuesday",
+                "3": "Wednesday",
+                "4": "Thursday",
+                "5": "Friday",
+                "6": "Saturday",
+                "7": "Sunday"
+            },
+            "room": {
+                "loading": "Preparing your private meeting room…",
+                "leave": "Leave meeting",
+                "waitingEyebrow": "WAITING FOR THE HOST",
+                "waitingTitle": "The meeting will begin shortly",
+                "waitingDescription": "You’ll enter automatically as soon as {name} starts the meeting.",
+                "checkingHost": "Checking for the host…"
+            }
         },
         "loading": "Loading your groups…"
     }

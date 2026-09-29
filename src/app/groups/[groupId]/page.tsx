@@ -29,11 +29,15 @@ import {
     MemberActions,
 } from "@/features/groups/components/group-actions";
 import GroupInvite from "@/features/groups/components/group-invite";
+import GroupMeetingPanel from "@/features/groups/components/group-meeting-panel";
 import MemberAssignmentForm from "@/features/groups/components/member-assignment-form";
+import { isJaasConfigured } from "@/features/groups/server/create-jaas-token";
 import getGroupAssignments, {
     type GroupAssignmentSummary,
 } from "@/features/groups/server/get-group-assignments";
+import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
 import { getGroupForUser } from "@/features/groups/server/get-groups";
+import { calculateMeetingState } from "@/features/groups/server/meeting-schedule";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import {
@@ -112,17 +116,20 @@ export default async function GroupPage({
     };
     const [
         assignments,
+        meeting,
         surahs,
         warshChapters,
         hafsNavigation,
         warshNavigation,
     ] = await Promise.all([
         getGroupAssignments(group.id, session.user.id, isAdmin),
+        getGroupMeetingForUser(group.id, session.user.id),
         getSurahsMeta(),
         isAdmin ? getWarshChapters() : Promise.resolve([]),
         isAdmin ? getQuranNavigationMeta() : Promise.resolve(null),
         isAdmin ? getWarshNavigationMeta() : Promise.resolve(null),
     ]);
+    const meetingState = meeting ? calculateMeetingState(meeting) : null;
     const warshCounts = new Map(
         warshChapters.map((chapter) => [chapter.id, chapter.verses.length]),
     );
@@ -378,6 +385,16 @@ export default async function GroupPage({
                             {t("members", { count: group.memberCount })}
                         </div>
                     </div>
+
+                    <GroupMeetingPanel
+                        groupId={group.id}
+                        meeting={meeting}
+                        state={meetingState}
+                        isAdmin={isAdmin}
+                        isHost={meeting?.hostUserId === session.user.id}
+                        locale={preferences.language}
+                        providerConfigured={isJaasConfigured()}
+                    />
 
                     {isAdmin && (
                         <section className="mt-10 rounded-3xl bg-primary/[0.07] p-6 ring-1 ring-primary/15 sm:p-7">
@@ -696,7 +713,9 @@ export default async function GroupPage({
                     <GroupDangerActions
                         groupId={group.id}
                         isAdmin={isAdmin}
-                        canLeave={canLeave}
+                        canLeave={
+                            canLeave && meeting?.hostUserId !== currentUserId
+                        }
                     />
                 </section>
             </div>

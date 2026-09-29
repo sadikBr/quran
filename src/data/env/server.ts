@@ -12,6 +12,9 @@ export const env = createEnv({
         VAPID_PUBLIC_KEY: z.string().min(1).optional(),
         VAPID_PRIVATE_KEY: z.string().min(1).optional(),
         CRON_SECRET: z.string().min(16).optional(),
+        JAAS_APP_ID: z.string().min(1).optional(),
+        JAAS_API_KEY_ID: z.string().min(1).optional(),
+        JAAS_PRIVATE_KEY: z.string().min(1).optional(),
     },
     createFinalSchema: (env) => {
         return z.object(env).transform((values) => {

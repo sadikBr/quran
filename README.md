@@ -69,6 +69,20 @@ Quran data is retrieved from [Al Quran Cloud](https://alquran.cloud/api). The se
    CRON_SECRET=
    ```
 
+   To enable private group video meetings, create a Jitsi as a Service (JaaS)
+   application and API key, then add the following values locally and in
+   Vercel:
+
+   ```text
+   JAAS_APP_ID=vpaas-magic-cookie-...
+   JAAS_API_KEY_ID=vpaas-magic-cookie-.../key-id
+   JAAS_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+   ```
+
+   `JAAS_API_KEY_ID` is the complete `kid` shown by the JaaS console. The
+   private key may contain real line breaks or escaped `\n` line breaks. Never
+   expose it through a `NEXT_PUBLIC_` variable.
+
 3. Push the current Drizzle schema to the database:
 
    ```bash
@@ -111,6 +125,15 @@ the download state can be checked or refreshed from Settings.
 
 Quran text remains available without a connection at `/offline`. Audio, tafsir,
 account updates, bookmarks, and progress syncing still require the network.
+
+## Group video meetings
+
+Group creators choose one or more weekday/time combinations and a timezone.
+The application keeps those recurring schedules in local time so daylight
+saving changes do not move the meeting. Each occurrence opens for three hours.
+The group meeting host receives moderator permissions and other active group
+members receive participant permissions through short-lived, server-signed
+JaaS tokens. No external Jitsi account is required for family members.
 
 ## Planned work
 

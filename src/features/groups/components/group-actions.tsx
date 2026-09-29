@@ -33,7 +33,15 @@ function showFailure(
     reason: string | undefined,
     t: ReturnType<typeof useTranslations>,
 ) {
-    toast.error(t(reason === "last_admin" ? "lastAdmin" : "failed"));
+    toast.error(
+        t(
+            reason === "last_admin"
+                ? "lastAdmin"
+                : reason === "meeting_host"
+                  ? "meetingHost"
+                  : "failed",
+        ),
+    );
 }
 
 export function MemberActions({

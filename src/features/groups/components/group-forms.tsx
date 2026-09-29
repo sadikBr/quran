@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import type { MeetingScheduleSlot } from "../meeting-types";
 import createGroup from "../server/create-group";
 import joinGroup from "../server/join-group";
+import MeetingScheduleFields from "./meeting-schedule-fields";
 
 export default function GroupForms({
     initialInviteCode = "",
@@ -24,12 +26,18 @@ export default function GroupForms({
         initialInviteCode ? "join" : "create",
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [schedule, setSchedule] = useState<MeetingScheduleSlot[]>([
+        { weekday: 1, localTime: "20:00" },
+    ]);
+    const [timezone, setTimezone] = useState("");
 
     async function create(formData: FormData) {
         setIsSubmitting(true);
         const result = await createGroup({
             name: formData.get("name"),
             description: formData.get("description"),
+            schedule,
+            timezone,
         });
         setIsSubmitting(false);
 
@@ -141,6 +149,15 @@ export default function GroupForms({
                                 className="mt-2 h-12 rounded-xl bg-muted/30"
                             />
                         </div>
+                        <div className="border-border/60 border-t pt-5">
+                            <MeetingScheduleFields
+                                schedule={schedule}
+                                setSchedule={setSchedule}
+                                timezone={timezone}
+                                setTimezone={setTimezone}
+                                disabled={isSubmitting}
+                            />
+                        </div>
                         <div>
                             <Label htmlFor="group-description">
                                 {t("create.details")}
@@ -156,7 +173,7 @@ export default function GroupForms({
                         </div>
                         <Button
                             type="submit"
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || !timezone}
                             className="h-11 w-full rounded-full sm:w-auto"
                         >
                             {isSubmitting && (
