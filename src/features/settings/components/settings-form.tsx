@@ -503,6 +503,17 @@ export default function SettingsForm({
                     >
                         <PushNotificationSetting
                             vapidPublicKey={vapidPublicKey}
+                            reminderPreferences={{
+                                wirdRemindersEnabled:
+                                    values.wirdRemindersEnabled,
+                                meetingRemindersEnabled:
+                                    values.meetingRemindersEnabled,
+                                assignmentRemindersEnabled:
+                                    values.assignmentRemindersEnabled,
+                            }}
+                            onReminderPreferenceChange={(key, enabled) =>
+                                updateValue(key, enabled)
+                            }
                         />
                     </SettingsSection>
 

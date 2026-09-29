@@ -3,6 +3,7 @@
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { z } from "zod";
 import db from "@/drizzle/db";
 import {
@@ -11,6 +12,7 @@ import {
     userSettings,
 } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import { sendAssignmentNotification } from "@/features/notifications/server/assignment-notifications";
 import { practiceRangeSchema, referenceOrder } from "@/features/practice/types";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
@@ -83,9 +85,10 @@ export default async function createMemberAssignment(input: unknown) {
         return { success: false as const, reason: "invalid_range" };
     }
 
+    const assignmentId = crypto.randomUUID();
     try {
         await db.insert(practiceAssignment).values({
-            id: crypto.randomUUID(),
+            id: assignmentId,
             groupId: parsed.data.groupId,
             assigneeId: parsed.data.assigneeId,
             assignedById: session.user.id,
@@ -104,6 +107,12 @@ export default async function createMemberAssignment(input: unknown) {
     } catch {
         return { success: false as const, reason: "failed" };
     }
+
+    after(async () => {
+        await Promise.allSettled([
+            sendAssignmentNotification(assignmentId, "published"),
+        ]);
+    });
 
     revalidatePath(`/groups/${parsed.data.groupId}`);
     revalidatePath("/practice");

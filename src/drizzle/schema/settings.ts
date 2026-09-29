@@ -34,6 +34,15 @@ export const userSettings = pgTable("user_settings", {
         .notNull()
         .default(false),
     arabicTextSize: integer("arabic_text_size").notNull().default(3),
+    wirdRemindersEnabled: boolean("wird_reminders_enabled")
+        .notNull()
+        .default(true),
+    meetingRemindersEnabled: boolean("meeting_reminders_enabled")
+        .notNull()
+        .default(true),
+    assignmentRemindersEnabled: boolean("assignment_reminders_enabled")
+        .notNull()
+        .default(true),
 
     createdAt,
     updatedAt,

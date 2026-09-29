@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import PreferenceCard from "@/features/settings/components/settings-card";
 
 type NotificationStatus =
@@ -14,6 +15,11 @@ type NotificationStatus =
     | "blocked"
     | "disabled"
     | "enabled";
+
+export type ReminderPreferenceKey =
+    | "wirdRemindersEnabled"
+    | "meetingRemindersEnabled"
+    | "assignmentRemindersEnabled";
 
 function applicationServerKey(value: string) {
     const padding = "=".repeat((4 - (value.length % 4)) % 4);
@@ -36,8 +42,15 @@ function supportsPush() {
 
 export default function PushNotificationSetting({
     vapidPublicKey,
+    reminderPreferences,
+    onReminderPreferenceChange,
 }: {
     vapidPublicKey: string | null;
+    reminderPreferences: Record<ReminderPreferenceKey, boolean>;
+    onReminderPreferenceChange: (
+        key: ReminderPreferenceKey,
+        enabled: boolean,
+    ) => void;
 }) {
     const t = useTranslations("Settings.notifications");
     const [status, setStatus] = useState<NotificationStatus>("checking");
@@ -154,6 +167,17 @@ export default function PushNotificationSetting({
         status === "unsupported" ||
         status === "unconfigured" ||
         status === "blocked";
+    const categories: Array<{
+        key: ReminderPreferenceKey;
+        translationKey: "wird" | "meetings" | "assignments";
+    }> = [
+        { key: "wirdRemindersEnabled", translationKey: "wird" },
+        { key: "meetingRemindersEnabled", translationKey: "meetings" },
+        {
+            key: "assignmentRemindersEnabled",
+            translationKey: "assignments",
+        },
+    ];
 
     return (
         <PreferenceCard title={t("title")} description={t("description")}>
@@ -198,6 +222,43 @@ export default function PushNotificationSetting({
                     {t("blockedHint")}
                 </p>
             )}
+            <div className="mt-4 divide-y divide-border/60 border-border/60 border-t">
+                {categories.map((category) => {
+                    const id = `notification-${category.translationKey}`;
+                    return (
+                        <div
+                            key={category.key}
+                            className="flex items-center justify-between gap-5 py-4"
+                        >
+                            <label
+                                htmlFor={id}
+                                className="min-w-0 cursor-pointer"
+                            >
+                                <span className="block text-sm font-medium">
+                                    {t(
+                                        `categories.${category.translationKey}.title`,
+                                    )}
+                                </span>
+                                <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
+                                    {t(
+                                        `categories.${category.translationKey}.description`,
+                                    )}
+                                </span>
+                            </label>
+                            <Checkbox
+                                id={id}
+                                checked={reminderPreferences[category.key]}
+                                onCheckedChange={(checked) =>
+                                    onReminderPreferenceChange(
+                                        category.key,
+                                        checked === true,
+                                    )
+                                }
+                            />
+                        </div>
+                    );
+                })}
+            </div>
         </PreferenceCard>
     );
 }

@@ -40,6 +40,9 @@ export default async function getPreferences(): Promise<Preferences> {
         showTranslation: settings.showTranslation,
         readingMode: settings.readingMode,
         continuousRecitation: settings.continuousRecitation,
+        wirdRemindersEnabled: settings.wirdRemindersEnabled,
+        meetingRemindersEnabled: settings.meetingRemindersEnabled,
+        assignmentRemindersEnabled: settings.assignmentRemindersEnabled,
         arabicTextSize:
             settings.arabicTextSize >= 1 && settings.arabicTextSize <= 5
                 ? (settings.arabicTextSize as Preferences["arabicTextSize"])

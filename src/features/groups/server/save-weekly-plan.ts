@@ -3,6 +3,7 @@
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { z } from "zod";
 import db from "@/drizzle/db";
 import {
@@ -11,6 +12,7 @@ import {
     userSettings,
 } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import { sendAssignmentNotification } from "@/features/notifications/server/assignment-notifications";
 import {
     PRACTICE_KINDS,
     quranReferenceSchema,
@@ -105,6 +107,24 @@ export default async function saveWeeklyPlan(input: unknown) {
         return { success: false as const, reason: "invalid_range" };
 
     const dueAt = new Date(`${parsed.data.dueDate}T12:00:00.000Z`);
+    const assignments = parsed.data.entries.map((entry) => {
+        const riwayah = memberById.get(entry.assigneeId)?.riwayah ?? "hafs";
+        return {
+            id: crypto.randomUUID(),
+            groupId: parsed.data.groupId,
+            assigneeId: entry.assigneeId,
+            assignedById: session.user.id,
+            kind: entry.kind,
+            riwayah,
+            startSurahNumber: entry.start.surahNumber,
+            startAyahNumber: entry.start.ayahNumber,
+            endSurahNumber: entry.end.surahNumber,
+            endAyahNumber: entry.end.ayahNumber,
+            status: parsed.data.mode === "draft" ? "draft" : "in_progress",
+            dueAt,
+            instructions: entry.instructions || null,
+        };
+    });
     try {
         await db.transaction(async (transaction) => {
             await transaction
@@ -116,33 +136,20 @@ export default async function saveWeeklyPlan(input: unknown) {
                     ),
                 );
 
-            await transaction.insert(practiceAssignment).values(
-                parsed.data.entries.map((entry) => {
-                    const riwayah =
-                        memberById.get(entry.assigneeId)?.riwayah ?? "hafs";
-                    return {
-                        id: crypto.randomUUID(),
-                        groupId: parsed.data.groupId,
-                        assigneeId: entry.assigneeId,
-                        assignedById: session.user.id,
-                        kind: entry.kind,
-                        riwayah,
-                        startSurahNumber: entry.start.surahNumber,
-                        startAyahNumber: entry.start.ayahNumber,
-                        endSurahNumber: entry.end.surahNumber,
-                        endAyahNumber: entry.end.ayahNumber,
-                        status:
-                            parsed.data.mode === "draft"
-                                ? "draft"
-                                : "in_progress",
-                        dueAt,
-                        instructions: entry.instructions || null,
-                    };
-                }),
-            );
+            await transaction.insert(practiceAssignment).values(assignments);
         });
     } catch {
         return { success: false as const, reason: "failed" };
+    }
+
+    if (parsed.data.mode === "publish") {
+        after(async () => {
+            await Promise.allSettled(
+                assignments.map((assignment) =>
+                    sendAssignmentNotification(assignment.id, "published"),
+                ),
+            );
+        });
     }
 
     revalidatePath(`/groups/${parsed.data.groupId}`);

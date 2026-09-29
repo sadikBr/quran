@@ -10,6 +10,7 @@ import {
 import { createdAt, id, updatedAt } from "../helpers";
 import { user } from "./auth-schema";
 import { groupMeeting } from "./memorization-group";
+import { practiceAssignment } from "./practice-assignment";
 
 export const pushSubscription = pgTable(
     "push_subscription",
@@ -42,6 +43,7 @@ export const pushSubscriptionRelations = relations(
             references: [user.id],
         }),
         meetingReminderDeliveries: many(groupMeetingReminderDelivery),
+        assignmentNotificationDeliveries: many(assignmentNotificationDelivery),
     }),
 );
 
@@ -85,6 +87,49 @@ export const groupMeetingReminderDeliveryRelations = relations(
         }),
         subscription: one(pushSubscription, {
             fields: [groupMeetingReminderDelivery.subscriptionId],
+            references: [pushSubscription.id],
+        }),
+    }),
+);
+
+export const assignmentNotificationDelivery = pgTable(
+    "assignment_notification_delivery",
+    {
+        id,
+        assignmentId: text("assignment_id")
+            .notNull()
+            .references(() => practiceAssignment.id, { onDelete: "cascade" }),
+        subscriptionId: text("subscription_id")
+            .notNull()
+            .references(() => pushSubscription.id, { onDelete: "cascade" }),
+        kind: text("kind").notNull(),
+        sentAt: timestamp("sent_at", { withTimezone: true }),
+        createdAt,
+    },
+    (table) => [
+        uniqueIndex("assignment_notification_delivery_once_idx").on(
+            table.assignmentId,
+            table.subscriptionId,
+            table.kind,
+        ),
+        index("assignment_notification_delivery_assignment_idx").on(
+            table.assignmentId,
+        ),
+        index("assignment_notification_delivery_subscription_idx").on(
+            table.subscriptionId,
+        ),
+    ],
+);
+
+export const assignmentNotificationDeliveryRelations = relations(
+    assignmentNotificationDelivery,
+    ({ one }) => ({
+        assignment: one(practiceAssignment, {
+            fields: [assignmentNotificationDelivery.assignmentId],
+            references: [practiceAssignment.id],
+        }),
+        subscription: one(pushSubscription, {
+            fields: [assignmentNotificationDelivery.subscriptionId],
             references: [pushSubscription.id],
         }),
     }),

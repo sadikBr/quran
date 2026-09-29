@@ -65,6 +65,7 @@ export async function GET(request: Request) {
             language: userSettings.language,
             targetDate: userWird.targetDate,
             completedAt: userWird.completedAt,
+            remindersEnabled: userSettings.wirdRemindersEnabled,
         })
         .from(pushSubscription)
         .innerJoin(userWird, eq(pushSubscription.userId, userWird.userId))
@@ -81,6 +82,7 @@ export async function GET(request: Request) {
             subscription.completedAt !== null &&
             getWirdDate(subscription.completedAt) === today;
         if (
+            !subscription.remindersEnabled ||
             completedToday ||
             subscription.targetDate > today ||
             subscription.lastReminderDate === today

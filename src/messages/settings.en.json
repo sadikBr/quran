@@ -76,14 +76,28 @@
             "manual": "Ayah by ayah"
         },
         "notifications": {
-            "title": "Wird and meeting reminders",
-            "description": "Remind me before scheduled circle meetings, and around 11 PM Morocco time when today’s Wird is still incomplete.",
+            "title": "Notification preferences",
+            "description": "Choose which reminders you want to receive.",
             "enable": "Enable",
             "disable": "Disable",
             "enabledFeedback": "Wird and meeting reminders are enabled on this device.",
             "disabledFeedback": "Notifications have been disabled on this device.",
             "errorFeedback": "We could not update notification settings.",
             "blockedHint": "Notifications are blocked in Chrome. Allow them for this app in your browser or system settings, then return here.",
+            "categories": {
+                "wird": {
+                    "title": "Daily Wird",
+                    "description": "Remind me near the end of the day when my Wird is unfinished."
+                },
+                "meetings": {
+                    "title": "Circle meetings",
+                    "description": "Remind me 15 minutes before a scheduled meeting."
+                },
+                "assignments": {
+                    "title": "Group assignments",
+                    "description": "Tell me about new assignments and deadlines approaching in 24 hours."
+                }
+            },
             "status": {
                 "checking": "Checking this device…",
                 "unsupported": "Push notifications are not supported here",

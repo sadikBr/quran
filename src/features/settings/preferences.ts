@@ -24,6 +24,9 @@ export interface Preferences {
     readingMode: ReadingMode;
     continuousRecitation: boolean;
     arabicTextSize: ArabicTextSize;
+    wirdRemindersEnabled: boolean;
+    meetingRemindersEnabled: boolean;
+    assignmentRemindersEnabled: boolean;
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -38,6 +41,9 @@ export const DEFAULT_PREFERENCES: Preferences = {
     readingMode: "page",
     continuousRecitation: false,
     arabicTextSize: 3,
+    wirdRemindersEnabled: true,
+    meetingRemindersEnabled: true,
+    assignmentRemindersEnabled: true,
 };
 
 export const preferencesZodSchema = z.object({
@@ -51,6 +57,9 @@ export const preferencesZodSchema = z.object({
     showTranslation: z.boolean(),
     readingMode: z.enum(READING_MODES),
     continuousRecitation: z.boolean(),
+    wirdRemindersEnabled: z.boolean(),
+    meetingRemindersEnabled: z.boolean(),
+    assignmentRemindersEnabled: z.boolean(),
     arabicTextSize: z.union([
         z.literal(1),
         z.literal(2),

@@ -157,6 +157,7 @@ export async function GET(request: Request) {
             p256dh: pushSubscription.p256dh,
             auth: pushSubscription.auth,
             language: userSettings.language,
+            remindersEnabled: userSettings.meetingRemindersEnabled,
         })
         .from(groupMember)
         .innerJoin(
@@ -172,6 +173,7 @@ export async function GET(request: Request) {
     let failed = 0;
 
     for (const recipient of recipients) {
+        if (recipient.remindersEnabled === false) continue;
         const meeting = candidateByGroup.get(recipient.groupId);
         if (!meeting) continue;
 
