@@ -104,6 +104,63 @@ export const groupMeetingSchedule = pgTable(
     ],
 );
 
+export const groupMeetingSession = pgTable(
+    "group_meeting_session",
+    {
+        id,
+        meetingId: text("meeting_id")
+            .notNull()
+            .references(() => groupMeeting.id, { onDelete: "cascade" }),
+        scheduledStartsAt: timestamp("scheduled_starts_at", {
+            withTimezone: true,
+        }).notNull(),
+        scheduledEndsAt: timestamp("scheduled_ends_at", {
+            withTimezone: true,
+        }).notNull(),
+        startedAt: timestamp("started_at", { withTimezone: true }),
+        endedAt: timestamp("ended_at", { withTimezone: true }),
+        finalizedAt: timestamp("finalized_at", { withTimezone: true }),
+        createdAt,
+        updatedAt,
+    },
+    (table) => [
+        uniqueIndex("group_meeting_session_occurrence_idx").on(
+            table.meetingId,
+            table.scheduledStartsAt,
+        ),
+        index("group_meeting_session_meeting_idx").on(table.meetingId),
+    ],
+);
+
+export const groupMeetingAttendance = pgTable(
+    "group_meeting_attendance",
+    {
+        id,
+        sessionId: text("session_id")
+            .notNull()
+            .references(() => groupMeetingSession.id, { onDelete: "cascade" }),
+        userId: text("user_id")
+            .notNull()
+            .references(() => user.id, { onDelete: "cascade" }),
+        joinedAt: timestamp("joined_at", { withTimezone: true }),
+        activeJoinedAt: timestamp("active_joined_at", { withTimezone: true }),
+        lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
+        leftAt: timestamp("left_at", { withTimezone: true }),
+        attendedSeconds: integer("attended_seconds").notNull().default(0),
+        status: text("status").notNull().default("present"),
+        createdAt,
+        updatedAt,
+    },
+    (table) => [
+        uniqueIndex("group_meeting_attendance_member_idx").on(
+            table.sessionId,
+            table.userId,
+        ),
+        index("group_meeting_attendance_session_idx").on(table.sessionId),
+        index("group_meeting_attendance_user_idx").on(table.userId),
+    ],
+);
+
 export const memorizationGroupRelations = relations(
     memorizationGroup,
     ({ one, many }) => ({
@@ -139,6 +196,32 @@ export const groupMeetingRelations = relations(
             references: [user.id],
         }),
         schedule: many(groupMeetingSchedule),
+        sessions: many(groupMeetingSession),
+    }),
+);
+
+export const groupMeetingSessionRelations = relations(
+    groupMeetingSession,
+    ({ one, many }) => ({
+        meeting: one(groupMeeting, {
+            fields: [groupMeetingSession.meetingId],
+            references: [groupMeeting.id],
+        }),
+        attendance: many(groupMeetingAttendance),
+    }),
+);
+
+export const groupMeetingAttendanceRelations = relations(
+    groupMeetingAttendance,
+    ({ one }) => ({
+        session: one(groupMeetingSession, {
+            fields: [groupMeetingAttendance.sessionId],
+            references: [groupMeetingSession.id],
+        }),
+        member: one(user, {
+            fields: [groupMeetingAttendance.userId],
+            references: [user.id],
+        }),
     }),
 );
 

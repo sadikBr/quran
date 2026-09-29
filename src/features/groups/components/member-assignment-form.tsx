@@ -1,6 +1,12 @@
 "use client";
 
-import { BookMarked, LoaderCircle, RefreshCcw, UserRound } from "lucide-react";
+import {
+    BookMarked,
+    CalendarClock,
+    LoaderCircle,
+    RefreshCcw,
+    UserRound,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
@@ -14,8 +20,14 @@ import {
     ComboboxItem,
     ComboboxList,
 } from "@/components/ui/combobox";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { GroupMemberDetails } from "@/features/groups/types";
 import QuranRangeSelector from "@/features/practice/components/quran-range-selector";
@@ -33,10 +45,9 @@ export interface AssignmentSurah {
     warshAyahCount: number;
 }
 
-function defaultDueDate() {
-    const date = new Date();
-    date.setDate(date.getDate() + 7);
-    return date.toISOString().slice(0, 10);
+export interface AssignmentMeetingOption {
+    startsAt: string;
+    label: string;
 }
 
 export default function MemberAssignmentForm({
@@ -44,12 +55,14 @@ export default function MemberAssignmentForm({
     members,
     surahs,
     navigationByRiwayah,
+    meetingOptions,
     locale,
 }: {
     groupId: string;
     members: GroupMemberDetails[];
     surahs: AssignmentSurah[];
     navigationByRiwayah: Record<"hafs" | "warsh", QuranNavigationMeta>;
+    meetingOptions: AssignmentMeetingOption[];
     locale: string;
 }) {
     const t = useTranslations("Groups.assignments");
@@ -66,7 +79,9 @@ export default function MemberAssignmentForm({
         surahNumber: 1,
         ayahNumber: 7,
     });
-    const [dueDate, setDueDate] = useState(defaultDueDate);
+    const [dueMeetingStartsAt, setDueMeetingStartsAt] = useState(
+        meetingOptions[0]?.startsAt ?? "",
+    );
     const [instructions, setInstructions] = useState("");
     const [isSaving, setIsSaving] = useState(false);
     const surahOptions = useMemo(
@@ -84,7 +99,7 @@ export default function MemberAssignmentForm({
     );
     async function submit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        if (!assignee) return;
+        if (!assignee || !dueMeetingStartsAt) return;
         setIsSaving(true);
         const result = await createMemberAssignment({
             groupId,
@@ -92,7 +107,7 @@ export default function MemberAssignmentForm({
             kind,
             start,
             end,
-            dueDate,
+            dueMeetingStartsAt,
             instructions,
         });
         setIsSaving(false);
@@ -206,15 +221,49 @@ export default function MemberAssignmentForm({
 
             <div className="grid gap-5 md:grid-cols-2">
                 <div>
-                    <Label htmlFor="assignment-due-date">{t("dueDate")}</Label>
-                    <Input
-                        id="assignment-due-date"
-                        type="date"
+                    <Label htmlFor="assignment-due-meeting">
+                        {t("dueMeeting")}
+                    </Label>
+                    <Select
+                        value={dueMeetingStartsAt}
+                        onValueChange={setDueMeetingStartsAt}
+                        disabled={meetingOptions.length === 0}
                         required
-                        value={dueDate}
-                        onChange={(event) => setDueDate(event.target.value)}
-                        className="mt-2 h-12 rounded-xl bg-background/70"
-                    />
+                    >
+                        <SelectTrigger
+                            id="assignment-due-meeting"
+                            className="mt-2 h-12 w-full rounded-xl bg-background/70 px-4 shadow-none"
+                        >
+                            <span className="flex min-w-0 items-center gap-2">
+                                <CalendarClock className="size-4 shrink-0 text-primary" />
+                                <SelectValue
+                                    placeholder={t("dueMeetingPlaceholder")}
+                                />
+                            </span>
+                        </SelectTrigger>
+                        <SelectContent
+                            dir={locale === "ar" ? "rtl" : "ltr"}
+                            position="popper"
+                            className="max-h-72 rounded-xl"
+                        >
+                            {meetingOptions.map((option) => (
+                                <SelectItem
+                                    key={option.startsAt}
+                                    value={option.startsAt}
+                                    className="rounded-lg py-2.5"
+                                >
+                                    {option.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                        {t(
+                            meetingOptions.length > 0
+                                ? "dueMeetingHint"
+                                : "noUpcomingMeetings",
+                        )}
+                    </p>
                 </div>
                 <div>
                     <Label htmlFor="assignment-instructions">
@@ -235,7 +284,7 @@ export default function MemberAssignmentForm({
 
             <Button
                 type="submit"
-                disabled={isSaving || !assignee}
+                disabled={isSaving || !assignee || !dueMeetingStartsAt}
                 className="h-11 w-full rounded-xl sm:w-auto"
             >
                 {isSaving && <LoaderCircle className="size-4 animate-spin" />}

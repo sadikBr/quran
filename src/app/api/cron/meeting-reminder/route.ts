@@ -12,6 +12,10 @@ import {
     pushSubscription,
     userSettings,
 } from "@/drizzle/schema";
+import {
+    ensureMeetingAttendanceRoster,
+    finalizeEndedMeetingAttendance,
+} from "@/features/groups/server/meeting-attendance";
 import { calculateMeetingState } from "@/features/groups/server/meeting-schedule";
 import {
     configureWebPush,
@@ -74,13 +78,6 @@ export async function GET(request: Request) {
     ) {
         return NextResponse.json({ success: false }, { status: 401 });
     }
-    if (!configureWebPush()) {
-        return NextResponse.json(
-            { success: false, reason: "Push is not configured." },
-            { status: 503 },
-        );
-    }
-
     const now = new Date();
     const meetingRows = await db
         .select({
@@ -127,8 +124,22 @@ export async function GET(request: Request) {
     }
 
     const candidates: CandidateMeeting[] = [];
+    let attendancePrepared = 0;
     for (const meeting of meetings.values()) {
         const state = calculateMeetingState({ ...meeting, now });
+        if (
+            state.status === "active" &&
+            state.activeStartsAt &&
+            state.activeEndsAt
+        ) {
+            await ensureMeetingAttendanceRoster({
+                meetingId: meeting.id,
+                groupId: meeting.groupId,
+                scheduledStartsAt: new Date(state.activeStartsAt),
+                scheduledEndsAt: new Date(state.activeEndsAt),
+            });
+            attendancePrepared += 1;
+        }
         if (!state.nextStartsAt) continue;
 
         const occurrenceStartsAt = new Date(state.nextStartsAt);
@@ -140,9 +151,28 @@ export async function GET(request: Request) {
 
         candidates.push({ ...meeting, occurrenceStartsAt });
     }
+    const attendanceFinalized = await finalizeEndedMeetingAttendance(now);
 
     if (candidates.length === 0) {
-        return NextResponse.json({ success: true, sent: 0, duplicate: 0 });
+        return NextResponse.json({
+            success: true,
+            sent: 0,
+            duplicate: 0,
+            attendancePrepared,
+            attendanceFinalized,
+        });
+    }
+
+    if (!configureWebPush()) {
+        return NextResponse.json(
+            {
+                success: false,
+                reason: "Push is not configured.",
+                attendancePrepared,
+                attendanceFinalized,
+            },
+            { status: 503 },
+        );
     }
 
     const candidateByGroup = new Map(
@@ -244,5 +274,7 @@ export async function GET(request: Request) {
         duplicate,
         removed,
         failed,
+        attendancePrepared,
+        attendanceFinalized,
     });
 }

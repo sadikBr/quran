@@ -4,7 +4,7 @@ import { LoaderCircle, LogOut, Video } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const JaaSMeeting = dynamic(
@@ -36,7 +36,6 @@ export default function JaasMeeting({
     locale,
     displayName,
     email,
-    isHost,
 }: {
     appId: string;
     roomName: string;
@@ -45,10 +44,11 @@ export default function JaasMeeting({
     locale: string;
     displayName: string;
     email: string;
-    isHost: boolean;
 }) {
     const t = useTranslations("Groups.meeting.room");
     const [sdkReady, setSdkReady] = useState(false);
+    const joinedRef = useRef(false);
+    const heartbeatRef = useRef<number | null>(null);
 
     useEffect(() => {
         try {
@@ -58,9 +58,22 @@ export default function JaasMeeting({
         }
     }, []);
 
-    useEffect(() => {
-        if (!isHost) return;
+    const leaveMeeting = useCallback(() => {
+        if (!joinedRef.current) return;
+        joinedRef.current = false;
+        if (heartbeatRef.current !== null) {
+            window.clearInterval(heartbeatRef.current);
+            heartbeatRef.current = null;
+        }
+        void fetch(`/api/groups/${groupId}/meeting/presence`, {
+            method: "DELETE",
+            keepalive: true,
+        });
+    }, [groupId]);
 
+    const joinMeeting = useCallback(() => {
+        if (joinedRef.current) return;
+        joinedRef.current = true;
         const updatePresence = () =>
             fetch(`/api/groups/${groupId}/meeting/presence`, {
                 method: "POST",
@@ -68,17 +81,17 @@ export default function JaasMeeting({
             }).catch(() => null);
 
         void updatePresence();
-        const interval = window.setInterval(updatePresence, 25_000);
-        return () => window.clearInterval(interval);
-    }, [groupId, isHost]);
+        heartbeatRef.current = window.setInterval(updatePresence, 25_000);
+    }, [groupId]);
 
-    function leaveMeeting() {
-        if (!isHost) return;
-        void fetch(`/api/groups/${groupId}/meeting/presence`, {
-            method: "DELETE",
-            keepalive: true,
-        });
-    }
+    useEffect(() => {
+        const handlePageHide = () => leaveMeeting();
+        window.addEventListener("pagehide", handlePageHide);
+        return () => {
+            window.removeEventListener("pagehide", handlePageHide);
+            leaveMeeting();
+        };
+    }, [leaveMeeting]);
 
     return (
         <div className="flex h-dvh min-h-[34rem] flex-col overflow-hidden bg-[#11100f]">
@@ -115,6 +128,20 @@ export default function JaasMeeting({
                         }}
                         interfaceConfigOverwrite={{
                             MOBILE_APP_PROMO: false,
+                        }}
+                        onApiReady={(api) => {
+                            api.addEventListener(
+                                "videoConferenceJoined",
+                                joinMeeting,
+                            );
+                            api.addEventListener(
+                                "videoConferenceLeft",
+                                leaveMeeting,
+                            );
+                        }}
+                        onReadyToClose={() => {
+                            leaveMeeting();
+                            window.location.assign(`/groups/${groupId}`);
                         }}
                         spinner={MeetingSpinner}
                         getIFrameRef={(parentNode) => {

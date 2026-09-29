@@ -12,6 +12,8 @@ import {
     userSettings,
 } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
+import { getUpcomingMeetingOccurrences } from "@/features/groups/server/meeting-schedule";
 import { sendAssignmentNotification } from "@/features/notifications/server/assignment-notifications";
 import { practiceRangeSchema, referenceOrder } from "@/features/practice/types";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
@@ -20,7 +22,7 @@ import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
 const inputSchema = practiceRangeSchema.extend({
     groupId: z.string().min(1),
     assigneeId: z.string().min(1),
-    dueDate: z.iso.date(),
+    dueMeetingStartsAt: z.iso.datetime(),
     instructions: z.string().trim().max(500).optional(),
 });
 
@@ -57,6 +59,24 @@ export default async function createMemberAssignment(input: unknown) {
 
     if (!adminMembership[0] || !assigneeMembership[0]) {
         return { success: false as const, reason: "unauthorized" };
+    }
+
+    const meeting = await getGroupMeetingForUser(
+        parsed.data.groupId,
+        session.user.id,
+    );
+    const upcomingMeetingStarts = meeting
+        ? getUpcomingMeetingOccurrences({ ...meeting, limit: 12 })
+        : [];
+    const selectedMeetingTime = new Date(
+        parsed.data.dueMeetingStartsAt,
+    ).getTime();
+    const isScheduledMeeting = upcomingMeetingStarts.some(
+        (startsAt) => new Date(startsAt).getTime() === selectedMeetingTime,
+    );
+
+    if (!isScheduledMeeting) {
+        return { success: false as const, reason: "invalid_meeting" };
     }
 
     const [settings] = await db
@@ -99,9 +119,7 @@ export default async function createMemberAssignment(input: unknown) {
             endSurahNumber: end.surahNumber,
             endAyahNumber: end.ayahNumber,
             status: "in_progress",
-            // Noon UTC keeps this calendar-only deadline on the same displayed
-            // date across the application's supported time zone.
-            dueAt: new Date(`${parsed.data.dueDate}T12:00:00.000Z`),
+            dueAt: new Date(parsed.data.dueMeetingStartsAt),
             instructions: parsed.data.instructions || null,
         });
     } catch {

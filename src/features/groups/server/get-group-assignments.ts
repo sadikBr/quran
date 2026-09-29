@@ -28,9 +28,12 @@ export default async function getGroupAssignments(
     requestingUserId: string,
     isAdmin: boolean,
 ): Promise<GroupAssignmentSummary[]> {
-    const visibleStatuses = isAdmin
-        ? ["in_progress", "submitted", "needs_revision", "completed"]
-        : ["in_progress", "submitted", "needs_revision"];
+    const visibleStatuses = [
+        "in_progress",
+        "submitted",
+        "needs_revision",
+        "completed",
+    ];
     const conditions = [
         eq(practiceAssignment.groupId, groupId),
         inArray(practiceAssignment.status, visibleStatuses),

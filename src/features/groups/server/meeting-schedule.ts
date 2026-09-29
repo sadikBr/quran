@@ -48,6 +48,53 @@ function occurrenceForWeek(
     );
 }
 
+export function getUpcomingMeetingOccurrences({
+    schedule,
+    timezone,
+    enabled,
+    now = new Date(),
+    limit = 12,
+}: {
+    schedule: MeetingScheduleSlot[];
+    timezone: string;
+    enabled: boolean;
+    now?: Date;
+    limit?: number;
+}) {
+    if (
+        !enabled ||
+        schedule.length === 0 ||
+        !isValidTimezone(timezone) ||
+        limit <= 0
+    ) {
+        return [];
+    }
+
+    const zonedNow = DateTime.fromJSDate(now, {
+        zone: getMeetingDisplayTimezone(timezone, now),
+    });
+    const weekStart = zonedNow.startOf("week");
+    const candidates = Array.from({ length: 13 }, (_, weekOffset) =>
+        schedule.map((slot) =>
+            occurrenceForWeek(
+                weekStart.plus({ weeks: weekOffset }),
+                slot,
+                timezone,
+            ),
+        ),
+    )
+        .flat()
+        .filter((candidate) => candidate > zonedNow)
+        .sort((first, second) => first.toMillis() - second.toMillis());
+
+    return [
+        ...new Map(candidates.map((item) => [item.toMillis(), item])).values(),
+    ]
+        .slice(0, limit)
+        .map((item) => item.toUTC().toISO())
+        .filter((item): item is string => item !== null);
+}
+
 export function calculateMeetingState({
     schedule,
     timezone,

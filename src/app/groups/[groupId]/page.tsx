@@ -28,16 +28,26 @@ import {
     GroupDangerActions,
     MemberActions,
 } from "@/features/groups/components/group-actions";
+import GroupActivityFeed from "@/features/groups/components/group-activity-feed";
 import GroupInvite from "@/features/groups/components/group-invite";
 import GroupMeetingPanel from "@/features/groups/components/group-meeting-panel";
+import MeetingHistory from "@/features/groups/components/meeting-history";
 import MemberAssignmentForm from "@/features/groups/components/member-assignment-form";
+import MemberProgressSummary from "@/features/groups/components/member-progress-summary";
 import { isJaasConfigured } from "@/features/groups/server/create-jaas-token";
+import getGroupActivity from "@/features/groups/server/get-group-activity";
 import getGroupAssignments, {
     type GroupAssignmentSummary,
 } from "@/features/groups/server/get-group-assignments";
 import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
 import { getGroupForUser } from "@/features/groups/server/get-groups";
-import { calculateMeetingState } from "@/features/groups/server/meeting-schedule";
+import getMeetingHistory from "@/features/groups/server/get-meeting-history";
+import getMemberProgressSummaries from "@/features/groups/server/get-member-progress-summaries";
+import {
+    calculateMeetingState,
+    getMeetingDisplayTimezone,
+    getUpcomingMeetingOccurrences,
+} from "@/features/groups/server/meeting-schedule";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import {
@@ -117,6 +127,9 @@ export default async function GroupPage({
     const [
         assignments,
         meeting,
+        meetingHistory,
+        activity,
+        memberProgressSummaries,
         surahs,
         warshChapters,
         hafsNavigation,
@@ -124,12 +137,37 @@ export default async function GroupPage({
     ] = await Promise.all([
         getGroupAssignments(group.id, session.user.id, isAdmin),
         getGroupMeetingForUser(group.id, session.user.id),
+        getMeetingHistory(group.id, session.user.id, isAdmin, { limit: 3 }),
+        getGroupActivity(group.id, session.user.id, isAdmin),
+        getMemberProgressSummaries(group.id, session.user.id),
         getSurahsMeta(),
         isAdmin ? getWarshChapters() : Promise.resolve([]),
         isAdmin ? getQuranNavigationMeta() : Promise.resolve(null),
         isAdmin ? getWarshNavigationMeta() : Promise.resolve(null),
     ]);
     const meetingState = meeting ? calculateMeetingState(meeting) : null;
+    const assignmentMeetingOptions = meeting
+        ? getUpcomingMeetingOccurrences({ ...meeting, limit: 12 }).map(
+              (startsAt) => {
+                  const startsAtDate = new Date(startsAt);
+                  return {
+                      startsAt,
+                      label: new Intl.DateTimeFormat(preferences.language, {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          timeZone: getMeetingDisplayTimezone(
+                              meeting.timezone,
+                              startsAtDate,
+                          ),
+                      }).format(startsAtDate),
+                  };
+              },
+          )
+        : [];
     const warshCounts = new Map(
         warshChapters.map((chapter) => [chapter.id, chapter.verses.length]),
     );
@@ -148,12 +186,23 @@ export default async function GroupPage({
         dateStyle: "medium",
         timeZone: "UTC",
     });
+    const formatAssignmentDueAt = (dueAt: Date) =>
+        new Intl.DateTimeFormat(preferences.language, {
+            dateStyle: "medium",
+            timeStyle: "short",
+            timeZone: meeting
+                ? getMeetingDisplayTimezone(meeting.timezone, dueAt)
+                : "UTC",
+        }).format(dueAt);
     const assignmentMembers = group.members
         .filter((member) => isAdmin || member.userId === currentUserId)
         .map((member) => ({
             member,
             assignments: assignments.filter(
                 (assignment) => assignment.assigneeId === member.userId,
+            ),
+            progress: memberProgressSummaries.find(
+                (summary) => summary.userId === member.userId,
             ),
         }))
         .sort((first, second) => {
@@ -254,7 +303,7 @@ export default async function GroupPage({
                                         className="size-3.5"
                                     />
                                     {t("assignments.due", {
-                                        date: dateFormatter.format(
+                                        date: formatAssignmentDueAt(
                                             assignment.dueAt,
                                         ),
                                     })}
@@ -396,6 +445,17 @@ export default async function GroupPage({
                         providerConfigured={isJaasConfigured()}
                     />
 
+                    {meeting && (
+                        <MeetingHistory
+                            groupId={group.id}
+                            history={meetingHistory}
+                            locale={preferences.language}
+                            timezone={meeting.timezone}
+                            isAdmin={isAdmin}
+                            viewAllHref={`/groups/${group.id}/history`}
+                        />
+                    )}
+
                     {isAdmin && (
                         <section className="mt-10 rounded-3xl bg-primary/[0.07] p-6 ring-1 ring-primary/15 sm:p-7">
                             <h2 className="text-lg font-semibold">
@@ -407,6 +467,13 @@ export default async function GroupPage({
                             <GroupInvite inviteCode={group.inviteCode} />
                         </section>
                     )}
+
+                    <GroupActivityFeed
+                        activity={activity}
+                        currentUserId={session.user.id}
+                        locale={preferences.language}
+                        timezone={meeting?.timezone ?? "UTC"}
+                    />
 
                     <section className="mt-12">
                         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
@@ -434,10 +501,14 @@ export default async function GroupPage({
                             )}
                         </div>
 
-                        {assignments.length > 0 ? (
+                        {assignmentMembers.length > 0 ? (
                             <div className="mt-6 divide-y divide-border/55 overflow-hidden rounded-3xl bg-muted/30 ring-1 ring-border/50">
                                 {assignmentMembers.map(
-                                    ({ member, assignments: memberWork }) => {
+                                    ({
+                                        member,
+                                        assignments: memberWork,
+                                        progress,
+                                    }) => {
                                         const currentAssignments =
                                             memberWork.filter(
                                                 (assignment) =>
@@ -500,23 +571,42 @@ export default async function GroupPage({
                                                         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                                                             <span>
                                                                 {t(
-                                                                    "assignments.currentCount",
+                                                                    "assignments.progress.compactAssignments",
                                                                     {
-                                                                        count: currentAssignments.length,
+                                                                        completed:
+                                                                            progress?.completedAssignments ??
+                                                                            completedAssignments.length,
+                                                                        total:
+                                                                            progress?.totalAssignments ??
+                                                                            memberWork.length,
                                                                     },
                                                                 )}
                                                             </span>
-                                                            {completedAssignments.length >
-                                                                0 && (
-                                                                <span>
-                                                                    {t(
-                                                                        "assignments.completedCount",
-                                                                        {
-                                                                            count: completedAssignments.length,
-                                                                        },
-                                                                    )}
-                                                                </span>
-                                                            )}
+                                                            {progress?.attendanceRate !==
+                                                                null &&
+                                                                progress?.attendanceRate !==
+                                                                    undefined && (
+                                                                    <span>
+                                                                        {t(
+                                                                            "assignments.progress.compactAttendance",
+                                                                            {
+                                                                                rate: progress.attendanceRate,
+                                                                            },
+                                                                        )}
+                                                                    </span>
+                                                                )}
+                                                            {progress &&
+                                                                progress.unacceptedAbsenceStreak >
+                                                                    0 && (
+                                                                    <span className="font-semibold text-destructive">
+                                                                        {t(
+                                                                            "assignments.progress.compactAbsenceStreak",
+                                                                            {
+                                                                                count: progress.unacceptedAbsenceStreak,
+                                                                            },
+                                                                        )}
+                                                                    </span>
+                                                                )}
                                                             {readyCount > 0 && (
                                                                 <span className="font-semibold text-primary sm:hidden">
                                                                     {t(
@@ -546,6 +636,62 @@ export default async function GroupPage({
                                                 </summary>
 
                                                 <div className="border-t border-border/50">
+                                                    {progress && (
+                                                        <MemberProgressSummary
+                                                            summary={progress}
+                                                            locale={
+                                                                preferences.language
+                                                            }
+                                                            labels={{
+                                                                title: t(
+                                                                    "assignments.progress.title",
+                                                                ),
+                                                                completed: t(
+                                                                    "assignments.progress.completed",
+                                                                ),
+                                                                active: t(
+                                                                    "assignments.progress.active",
+                                                                ),
+                                                                awaitingReview:
+                                                                    t(
+                                                                        "assignments.progress.awaitingReview",
+                                                                        {
+                                                                            count: progress.awaitingReview,
+                                                                        },
+                                                                    ),
+                                                                attendance: t(
+                                                                    "assignments.progress.attendance",
+                                                                ),
+                                                                noAttendance: t(
+                                                                    "assignments.progress.noAttendance",
+                                                                ),
+                                                                attendanceDetail:
+                                                                    t(
+                                                                        "assignments.progress.attendanceDetail",
+                                                                        {
+                                                                            attended:
+                                                                                progress.attendedMeetings,
+                                                                            total: progress.countedMeetings,
+                                                                        },
+                                                                    ),
+                                                                absenceStreak:
+                                                                    t(
+                                                                        "assignments.progress.absenceStreak",
+                                                                    ),
+                                                                noAbsenceStreak:
+                                                                    t(
+                                                                        "assignments.progress.noAbsenceStreak",
+                                                                    ),
+                                                                excusedAbsences:
+                                                                    t(
+                                                                        "assignments.progress.excusedAbsences",
+                                                                        {
+                                                                            count: progress.excusedAbsences,
+                                                                        },
+                                                                    ),
+                                                            }}
+                                                        />
+                                                    )}
                                                     {currentAssignments.length >
                                                     0 ? (
                                                         <div className="divide-y divide-border/45">
@@ -643,6 +789,9 @@ export default async function GroupPage({
                                             hafs: hafsNavigation,
                                             warsh: warshNavigation,
                                         }}
+                                        meetingOptions={
+                                            assignmentMeetingOptions
+                                        }
                                         locale={preferences.language}
                                     />
                                 </div>
