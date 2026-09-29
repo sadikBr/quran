@@ -9,7 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt } from "../helpers";
 import { user } from "./auth-schema";
-import { groupMeeting } from "./memorization-group";
+import { groupMeeting, groupMeetingSession } from "./memorization-group";
 import { practiceAssignment } from "./practice-assignment";
 
 export const pushSubscription = pgTable(
@@ -43,7 +43,47 @@ export const pushSubscriptionRelations = relations(
             references: [user.id],
         }),
         meetingReminderDeliveries: many(groupMeetingReminderDelivery),
+        meetingStartDeliveries: many(groupMeetingStartDelivery),
         assignmentNotificationDeliveries: many(assignmentNotificationDelivery),
+    }),
+);
+
+export const groupMeetingStartDelivery = pgTable(
+    "group_meeting_start_delivery",
+    {
+        id,
+        sessionId: text("session_id")
+            .notNull()
+            .references(() => groupMeetingSession.id, { onDelete: "cascade" }),
+        subscriptionId: text("subscription_id")
+            .notNull()
+            .references(() => pushSubscription.id, { onDelete: "cascade" }),
+        sentAt: timestamp("sent_at", { withTimezone: true }),
+        createdAt,
+    },
+    (table) => [
+        uniqueIndex("group_meeting_start_delivery_once_idx").on(
+            table.sessionId,
+            table.subscriptionId,
+        ),
+        index("group_meeting_start_delivery_session_idx").on(table.sessionId),
+        index("group_meeting_start_delivery_subscription_idx").on(
+            table.subscriptionId,
+        ),
+    ],
+);
+
+export const groupMeetingStartDeliveryRelations = relations(
+    groupMeetingStartDelivery,
+    ({ one }) => ({
+        session: one(groupMeetingSession, {
+            fields: [groupMeetingStartDelivery.sessionId],
+            references: [groupMeetingSession.id],
+        }),
+        subscription: one(pushSubscription, {
+            fields: [groupMeetingStartDelivery.subscriptionId],
+            references: [pushSubscription.id],
+        }),
     }),
 );
 

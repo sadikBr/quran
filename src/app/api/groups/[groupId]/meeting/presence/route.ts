@@ -1,6 +1,6 @@
 import { and, desc, eq, gt, isNotNull } from "drizzle-orm";
 import { headers } from "next/headers";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import db from "@/drizzle/db";
 import {
     groupMeeting,
@@ -11,6 +11,7 @@ import { auth } from "@/features/auth/auth";
 import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
 import { ensureMeetingAttendanceRoster } from "@/features/groups/server/meeting-attendance";
 import { calculateMeetingState } from "@/features/groups/server/meeting-schedule";
+import sendMeetingStartNotifications from "@/features/notifications/server/meeting-start-notifications";
 
 const HOST_PRESENCE_TTL_MS = 75_000;
 
@@ -225,7 +226,7 @@ export async function POST(
         return presenceResponse(false, 403);
     }
 
-    await recordAttendance(context);
+    const meetingSessionId = await recordAttendance(context);
 
     if (context.meeting.hostUserId === context.userId) {
         const hostActiveUntil = new Date(Date.now() + HOST_PRESENCE_TTL_MS);
@@ -238,6 +239,15 @@ export async function POST(
                     eq(groupMeeting.hostUserId, context.userId),
                 ),
             );
+
+        if (meetingSessionId) {
+            after(async () => {
+                await sendMeetingStartNotifications({
+                    groupId: context.meeting.groupId,
+                    sessionId: meetingSessionId,
+                });
+            });
+        }
     }
 
     return presenceResponse(context.meeting.hostUserId === context.userId);

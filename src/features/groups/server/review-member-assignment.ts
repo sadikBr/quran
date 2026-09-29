@@ -3,10 +3,12 @@
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { z } from "zod";
 import db from "@/drizzle/db";
 import { groupMember, practiceAssignment } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import { sendAssignmentNotification } from "@/features/notifications/server/assignment-notifications";
 
 const inputSchema = z.object({
     groupId: z.string().min(1),
@@ -59,6 +61,17 @@ export default async function reviewMemberAssignment(input: unknown) {
     if (updated.length === 0) {
         return { success: false as const, reason: "not_submitted" };
     }
+
+    after(async () => {
+        await Promise.allSettled([
+            sendAssignmentNotification(
+                parsed.data.assignmentId,
+                parsed.data.decision === "completed"
+                    ? "review_completed"
+                    : "review_needs_revision",
+            ),
+        ]);
+    });
 
     revalidatePath(`/groups/${parsed.data.groupId}`);
     revalidatePath(

@@ -31,6 +31,7 @@ import {
 import GroupActivityFeed from "@/features/groups/components/group-activity-feed";
 import GroupInvite from "@/features/groups/components/group-invite";
 import GroupMeetingPanel from "@/features/groups/components/group-meeting-panel";
+import MeetingAgenda from "@/features/groups/components/meeting-agenda";
 import MeetingHistory from "@/features/groups/components/meeting-history";
 import MemberAssignmentForm from "@/features/groups/components/member-assignment-form";
 import MemberProgressSummary from "@/features/groups/components/member-progress-summary";
@@ -41,6 +42,7 @@ import getGroupAssignments, {
 } from "@/features/groups/server/get-group-assignments";
 import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
 import { getGroupForUser } from "@/features/groups/server/get-groups";
+import getMeetingAgenda from "@/features/groups/server/get-meeting-agenda";
 import getMeetingHistory from "@/features/groups/server/get-meeting-history";
 import getMemberProgressSummaries from "@/features/groups/server/get-member-progress-summaries";
 import {
@@ -71,13 +73,16 @@ function initials(name: string) {
 
 export default async function GroupPage({
     params,
+    searchParams,
 }: {
     params: Promise<{ groupId: string }>;
+    searchParams: Promise<{ assignment?: string }>;
 }) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) redirect("/sign-in");
 
-    const { groupId } = await params;
+    const [{ groupId }, { assignment: focusedAssignmentId }] =
+        await Promise.all([params, searchParams]);
     const [preferences, readingProgress, group] = await Promise.all([
         getPreferences(),
         getReadingProgress(),
@@ -146,6 +151,22 @@ export default async function GroupPage({
         isAdmin ? getWarshNavigationMeta() : Promise.resolve(null),
     ]);
     const meetingState = meeting ? calculateMeetingState(meeting) : null;
+    const agendaStartsAt = meetingState
+        ? new Date(
+              meetingState.status === "active"
+                  ? (meetingState.activeStartsAt ?? "")
+                  : (meetingState.nextStartsAt ?? ""),
+          )
+        : null;
+    const meetingAgenda =
+        meeting && agendaStartsAt && !Number.isNaN(agendaStartsAt.getTime())
+            ? await getMeetingAgenda({
+                  groupId: group.id,
+                  requestingUserId: session.user.id,
+                  occurrenceStartsAt: agendaStartsAt,
+                  active: meetingState?.status === "active",
+              })
+            : null;
     const assignmentMeetingOptions = meeting
         ? getUpcomingMeetingOccurrences({ ...meeting, limit: 12 }).map(
               (startsAt) => {
@@ -237,9 +258,12 @@ export default async function GroupPage({
         return (
             <article
                 key={assignment.id}
+                id={`assignment-${assignment.id}`}
                 className={cn(
-                    "grid gap-4 px-4 py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5",
+                    "grid scroll-mt-24 gap-4 px-4 py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5",
                     isHistory && "bg-background/25",
+                    assignment.id === focusedAssignmentId &&
+                        "bg-primary/[0.075] ring-1 ring-inset ring-primary/25",
                 )}
             >
                 <div className="flex min-w-0 items-start gap-3.5">
@@ -445,6 +469,25 @@ export default async function GroupPage({
                         providerConfigured={isJaasConfigured()}
                     />
 
+                    {meeting && meetingAgenda && (
+                        <MeetingAgenda
+                            groupId={group.id}
+                            agenda={meetingAgenda}
+                            currentUserId={session.user.id}
+                            isAdmin={isAdmin}
+                            locale={preferences.language}
+                            timezone={meeting.timezone}
+                            surahNames={Object.fromEntries(
+                                surahs.map((surah) => [
+                                    surah.number,
+                                    preferences.language === "ar"
+                                        ? surah.name
+                                        : surah.englishName,
+                                ]),
+                            )}
+                        />
+                    )}
+
                     {meeting && (
                         <MeetingHistory
                             groupId={group.id}
@@ -541,6 +584,11 @@ export default async function GroupPage({
                                                 className="group/member bg-background/20 open:bg-background/40"
                                                 open={
                                                     readyCount > 0 ||
+                                                    memberWork.some(
+                                                        (assignment) =>
+                                                            assignment.id ===
+                                                            focusedAssignmentId,
+                                                    ) ||
                                                     (!isAdmin &&
                                                         currentAssignments.length >
                                                             0)
@@ -712,7 +760,14 @@ export default async function GroupPage({
 
                                                     {completedAssignments.length >
                                                         0 && (
-                                                        <details className="group/history border-t border-border/45">
+                                                        <details
+                                                            className="group/history border-t border-border/45"
+                                                            open={completedAssignments.some(
+                                                                (assignment) =>
+                                                                    assignment.id ===
+                                                                    focusedAssignmentId,
+                                                            )}
+                                                        >
                                                             <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-3 text-xs font-semibold text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
                                                                 <History
                                                                     aria-hidden="true"

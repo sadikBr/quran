@@ -281,6 +281,29 @@
                     "unaccepted": "Absence not accepted"
                 }
             },
+            "agenda": {
+                "eyebrow": "NEXT MEETING",
+                "liveEyebrow": "TODAY’S AGENDA",
+                "upcoming": "Upcoming",
+                "live": "In progress",
+                "title": "Meeting agenda",
+                "ready": "Ready to review",
+                "assignments": "Assignments",
+                "present": "Present now",
+                "members": "Members",
+                "you": "You",
+                "queuePosition": "Review #{position, number}",
+                "noAssignment": "No assignment due at this meeting",
+                "noAssignmentDescription": "There is no assignment scheduled for this member at this meeting.",
+                "sameSurahRange": "{surah}, {start, number}–{end, number}",
+                "crossSurahRange": "{startSurah} {start, number} — {endSurah} {end, number}",
+                "review": "Start review",
+                "openPractice": "Open practice",
+                "attendance": {
+                    "present": "Present",
+                    "waiting": "Not joined yet"
+                }
+            },
             "weekdays": {
                 "1": "Monday",
                 "2": "Tuesday",

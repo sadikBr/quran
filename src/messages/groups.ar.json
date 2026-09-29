@@ -281,6 +281,29 @@
                     "unaccepted": "عذر غير مقبول"
                 }
             },
+            "agenda": {
+                "eyebrow": "الاجتماع القادم",
+                "liveEyebrow": "برنامج اجتماع اليوم",
+                "upcoming": "قادم",
+                "live": "جارٍ الآن",
+                "title": "برنامج الاجتماع",
+                "ready": "جاهزون للتسميع",
+                "assignments": "التكاليف",
+                "present": "الحاضرون الآن",
+                "members": "الأعضاء",
+                "you": "أنت",
+                "queuePosition": "ترتيب التسميع: {position, number}",
+                "noAssignment": "لا تكليف مستحق في هذا الاجتماع",
+                "noAssignmentDescription": "لا يوجد لهذا العضو تكليف محدّد لهذا الاجتماع.",
+                "sameSurahRange": "{surah}، من الآية {start, number} إلى {end, number}",
+                "crossSurahRange": "من {startSurah}، الآية {start, number} إلى {endSurah}، الآية {end, number}",
+                "review": "بدء التسميع",
+                "openPractice": "فتح التدرّب",
+                "attendance": {
+                    "present": "حاضر",
+                    "waiting": "لم ينضم بعد"
+                }
+            },
             "weekdays": {
                 "1": "الاثنين",
                 "2": "الثلاثاء",

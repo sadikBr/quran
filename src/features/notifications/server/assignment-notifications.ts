@@ -1,10 +1,11 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import webpush from "web-push";
 import db from "@/drizzle/db";
 import {
     assignmentNotificationDelivery,
+    groupMember,
     memorizationGroup,
     practiceAssignment,
     pushSubscription,
@@ -12,7 +13,16 @@ import {
 } from "@/drizzle/schema";
 import { configureWebPush, isExpiredPushSubscription } from "./web-push";
 
-export type AssignmentNotificationKind = "published" | "due_soon";
+export type AssignmentNotificationKind =
+    | "published"
+    | "due_soon"
+    | "review_completed"
+    | "review_needs_revision";
+
+function shortenedFeedback(note: string | null) {
+    if (!note) return null;
+    return note.length > 100 ? `${note.slice(0, 97).trimEnd()}…` : note;
+}
 
 function notificationCopy({
     language,
@@ -20,14 +30,36 @@ function notificationCopy({
     assignmentKind,
     groupName,
     dueAt,
+    reviewNote,
 }: {
     language: "ar" | "en";
     kind: AssignmentNotificationKind;
     assignmentKind: string;
     groupName: string;
     dueAt: Date | null;
+    reviewNote: string | null;
 }) {
+    const feedback = shortenedFeedback(reviewNote);
+
     if (language === "ar") {
+        if (kind === "review_completed") {
+            return {
+                title: "اعتُمد إنجاز تكليفك",
+                body: feedback
+                    ? `اعتمد مشرف حلقة «${groupName}» إنجازك. ملاحظته: ${feedback}`
+                    : `أحسنت! اعتمد مشرف حلقة «${groupName}» إنجاز تكليفك.`,
+            };
+        }
+
+        if (kind === "review_needs_revision") {
+            return {
+                title: "يحتاج تكليفك إلى مزيد من المراجعة",
+                body: feedback
+                    ? `أعاد إليك مشرف حلقة «${groupName}» التكليف. ملاحظته: ${feedback}`
+                    : `طلب منك مشرف حلقة «${groupName}» مراجعة التكليف مرة أخرى.`,
+            };
+        }
+
         if (kind === "due_soon") {
             return {
                 title: "موعد تكليفك يقترب",
@@ -48,6 +80,24 @@ function notificationCopy({
             body: due
                 ? `أرسلت إليك حلقة «${groupName}» تكليف ${type}، وموعده ${due}.`
                 : `أرسلت إليك حلقة «${groupName}» تكليف ${type} جديدًا.`,
+        };
+    }
+
+    if (kind === "review_completed") {
+        return {
+            title: "Your assignment was approved",
+            body: feedback
+                ? `${groupName} approved your work. Feedback: ${feedback}`
+                : `Well done! ${groupName} approved your assignment.`,
+        };
+    }
+
+    if (kind === "review_needs_revision") {
+        return {
+            title: "Your assignment needs more revision",
+            body: feedback
+                ? `${groupName} returned your assignment. Feedback: ${feedback}`
+                : `${groupName} asked you to review this assignment again.`,
         };
     }
 
@@ -86,13 +136,17 @@ export async function sendAssignmentNotification(
     const [assignment] = await db
         .select({
             id: practiceAssignment.id,
+            groupId: practiceAssignment.groupId,
             assigneeId: practiceAssignment.assigneeId,
             assignmentKind: practiceAssignment.kind,
             dueAt: practiceAssignment.dueAt,
             status: practiceAssignment.status,
+            reviewNote: practiceAssignment.reviewNote,
+            reviewedAt: practiceAssignment.reviewedAt,
             groupName: memorizationGroup.name,
             language: userSettings.language,
             remindersEnabled: userSettings.assignmentRemindersEnabled,
+            assigneeRole: groupMember.role,
         })
         .from(practiceAssignment)
         .leftJoin(
@@ -103,15 +157,31 @@ export async function sendAssignmentNotification(
             userSettings,
             eq(practiceAssignment.assigneeId, userSettings.userId),
         )
+        .leftJoin(
+            groupMember,
+            and(
+                eq(groupMember.groupId, practiceAssignment.groupId),
+                eq(groupMember.userId, practiceAssignment.assigneeId),
+            ),
+        )
         .where(eq(practiceAssignment.id, assignmentId))
         .limit(1);
+
+    const reviewCompleted = kind === "review_completed";
+    const reviewNeedsRevision = kind === "review_needs_revision";
+    const reviewKind = reviewCompleted || reviewNeedsRevision;
+    const statusMatchesReview =
+        (reviewCompleted && assignment?.status === "completed") ||
+        (reviewNeedsRevision && assignment?.status === "needs_revision");
 
     if (
         !assignment ||
         !assignment.groupName ||
+        assignment.assigneeRole === "admin" ||
         assignment.remindersEnabled === false ||
         assignment.status === "draft" ||
-        assignment.status === "completed" ||
+        (reviewKind && !statusMatchesReview) ||
+        (!reviewKind && assignment.status === "completed") ||
         (kind === "due_soon" && assignment.status === "submitted")
     ) {
         return { sent: 0, duplicate: 0, removed: 0, failed: 0 };
@@ -133,7 +203,16 @@ export async function sendAssignmentNotification(
         assignmentKind: assignment.assignmentKind,
         groupName: assignment.groupName,
         dueAt: assignment.dueAt,
+        reviewNote: assignment.reviewNote,
     });
+    const deliveryKind = reviewKind
+        ? `${kind}:${assignment.reviewedAt?.toISOString() ?? "latest"}`
+        : kind;
+    const destination = reviewCompleted
+        ? assignment.groupId
+            ? `/groups/${assignment.groupId}?assignment=${assignment.id}#assignment-${assignment.id}`
+            : "/practice"
+        : `/practice/${assignment.id}/read`;
     let sent = 0;
     let duplicate = 0;
     let removed = 0;
@@ -147,7 +226,7 @@ export async function sendAssignmentNotification(
                 id: deliveryId,
                 assignmentId: assignment.id,
                 subscriptionId: subscription.id,
-                kind,
+                kind: deliveryKind,
             })
             .onConflictDoNothing()
             .returning({ id: assignmentNotificationDelivery.id });
@@ -168,10 +247,12 @@ export async function sendAssignmentNotification(
                 },
                 JSON.stringify({
                     ...copy,
-                    url: `/practice/${assignment.id}/read`,
-                    tag: `assignment-${kind}-${assignment.id}`,
+                    url: destination,
+                    tag: `assignment-${deliveryKind}-${assignment.id}`,
                 }),
-                { TTL: kind === "published" ? 24 * 60 * 60 : 60 * 60 },
+                {
+                    TTL: kind === "due_soon" ? 60 * 60 : 24 * 60 * 60,
+                },
             );
             await db
                 .update(assignmentNotificationDelivery)

@@ -80,7 +80,7 @@
             "description": "Choose which reminders you want to receive.",
             "enable": "Enable",
             "disable": "Disable",
-            "enabledFeedback": "Wird and meeting reminders are enabled on this device.",
+            "enabledFeedback": "Your selected notifications are enabled on this device.",
             "disabledFeedback": "Notifications have been disabled on this device.",
             "errorFeedback": "We could not update notification settings.",
             "blockedHint": "Notifications are blocked in Chrome. Allow them for this app in your browser or system settings, then return here.",
@@ -91,11 +91,11 @@
                 },
                 "meetings": {
                     "title": "Circle meetings",
-                    "description": "Remind me 15 minutes before a scheduled meeting."
+                    "description": "Remind me 15 minutes before a meeting and tell me when the host starts it."
                 },
                 "assignments": {
                     "title": "Group assignments",
-                    "description": "Tell me about new assignments and deadlines approaching in 24 hours."
+                    "description": "Tell me about new assignments, approaching deadlines, and review results."
                 }
             },
             "status": {
