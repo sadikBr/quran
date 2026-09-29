@@ -16,7 +16,7 @@ export default async function AdhkarPage() {
             className={`relative isolate min-h-dvh bg-background ${ar ? "arabic-ui" : ""}`}
         >
             <PageBackground />
-            <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="app-container ">
                 <StickyAppHeader navigation />
                 <header className="flex items-center justify-between gap-4 pb-6 pt-5 sm:pb-8 sm:pt-8">
                     <div className="flex min-w-0 items-center gap-3 sm:gap-4">

@@ -105,7 +105,7 @@ export default function QuranIndex({
     return (
         <div
             data-quran-scroll-container
-            className="mx-auto h-full max-w-6xl overflow-y-auto px-4 pb-12 pt-6 sm:px-6 sm:pt-8"
+            className="app-container h-full overflow-y-auto pb-12 pt-6 sm:pt-8"
         >
             <header className="mb-6 border-b border-border/60 pb-6">
                 <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">

@@ -43,20 +43,22 @@ export default function MeetingWaitingRoom({
 
     return (
         <main className="flex min-h-dvh flex-col bg-background">
-            <header className="flex h-[calc(4rem+env(safe-area-inset-top))] shrink-0 items-center justify-between gap-3 border-border/60 border-b bg-background px-3 pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] sm:px-4">
-                <AppPrimaryNav />
-                <Button
-                    asChild
-                    variant="ghost"
-                    size="sm"
-                    className="rounded-xl"
-                >
-                    <Link href={`/groups/${groupId}`}>
-                        <LogOut className="size-4" />
-                        {t("leave")}
-                    </Link>
-                </Button>
-                <AppLogo />
+            <header className="shrink-0 border-b border-border/60 bg-background">
+                <div className="app-container flex h-[calc(4rem+env(safe-area-inset-top))] shrink-0 items-center justify-between gap-3 pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))]">
+                    <AppPrimaryNav />
+                    <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-xl"
+                    >
+                        <Link href={`/groups/${groupId}`}>
+                            <LogOut className="size-4" />
+                            {t("leave")}
+                        </Link>
+                    </Button>
+                    <AppLogo />
+                </div>
             </header>
             <section className="flex flex-1 items-center justify-center px-6 py-16 text-center">
                 <div className="max-w-md">

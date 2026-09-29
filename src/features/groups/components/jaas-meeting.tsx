@@ -183,41 +183,43 @@ export default function JaasMeeting({
 
     return (
         <div className="flex h-dvh min-h-[34rem] flex-col overflow-hidden bg-[#11100f]">
-            <header className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-2 border-border/60 border-b bg-background px-3 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] text-foreground sm:min-h-20 sm:flex-nowrap sm:px-4">
-                <AppPrimaryNav />
-                {canReview && (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        aria-expanded={reviewOpen}
-                        aria-controls="meeting-review-panel"
-                        className="order-last w-full sm:order-none sm:w-auto"
-                        onClick={() => {
-                            setReviewVisited(true);
-                            setReviewOpen((open) => !open);
-                        }}
-                    >
-                        {reviewT(
-                            reviewOpen ? "backToMeeting" : "openInMeeting",
-                        )}
-                    </Button>
-                )}
-                <Button
-                    onClick={leaveMeeting}
-                    disabled={leaving}
-                    aria-busy={leaving}
-                    variant="ghost"
-                    size="sm"
-                    className="rounded-xl text-muted-foreground hover:text-foreground"
-                >
-                    {leaving ? (
-                        <LoaderCircle className="size-4 animate-spin" />
-                    ) : (
-                        <LogOut className="size-4" />
+            <header className="shrink-0 border-b border-border/60 bg-background">
+                <div className="app-container flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-2 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] text-foreground sm:min-h-20 sm:flex-nowrap">
+                    <AppPrimaryNav />
+                    {canReview && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            aria-expanded={reviewOpen}
+                            aria-controls="meeting-review-panel"
+                            className="order-last w-full sm:order-none sm:w-auto"
+                            onClick={() => {
+                                setReviewVisited(true);
+                                setReviewOpen((open) => !open);
+                            }}
+                        >
+                            {reviewT(
+                                reviewOpen ? "backToMeeting" : "openInMeeting",
+                            )}
+                        </Button>
                     )}
-                    {t("leave")}
-                </Button>
-                <AppLogo />
+                    <Button
+                        onClick={leaveMeeting}
+                        disabled={leaving}
+                        aria-busy={leaving}
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-xl text-muted-foreground hover:text-foreground"
+                    >
+                        {leaving ? (
+                            <LoaderCircle className="size-4 animate-spin" />
+                        ) : (
+                            <LogOut className="size-4" />
+                        )}
+                        {t("leave")}
+                    </Button>
+                    <AppLogo />
+                </div>
             </header>
             <div className="relative flex min-h-0 flex-1">
                 <div

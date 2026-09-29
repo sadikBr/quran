@@ -8,7 +8,7 @@ export default function QuranLoading() {
         <div
             aria-busy="true"
             aria-live="polite"
-            className="mx-auto h-full max-w-5xl overflow-hidden p-4"
+            className="app-container h-full overflow-hidden py-4"
         >
             <p className="sr-only">{t("loading")}</p>
             <div className="space-y-8 pt-4 motion-safe:animate-pulse">

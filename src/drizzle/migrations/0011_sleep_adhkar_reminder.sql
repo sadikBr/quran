@@ -1,0 +1,1 @@
+ALTER TABLE "user_settings" ADD COLUMN "sleep_adhkar_time" text;

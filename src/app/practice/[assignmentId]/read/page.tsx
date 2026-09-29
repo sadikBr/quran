@@ -38,7 +38,7 @@ export default async function PracticeReaderPage({
             )}
         >
             <header className="sticky top-0 z-30 bg-background/92 backdrop-blur-xl">
-                <div className="mx-auto flex h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] max-w-4xl items-center justify-between gap-4 px-3 sm:px-5">
+                <div className="app-container flex h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] items-center justify-between gap-4">
                     <AppPrimaryNav />
                     <AppLogo />
                 </div>

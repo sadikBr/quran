@@ -15,7 +15,7 @@ export default function WirdReaderLoading() {
         >
             <p className="sr-only">{t("reader")}</p>
             <header className="bg-background/92">
-                <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-3 motion-safe:animate-pulse sm:px-5">
+                <div className="app-container flex h-14 items-center justify-between motion-safe:animate-pulse">
                     <div className="h-8 w-28 rounded-full bg-muted" />
                     <div className="h-5 w-28 rounded bg-muted" />
                 </div>

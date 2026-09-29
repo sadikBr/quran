@@ -134,7 +134,7 @@ export default function OfflineQuranReader({
             />
 
             <header className="sticky top-0 z-30 border-b border-border/40 bg-background/88 backdrop-blur-xl">
-                <div className="mx-auto flex h-[calc(4rem+env(safe-area-inset-top))] max-w-6xl items-center justify-between gap-4 px-4 pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] sm:px-6">
+                <div className="app-container flex h-[calc(4rem+env(safe-area-inset-top))] items-center justify-between gap-4 pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))]">
                     <AppPrimaryNav />
                     <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <CloudOff className="size-4" aria-hidden="true" />
@@ -144,7 +144,7 @@ export default function OfflineQuranReader({
                 </div>
             </header>
 
-            <main className="relative mx-auto max-w-6xl px-4 pb-32 sm:px-6">
+            <main className="app-container relative pb-32">
                 <section className="py-4 sm:py-5">
                     <div className="grid gap-3 rounded-2xl bg-muted/35 p-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-4 sm:p-3">
                         <label className="grid min-w-0 gap-1.5 ps-1 text-[0.65rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">

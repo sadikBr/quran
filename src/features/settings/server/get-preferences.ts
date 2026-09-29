@@ -32,6 +32,7 @@ export default async function getPreferences(): Promise<Preferences> {
     const preferences: Preferences = {
         morningAdhkarTime: settings.morningAdhkarTime,
         eveningAdhkarTime: settings.eveningAdhkarTime,
+        sleepAdhkarTime: settings.sleepAdhkarTime,
         adhkarTimezone: settings.adhkarTimezone,
         theme: settings.theme,
         language: settings.language,

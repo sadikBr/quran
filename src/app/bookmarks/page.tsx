@@ -104,7 +104,7 @@ export default async function BookmarksPage() {
             )}
         >
             <PageBackground />
-            <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="app-container ">
                 <StickyAppHeader navigation />
                 <section className="pb-12 pt-5 sm:pt-8">
                     <h1 className="text-3xl font-semibold sm:text-4xl">

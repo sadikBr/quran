@@ -119,7 +119,7 @@ export default async function GroupPage({
             )}
         >
             <PageBackground />
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="app-container ">
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"

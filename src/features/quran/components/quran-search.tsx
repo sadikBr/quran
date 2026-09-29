@@ -209,7 +209,7 @@ export default function QuranSearch({
 
     return (
         <div className="h-full overflow-y-auto bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--primary)_6%,transparent),transparent_55%)]">
-            <div className="mx-auto w-full max-w-4xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+            <div className="app-container pb-16 pt-6 sm:pt-10">
                 <div className="rounded-2xl border border-primary/15 bg-card/70 p-5 shadow-sm sm:rounded-3xl sm:p-8">
                     <header className="max-w-2xl">
                         <span className="mb-5 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">

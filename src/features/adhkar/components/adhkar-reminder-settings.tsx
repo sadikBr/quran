@@ -4,7 +4,7 @@ import { useLocale } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Preferences } from "@/features/settings/preferences";
 
-type Key = "morningAdhkarTime" | "eveningAdhkarTime";
+type Key = "morningAdhkarTime" | "eveningAdhkarTime" | "sleepAdhkarTime";
 export default function AdhkarReminderSettings({
     values,
     onChange,
@@ -28,59 +28,69 @@ export default function AdhkarReminderSettings({
                         : "Choose a time for each reminder, then save settings. Enable notifications above to receive reminders even when the app is closed. Delivery may be delayed by device connectivity."}
                 </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-                {(["morningAdhkarTime", "eveningAdhkarTime"] as Key[]).map(
-                    (key) => (
-                        <div
-                            key={key}
-                            className="rounded-xl border bg-background/40 p-4"
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {(
+                    [
+                        "morningAdhkarTime",
+                        "eveningAdhkarTime",
+                        "sleepAdhkarTime",
+                    ] as Key[]
+                ).map((key) => (
+                    <div
+                        key={key}
+                        className="rounded-xl border bg-background/40 p-4"
+                    >
+                        <label
+                            className="flex min-h-11 items-center gap-3"
+                            htmlFor={`${key}-enabled`}
                         >
-                            <label
-                                className="flex min-h-11 items-center gap-3"
-                                htmlFor={`${key}-enabled`}
-                            >
-                                <Checkbox
-                                    id={`${key}-enabled`}
-                                    checked={values[key] !== null}
-                                    onCheckedChange={(checked) =>
-                                        onChange(
-                                            key,
-                                            checked === true
-                                                ? key === "morningAdhkarTime"
-                                                    ? "07:00"
-                                                    : "18:00"
-                                                : null,
-                                        )
-                                    }
-                                />
-                                <span>
-                                    {key === "morningAdhkarTime"
-                                        ? ar
-                                            ? "أذكار الصباح"
-                                            : "Morning adhkar"
-                                        : ar
-                                          ? "أذكار المساء"
-                                          : "Evening adhkar"}
-                                </span>
-                            </label>
-                            <label className="sr-only" htmlFor={key}>
-                                {ar ? "وقت التذكير" : "Reminder time"}
-                            </label>
-                            <input
-                                id={key}
-                                type="time"
-                                dir="ltr"
-                                required={values[key] !== null}
-                                disabled={values[key] === null}
-                                value={values[key] ?? ""}
-                                onChange={(event) =>
-                                    onChange(key, event.target.value)
+                            <Checkbox
+                                id={`${key}-enabled`}
+                                checked={values[key] !== null}
+                                onCheckedChange={(checked) =>
+                                    onChange(
+                                        key,
+                                        checked === true
+                                            ? key === "morningAdhkarTime"
+                                                ? "07:00"
+                                                : key === "sleepAdhkarTime"
+                                                  ? "22:00"
+                                                  : "18:00"
+                                            : null,
+                                    )
                                 }
-                                className="mt-2 h-11 w-full rounded-lg border bg-background px-3 disabled:opacity-40"
                             />
-                        </div>
-                    ),
-                )}
+                            <span>
+                                {key === "morningAdhkarTime"
+                                    ? ar
+                                        ? "أذكار الصباح"
+                                        : "Morning adhkar"
+                                    : key === "sleepAdhkarTime"
+                                      ? ar
+                                          ? "أذكار النوم"
+                                          : "Bedtime adhkar"
+                                      : ar
+                                        ? "أذكار المساء"
+                                        : "Evening adhkar"}
+                            </span>
+                        </label>
+                        <label className="sr-only" htmlFor={key}>
+                            {ar ? "وقت التذكير" : "Reminder time"}
+                        </label>
+                        <input
+                            id={key}
+                            type="time"
+                            dir="ltr"
+                            required={values[key] !== null}
+                            disabled={values[key] === null}
+                            value={values[key] ?? ""}
+                            onChange={(event) =>
+                                onChange(key, event.target.value)
+                            }
+                            className="mt-2 h-11 w-full rounded-lg border bg-background px-3 disabled:opacity-40"
+                        />
+                    </div>
+                ))}
             </div>
             <label className="block text-sm" htmlFor="adhkar-timezone">
                 {ar ? "المنطقة الزمنية للتذكيرات" : "Reminder timezone"}

@@ -39,7 +39,13 @@
             "sapphire": "Midnight Sapphire",
             "rose": "Rose Quartz",
             "aurora": "Aurora",
-            "pearl": "Desert Pearl"
+            "pearl": "Desert Pearl",
+            "ruby": "Ruby Night",
+            "olive": "Olive Silk",
+            "obsidian": "Obsidian Gold",
+            "lagoon": "Moonlit Lagoon",
+            "wisteria": "Wisteria Dawn",
+            "apricot": "Apricot Porcelain"
         },
         "language": {
             "title": "Language",

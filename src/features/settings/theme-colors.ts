@@ -6,5 +6,11 @@ export const THEME_COLORS = {
     sapphire: "#101b30",
     rose: "#faf5f3",
     aurora: "#19152c",
+    ruby: "#25151e",
+    olive: "#f5f5e9",
+    obsidian: "#141719",
+    lagoon: "#0e252d",
+    wisteria: "#f6f3fc",
+    apricot: "#fff5ed",
     pearl: "#faf6ed",
 } as const;

@@ -18,8 +18,8 @@ export default async function AuthLayout({
             className="relative isolate min-h-dvh overflow-x-clip bg-background"
         >
             <PageBackground />
-            <StickyAppHeader className="px-4">
-                <div className="mx-auto flex h-full w-full max-w-5xl items-center justify-between gap-4">
+            <StickyAppHeader>
+                <div className="app-container flex h-full items-center justify-between gap-4">
                     <AppPrimaryNav />
                     <AppLogo />
                 </div>

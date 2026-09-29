@@ -57,7 +57,7 @@ export default async function AssignmentReviewPage({
             )}
         >
             <PageBackground />
-            <div className="mx-auto max-w-6xl px-4">
+            <div className="app-container ">
                 <StickyAppHeader navigation className="-mx-4 px-4" />
 
                 <section className="py-10 sm:py-14">

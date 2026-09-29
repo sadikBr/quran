@@ -4,7 +4,7 @@ export default function MemorizationLoading() {
     return (
         <main className="relative isolate min-h-dvh overflow-hidden bg-background">
             <PageBackground />
-            <div className="mx-auto max-w-6xl animate-pulse px-4 py-10 sm:py-14">
+            <div className="app-container animate-pulse py-10 sm:py-14">
                 <div className="h-4 w-28 rounded-full bg-muted" />
                 <div className="mt-10 h-4 w-24 rounded-full bg-primary/10" />
                 <div className="mt-4 h-10 max-w-xl rounded-xl bg-muted" />

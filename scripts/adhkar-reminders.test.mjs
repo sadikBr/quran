@@ -1,6 +1,51 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { dueAdhkarDate } from "../src/features/adhkar/reminder-schedule.ts";
+import {
+    DEFAULT_PREFERENCES,
+    preferencesZodSchema,
+} from "../src/features/settings/preferences.ts";
+
+test("bedtime reminder is opt-in and validates its independent time", () => {
+    assert.equal(DEFAULT_PREFERENCES.sleepAdhkarTime, null);
+    for (const time of [null, "22:00", "00:00", "23:59"]) {
+        assert.equal(
+            preferencesZodSchema.safeParse({
+                ...DEFAULT_PREFERENCES,
+                sleepAdhkarTime: time,
+            }).success,
+            true,
+        );
+    }
+    for (const time of ["", "24:00", "22:60", "9:00"]) {
+        assert.equal(
+            preferencesZodSchema.safeParse({
+                ...DEFAULT_PREFERENCES,
+                sleepAdhkarTime: time,
+            }).success,
+            false,
+        );
+    }
+});
+
+test("bedtime reminder follows selected timezone and stops after catch-up", () => {
+    assert.equal(
+        dueAdhkarDate(
+            "22:00",
+            "Africa/Casablanca",
+            new Date("2026-09-29T21:00:00Z"),
+        ),
+        "2026-09-29",
+    );
+    assert.equal(
+        dueAdhkarDate(
+            "22:00",
+            "Africa/Casablanca",
+            new Date("2026-09-29T21:10:00Z"),
+        ),
+        null,
+    );
+});
 
 test("disabled and invalid reminders never run", () => {
     const now = new Date("2026-09-29T06:00:00Z");

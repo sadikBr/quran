@@ -119,7 +119,7 @@ export default async function Home() {
             )}
         >
             <PageBackground />
-            <div className="mx-auto flex min-h-dvh max-w-6xl flex-col px-4 sm:px-6">
+            <div className="app-container flex min-h-dvh flex-col">
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 text-foreground transition-colors data-[scrolled=true]:text-foreground sm:-mx-6 sm:px-6 dark:text-white"
@@ -163,8 +163,8 @@ export default async function Home() {
 
                     <div
                         className={cn(
-                            "relative z-10 mx-auto flex w-full max-w-7xl flex-col px-4 py-6 sm:px-6 sm:py-10",
-                            session && "gap-8 py-8 sm:gap-10 sm:py-12 lg:px-10",
+                            "app-container relative z-10 flex flex-col py-6 sm:py-10",
+                            session && "gap-8 py-8 sm:gap-10 sm:py-12",
                         )}
                     >
                         <div

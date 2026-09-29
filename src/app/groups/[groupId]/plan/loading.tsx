@@ -10,7 +10,7 @@ export default function MeetingPlanLoading() {
         <main aria-busy="true" className="relative min-h-dvh bg-background">
             <PageBackground />
             <p className="sr-only">{t("loading")}</p>
-            <div className="mx-auto max-w-6xl px-4 motion-safe:animate-pulse">
+            <div className="app-container motion-safe:animate-pulse">
                 <div className="flex h-20 items-center justify-between">
                     <div className="h-9 w-40 rounded-lg bg-muted" />
                     <div className="size-10 rounded-full bg-muted" />

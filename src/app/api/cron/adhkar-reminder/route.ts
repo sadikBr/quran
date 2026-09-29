@@ -44,6 +44,7 @@ export async function GET(request: Request) {
                 or(
                     ne(userSettings.morningAdhkarTime, ""),
                     ne(userSettings.eveningAdhkarTime, ""),
+                    ne(userSettings.sleepAdhkarTime, ""),
                 ),
             ),
         );
@@ -51,11 +52,13 @@ export async function GET(request: Request) {
         failed = 0,
         duplicate = 0;
     for (const { subscription, settings } of rows) {
-        for (const kind of ["morning", "evening"] as const) {
+        for (const kind of ["morning", "evening", "sleep"] as const) {
             const localDate = dueAdhkarDate(
                 kind === "morning"
                     ? settings.morningAdhkarTime
-                    : settings.eveningAdhkarTime,
+                    : kind === "sleep"
+                      ? settings.sleepAdhkarTime
+                      : settings.eveningAdhkarTime,
                 settings.adhkarTimezone,
                 now,
             );
@@ -107,10 +110,14 @@ export async function GET(request: Request) {
                         title: ar
                             ? kind === "morning"
                                 ? "حان وقت أذكار الصباح"
-                                : "حان وقت أذكار المساء"
+                                : kind === "sleep"
+                                  ? "اختم يومك بأذكار النوم"
+                                  : "حان وقت أذكار المساء"
                             : kind === "morning"
                               ? "Time for morning adhkar"
-                              : "Time for evening adhkar",
+                              : kind === "sleep"
+                                ? "Time for bedtime adhkar"
+                                : "Time for evening adhkar",
                         body: ar
                             ? "خذ لحظات لذكر الله. اضغط لقراءة الأذكار."
                             : "Take a moment for remembrance. Tap to read your adhkar.",

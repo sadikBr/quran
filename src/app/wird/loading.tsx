@@ -14,7 +14,7 @@ export default function WirdLoading() {
         >
             <PageBackground />
             <p className="sr-only">{t("overview")}</p>
-            <div className="mx-auto max-w-5xl px-4 motion-safe:animate-pulse">
+            <div className="app-container motion-safe:animate-pulse">
                 <header className="flex h-20 items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="size-9 rounded-lg bg-primary/20" />

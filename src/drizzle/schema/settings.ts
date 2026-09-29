@@ -17,6 +17,7 @@ export const Riwayah = pgEnum("riwayah", RIWAYAHS);
 export const userSettings = pgTable("user_settings", {
     morningAdhkarTime: text("morning_adhkar_time"),
     eveningAdhkarTime: text("evening_adhkar_time"),
+    sleepAdhkarTime: text("sleep_adhkar_time"),
     adhkarTimezone: text("adhkar_timezone")
         .notNull()
         .default("Africa/Casablanca"),

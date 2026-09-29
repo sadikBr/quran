@@ -12,7 +12,7 @@ export default function PracticeReaderLoading() {
             className="min-h-dvh bg-background"
         >
             <p className="sr-only">{t("reader")}</p>
-            <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-3 sm:px-5">
+            <div className="app-container flex h-14 items-center justify-between">
                 <div className="h-8 w-28 rounded-full bg-muted" />
                 <div className="h-5 w-32 rounded bg-muted" />
             </div>

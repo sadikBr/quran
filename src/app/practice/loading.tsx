@@ -14,7 +14,7 @@ export default function PracticeLoading() {
         >
             <PageBackground />
             <p className="sr-only">{t("overview")}</p>
-            <div className="mx-auto max-w-5xl px-4 motion-safe:animate-pulse">
+            <div className="app-container motion-safe:animate-pulse">
                 <header className="flex h-20 items-center justify-between">
                     <div className="h-9 w-36 rounded-lg bg-muted" />
                     <div className="size-10 rounded-full bg-muted" />

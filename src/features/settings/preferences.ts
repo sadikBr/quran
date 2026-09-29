@@ -9,6 +9,12 @@ export const THEMES = [
     "rose",
     "aurora",
     "pearl",
+    "ruby",
+    "olive",
+    "obsidian",
+    "lagoon",
+    "wisteria",
+    "apricot",
 ] as const;
 export const LANGUAGES = ["en", "ar"] as const;
 export const READING_MODES = ["page", "surah"] as const;
@@ -24,6 +30,7 @@ export type ArabicTextSize = (typeof ARABIC_TEXT_SIZES)[number];
 export interface Preferences {
     morningAdhkarTime: string | null;
     eveningAdhkarTime: string | null;
+    sleepAdhkarTime: string | null;
     adhkarTimezone: string;
     theme: Theme;
     language: Language;
@@ -44,6 +51,7 @@ export interface Preferences {
 export const DEFAULT_PREFERENCES: Preferences = {
     morningAdhkarTime: null,
     eveningAdhkarTime: null,
+    sleepAdhkarTime: null,
     adhkarTimezone: "Africa/Casablanca",
     theme: "light",
     language: "en",
@@ -63,6 +71,11 @@ export const DEFAULT_PREFERENCES: Preferences = {
 
 export const preferencesZodSchema = z.object({
     morningAdhkarTime: z
+        .string()
+        .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+        .nullable()
+        .default(null),
+    sleepAdhkarTime: z
         .string()
         .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
         .nullable()

@@ -83,7 +83,7 @@ export default async function AdminPage({
     return (
         <main className="relative isolate min-h-dvh overflow-x-clip bg-background">
             <PageBackground />
-            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="app-container ">
                 <StickyAppHeader navigation />
                 <div className="space-y-8 pb-14 pt-8 sm:space-y-10 sm:pt-12">
                     <header className="relative flex items-start justify-between gap-6 border-b border-border/60 pb-8 sm:pb-10">

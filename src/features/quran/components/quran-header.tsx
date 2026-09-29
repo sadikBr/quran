@@ -24,7 +24,7 @@ export default function QuranHeader({
             >
                 {t("header.skipToReader")}
             </a>
-            <div className="mx-auto flex h-[calc(4rem+env(safe-area-inset-top))] max-w-5xl items-center justify-between gap-3 px-3 pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] sm:px-4">
+            <div className="app-container flex h-[calc(4rem+env(safe-area-inset-top))] items-center justify-between gap-3 pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))]">
                 <AppPrimaryNav />
                 {(riwayah || showSurahIndex) && (
                     <nav

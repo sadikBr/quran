@@ -1,7 +1,18 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *));
+/* Shared outer shell for page content and navigation; reading measures stay local. */
+@utility app-container {
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+    @media (width >= 40rem) {
+        padding-inline: 1.5rem;
+    }
+}
+
+@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *, .ruby *, .obsidian *, .lagoon *));
 
 @theme inline {
     --color-background: var(--background);
@@ -146,6 +157,9 @@
 .dark,
 .emerald,
 .sapphire,
+.ruby,
+.obsidian,
+.lagoon,
 .aurora {
     color-scheme: dark;
     --background: oklch(0.2161 0.0061 56.0434);
@@ -853,5 +867,359 @@ body.focus-mode .quran-focus-chrome {
     .quran-reader-text {
         scroll-behavior: auto;
         transition-duration: 0.01ms;
+    }
+}
+.ruby {
+    color-scheme: dark;
+    --background: #25151e;
+    --foreground: #f9eee9;
+    --card: #36212c;
+    --primary: #efb29b;
+    --primary-foreground: #321b22;
+    --division: #d5badf;
+    --secondary: #50303e;
+    --secondary-foreground: #f9eee9;
+    --muted: #2e1b26;
+    --muted-foreground: #cdb2bd;
+    --accent: #573946;
+    --accent-foreground: #ffe2d4;
+    --destructive: #ffa6ae;
+    --destructive-foreground: #421922;
+    --border: #684653;
+    --input: #936c7b;
+    --chart-1: #efb29b;
+    --chart-2: #d5badf;
+    --chart-3: #add3c2;
+    --chart-4: #c2ccec;
+    --chart-5: #e8ce96;
+    --card-foreground: var(--foreground);
+    --popover: var(--card);
+    --popover-foreground: var(--foreground);
+    --ring: var(--primary);
+    --sidebar: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--primary);
+}
+
+.olive {
+    color-scheme: light;
+    --background: #f5f5e9;
+    --foreground: #303b29;
+    --card: #eaf0df;
+    --primary: #526536;
+    --primary-foreground: #ffffff;
+    --division: #856039;
+    --secondary: #dce2cb;
+    --secondary-foreground: #36412d;
+    --muted: #e9ebdf;
+    --muted-foreground: #606b55;
+    --accent: #e7ddc4;
+    --accent-foreground: #66502e;
+    --destructive: #a13543;
+    --destructive-foreground: #ffffff;
+    --border: #c4cdb4;
+    --input: #929e7f;
+    --chart-1: #526536;
+    --chart-2: #856039;
+    --chart-3: #487574;
+    --chart-4: #796386;
+    --chart-5: #a04f3d;
+    --card-foreground: var(--foreground);
+    --popover: var(--card);
+    --popover-foreground: var(--foreground);
+    --ring: var(--primary);
+    --sidebar: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--primary);
+}
+
+.ruby .home-landscape {
+    background-color: #754959;
+    background-blend-mode: luminosity;
+}
+.ruby .home-landscape-shade {
+    background-image: linear-gradient(
+        90deg,
+        #25151ee6,
+        #25151e73 45%,
+        #25151e14
+    );
+}
+.ruby .home-session-shade {
+    background: transparent;
+}
+.olive .home-landscape-light {
+    background-color: #bbc8a0;
+    background-blend-mode: luminosity;
+}
+.olive .home-landscape-light-shade {
+    background-image: linear-gradient(
+        90deg,
+        #f5f5e9f0,
+        #f5f5e999 48%,
+        #f5f5e91f
+    );
+}
+@media (max-width: 1023px) {
+    .ruby .home-landscape-shade {
+        background-image: linear-gradient(
+            180deg,
+            #25151e1f,
+            #25151e73 45%,
+            #25151ee6
+        );
+    }
+    .olive .home-landscape-light-shade {
+        background-image: linear-gradient(
+            180deg,
+            #f5f5e938,
+            #f5f5e999 44%,
+            #f5f5e9f0
+        );
+    }
+}
+.obsidian {
+    color-scheme: dark;
+    --background: #141719;
+    --foreground: #f5f0df;
+    --card: #22282b;
+    --primary: #e6ca83;
+    --primary-foreground: #242014;
+    --secondary: #343d40;
+    --secondary-foreground: #f5f0df;
+    --muted: #1c2124;
+    --muted-foreground: #b7c1c1;
+    --accent: #3e3827;
+    --accent-foreground: #f3dfac;
+    --border: #4c5658;
+    --input: #798689;
+    --division: #9cd2cd;
+    --destructive: #ffadb5;
+    --destructive-foreground: #401522;
+    --chart-1: #e6ca83;
+    --chart-2: #9cd2cd;
+    --chart-3: #bdd69b;
+    --chart-4: #d5b4e9;
+    --chart-5: #efb996;
+    --card-foreground: var(--foreground);
+    --popover: var(--card);
+    --popover-foreground: var(--foreground);
+    --ring: var(--primary);
+    --sidebar: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--primary);
+}
+.obsidian .home-landscape {
+    background-color: #697675;
+    background-blend-mode: luminosity;
+}
+.obsidian .home-landscape-shade {
+    background-image:
+        radial-gradient(ellipse at 75% 12%, #e6ca831a, transparent 60%),
+        linear-gradient(90deg, #141719eb, #14171980 45%, #14171914);
+}
+.obsidian .home-session-shade {
+    background: transparent;
+}
+@media (max-width: 1023px) {
+    .obsidian .home-landscape-shade {
+        background-image: linear-gradient(
+            180deg,
+            #14171926,
+            #14171980 45%,
+            #141719eb
+        );
+    }
+}
+
+.lagoon {
+    color-scheme: dark;
+    --background: #0e252d;
+    --foreground: #e7f7f6;
+    --card: #193740;
+    --primary: #83dfec;
+    --primary-foreground: #102b32;
+    --secondary: #284c56;
+    --secondary-foreground: #e7f7f6;
+    --muted: #142e37;
+    --muted-foreground: #aecbd0;
+    --accent: #414051;
+    --accent-foreground: #ead8f3;
+    --border: #406572;
+    --input: #729ba8;
+    --division: #dfb5e4;
+    --destructive: #ffadb5;
+    --destructive-foreground: #401522;
+    --chart-1: #83dfec;
+    --chart-2: #dfb5e4;
+    --chart-3: #bdd69b;
+    --chart-4: #d5b4e9;
+    --chart-5: #efb996;
+    --card-foreground: var(--foreground);
+    --popover: var(--card);
+    --popover-foreground: var(--foreground);
+    --ring: var(--primary);
+    --sidebar: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--primary);
+}
+.lagoon .home-landscape {
+    background-color: #398293;
+    background-blend-mode: luminosity;
+}
+.lagoon .home-landscape-shade {
+    background-image:
+        radial-gradient(ellipse at 75% 12%, #83dfec1a, transparent 60%),
+        linear-gradient(90deg, #0e252deb, #0e252d80 45%, #0e252d14);
+}
+.lagoon .home-session-shade {
+    background: transparent;
+}
+@media (max-width: 1023px) {
+    .lagoon .home-landscape-shade {
+        background-image: linear-gradient(
+            180deg,
+            #0e252d26,
+            #0e252d80 45%,
+            #0e252deb
+        );
+    }
+}
+
+.wisteria {
+    color-scheme: light;
+    --background: #f6f3fc;
+    --foreground: #352e49;
+    --card: #ece5f7;
+    --primary: #70509b;
+    --primary-foreground: #ffffff;
+    --secondary: #e1d7ef;
+    --secondary-foreground: #352e49;
+    --muted: #efebf5;
+    --muted-foreground: #6c607c;
+    --accent: #dcece7;
+    --accent-foreground: #365e53;
+    --border: #cbbdda;
+    --input: #9885b0;
+    --division: #3c7465;
+    --destructive: #a52e45;
+    --destructive-foreground: #ffffff;
+    --chart-1: #70509b;
+    --chart-2: #3c7465;
+    --chart-3: #597740;
+    --chart-4: #855396;
+    --chart-5: #ab6134;
+    --card-foreground: var(--foreground);
+    --popover: var(--card);
+    --popover-foreground: var(--foreground);
+    --ring: var(--primary);
+    --sidebar: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--primary);
+}
+.wisteria .home-landscape-light {
+    background-color: #b9a9d5;
+    background-blend-mode: luminosity;
+}
+.wisteria .home-landscape-light-shade {
+    background-image:
+        radial-gradient(ellipse at 75% 12%, #70509b1a, transparent 60%),
+        linear-gradient(90deg, #f6f3fceb, #f6f3fc80 45%, #f6f3fc14);
+}
+.wisteria .home-session-shade {
+    background: transparent;
+}
+@media (max-width: 1023px) {
+    .wisteria .home-landscape-light-shade {
+        background-image: linear-gradient(
+            180deg,
+            #f6f3fc26,
+            #f6f3fc80 45%,
+            #f6f3fceb
+        );
+    }
+}
+
+.apricot {
+    color-scheme: light;
+    --background: #fff5ed;
+    --foreground: #49372d;
+    --card: #fae7d9;
+    --primary: #a34f30;
+    --primary-foreground: #ffffff;
+    --secondary: #efd4c0;
+    --secondary-foreground: #49372d;
+    --muted: #f5e9df;
+    --muted-foreground: #795f50;
+    --accent: #dde8e8;
+    --accent-foreground: #365f64;
+    --border: #d9b9a3;
+    --input: #ad8066;
+    --division: #3f7177;
+    --destructive: #a52e45;
+    --destructive-foreground: #ffffff;
+    --chart-1: #a34f30;
+    --chart-2: #3f7177;
+    --chart-3: #597740;
+    --chart-4: #855396;
+    --chart-5: #ab6134;
+    --card-foreground: var(--foreground);
+    --popover: var(--card);
+    --popover-foreground: var(--foreground);
+    --ring: var(--primary);
+    --sidebar: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--primary);
+}
+.apricot .home-landscape-light {
+    background-color: #e5b393;
+    background-blend-mode: luminosity;
+}
+.apricot .home-landscape-light-shade {
+    background-image:
+        radial-gradient(ellipse at 75% 12%, #a34f301a, transparent 60%),
+        linear-gradient(90deg, #fff5edeb, #fff5ed80 45%, #fff5ed14);
+}
+.apricot .home-session-shade {
+    background: transparent;
+}
+@media (max-width: 1023px) {
+    .apricot .home-landscape-light-shade {
+        background-image: linear-gradient(
+            180deg,
+            #fff5ed26,
+            #fff5ed80 45%,
+            #fff5edeb
+        );
     }
 }
