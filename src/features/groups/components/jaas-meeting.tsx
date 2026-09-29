@@ -2,11 +2,16 @@
 
 import { LoaderCircle, LogOut, Video } from "lucide-react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AppPrimaryNav from "@/components/app-primary-nav";
 import { Button } from "@/components/ui/button";
+
+type MeetingApi = {
+    executeCommand: (command: string) => void;
+    dispose: () => void;
+};
 
 const JaaSMeeting = dynamic(
     () => import("@jitsi/react-sdk").then((module) => module.JaaSMeeting),
@@ -48,6 +53,13 @@ export default function JaasMeeting({
 }) {
     const t = useTranslations("Groups.meeting.room");
     const [sdkReady, setSdkReady] = useState(false);
+    const [leaving, setLeaving] = useState(false);
+    const router = useRouter();
+    const apiRef = useRef<MeetingApi | null>(null);
+    const leavingRef = useRef(false);
+    const closedRef = useRef(false);
+    const mountedRef = useRef(false);
+    const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const joinedRef = useRef(false);
     const heartbeatRef = useRef<number | null>(null);
 
@@ -59,7 +71,7 @@ export default function JaasMeeting({
         }
     }, []);
 
-    const leaveMeeting = useCallback(() => {
+    const clearPresence = useCallback(() => {
         if (!joinedRef.current) return;
         joinedRef.current = false;
         if (heartbeatRef.current !== null) {
@@ -69,11 +81,57 @@ export default function JaasMeeting({
         void fetch(`/api/groups/${groupId}/meeting/presence`, {
             method: "DELETE",
             keepalive: true,
-        });
+        }).catch(() => null);
     }, [groupId]);
 
+    const disposeMeeting = useCallback(() => {
+        if (exitTimerRef.current !== null) {
+            clearTimeout(exitTimerRef.current);
+            exitTimerRef.current = null;
+        }
+        const api = apiRef.current;
+        apiRef.current = null;
+        try {
+            api?.dispose();
+        } finally {
+            clearPresence();
+        }
+    }, [clearPresence]);
+
+    const finishLeaving = useCallback(() => {
+        if (!mountedRef.current || closedRef.current) return;
+        closedRef.current = true;
+        leavingRef.current = true;
+        setLeaving(true);
+        try {
+            disposeMeeting();
+        } finally {
+            router.replace(`/groups/${groupId}`);
+        }
+    }, [disposeMeeting, groupId, router]);
+
+    const leaveMeeting = useCallback(() => {
+        if (leavingRef.current) return;
+        leavingRef.current = true;
+        setLeaving(true);
+        const api = apiRef.current;
+        if (!api) {
+            finishLeaving();
+            return;
+        }
+        // Keep the iframe alive until Jitsi completes its hang-up signalling.
+        // A stalled iframe must not trap the user on this page.
+        exitTimerRef.current = setTimeout(finishLeaving, 5000);
+        try {
+            api.executeCommand("hangup");
+        } catch {
+            finishLeaving();
+        }
+    }, [finishLeaving]);
+
     const joinMeeting = useCallback(() => {
-        if (joinedRef.current) return;
+        if (joinedRef.current || leavingRef.current || !mountedRef.current)
+            return;
         joinedRef.current = true;
         const updatePresence = () =>
             fetch(`/api/groups/${groupId}/meeting/presence`, {
@@ -86,28 +144,54 @@ export default function JaasMeeting({
     }, [groupId]);
 
     useEffect(() => {
-        const handlePageHide = () => leaveMeeting();
-        window.addEventListener("pagehide", handlePageHide);
-        return () => {
-            window.removeEventListener("pagehide", handlePageHide);
-            leaveMeeting();
+        mountedRef.current = true;
+        const disconnect = () => {
+            leavingRef.current = true;
+            try {
+                apiRef.current?.executeCommand("hangup");
+            } catch {
+                // The iframe may already have closed during navigation.
+            } finally {
+                disposeMeeting();
+            }
         };
-    }, [leaveMeeting]);
+        const handlePageHide = () => {
+            mountedRef.current = false;
+            disconnect();
+        };
+        // A restored bfcache page must initialize a new, usable conference.
+        const handlePageShow = (event: PageTransitionEvent) => {
+            if (event.persisted) window.location.reload();
+        };
+        window.addEventListener("pagehide", handlePageHide);
+        window.addEventListener("pageshow", handlePageShow);
+        return () => {
+            mountedRef.current = false;
+            window.removeEventListener("pagehide", handlePageHide);
+            window.removeEventListener("pageshow", handlePageShow);
+            disconnect();
+            leavingRef.current = false;
+        };
+    }, [disposeMeeting]);
 
     return (
         <div className="flex h-dvh min-h-[34rem] flex-col overflow-hidden bg-[#11100f]">
             <header className="flex h-[calc(4rem+env(safe-area-inset-top))] shrink-0 items-center justify-between gap-3 border-border/60 border-b bg-background px-3 pt-[env(safe-area-inset-top)] text-foreground sm:h-[calc(5rem+env(safe-area-inset-top))] sm:px-4">
                 <AppPrimaryNav />
                 <Button
-                    asChild
+                    onClick={leaveMeeting}
+                    disabled={leaving}
+                    aria-busy={leaving}
                     variant="ghost"
                     size="sm"
                     className="rounded-xl text-muted-foreground hover:text-foreground"
                 >
-                    <Link href={`/groups/${groupId}`} onClick={leaveMeeting}>
+                    {leaving ? (
+                        <LoaderCircle className="size-4 animate-spin" />
+                    ) : (
                         <LogOut className="size-4" />
-                        {t("leave")}
-                    </Link>
+                    )}
+                    {t("leave")}
                 </Button>
             </header>
             <div className="relative min-h-0 flex-1 [&>div]:h-full [&_iframe]:h-full [&_iframe]:w-full">
@@ -132,19 +216,25 @@ export default function JaasMeeting({
                             MOBILE_APP_PROMO: false,
                         }}
                         onApiReady={(api) => {
+                            if (!mountedRef.current || leavingRef.current) {
+                                try {
+                                    api.executeCommand("hangup");
+                                } finally {
+                                    api.dispose();
+                                }
+                                return;
+                            }
+                            apiRef.current = api;
                             api.addEventListener(
                                 "videoConferenceJoined",
                                 joinMeeting,
                             );
                             api.addEventListener(
                                 "videoConferenceLeft",
-                                leaveMeeting,
+                                clearPresence,
                             );
                         }}
-                        onReadyToClose={() => {
-                            leaveMeeting();
-                            window.location.assign(`/groups/${groupId}`);
-                        }}
+                        onReadyToClose={finishLeaving}
                         spinner={MeetingSpinner}
                         getIFrameRef={(parentNode) => {
                             parentNode.style.height = "100%";
