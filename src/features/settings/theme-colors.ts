@@ -4,4 +4,5 @@ export const THEME_COLORS = {
     dark: "#1b1917",
     emerald: "#10332d",
     sapphire: "#101b30",
+    rose: "#faf5f3",
 } as const;

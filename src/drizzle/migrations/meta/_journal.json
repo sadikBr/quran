@@ -36,6 +36,13 @@
       "when": 1790707236211,
       "tag": "0004_sapphire_theme",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790711020958,
+      "tag": "0005_rose_quartz_theme",
+      "breakpoints": true
     }
   ]
 }

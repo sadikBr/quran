@@ -169,9 +169,11 @@ export default function GroupMeetingPanel({
                                   )
                                 : active && remaining
                                   ? t("closesIn", remaining)
-                                  : t("hostedBy", {
-                                        name: meeting.hostName,
-                                    })}
+                                  : isHost
+                                    ? t("hostedByYou")
+                                    : t("hostedBy", {
+                                          name: meeting.hostName,
+                                      })}
                         </p>
                         {meeting && meeting.schedule.length > 1 && (
                             <div className="mt-5 flex flex-wrap gap-2 text-xs text-muted-foreground">
@@ -241,9 +243,12 @@ export default function GroupMeetingPanel({
                             <div className="flex items-start gap-2 text-sm text-muted-foreground">
                                 <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
                                 <p>
-                                    {t("hostNote", {
-                                        name: meeting?.hostName ?? t("you"),
-                                    })}
+                                    {isHost
+                                        ? t("hostNoteSelf")
+                                        : t("hostNote", {
+                                              name:
+                                                  meeting?.hostName ?? t("you"),
+                                          })}
                                 </p>
                             </div>
                             <Button

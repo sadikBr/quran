@@ -257,6 +257,8 @@
             "pausedTitle": "Group meetings are paused",
             "closesIn": "The room remains open for {hours, plural, =0 {} one {# hour } other {# hours }}{minutes, plural, =0 {} one {# minute} other {# minutes}}.",
             "hostedBy": "Hosted by {name}. Members enter once the host starts the meeting.",
+            "hostedByYou": "You host this meeting. Start it at the scheduled time so members can join.",
+            "hostNoteSelf": "You are the designated meeting moderator.",
             "start": "Start meeting",
             "join": "Join meeting",
             "notOpen": "Available at meeting time",

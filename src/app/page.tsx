@@ -184,10 +184,10 @@ export default async function Home() {
                         aria-hidden="true"
                         className="absolute inset-x-0 -top-20 bottom-0 overflow-hidden"
                     >
-                        <span className="absolute inset-0 bg-[url('/meccan-home-light-v1.webp')] bg-cover bg-position-[center_60%] sm:bg-bottom dark:hidden" />
+                        <span className="home-landscape-light absolute inset-0 bg-[url('/meccan-home-light-v1.webp')] bg-cover bg-position-[center_60%] sm:bg-bottom dark:hidden" />
                         <span
                             className={cn(
-                                "absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,246,0.9)_0%,rgba(255,252,246,0.62)_48%,rgba(255,252,246,0.12)_100%)] max-lg:bg-[linear-gradient(180deg,rgba(255,252,246,0.22)_0%,rgba(255,252,246,0.6)_44%,rgba(255,252,246,0.94)_100%)] dark:hidden",
+                                "home-landscape-light-shade absolute inset-0 bg-[linear-gradient(90deg,rgba(255,252,246,0.9)_0%,rgba(255,252,246,0.62)_48%,rgba(255,252,246,0.12)_100%)] max-lg:bg-[linear-gradient(180deg,rgba(255,252,246,0.22)_0%,rgba(255,252,246,0.6)_44%,rgba(255,252,246,0.94)_100%)] dark:hidden",
                                 preferences.language === "ar" &&
                                     "max-lg:scale-x-100 lg:-scale-x-100",
                             )}

@@ -89,7 +89,7 @@ export default function QuranAudioQueue({
             <span
                 className={cn(
                     "flex items-center gap-1.5 px-1.5 text-muted-foreground text-xs",
-                    subdued && "hidden lg:flex",
+                    subdued && "hidden",
                 )}
             >
                 <AudioLines
@@ -168,7 +168,7 @@ export default function QuranAudioQueue({
                             />
                         )}
                     </span>
-                    <span>
+                    <span className={subdued ? "hidden sm:inline" : undefined}>
                         {isLoading
                             ? t("audio.loadingShort")
                             : hasError

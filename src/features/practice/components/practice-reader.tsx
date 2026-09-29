@@ -164,7 +164,7 @@ export default function PracticeReader({
                     variant={hideText ? "secondary" : "ghost"}
                     aria-label={t(hideText ? "showText" : "hideText")}
                     aria-pressed={hideText}
-                    className="size-11 rounded-xl text-muted-foreground hover:bg-primary/10 hover:text-primary min-[420px]:w-auto min-[420px]:gap-1.5 min-[420px]:px-3"
+                    className="size-11 shrink-0 rounded-xl text-muted-foreground hover:bg-primary/10 hover:text-primary sm:w-auto sm:gap-1.5 sm:px-3"
                     onClick={() => {
                         setHideText((value) => !value);
                         setRevealedAyahs(new Set());
@@ -175,7 +175,7 @@ export default function PracticeReader({
                     ) : (
                         <EyeOff aria-hidden="true" className="size-4" />
                     )}
-                    <span className="hidden min-[420px]:inline">
+                    <span className="hidden sm:inline">
                         {t(hideText ? "showText" : "hideText")}
                     </span>
                 </Button>

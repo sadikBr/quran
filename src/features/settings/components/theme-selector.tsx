@@ -11,6 +11,7 @@ const previews = {
     dark: "bg-[#211d19]",
     emerald: "bg-[#10332d]",
     sapphire: "bg-[#101b30]",
+    rose: "bg-[#faf5f3]",
 };
 const icons = {
     system: Monitor,
@@ -18,6 +19,7 @@ const icons = {
     dark: Moon,
     emerald: Sparkles,
     sapphire: Moon,
+    rose: Sparkles,
 };
 
 export default function ThemeSelector({
@@ -35,7 +37,7 @@ export default function ThemeSelector({
     return (
         <fieldset disabled={disabled} className="min-w-0">
             <legend className="sr-only">{t("theme.label")}</legend>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {THEMES.map((theme) => {
                     const Icon = icons[theme];
                     return (
@@ -57,17 +59,17 @@ export default function ThemeSelector({
                                     className={`relative flex h-20 overflow-hidden rounded-md border border-black/10 p-2 sm:h-24 ${previews[theme]}`}
                                 >
                                     <span
-                                        className={`w-1/4 rounded-sm ${theme === "sapphire" ? "bg-[#2b4165]" : theme === "emerald" ? "bg-[#28574b]" : "bg-stone-500/20"}`}
+                                        className={`w-1/4 rounded-sm ${theme === "rose" ? "bg-[#e9d5db]" : theme === "sapphire" ? "bg-[#2b4165]" : theme === "emerald" ? "bg-[#28574b]" : "bg-stone-500/20"}`}
                                     />
                                     <span className="ms-2 flex-1 space-y-2 pt-1">
                                         <span
-                                            className={`block h-2 w-2/3 rounded-sm ${theme === "sapphire" ? "bg-[#e2c78d]" : theme === "emerald" ? "bg-[#d8b766]" : "bg-orange-500/70"}`}
+                                            className={`block h-2 w-2/3 rounded-sm ${theme === "rose" ? "bg-[#934b65]" : theme === "sapphire" ? "bg-[#e2c78d]" : theme === "emerald" ? "bg-[#d8b766]" : "bg-orange-500/70"}`}
                                         />
                                         <span
-                                            className={`block h-2 rounded-sm ${theme === "sapphire" ? "bg-[#aebcd2]/40" : theme === "emerald" ? "bg-[#b5c8bb]/40" : "bg-stone-500/25"}`}
+                                            className={`block h-2 rounded-sm ${theme === "rose" ? "bg-[#77606c]/40" : theme === "sapphire" ? "bg-[#aebcd2]/40" : theme === "emerald" ? "bg-[#b5c8bb]/40" : "bg-stone-500/25"}`}
                                         />
                                         <span
-                                            className={`block h-6 rounded-sm border ${theme === "sapphire" ? "border-[#3b506d] bg-[#1b2b46]" : theme === "emerald" ? "border-[#416356] bg-[#1a463e]" : "border-stone-500/20 bg-stone-500/10"}`}
+                                            className={`block h-6 rounded-sm border ${theme === "rose" ? "border-[#d9bec8] bg-[#f3e7e6]" : theme === "sapphire" ? "border-[#3b506d] bg-[#1b2b46]" : theme === "emerald" ? "border-[#416356] bg-[#1a463e]" : "border-stone-500/20 bg-stone-500/10"}`}
                                         />
                                     </span>
                                     {value === theme && (

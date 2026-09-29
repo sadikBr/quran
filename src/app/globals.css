@@ -285,6 +285,68 @@
     --sidebar-ring: #e2c78d;
 }
 
+.rose {
+    color-scheme: light;
+    --background: #faf5f3;
+    --foreground: #45323f;
+    --card: #f3e7e6;
+    --card-foreground: #45323f;
+    --popover: #fffaf8;
+    --popover-foreground: #45323f;
+    --primary: #934b65;
+    --primary-foreground: #ffffff;
+    --division: #78608c;
+    --secondary: #e9d5db;
+    --secondary-foreground: #553746;
+    --muted: #f0e6e7;
+    --muted-foreground: #77606c;
+    --accent: #ead8df;
+    --accent-foreground: #673b51;
+    --destructive: #ad343f;
+    --destructive-foreground: #ffffff;
+    --border: #d9bec8;
+    --input: #b995a5;
+    --ring: #934b65;
+    --chart-1: #934b65;
+    --chart-2: #78608c;
+    --chart-3: #967043;
+    --chart-4: #4d7d78;
+    --chart-5: #b96863;
+    --sidebar: #f3e7e6;
+    --sidebar-foreground: #45323f;
+    --sidebar-primary: #934b65;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #ead8df;
+    --sidebar-accent-foreground: #673b51;
+    --sidebar-border: #d9bec8;
+    --sidebar-ring: #934b65;
+}
+
+.rose .home-landscape-light {
+    background-color: #e5c5cc;
+    background-blend-mode: luminosity;
+}
+
+.rose .home-landscape-light-shade {
+    background-image: linear-gradient(
+        90deg,
+        rgb(250 245 243 / 94%) 0%,
+        rgb(250 245 243 / 65%) 48%,
+        rgb(250 245 243 / 12%) 100%
+    );
+}
+
+@media (max-width: 1023px) {
+    .rose .home-landscape-light-shade {
+        background-image: linear-gradient(
+            180deg,
+            rgb(250 245 243 / 22%) 0%,
+            rgb(250 245 243 / 60%) 44%,
+            rgb(250 245 243 / 94%) 100%
+        );
+    }
+}
+
 .sapphire .home-landscape {
     background-color: #38557c;
     background-blend-mode: luminosity;
