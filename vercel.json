@@ -7,10 +7,6 @@
         {
             "path": "/api/cron/wird-reminder",
             "schedule": "0 23 * * *"
-        },
-        {
-            "path": "/api/cron/meeting-reminder",
-            "schedule": "* * * * *"
         }
     ]
 }
