@@ -15,6 +15,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import AdhkarReminderSettings from "@/features/adhkar/components/adhkar-reminder-settings";
 import PushNotificationSetting from "@/features/notifications/components/push-notification-setting";
 import OfflineLibrarySetting from "@/features/offline/components/offline-library-setting";
 import EditionCombobox from "@/features/quran/components/edition-combobox";
@@ -500,6 +501,10 @@ export default function SettingsForm({
                             onReminderPreferenceChange={(key, enabled) =>
                                 updateValue(key, enabled)
                             }
+                        />
+                        <AdhkarReminderSettings
+                            values={values}
+                            onChange={updateValue}
                         />
                     </SettingsSection>
 

@@ -1,3 +1,4 @@
+export * from "./schema/adhkar-reminder";
 export * from "./schema/admin-activity";
 export * from "./schema/auth-schema";
 export * from "./schema/bookmark-collection";

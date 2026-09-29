@@ -22,6 +22,9 @@ export type Riwayah = (typeof RIWAYAHS)[number];
 export type ArabicTextSize = (typeof ARABIC_TEXT_SIZES)[number];
 
 export interface Preferences {
+    morningAdhkarTime: string | null;
+    eveningAdhkarTime: string | null;
+    adhkarTimezone: string;
     theme: Theme;
     language: Language;
     riwayah: Riwayah;
@@ -39,6 +42,9 @@ export interface Preferences {
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
+    morningAdhkarTime: null,
+    eveningAdhkarTime: null,
+    adhkarTimezone: "Africa/Casablanca",
     theme: "light",
     language: "en",
     riwayah: "hafs",
@@ -56,6 +62,28 @@ export const DEFAULT_PREFERENCES: Preferences = {
 };
 
 export const preferencesZodSchema = z.object({
+    morningAdhkarTime: z
+        .string()
+        .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+        .nullable()
+        .default(null),
+    eveningAdhkarTime: z
+        .string()
+        .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+        .nullable()
+        .default(null),
+    adhkarTimezone: z
+        .string()
+        .max(100)
+        .refine((zone) => {
+            try {
+                new Intl.DateTimeFormat("en", { timeZone: zone });
+                return true;
+            } catch {
+                return false;
+            }
+        })
+        .default("Africa/Casablanca"),
     theme: z.enum(THEMES),
     language: z.enum(LANGUAGES),
     riwayah: z.enum(RIWAYAHS),

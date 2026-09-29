@@ -50,6 +50,20 @@
       "when": 1790711193829,
       "tag": "0006_aurora_pearl_themes",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790713011099,
+      "tag": "0007_free_zarda",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790713017663,
+      "tag": "0008_adhkar_reminders",
+      "breakpoints": true
     }
   ]
 }

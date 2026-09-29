@@ -15,6 +15,11 @@ export const ReadingMode = pgEnum("reading_mode", READING_MODES);
 export const Riwayah = pgEnum("riwayah", RIWAYAHS);
 
 export const userSettings = pgTable("user_settings", {
+    morningAdhkarTime: text("morning_adhkar_time"),
+    eveningAdhkarTime: text("evening_adhkar_time"),
+    adhkarTimezone: text("adhkar_timezone")
+        .notNull()
+        .default("Africa/Casablanca"),
     userId: text("user_id")
         .primaryKey()
         .references(() => user.id, { onDelete: "cascade" }),

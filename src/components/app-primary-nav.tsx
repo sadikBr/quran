@@ -34,6 +34,12 @@ import {
 
 const destinations = [
     {
+        href: "/azkar",
+        label: "adhkar",
+        icon: MoonStar,
+        matches: (path: string) => path === "/azkar",
+    },
+    {
         href: "/",
         label: "home",
         icon: Home,
@@ -132,7 +138,9 @@ export default function AppPrimaryNav() {
         : isAuthenticated
           ? destinations
           : destinations.filter((destination) =>
-                ["/", "/quran", "/quran/search"].includes(destination.href),
+                ["/", "/quran", "/quran/search", "/azkar"].includes(
+                    destination.href,
+                ),
             );
     const pathname = usePathname();
     const locale = useLocale();
@@ -159,6 +167,7 @@ export default function AppPrimaryNav() {
                       "/quran/search",
                       "/bookmarks",
                       "/wird",
+                      "/azkar",
                       "/practice",
                       "/memorization",
                   ],
