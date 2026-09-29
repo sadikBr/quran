@@ -28,6 +28,7 @@
             }
         },
         "theme": {
+            "quickHint": "Choose a theme. Your selection applies and saves automatically.",
             "title": "Theme",
             "description": "Choose how the application looks across every page.",
             "label": "Theme",

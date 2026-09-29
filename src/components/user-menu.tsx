@@ -3,18 +3,20 @@
 import {
     LoaderCircle,
     LogOut,
-    Moon,
+    Palette,
     Settings,
-    Sun,
     UserRound,
+    X,
 } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { Dialog } from "radix-ui";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useIsPlatformAdmin } from "@/features/auth/account-role-provider";
 import { authClient } from "@/features/auth/auth-client";
+import ThemeSelector from "@/features/settings/components/theme-selector";
 import {
     DEFAULT_PREFERENCES,
     type Theme,
@@ -76,42 +78,36 @@ export default function UserMenu({
     continueReadingHref?: string;
     labels?: UserMenuLabels;
 }) {
-    const { resolvedTheme, setTheme } = useTheme();
-    const isDarkTheme =
-        resolvedTheme === "dark" ||
-        resolvedTheme === "emerald" ||
-        resolvedTheme === "sapphire";
+    const { setTheme } = useTheme();
     const locale = useLocale();
     const commonT = useTranslations("Common");
     const isAdmin = useIsPlatformAdmin();
     const adminT = useTranslations("Admin");
     const { setPreferences, ...preferences } = useSettings();
-    const [selectedTheme, setSelectedTheme] = useState(preferences.theme);
+    const [pendingTheme, setPendingTheme] = useState<Theme | null>(null);
+    const [pickerOpen, setPickerOpen] = useState(false);
+    const avatarRef = useRef<HTMLButtonElement>(null);
+    const savingRef = useRef(false);
+    const settingsT = useTranslations("Settings");
     const [isSigningOut, setIsSigningOut] = useState(false);
 
     async function changeTheme(theme: Theme) {
-        const previousTheme = selectedTheme;
-
-        setSelectedTheme(theme);
+        if (savingRef.current || theme === preferences.theme) return;
+        savingRef.current = true;
+        const previousTheme = preferences.theme;
+        setPendingTheme(theme);
         setTheme(theme);
-
-        const result = await updatePreferences({ ...preferences, theme });
-
-        if (!result.success) {
-            setSelectedTheme(previousTheme);
+        try {
+            const result = await updatePreferences({ ...preferences, theme });
+            if (!result.success) throw new Error("Theme save failed");
+            setPreferences((current) => ({ ...current, theme }));
+        } catch {
             setTheme(previousTheme);
             toast.error(commonT("feedback.preferencesUpdateFailed"));
-            return;
+        } finally {
+            savingRef.current = false;
+            setPendingTheme(null);
         }
-
-        setPreferences((currentPreferences) => ({
-            ...currentPreferences,
-            theme,
-        }));
-    }
-
-    function toggleTheme() {
-        changeTheme(isDarkTheme ? "light" : "dark");
     }
 
     function signOut() {
@@ -138,6 +134,7 @@ export default function UserMenu({
                     <button
                         type="button"
                         className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        ref={avatarRef}
                         aria-label={labels.openMenu}
                     >
                         <Avatar className="size-10 border border-primary/20">
@@ -149,6 +146,9 @@ export default function UserMenu({
                     </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
+                    onCloseAutoFocus={(event) => {
+                        if (pickerOpen) event.preventDefault();
+                    }}
                     align="end"
                     className="w-[min(16rem,calc(100vw-1rem))] p-1.5"
                 >
@@ -163,24 +163,12 @@ export default function UserMenu({
                                     : labels.readingSpace}
                             </p>
                         </div>
-                        <button
-                            type="button"
-                            onClick={toggleTheme}
-                            className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-muted/65 text-muted-foreground transition-colors hover:bg-primary/12 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            aria-label={
-                                isDarkTheme
-                                    ? labels.switchToLight
-                                    : labels.switchToDark
-                            }
-                        >
-                            {isDarkTheme ? (
-                                <Sun aria-hidden="true" className="size-4" />
-                            ) : (
-                                <Moon aria-hidden="true" className="size-4" />
-                            )}
-                        </button>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => setPickerOpen(true)}>
+                        <Palette aria-hidden="true" />
+                        {settingsT("sections.appearance.eyebrow")}
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link href="/profile">
                             <UserRound aria-hidden="true" />
@@ -211,6 +199,47 @@ export default function UserMenu({
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
+            <Dialog.Root open={pickerOpen} onOpenChange={setPickerOpen}>
+                <Dialog.Portal>
+                    <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
+                    <Dialog.Content
+                        dir={locale === "ar" ? "rtl" : "ltr"}
+                        lang={locale}
+                        onCloseAutoFocus={(event) => {
+                            event.preventDefault();
+                            avatarRef.current?.focus();
+                        }}
+                        className={`fixed inset-x-0 bottom-0 z-50 max-h-[90dvh] overflow-y-auto rounded-t-2xl border bg-background p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-foreground shadow-xl outline-none sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(48rem,calc(100vw-3rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:p-6 ${locale === "ar" ? "arabic-ui" : ""}`}
+                    >
+                        <div className="mb-5 flex items-start justify-between gap-4">
+                            <div>
+                                <Dialog.Title className="text-lg font-semibold">
+                                    {settingsT("theme.title")}
+                                </Dialog.Title>
+                                <Dialog.Description className="mt-1 text-sm text-muted-foreground">
+                                    {settingsT("theme.quickHint")}
+                                </Dialog.Description>
+                            </div>
+                            <Dialog.Close
+                                aria-label={commonT("navigation.close")}
+                                className="flex size-11 shrink-0 items-center justify-center rounded-lg hover:bg-muted"
+                            >
+                                <X className="size-5" aria-hidden="true" />
+                            </Dialog.Close>
+                        </div>
+                        <ThemeSelector
+                            value={pendingTheme ?? preferences.theme}
+                            onChange={changeTheme}
+                            disabled={pendingTheme !== null}
+                        />
+                        <output className="mt-3 block min-h-5 text-xs text-muted-foreground">
+                            {pendingTheme !== null
+                                ? settingsT("footer.saving")
+                                : ""}
+                        </output>
+                    </Dialog.Content>
+                </Dialog.Portal>
+            </Dialog.Root>
         </div>
     );
 }
