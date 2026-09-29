@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { THEME_COLORS } from "@/features/settings/theme-colors";
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
@@ -10,7 +11,7 @@ export default function manifest(): MetadataRoute.Manifest {
         scope: "/",
         display: "standalone",
         background_color: "#181512",
-        theme_color: "#ff6b0a",
+        theme_color: THEME_COLORS.dark,
         shortcuts: [
             {
                 name: "Offline Quran",

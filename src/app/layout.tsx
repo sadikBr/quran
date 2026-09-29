@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
     Amiri,
     Fira_Code,
@@ -21,6 +21,7 @@ import OfflineLibraryManager from "@/features/offline/components/offline-library
 import ThemePreferenceSync from "@/features/settings/components/theme-preference-sync";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { SettingsProvider } from "@/features/settings/settings-provider";
+import { THEME_COLORS } from "@/features/settings/theme-colors";
 import { getMessages } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +64,25 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
         title: t("metadata.title"),
         description: t("metadata.description"),
+    };
+}
+
+export async function generateViewport(): Promise<Viewport> {
+    const { theme } = await getPreferences();
+    return {
+        themeColor:
+            theme === "system"
+                ? [
+                      {
+                          media: "(prefers-color-scheme: light)",
+                          color: THEME_COLORS.light,
+                      },
+                      {
+                          media: "(prefers-color-scheme: dark)",
+                          color: THEME_COLORS.dark,
+                      },
+                  ]
+                : THEME_COLORS[theme],
     };
 }
 
