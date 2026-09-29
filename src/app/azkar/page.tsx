@@ -1,27 +1,14 @@
-import { Bell, HandHeart, Moon, MoonStar, Sunrise } from "lucide-react";
+import { Bell, MoonStar } from "lucide-react";
 import Link from "next/link";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
-import { ADHKAR, isAdhkarCategory } from "@/features/adhkar/catalog";
-import AdhkarReader from "@/features/adhkar/components/adhkar-reader";
-import getAdhkar from "@/features/adhkar/server/get-adhkar";
+import AdhkarCollections from "@/features/adhkar/components/adhkar-collections";
+import data from "@/features/adhkar/data/collections.json";
 import getPreferences from "@/features/settings/server/get-preferences";
 
-export default async function AdhkarPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ category?: string }>;
-}) {
-    const [{ language }, query] = await Promise.all([
-        getPreferences(),
-        searchParams,
-    ]);
+export default async function AdhkarPage() {
+    const { language } = await getPreferences();
     const ar = language === "ar";
-    const category =
-        query.category && isAdhkarCategory(query.category)
-            ? query.category
-            : "morning";
-    const entries = await getAdhkar(category).catch(() => null);
     return (
         <main
             lang={language}
@@ -62,74 +49,7 @@ export default async function AdhkarPage({
                         </span>
                     </Link>
                 </header>
-                <nav
-                    aria-label={ar ? "أقسام الأذكار" : "Adhkar collections"}
-                    className="mb-5 grid grid-cols-2 gap-2 sm:mb-7 sm:grid-cols-4 sm:gap-3"
-                >
-                    {Object.entries(ADHKAR).map(([key, item]) => (
-                        <Link
-                            key={key}
-                            href={`/azkar?category=${key}`}
-                            aria-current={category === key ? "page" : undefined}
-                            className={`flex min-h-12 items-center gap-2.5 rounded-xl border px-3 py-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-16 sm:px-4 ${category === key ? "border-primary/35 bg-primary/10 text-primary shadow-sm" : "border-border/60 bg-card/40 text-muted-foreground hover:border-primary/20 hover:bg-card hover:text-foreground"}`}
-                        >
-                            {key === "morning" ? (
-                                <Sunrise
-                                    className="size-4"
-                                    aria-hidden="true"
-                                />
-                            ) : key === "evening" ? (
-                                <MoonStar
-                                    className="size-4"
-                                    aria-hidden="true"
-                                />
-                            ) : key === "sleep" ? (
-                                <Moon className="size-4" aria-hidden="true" />
-                            ) : (
-                                <HandHeart
-                                    className="size-4"
-                                    aria-hidden="true"
-                                />
-                            )}
-                            <span className="flex-1">{item[language]}</span>
-                            {category === key && (
-                                <span
-                                    className="size-1.5 shrink-0 rounded-full bg-primary"
-                                    aria-hidden="true"
-                                />
-                            )}
-                        </Link>
-                    ))}
-                </nav>
-                <section
-                    className="pb-12"
-                    aria-label={ADHKAR[category][language]}
-                >
-                    <div className="space-y-4">
-                        {entries ? (
-                            <AdhkarReader
-                                key={category}
-                                entries={entries}
-                                category={category}
-                                ar={ar}
-                            />
-                        ) : (
-                            <div role="alert" className="rounded-xl border p-6">
-                                <p>
-                                    {ar
-                                        ? "تعذّر تحميل الأذكار من المصدر. حاول مرة أخرى بعد قليل."
-                                        : "The adhkar source could not be loaded. Please try again shortly."}
-                                </p>
-                                <Link
-                                    href={`/azkar?category=${category}`}
-                                    className="mt-4 inline-block text-primary underline"
-                                >
-                                    {ar ? "إعادة المحاولة" : "Try again"}
-                                </Link>
-                            </div>
-                        )}
-                    </div>
-                </section>
+                <AdhkarCollections collections={data.collections} ar={ar} />
             </div>
         </main>
     );
