@@ -13,9 +13,11 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Ayah from "@/features/quran/components/ayah";
-import QuranAudioQueue from "@/features/quran/components/quran-audio-queue";
+import GuidedReader, {
+    GuidedReaderSurah,
+    GuidedReaderVerse,
+} from "@/features/quran/components/guided-reader";
 import getAyahAudioStreams from "@/features/quran/helpers/get-ayah-audio-streams";
-import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
 import type { PracticeReaderGroup } from "../reader-types";
 import submitPracticeAssignment from "../server/submit-practice-assignment";
@@ -136,80 +138,49 @@ export default function PracticeReader({
     }
 
     return (
-        <div className="mx-auto w-full max-w-4xl px-3 pb-[max(5rem,env(safe-area-inset-bottom))] sm:px-5">
-            <section className="sticky top-14 z-20 -mx-3 border-border/45 border-y bg-background/92 px-3 shadow-[0_14px_32px_-30px_hsl(var(--foreground)/0.55)] backdrop-blur-xl sm:-mx-5 sm:px-5">
-                <div className="flex min-h-16 items-center justify-between gap-3 py-2">
-                    <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-                        <strong
-                            className="shrink-0 text-lg font-semibold text-primary tabular-nums sm:text-xl"
-                            dir="ltr"
-                        >
-                            {percentage}%
-                        </strong>
-                        <span className="h-7 w-px bg-border/60" />
-                        <div className="min-w-0">
-                            <p className="text-[0.68rem] font-semibold tracking-[0.12em] text-primary uppercase">
-                                {t(`kinds.${assignment.kind}`)}
-                            </p>
-                            <p className="mt-0.5 truncate text-xs text-muted-foreground sm:text-sm">
-                                {t("progressCount", {
-                                    completed: completedAyahs,
-                                    total: ayahs.length,
-                                })}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                        <Button
-                            type="button"
-                            size="icon"
-                            variant={hideText ? "secondary" : "ghost"}
-                            className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary min-[420px]:w-auto min-[420px]:gap-1.5 min-[420px]:px-3"
-                            onClick={() => {
-                                setHideText((value) => !value);
-                                setRevealedAyahs(new Set());
-                            }}
-                        >
-                            {hideText ? (
-                                <Eye aria-hidden="true" className="size-4" />
-                            ) : (
-                                <EyeOff aria-hidden="true" className="size-4" />
-                            )}
-                            <span className="hidden min-[420px]:inline">
-                                {t(hideText ? "showText" : "hideText")}
-                            </span>
-                        </Button>
-                        {audioQueue.length > 0 && (
-                            <QuranAudioQueue
-                                queue={audioQueue}
-                                continuousRecitation={continuousRecitation}
-                                showReadAll
-                                scope="practice"
-                                embedded
-                                className="shrink-0"
-                            />
-                        )}
-                    </div>
-                </div>
-                <div
-                    role="progressbar"
-                    aria-label={t("progressSummary", {
-                        completed: completedAyahs,
-                        total: ayahs.length,
-                        percentage,
-                    })}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={percentage}
-                    className="absolute inset-x-0 bottom-0 h-0.5 overflow-hidden bg-muted/70"
+        <GuidedReader
+            percentage={percentage}
+            title={t(`kinds.${assignment.kind}`)}
+            progressLabel={
+                completedAyahs === 0
+                    ? t("notStarted")
+                    : t("progressCount", {
+                          completed: completedAyahs,
+                          total: ayahs.length,
+                      })
+            }
+            progressSummary={t("progressSummary", {
+                completed: completedAyahs,
+                total: ayahs.length,
+                percentage,
+            })}
+            queue={audioQueue}
+            continuousRecitation={continuousRecitation}
+            scope="practice"
+            controls={
+                <Button
+                    type="button"
+                    size="icon"
+                    variant={hideText ? "secondary" : "ghost"}
+                    aria-label={t(hideText ? "showText" : "hideText")}
+                    aria-pressed={hideText}
+                    className="size-11 rounded-xl text-muted-foreground hover:bg-primary/10 hover:text-primary min-[420px]:w-auto min-[420px]:gap-1.5 min-[420px]:px-3"
+                    onClick={() => {
+                        setHideText((value) => !value);
+                        setRevealedAyahs(new Set());
+                    }}
                 >
-                    <div
-                        className="h-full bg-primary transition-[width] duration-500"
-                        style={{ width: `${percentage}%` }}
-                    />
-                </div>
-            </section>
-
+                    {hideText ? (
+                        <Eye aria-hidden="true" className="size-4" />
+                    ) : (
+                        <EyeOff aria-hidden="true" className="size-4" />
+                    )}
+                    <span className="hidden min-[420px]:inline">
+                        {t(hideText ? "showText" : "hideText")}
+                    </span>
+                </Button>
+            }
+        >
             {assignment.source === "group" && assignment.reviewNote && (
                 <section className="mt-6 rounded-2xl bg-primary/[0.07] px-5 py-4 ring-1 ring-primary/15">
                     <p className="text-xs font-semibold text-primary">
@@ -266,20 +237,11 @@ export default function PracticeReader({
                             : group.surah.englishName;
 
                     return (
-                        <section key={group.surah.number}>
-                            <div className="mb-6 flex items-center gap-4">
-                                <span className="h-px flex-1 bg-primary/20" />
-                                <div className="text-center">
-                                    <p className="surah-name text-3xl leading-none text-primary">
-                                        {getArabicNumber(group.surah.number)}
-                                    </p>
-                                    <h2 className="mt-1 text-sm font-semibold">
-                                        {surahName}
-                                    </h2>
-                                </div>
-                                <span className="h-px flex-1 bg-primary/20" />
-                            </div>
-
+                        <GuidedReaderSurah
+                            key={group.surah.number}
+                            number={group.surah.number}
+                            name={surahName}
+                        >
                             <div className="space-y-4">
                                 {group.ayahs.map((ayah) => {
                                     const reference = {
@@ -311,17 +273,12 @@ export default function PracticeReader({
                                         .join(" ");
 
                                     return (
-                                        <article
+                                        <GuidedReaderVerse
+                                            active={isNext}
                                             id={`practice-${reference.surahNumber}-${reference.ayahNumber}`}
                                             key={key}
-                                            className={cn(
-                                                "relative overflow-hidden rounded-2xl px-4 py-5 transition-colors sm:px-6",
-                                                isNext
-                                                    ? "bg-primary/[0.07] ring-1 ring-primary/15"
-                                                    : "bg-muted/25",
-                                            )}
                                         >
-                                            <div className="relative min-h-24">
+                                            <div className="relative min-h-16">
                                                 <div
                                                     dir="rtl"
                                                     lang="ar"
@@ -364,7 +321,7 @@ export default function PracticeReader({
                                                         onClick={() =>
                                                             toggleReveal(key)
                                                         }
-                                                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                                        className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                                     >
                                                         <EyeOff
                                                             aria-hidden="true"
@@ -379,7 +336,10 @@ export default function PracticeReader({
                                             {showTranslation &&
                                                 translation &&
                                                 isRevealed && (
-                                                    <p className="mt-4 border-border/60 border-t pt-4 text-sm leading-7 text-muted-foreground">
+                                                    <p
+                                                        dir="auto"
+                                                        className="mt-4 border-border/60 border-t pt-4 text-start text-sm leading-7 text-muted-foreground"
+                                                    >
                                                         {translation}
                                                     </p>
                                                 )}
@@ -401,7 +361,7 @@ export default function PracticeReader({
                                                     onClick={() =>
                                                         saveProgress(reference)
                                                     }
-                                                    className="gap-2 rounded-full"
+                                                    className="min-h-11 gap-2 rounded-xl"
                                                 >
                                                     {reached ? (
                                                         <Check
@@ -419,14 +379,14 @@ export default function PracticeReader({
                                                         : t("markReached")}
                                                 </Button>
                                             </div>
-                                        </article>
+                                        </GuidedReaderVerse>
                                     );
                                 })}
                             </div>
-                        </section>
+                        </GuidedReaderSurah>
                     );
                 })}
             </div>
-        </div>
+        </GuidedReader>
     );
 }

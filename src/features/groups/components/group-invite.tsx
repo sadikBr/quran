@@ -21,20 +21,23 @@ export default function GroupInvite({ inviteCode }: { inviteCode: string }) {
     const LinkCopyIcon = copied === "link" ? Check : LinkIcon;
 
     return (
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="mt-4 flex min-w-0 flex-col gap-3">
             <div className="flex min-h-12 flex-1 items-center justify-between gap-4 rounded-xl bg-background/65 px-4 ring-1 ring-border/60">
                 <span className="text-xs text-muted-foreground">
                     {t("inviteCode")}
                 </span>
-                <strong className="font-mono text-sm tracking-[0.16em] text-primary">
+                <strong
+                    dir="ltr"
+                    className="break-all font-mono text-sm tracking-[0.12em] text-primary"
+                >
                     {inviteCode}
                 </strong>
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:flex">
+            <div className="grid grid-cols-2 gap-2">
                 <Button
                     type="button"
                     variant="outline"
-                    className="h-12 rounded-xl"
+                    className="h-auto min-h-11 rounded-xl px-2 py-2 text-xs whitespace-normal"
                     onClick={() => copy(inviteCode, "code")}
                 >
                     <CopyIcon aria-hidden="true" className="size-4" />
@@ -42,7 +45,7 @@ export default function GroupInvite({ inviteCode }: { inviteCode: string }) {
                 </Button>
                 <Button
                     type="button"
-                    className="h-12 rounded-xl"
+                    className="h-auto min-h-11 rounded-xl px-2 py-2 text-xs whitespace-normal"
                     onClick={() =>
                         copy(
                             `${window.location.origin}/groups?join=${inviteCode}`,

@@ -3,6 +3,7 @@
 import {
     ArrowRight,
     BookMarked,
+    Bookmark,
     BookOpen,
     CalendarCheck2,
     Home,
@@ -58,7 +59,7 @@ const destinations = [
     },
     {
         href: "/dashboard",
-        label: "today",
+        label: "dashboard",
         icon: LayoutDashboard,
         matches: (pathname: string) => pathname === "/dashboard",
     },
@@ -77,6 +78,12 @@ const destinations = [
         icon: Search,
         matches: (pathname: string) =>
             pathname.replace(/\/$/, "") === "/quran/search",
+    },
+    {
+        href: "/bookmarks",
+        label: "bookmarks",
+        icon: Bookmark,
+        matches: (path: string) => path === "/bookmarks",
     },
     {
         href: "/assignments",
@@ -150,6 +157,7 @@ export default function AppPrimaryNav() {
                   links: [
                       "/quran",
                       "/quran/search",
+                      "/bookmarks",
                       "/wird",
                       "/practice",
                       "/memorization",

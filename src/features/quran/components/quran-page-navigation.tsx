@@ -98,14 +98,21 @@ export default function QuranPageNavigation({
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {
             if (
+                event.defaultPrevented ||
+                isNavigatingRef.current ||
                 event.altKey ||
                 event.ctrlKey ||
                 event.metaKey ||
                 event.shiftKey ||
                 !(event.target instanceof HTMLElement) ||
                 event.target.closest(
-                    'input, textarea, select, [contenteditable="true"]',
-                )
+                    'input, textarea, select, button, a, [contenteditable]:not([contenteditable="false"]), [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [role="combobox"], [role="toolbar"]',
+                ) ||
+                Array.from(
+                    document.querySelectorAll<HTMLElement>(
+                        '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], dialog[open]',
+                    ),
+                ).some((overlay) => overlay.getClientRects().length > 0)
             ) {
                 return;
             }
@@ -448,6 +455,7 @@ export default function QuranPageNavigation({
             >
                 {currentNumber >= max ? (
                     <Button
+                        aria-label={t("navigation.next")}
                         disabled
                         variant="ghost"
                         className="min-w-10 justify-start px-2 text-muted-foreground min-[420px]:min-w-24"
@@ -464,6 +472,7 @@ export default function QuranPageNavigation({
                         className="min-w-10 justify-start px-2 min-[420px]:min-w-24"
                     >
                         <Link
+                            aria-label={t("navigation.next")}
                             href={getHref(Number(currentNumber) + 1)}
                             onClick={(event) => {
                                 if (
@@ -623,6 +632,7 @@ export default function QuranPageNavigation({
                 )}
                 {currentNumber <= min ? (
                     <Button
+                        aria-label={t("navigation.previous")}
                         disabled
                         variant="ghost"
                         className="min-w-10 justify-end px-2 text-muted-foreground min-[420px]:min-w-24"
@@ -639,6 +649,7 @@ export default function QuranPageNavigation({
                         className="min-w-10 justify-end px-2 min-[420px]:min-w-24"
                     >
                         <Link
+                            aria-label={t("navigation.previous")}
                             href={getHref(Number(currentNumber) - 1)}
                             onClick={(event) => {
                                 if (

@@ -65,7 +65,6 @@ export default function ReaderToolbar({ children }: { children: ReactNode }) {
                     setIsOpen(false);
                 }
             }}
-            onFocusCapture={() => setIsOpen(true)}
             onBlurCapture={(event) => {
                 if (!event.currentTarget.contains(event.relatedTarget)) {
                     setIsOpen(false);
@@ -90,7 +89,7 @@ export default function ReaderToolbar({ children }: { children: ReactNode }) {
                 title={isOpen ? t("close") : t("open")}
                 aria-expanded={isOpen}
                 aria-controls={panelId}
-                onClick={() => setIsOpen(true)}
+                onClick={() => setIsOpen((open) => !open)}
                 className="inline-flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_10px_28px_-10px_hsl(var(--primary)/0.8)] ring-1 ring-primary-foreground/15 transition-[transform,background-color] hover:scale-105 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 pointer-coarse:size-12"
             >
                 <AudioLines aria-hidden="true" className="size-5" />

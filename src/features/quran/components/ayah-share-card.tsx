@@ -198,6 +198,8 @@ export default function AyahShareCard({
     const [showBranding, setShowBranding] = useState(true);
     const [isRendering, setIsRendering] = useState(true);
     const [isCopying, setIsCopying] = useState(false);
+    const [renderFailed, setRenderFailed] = useState(false);
+    const renderVersion = useRef(0);
     const palette = THEMES[theme];
     const ayahReference = t("shareAyahReference", {
         ayah: String(ayahNumber),
@@ -206,10 +208,12 @@ export default function AyahShareCard({
     const drawCard = useCallback(async () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
+        const version = ++renderVersion.current;
         setIsRendering(true);
+        setRenderFailed(false);
 
         const context = canvas.getContext("2d");
-        if (!context) return;
+        if (!context) throw new Error("Canvas is unavailable");
         const quranFont = riwayah === "warsh" ? "Uthmanic Warsh" : "Amiri";
         const bodyStyles = getComputedStyle(document.body);
         const uiFont =
@@ -226,6 +230,7 @@ export default function AyahShareCard({
             document.fonts.load(`400 28px ${serifFont}`),
             document.fonts.load(`600 27px ${arabicUiFont}`),
         ]);
+        if (version !== renderVersion.current) return;
         canvas.width = CARD_WIDTH;
         canvas.height = CARD_HEIGHT;
 
@@ -417,7 +422,13 @@ export default function AyahShareCard({
     ]);
 
     useEffect(() => {
-        drawCard();
+        drawCard().catch(() => {
+            setRenderFailed(true);
+            setIsRendering(false);
+        });
+        return () => {
+            renderVersion.current += 1;
+        };
     }, [drawCard]);
 
     async function copyImage() {
@@ -455,18 +466,19 @@ export default function AyahShareCard({
             <button
                 type="button"
                 onClick={onBack}
-                className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 pe-12 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
                 <ArrowLeft className="size-4 rtl:rotate-180" />
                 {t("back")}
             </button>
 
-            <header className="mt-6 pe-9">
+            <header className="mt-4 pe-9">
                 <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                     {t("shareCardEyebrow")}
                 </p>
                 <h1
                     id="ayah-actions-title"
+                    tabIndex={-1}
                     className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl"
                 >
                     {t("shareCardTitle")}
@@ -477,7 +489,7 @@ export default function AyahShareCard({
             </header>
 
             <div className="mt-5 overflow-hidden rounded-2xl bg-muted/40 p-2 ring-1 ring-border/50">
-                <div className="relative mx-auto max-w-sm overflow-hidden rounded-xl shadow-xl">
+                <div className="relative mx-auto w-full max-w-[min(16rem,42dvh)] overflow-hidden rounded-xl shadow-sm">
                     <canvas
                         ref={canvasRef}
                         aria-label={t("sharePreview")}
@@ -491,7 +503,12 @@ export default function AyahShareCard({
                 </div>
             </div>
 
-            <div className="mt-5 rounded-2xl bg-muted/35 p-4 ring-1 ring-border/45">
+            {renderFailed && (
+                <p role="alert" className="mt-3 text-sm text-destructive">
+                    {t("shareRenderFailed")}
+                </p>
+            )}
+            <div className="mt-4 rounded-xl border border-border/60 bg-card/50 p-4">
                 <div className="flex items-center gap-2 text-sm font-semibold">
                     <Palette className="size-4 text-primary" />
                     {t("shareStyle")}
@@ -504,7 +521,7 @@ export default function AyahShareCard({
                                 type="button"
                                 aria-pressed={theme === option}
                                 onClick={() => setTheme(option)}
-                                className={`flex items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-xs font-semibold ring-1 transition-colors ${
+                                className={`flex min-h-11 flex-wrap items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-xs font-semibold ring-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                                     theme === option
                                         ? "bg-primary/10 text-primary ring-primary/25"
                                         : "bg-background/70 text-muted-foreground ring-border/50 hover:text-foreground"
@@ -562,11 +579,11 @@ export default function AyahShareCard({
                 </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="sticky -bottom-4 mt-4 grid grid-cols-1 gap-2 border-t border-border/60 bg-background py-3 min-[360px]:grid-cols-2 sm:-bottom-7">
                 <Button
                     type="button"
                     variant="outline"
-                    disabled={isRendering || isCopying}
+                    disabled={isRendering || isCopying || renderFailed}
                     onClick={copyImage}
                     className="min-h-11 rounded-xl"
                 >
@@ -579,7 +596,7 @@ export default function AyahShareCard({
                 </Button>
                 <Button
                     type="button"
-                    disabled={isRendering}
+                    disabled={isRendering || renderFailed}
                     onClick={downloadImage}
                     className="min-h-11 rounded-xl"
                 >

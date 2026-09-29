@@ -14,17 +14,21 @@ export default function CompleteWirdButton() {
     const [isCompleting, setIsCompleting] = useState(false);
 
     async function complete() {
+        if (isCompleting) return;
         setIsCompleting(true);
-        const result = await completeDailyWird();
-        setIsCompleting(false);
-
-        if (!result.success) {
+        try {
+            const result = await completeDailyWird();
+            if (!result.success) {
+                toast.error(t("completeError"));
+                return;
+            }
+            toast.success(t("completeSuccess"));
+            router.refresh();
+        } catch {
             toast.error(t("completeError"));
-            return;
+        } finally {
+            setIsCompleting(false);
         }
-
-        toast.success(t("completeSuccess"));
-        router.refresh();
     }
 
     return (
@@ -33,7 +37,7 @@ export default function CompleteWirdButton() {
             variant="outline"
             disabled={isCompleting}
             onClick={complete}
-            className="gap-2"
+            className="min-h-11 gap-2"
         >
             <Check aria-hidden="true" className="size-4" />
             {isCompleting ? t("completing") : t("markComplete")}

@@ -124,17 +124,16 @@ export default function GroupMeetingPanel({
             : null;
 
     return (
-        <section className="relative mt-10 overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary/[0.12] via-card to-card shadow-[0_24px_70px_-45px_hsl(var(--primary)/0.65)] ring-1 ring-primary/15">
-            <div className="pointer-events-none absolute -end-20 -top-24 size-64 rounded-full bg-primary/10 blur-3xl" />
+        <section className="relative mt-8 overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-sm">
             <div
                 className={cn(
-                    "relative grid gap-7 px-5 py-7 sm:px-8 sm:py-8",
+                    "relative grid gap-5 border-t-4 border-primary/70 bg-primary/[0.035] px-4 py-5 sm:px-6 sm:py-6",
                     canJoin &&
                         "lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center",
                 )}
             >
-                <div className="flex min-w-0 items-start gap-4">
-                    <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                <div className="flex min-w-0 items-start gap-3">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         {active ? (
                             <Video className="size-5.5" />
                         ) : (
@@ -152,7 +151,7 @@ export default function GroupMeetingPanel({
                                 </span>
                             )}
                         </div>
-                        <h2 className="mt-2.5 text-2xl font-semibold tracking-tight sm:text-3xl">
+                        <h2 className="mt-2 break-words text-xl font-semibold leading-relaxed tracking-tight sm:text-2xl">
                             {!meeting
                                 ? t("setupTitle")
                                 : active
@@ -204,7 +203,7 @@ export default function GroupMeetingPanel({
                         <Button
                             asChild
                             size="lg"
-                            className="rounded-xl px-7 shadow-lg shadow-primary/20"
+                            className="min-h-11 w-full rounded-xl px-6 lg:w-auto"
                         >
                             <Link href={`/groups/${groupId}/meeting`}>
                                 <Video className="size-4.5" />
@@ -225,12 +224,12 @@ export default function GroupMeetingPanel({
                     }
                     className="group relative bg-background/35"
                 >
-                    <summary className="flex cursor-pointer list-none items-center gap-2 border-primary/10 border-t px-5 py-4 text-sm font-semibold text-muted-foreground outline-none transition-colors hover:bg-background/35 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:px-8 [&::-webkit-details-marker]:hidden">
+                    <summary className="flex cursor-pointer list-none items-center gap-2 border-primary/10 border-t px-4 py-4 text-sm font-semibold text-muted-foreground outline-none transition-colors hover:bg-background/35 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
                         <Settings2 className="size-4 text-primary" />
                         {meeting ? t("editSchedule") : t("configure")}
                         <ChevronDown className="ms-auto size-4 transition-transform group-open:rotate-180" />
                     </summary>
-                    <div className="grid gap-8 px-5 pb-8 pt-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-end">
+                    <div className="grid gap-6 px-4 pb-6 pt-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-end">
                         <MeetingScheduleFields
                             schedule={schedule}
                             setSchedule={setSchedule}

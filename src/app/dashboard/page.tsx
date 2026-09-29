@@ -29,14 +29,8 @@ import {
     getAssignedPracticeAssignments,
     getPracticeAssignments,
 } from "@/features/practice/server/get-practice-assignment";
-import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
-import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
-import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
-import SavedAyahsSection from "@/features/saved-ayahs/components/saved-ayahs-section";
-import getBookmarkCollections from "@/features/saved-ayahs/server/get-bookmark-collections";
-import getSavedAyahs from "@/features/saved-ayahs/server/get-saved-ayahs";
 import getPreferences from "@/features/settings/server/get-preferences";
 import getDailyWird from "@/features/wird/server/get-daily-wird";
 import { getMessages, getTextDirection } from "@/i18n/config";
@@ -105,20 +99,10 @@ export default async function DashboardPage() {
         redirect("/sign-in");
     }
 
-    const [
-        preferences,
-        readingProgress,
-        savedAyahs,
-        bookmarkCollections,
-        surahs,
-        hafsNavigation,
-    ] = await Promise.all([
+    const [preferences, readingProgress, surahs] = await Promise.all([
         getPreferences(),
         getReadingProgress(),
-        getSavedAyahs(session.user.id),
-        getBookmarkCollections(session.user.id),
         getSurahsMeta().catch(() => []),
-        getQuranNavigationMeta().catch(() => null),
     ]);
     const [
         dailyWird,
@@ -136,32 +120,6 @@ export default async function DashboardPage() {
         getNextGroupMeetingForUser(session.user.id),
     ]);
     const practiceAssignment = practiceAssignments[0] ?? null;
-    const warshChapters =
-        preferences.riwayah === "warsh" ? await getWarshChapters() : [];
-    const warshBySurah = new Map(
-        warshChapters.map((chapter) => [chapter.id, chapter]),
-    );
-    const surahOffsets = new Map<number, number>();
-    let ayahOffset = 0;
-    for (const surah of surahs) {
-        surahOffsets.set(surah.number, ayahOffset);
-        ayahOffset += surah.numberOfAyahs;
-    }
-    const hafsPageForAyah = (
-        globalAyahNumber: number,
-        fallbackPageNumber: number,
-    ) => {
-        if (!hafsNavigation) return fallbackPageNumber;
-
-        let pageNumber = 1;
-
-        for (const page of hafsNavigation.pages) {
-            if (page.globalAyahNumber > globalAyahNumber) break;
-            pageNumber = page.number;
-        }
-
-        return pageNumber;
-    };
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
@@ -308,35 +266,6 @@ export default async function DashboardPage() {
         }
     }
 
-    const localizedSavedAyahs = savedAyahs.map((ayah) => {
-        const surah = surahs.find((item) => item.number === ayah.surahNumber);
-        const hafsAyahNumber =
-            ayah.globalAyahNumber - (surahOffsets.get(ayah.surahNumber) ?? 0);
-        const warshChapter = warshBySurah.get(ayah.surahNumber);
-        const exactWarshVerse = warshChapter?.verses.find(
-            (verse) =>
-                verse.number === ayah.ayahNumber &&
-                verse.number_in_hafs.includes(hafsAyahNumber),
-        );
-        const warshVerse =
-            exactWarshVerse ??
-            warshChapter?.verses.find((verse) =>
-                verse.number_in_hafs.includes(hafsAyahNumber),
-            );
-
-        return {
-            ...ayah,
-            ayahNumber: warshVerse?.number ?? hafsAyahNumber,
-            pageNumber:
-                warshVerse?.page_number ??
-                hafsPageForAyah(ayah.globalAyahNumber, ayah.pageNumber),
-            arabicText: warshVerse?.text ?? ayah.arabicText,
-            surahName:
-                preferences.language === "ar"
-                    ? (surah?.name ?? ayah.surahName)
-                    : (surah?.englishName ?? ayah.surahName),
-        };
-    });
     const accountLabels = {
         openMenu: homeT("account.openMenu"),
         readingSpace: homeT("account.readingSpace"),
@@ -383,12 +312,12 @@ export default async function DashboardPage() {
                     />
                 </StickyAppHeader>
 
-                <section className="py-7 sm:py-12">
-                    <div className="max-w-3xl">
+                <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
+                    <div className="border-b border-border/60 pb-6 sm:pb-8">
                         <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                             {t("eyebrow")}
                         </p>
-                        <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+                        <h1 className="mt-2 break-words text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">
                             {t("welcome", { name: session.user.name })}
                         </h1>
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -402,7 +331,7 @@ export default async function DashboardPage() {
                             className="group mt-6 flex min-w-0 flex-col gap-4 rounded-2xl border border-primary/20 bg-card/60 px-4 py-4 shadow-sm shadow-primary/5 outline-none transition-[background-color,border-color,box-shadow] hover:border-primary/30 hover:bg-card/80 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring sm:px-5 lg:flex-row lg:items-center lg:justify-between"
                         >
                             <div className="flex min-w-0 items-center gap-3.5">
-                                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+                                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
                                     {nextGroupMeeting.status === "active" ? (
                                         <Video
                                             aria-hidden="true"
@@ -423,7 +352,7 @@ export default async function DashboardPage() {
                                                 : "dashboard.nextMeetingEyebrow",
                                         )}
                                     </p>
-                                    <h2 className="mt-1 truncate text-lg font-semibold tracking-tight">
+                                    <h2 className="mt-1 break-words text-lg font-semibold tracking-tight">
                                         {nextGroupMeeting.groupName}
                                     </h2>
                                     <p className="mt-0.5 text-xs leading-5 text-muted-foreground sm:text-sm">
@@ -462,14 +391,14 @@ export default async function DashboardPage() {
 
                     <section
                         className={cn(
-                            "overflow-hidden rounded-3xl border border-border/60 bg-card/40 shadow-sm",
+                            "overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-sm",
                             nextGroupMeeting ? "mt-4 sm:mt-5" : "mt-8 sm:mt-10",
                         )}
                     >
                         <div className="grid sm:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_minmax(15rem,0.75fr)_minmax(15rem,0.75fr)]">
-                            <div className="min-w-0 px-2 py-7 sm:col-span-2 sm:px-5 sm:py-8 lg:col-span-1 lg:px-7 lg:py-9">
+                            <div className="min-w-0 bg-primary/[0.035] px-4 py-5 sm:col-span-2 sm:px-6 sm:py-6 lg:col-span-1">
                                 <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
+                                    <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
                                         <FocusIcon
                                             aria-hidden="true"
                                             className="size-5"
@@ -479,7 +408,7 @@ export default async function DashboardPage() {
                                         <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                                             {focusEyebrow}
                                         </p>
-                                        <h2 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl lg:text-3xl lg:leading-[1.15] xl:text-4xl">
+                                        <h2 className="mt-2 break-words text-xl font-semibold leading-relaxed tracking-tight sm:text-2xl">
                                             {focusTitle}
                                         </h2>
                                         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
@@ -523,9 +452,9 @@ export default async function DashboardPage() {
                             <div className="contents">
                                 <Link
                                     href="/assignments"
-                                    className="group grid min-w-0 grid-cols-[auto_minmax(0,1fr)] content-center items-start gap-3 border-border/50 border-t px-2 py-6 outline-none transition-colors hover:bg-muted/25 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 lg:border-t-0 lg:border-s lg:px-6"
+                                    className="group grid min-w-0 grid-cols-[auto_minmax(0,1fr)] content-center items-start gap-3 border-border/50 border-t px-4 py-5 outline-none transition-colors hover:bg-muted/25 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 lg:border-t-0 lg:border-s lg:px-6"
                                 >
-                                    <span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                    <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                         <CalendarCheck2
                                             aria-hidden="true"
                                             className="size-5"
@@ -563,9 +492,9 @@ export default async function DashboardPage() {
 
                                 <Link
                                     href="/memorization"
-                                    className="group grid min-w-0 grid-cols-[auto_minmax(0,1fr)] content-center items-start gap-3 border-border/50 border-t px-2 py-6 outline-none transition-colors hover:bg-muted/25 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:border-s sm:px-5 lg:border-t-0 lg:px-6"
+                                    className="group grid min-w-0 grid-cols-[auto_minmax(0,1fr)] content-center items-start gap-3 border-border/50 border-t px-4 py-5 outline-none transition-colors hover:bg-muted/25 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:border-s sm:px-5 lg:border-t-0 lg:px-6"
                                 >
-                                    <span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                    <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                         <Sparkles
                                             aria-hidden="true"
                                             className="size-5"
@@ -591,7 +520,7 @@ export default async function DashboardPage() {
                                                 "dashboard.description",
                                             )}
                                         </p>
-                                        <div className="mt-2 h-1 overflow-hidden rounded-full bg-primary/10">
+                                        <div className="mt-2 h-1 overflow-hidden rounded-xl bg-primary/10">
                                             <div
                                                 className="h-full rounded-full bg-primary"
                                                 style={{
@@ -606,7 +535,7 @@ export default async function DashboardPage() {
                     </section>
 
                     <section
-                        className="mt-14 sm:mt-20"
+                        className="mt-8 sm:mt-10"
                         aria-labelledby="dashboard-tools"
                     >
                         <div className="max-w-xl">
@@ -715,14 +644,6 @@ export default async function DashboardPage() {
                             />
                         </div>
                     </section>
-
-                    <QuranAudioProvider>
-                        <SavedAyahsSection
-                            savedAyahs={localizedSavedAyahs}
-                            collections={bookmarkCollections}
-                            readingMode={preferences.readingMode}
-                        />
-                    </QuranAudioProvider>
                 </section>
             </div>
         </main>

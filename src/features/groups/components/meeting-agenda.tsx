@@ -106,7 +106,7 @@ export default function MeetingAgenda({
         >
             <div
                 className={cn(
-                    "flex flex-col gap-5 border-border/50 border-b px-5 sm:px-7",
+                    "flex flex-col gap-4 border-border/50 border-b px-4 sm:px-6",
                     !embedded && "lg:flex-row lg:items-end lg:justify-between",
                     embedded ? "py-5" : "py-6",
                 )}
@@ -154,7 +154,7 @@ export default function MeetingAgenda({
 
                 <div
                     className={cn(
-                        "grid grid-cols-3 gap-2 text-center sm:flex sm:text-start",
+                        "grid grid-cols-3 gap-2 text-center",
                         embedded && "max-w-xl",
                     )}
                 >
@@ -194,7 +194,7 @@ export default function MeetingAgenda({
                                         member.assignments.length > 0))
                             }
                         >
-                            <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-8 [&::-webkit-details-marker]:hidden">
+                            <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
                                 <Avatar className="size-10 shrink-0 border border-primary/15">
                                     {member.image && (
                                         <AvatarImage
@@ -374,11 +374,11 @@ function AgendaStat({
 }) {
     return (
         <div className="min-w-0 rounded-xl bg-background/70 px-3 py-2.5 ring-1 ring-border/45 sm:min-w-24">
-            <div className="flex items-center justify-center gap-1.5 sm:justify-start">
+            <div className="flex items-center justify-center gap-1.5">
                 <Icon className="size-3.5 text-primary" />
                 <strong className="text-sm">{value}</strong>
             </div>
-            <p className="mt-0.5 truncate text-[0.68rem] text-muted-foreground">
+            <p className="mt-1 text-[0.7rem] leading-5 text-muted-foreground">
                 {label}
             </p>
         </div>

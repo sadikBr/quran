@@ -2,13 +2,15 @@
 
 import { Check, MapPin } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Ayah from "@/features/quran/components/ayah";
-import QuranAudioQueue from "@/features/quran/components/quran-audio-queue";
+import GuidedReader, {
+    GuidedReaderSurah,
+    GuidedReaderVerse,
+} from "@/features/quran/components/guided-reader";
 import getAyahAudioStreams from "@/features/quran/helpers/get-ayah-audio-streams";
-import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
 import type { WirdReaderGroup } from "../reader-types";
 import updateWirdProgress from "../server/update-wird-progress";
@@ -36,6 +38,7 @@ export default function WirdReader({
     const t = useTranslations("Wird.reader");
     const [progress, setProgress] = useState(initialProgress);
     const [savingAyah, setSavingAyah] = useState<number | null>(null);
+    const saveInFlight = useRef(false);
     const totalAyahs = endGlobalAyah - startGlobalAyah + 1;
     const completedAyahs = progress
         ? Math.max(0, progress - startGlobalAyah + 1)
@@ -62,85 +65,58 @@ export default function WirdReader({
     );
 
     useEffect(() => {
-        const target = document.getElementById(`ayah-${initialScrollTarget}`);
+        const target = document.querySelector<HTMLElement>(
+            `[data-wird-resume="true"]`,
+        );
         if (!target) return;
 
         const frame = window.requestAnimationFrame(() => {
             target.scrollIntoView({ block: "center", behavior: "auto" });
         });
         return () => window.cancelAnimationFrame(frame);
-    }, [initialScrollTarget]);
+    }, []);
 
     async function saveProgress(globalAyahNumber: number) {
+        if (saveInFlight.current) return;
+        saveInFlight.current = true;
         setSavingAyah(globalAyahNumber);
-        const result = await updateWirdProgress({ globalAyahNumber });
-        setSavingAyah(null);
-
-        if (!result.success) {
+        try {
+            const result = await updateWirdProgress({ globalAyahNumber });
+            if (!result.success) {
+                toast.error(t("saveError"));
+                return;
+            }
+            setProgress(globalAyahNumber);
+            toast.success(t("saved"));
+        } catch {
             toast.error(t("saveError"));
-            return;
+        } finally {
+            saveInFlight.current = false;
+            setSavingAyah(null);
         }
-
-        setProgress(globalAyahNumber);
-        toast.success(t("saved"));
     }
 
     return (
-        <div className="mx-auto w-full max-w-4xl px-3 pb-[max(5rem,env(safe-area-inset-bottom))] sm:px-5">
-            <section className="sticky top-14 z-20 -mx-3 border-border/45 border-y bg-background/92 px-3 shadow-[0_14px_32px_-30px_hsl(var(--foreground)/0.55)] backdrop-blur-xl sm:-mx-5 sm:px-5">
-                <div className="flex min-h-16 items-center justify-between gap-3 py-2">
-                    <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-                        <strong
-                            className="shrink-0 text-lg font-semibold text-primary tabular-nums sm:text-xl"
-                            dir="ltr"
-                        >
-                            {percentage}%
-                        </strong>
-                        <span className="h-7 w-px bg-border/60" />
-                        <div className="min-w-0">
-                            <p className="text-[0.68rem] font-semibold tracking-[0.12em] text-primary uppercase">
-                                {t("progress")}
-                            </p>
-                            <p className="mt-0.5 truncate text-xs text-muted-foreground sm:text-sm">
-                                {t("progressCount", {
-                                    completed: completedAyahs,
-                                    total: totalAyahs,
-                                })}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                        {audioQueue.length > 0 && (
-                            <QuranAudioQueue
-                                queue={audioQueue}
-                                continuousRecitation={continuousRecitation}
-                                showReadAll
-                                scope="wird"
-                                embedded
-                                className="shrink-0"
-                            />
-                        )}
-                    </div>
-                </div>
-                <div
-                    role="progressbar"
-                    aria-label={t("progressSummary", {
-                        completed: completedAyahs,
-                        total: totalAyahs,
-                        percentage,
-                    })}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={percentage}
-                    className="absolute inset-x-0 bottom-0 h-0.5 overflow-hidden bg-muted/70"
-                >
-                    <div
-                        className="h-full bg-primary transition-[width] duration-500"
-                        style={{ width: `${percentage}%` }}
-                    />
-                </div>
-            </section>
-
+        <GuidedReader
+            percentage={percentage}
+            title={t("progress")}
+            progressLabel={
+                completedAyahs === 0
+                    ? t("notStarted")
+                    : t("progressCount", {
+                          completed: completedAyahs,
+                          total: totalAyahs,
+                      })
+            }
+            progressSummary={t("progressSummary", {
+                completed: completedAyahs,
+                total: totalAyahs,
+                percentage,
+            })}
+            queue={audioQueue}
+            continuousRecitation={continuousRecitation}
+            scope="wird"
+        >
             <div className="mt-7 space-y-12">
                 {groups.map((group) => {
                     const translationByAyah = new Map(
@@ -155,20 +131,11 @@ export default function WirdReader({
                             : group.surah.englishName;
 
                     return (
-                        <section key={group.surah.number}>
-                            <div className="mb-6 flex items-center gap-4">
-                                <span className="h-px flex-1 bg-primary/20" />
-                                <div className="text-center">
-                                    <p className="surah-name text-3xl leading-none text-primary">
-                                        {getArabicNumber(group.surah.number)}
-                                    </p>
-                                    <h2 className="mt-1 text-sm font-semibold">
-                                        {surahName}
-                                    </h2>
-                                </div>
-                                <span className="h-px flex-1 bg-primary/20" />
-                            </div>
-
+                        <GuidedReaderSurah
+                            key={group.surah.number}
+                            number={group.surah.number}
+                            name={surahName}
+                        >
                             <div className="space-y-4">
                                 {group.ayahs.map((ayah) => {
                                     const ayahProgressNumber =
@@ -195,15 +162,19 @@ export default function WirdReader({
                                         .join(" ");
 
                                     return (
-                                        <article
+                                        <GuidedReaderVerse
+                                            active={isNext}
                                             data-wird-ayah={ayahProgressNumber}
+                                            data-wird-resume={
+                                                (
+                                                    ayah.hafsGlobalNumbers ?? [
+                                                        ayahProgressNumber,
+                                                    ]
+                                                ).includes(
+                                                    initialScrollTarget,
+                                                ) || undefined
+                                            }
                                             key={`${group.surah.number}-${ayah.numberInSurah}-${ayah.audioNumber ?? ayah.number}`}
-                                            className={cn(
-                                                "relative overflow-hidden rounded-2xl px-4 py-5 transition-colors sm:px-6",
-                                                isNext
-                                                    ? "bg-primary/[0.07] ring-1 ring-primary/15"
-                                                    : "bg-muted/25",
-                                            )}
                                         >
                                             <div
                                                 dir="rtl"
@@ -218,7 +189,10 @@ export default function WirdReader({
                                                 />
                                             </div>
                                             {showTranslation && translation && (
-                                                <p className="mt-4 border-border/60 border-t pt-4 text-sm leading-7 text-muted-foreground">
+                                                <p
+                                                    dir="auto"
+                                                    className="mt-4 border-border/60 border-t pt-4 text-start text-sm leading-7 text-muted-foreground"
+                                                >
                                                     {translation}
                                                 </p>
                                             )}
@@ -232,8 +206,7 @@ export default function WirdReader({
                                                             : "outline"
                                                     }
                                                     disabled={
-                                                        savingAyah ===
-                                                        ayahProgressNumber
+                                                        savingAyah !== null
                                                     }
                                                     onClick={() =>
                                                         saveProgress(
@@ -244,7 +217,7 @@ export default function WirdReader({
                                                         isSavedPosition
                                                     }
                                                     className={cn(
-                                                        "gap-2 rounded-full",
+                                                        "min-h-11 gap-2 rounded-xl",
                                                         isSavedPosition &&
                                                             "bg-primary/10 text-primary hover:bg-primary/12",
                                                     )}
@@ -270,11 +243,11 @@ export default function WirdReader({
                                                             : t("stopHere")}
                                                 </Button>
                                             </div>
-                                        </article>
+                                        </GuidedReaderVerse>
                                     );
                                 })}
                             </div>
-                        </section>
+                        </GuidedReaderSurah>
                     );
                 })}
             </div>
@@ -287,6 +260,6 @@ export default function WirdReader({
                     <CompleteWirdButton />
                 </div>
             </section>
-        </div>
+        </GuidedReader>
     );
 }

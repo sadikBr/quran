@@ -264,8 +264,8 @@ export default function ProfileForm({
     }
 
     return (
-        <div className="mt-14 grid gap-12 lg:grid-cols-[minmax(12rem,0.55fr)_minmax(0,1.45fr)]">
-            <aside className="lg:sticky lg:top-10 lg:self-start">
+        <div className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(12rem,0.55fr)_minmax(0,1.45fr)]">
+            <aside className="rounded-2xl border border-border/70 bg-card/70 p-5 lg:sticky lg:top-24 lg:self-start">
                 <div>
                     <button
                         type="button"
@@ -273,7 +273,7 @@ export default function ProfileForm({
                         className="group relative shrink-0 cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         aria-label={t("aside.chooseImage")}
                     >
-                        <Avatar className="size-24 border-2 border-primary/20">
+                        <Avatar className="size-20 border-2 border-primary/20">
                             {image.trim() && <AvatarImage src={image} alt="" />}
                             <AvatarFallback className="bg-primary/10 text-2xl font-semibold text-primary">
                                 {getInitials(name)}
@@ -294,7 +294,7 @@ export default function ProfileForm({
                         className="sr-only"
                         onChange={handleImageChange}
                     />
-                    <p className="mt-5 text-xs font-semibold tracking-[0.18em] text-primary">
+                    <p className="mt-4 text-xs font-semibold tracking-[0.18em] text-primary">
                         {t("aside.eyebrow")}
                     </p>
                     <p className="mt-2 text-xl font-semibold tracking-tight text-foreground">
@@ -303,14 +303,14 @@ export default function ProfileForm({
                     <p className="mt-1 break-all text-sm leading-6 text-muted-foreground">
                         {email}
                     </p>
-                    <p className="mt-6 border-t border-primary/15 pt-4 text-sm leading-6 text-muted-foreground">
+                    <p className="mt-4 border-t border-border/60 pt-4 text-sm leading-6 text-muted-foreground">
                         {t("aside.description")}
                     </p>
                 </div>
             </aside>
 
             <div>
-                <section className="border-b border-primary/15 pb-12">
+                <section className="rounded-2xl border border-border/70 bg-card/70 p-4 shadow-sm sm:p-6">
                     <div className="flex items-start gap-4">
                         <div>
                             <div className="flex items-center gap-2">
@@ -329,7 +329,7 @@ export default function ProfileForm({
                     </div>
                     <form
                         onSubmit={handleProfileSubmit}
-                        className="mt-8 grid gap-6 sm:grid-cols-2"
+                        className="mt-5 grid gap-4 sm:grid-cols-2"
                     >
                         <div className="grid content-start gap-2">
                             <Label htmlFor="name">
@@ -390,7 +390,7 @@ export default function ProfileForm({
                     </form>
                 </section>
 
-                <section className="border-b border-primary/15 py-12">
+                <section className="mt-5 rounded-2xl border border-border/70 bg-card/70 p-4 shadow-sm sm:p-6">
                     <div>
                         <h2 className="font-semibold text-foreground">
                             {t("access.title")}
@@ -399,7 +399,7 @@ export default function ProfileForm({
                             {t("access.description")}
                         </p>
                     </div>
-                    <div className="mt-8 space-y-8">
+                    <div className="mt-5 space-y-5">
                         <form
                             onSubmit={handleEmailSubmit}
                             className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
@@ -430,7 +430,7 @@ export default function ProfileForm({
                             </Button>
                         </form>
 
-                        <div className="border-t border-primary/15 pt-8">
+                        <div className="border-t border-border/60 pt-5">
                             <div className="flex items-center gap-2">
                                 <KeyRound
                                     aria-hidden="true"
@@ -495,7 +495,7 @@ export default function ProfileForm({
                     </div>
                 </section>
 
-                <section className="border-b border-primary/15 py-12">
+                <section className="mt-5 rounded-2xl border border-border/70 bg-card/70 p-4 shadow-sm sm:p-6">
                     <div className="flex items-start gap-3">
                         <div>
                             <div className="flex items-center gap-2">
@@ -512,11 +512,8 @@ export default function ProfileForm({
                             </p>
                         </div>
                     </div>
-                    <div className="relative mt-8">
-                        <span
-                            aria-hidden="true"
-                            className="absolute top-5 bottom-5 start-[3.5px] w-px bg-primary/20"
-                        />
+                    <div className="relative mt-5">
+                        <span aria-hidden="true" className="hidden" />
                         {isLoadingSessions ? (
                             <p className="text-sm text-muted-foreground">
                                 {t("sessions.loading")}
@@ -533,9 +530,9 @@ export default function ProfileForm({
                                 return (
                                     <div
                                         key={session.token}
-                                        className="relative flex flex-wrap items-center gap-4 pb-8 ps-8 last:pb-1"
+                                        className="relative mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-background/50 p-3 last:mb-0"
                                     >
-                                        <span className="absolute top-4 start-0 size-2 rounded-full bg-primary ring-4 ring-background" />
+                                        <span className="hidden" />
                                         <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                                             <Laptop
                                                 aria-hidden="true"
@@ -563,7 +560,7 @@ export default function ProfileForm({
                                             </p>
                                         </div>
                                         {isCurrentSession ? (
-                                            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                                            <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
                                                 {t("sessions.current")}
                                             </span>
                                         ) : (
@@ -591,8 +588,8 @@ export default function ProfileForm({
                     </div>
                 </section>
 
-                {canDeleteAccount && (
-                    <section className="mt-12 border-s-2 border-destructive/70 bg-destructive/5 py-6 pe-6 ps-5 sm:py-7 sm:pe-7 sm:ps-6">
+                {
+                    <section className="mt-5 rounded-2xl border border-destructive/25 bg-destructive/5 p-4 sm:p-6">
                         <div className="flex items-start gap-3">
                             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-destructive text-white">
                                 <AlertTriangle
@@ -609,55 +606,63 @@ export default function ProfileForm({
                                 </p>
                             </div>
                         </div>
-                        <form
-                            onSubmit={handleDeleteAccount}
-                            className="mt-6 grid gap-4"
-                        >
-                            <div className="grid gap-2">
-                                <Label htmlFor="delete-password">
-                                    {t("delete.currentPassword")}
-                                </Label>
-                                <Input
-                                    id="delete-password"
-                                    type="password"
-                                    value={deletePassword}
-                                    onChange={(event) =>
-                                        setDeletePassword(event.target.value)
-                                    }
-                                    autoComplete="current-password"
-                                    required
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="delete-confirmation">
-                                    {t("delete.confirmation")}
-                                </Label>
-                                <Input
-                                    id="delete-confirmation"
-                                    value={deleteConfirmation}
-                                    onChange={(event) =>
-                                        setDeleteConfirmation(
-                                            event.target.value,
-                                        )
-                                    }
-                                    autoComplete="off"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <Button
-                                    type="submit"
-                                    variant="destructive"
-                                    disabled={isDeleting}
-                                >
-                                    {isDeleting
-                                        ? t("delete.deleting")
-                                        : t("delete.submit")}
-                                </Button>
-                            </div>
-                        </form>
+                        {!canDeleteAccount ? (
+                            <p className="mt-4 rounded-xl border border-border/60 bg-background/50 p-4 text-sm leading-7 text-muted-foreground">
+                                {t("delete.restricted")}
+                            </p>
+                        ) : (
+                            <form
+                                onSubmit={handleDeleteAccount}
+                                className="mt-6 grid gap-4"
+                            >
+                                <div className="grid gap-2">
+                                    <Label htmlFor="delete-password">
+                                        {t("delete.currentPassword")}
+                                    </Label>
+                                    <Input
+                                        id="delete-password"
+                                        type="password"
+                                        value={deletePassword}
+                                        onChange={(event) =>
+                                            setDeletePassword(
+                                                event.target.value,
+                                            )
+                                        }
+                                        autoComplete="current-password"
+                                        required
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="delete-confirmation">
+                                        {t("delete.confirmation")}
+                                    </Label>
+                                    <Input
+                                        id="delete-confirmation"
+                                        value={deleteConfirmation}
+                                        onChange={(event) =>
+                                            setDeleteConfirmation(
+                                                event.target.value,
+                                            )
+                                        }
+                                        autoComplete="off"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <Button
+                                        type="submit"
+                                        variant="destructive"
+                                        disabled={isDeleting}
+                                    >
+                                        {isDeleting
+                                            ? t("delete.deleting")
+                                            : t("delete.submit")}
+                                    </Button>
+                                </div>
+                            </form>
+                        )}
                     </section>
-                )}
+                }
             </div>
         </div>
     );

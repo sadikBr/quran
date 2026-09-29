@@ -158,6 +158,7 @@ export const groupMeetingAttendance = pgTable(
         leftAt: timestamp("left_at", { withTimezone: true }),
         attendedSeconds: integer("attended_seconds").notNull().default(0),
         status: text("status").notNull().default("present"),
+        excuse: text("excuse"),
         createdAt,
         updatedAt,
     },

@@ -293,21 +293,32 @@ export default async function AssignmentsPage({
         return (
             <article
                 key={assignment.id}
-                className="rounded-2xl bg-background/65 p-4 ring-1 ring-border/55 sm:p-5"
+                className="min-w-0 rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-5"
             >
                 <div className="flex items-start justify-between gap-3">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         <Icon aria-hidden="true" className="size-5" />
                     </span>
-                    <span className="rounded-full bg-muted/60 px-3 py-1 text-xs text-muted-foreground">
+                    <span
+                        className={cn(
+                            "rounded-md px-2.5 py-1 text-xs font-medium",
+                            assignment.status === "needs_revision"
+                                ? "bg-amber-500/10 text-amber-800 dark:text-amber-300"
+                                : assignment.status === "completed"
+                                  ? "bg-emerald-500/10 text-emerald-800 dark:text-emerald-300"
+                                  : assignment.status === "submitted"
+                                    ? "bg-primary/10 text-primary"
+                                    : "bg-muted/60 text-muted-foreground",
+                        )}
+                    >
                         {t(`card.statuses.${assignment.status}`)}
                     </span>
                 </div>
 
-                <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-primary">
+                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-primary">
                     <span>{t(`card.kinds.${assignment.kind}`)}</span>
                 </div>
-                <h3 className="mt-2 text-lg font-semibold leading-8">
+                <h3 className="mt-1 break-words text-base font-semibold leading-7">
                     {t("card.range", {
                         startSurah:
                             surahName(assignment.start.surahNumber) ??
@@ -434,16 +445,16 @@ export default async function AssignmentsPage({
                     />
                 </StickyAppHeader>
 
-                <section className="py-10 sm:py-14">
+                <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
                     <div>
-                        <div className="max-w-3xl">
+                        <div className="border-b border-border/60 pb-6 sm:pb-8">
                             <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
                                 {t(isManageView ? "admin.eyebrow" : "eyebrow")}
                             </p>
-                            <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                            <h1 className="mt-2 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">
                                 {t(isManageView ? "admin.title" : "title")}
                             </h1>
-                            <p className="mt-4 leading-7 text-muted-foreground">
+                            <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
                                 {t(
                                     isManageView
                                         ? "admin.description"
@@ -455,7 +466,7 @@ export default async function AssignmentsPage({
                         {adminGroups.length > 0 && (
                             <nav
                                 aria-label={t("tabs.label")}
-                                className="mt-7 grid grid-cols-2 gap-1 rounded-2xl bg-muted/45 p-1 ring-1 ring-border/50 sm:w-fit sm:min-w-96"
+                                className="mt-6 grid grid-cols-2 gap-1 rounded-xl border border-border/60 bg-muted/30 p-1 sm:w-fit sm:min-w-96"
                             >
                                 <Link
                                     href="/assignments"
@@ -585,7 +596,7 @@ export default async function AssignmentsPage({
                                         <details
                                             key={group.key}
                                             className={cn(
-                                                "group/meeting overflow-hidden rounded-2xl bg-muted/25 ring-1 ring-border/55 open:bg-muted/35",
+                                                "group/meeting overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm",
                                                 isOverdue &&
                                                     "ring-destructive/20",
                                             )}
@@ -595,7 +606,7 @@ export default async function AssignmentsPage({
                                                 ready > 0
                                             }
                                         >
-                                            <summary className="relative grid cursor-pointer list-none gap-4 px-4 py-4 outline-none transition-colors hover:bg-background/35 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:grid-cols-[auto_minmax(0,1fr)_auto_auto] sm:items-center sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
+                                            <summary className="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center cursor-pointer list-none gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/25 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:grid-cols-[auto_minmax(0,1fr)_auto_auto] sm:px-5 [&::-webkit-details-marker]:hidden">
                                                 <span
                                                     className={cn(
                                                         "flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary",
@@ -749,13 +760,13 @@ export default async function AssignmentsPage({
                                     ))}
                                 </div>
 
-                                <div className="mt-4 overflow-hidden rounded-3xl bg-muted/30 ring-1 ring-border/55">
-                                    <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                                <div className="mt-4 overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-sm">
+                                    <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
                                         <div>
                                             <p className="text-xs font-semibold text-primary">
                                                 {t("admin.selectedGroup")}
                                             </p>
-                                            <h2 className="mt-2 text-2xl font-semibold">
+                                            <h2 className="mt-2 break-words text-xl font-semibold">
                                                 {selectedAdminGroup.name}
                                             </h2>
                                             <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -794,7 +805,7 @@ export default async function AssignmentsPage({
                                     </div>
 
                                     <div className="grid grid-cols-3 border-border/50 border-t">
-                                        <div className="p-4 text-center sm:p-5">
+                                        <div className="p-3 text-center sm:p-4">
                                             <strong className="text-2xl text-primary tabular-nums">
                                                 {activeAdminAssignments.length}
                                             </strong>
@@ -802,7 +813,7 @@ export default async function AssignmentsPage({
                                                 {t("admin.active")}
                                             </p>
                                         </div>
-                                        <div className="border-border/50 border-x p-4 text-center sm:p-5">
+                                        <div className="border-border/50 border-x p-3 text-center sm:p-4">
                                             <strong className="text-2xl text-primary tabular-nums">
                                                 {plannedMemberCount}
                                             </strong>
@@ -810,7 +821,7 @@ export default async function AssignmentsPage({
                                                 {t("admin.learners")}
                                             </p>
                                         </div>
-                                        <div className="p-4 text-center sm:p-5">
+                                        <div className="p-3 text-center sm:p-4">
                                             <strong className="text-2xl text-primary tabular-nums">
                                                 {reviewQueue.length}
                                             </strong>
@@ -858,12 +869,30 @@ export default async function AssignmentsPage({
                                             {reviewQueue.map((assignment) => (
                                                 <article
                                                     key={assignment.id}
-                                                    className="rounded-2xl bg-primary/[0.055] p-4 ring-1 ring-primary/15 sm:p-5"
+                                                    className="min-w-0 rounded-2xl border border-primary/20 bg-card p-4 shadow-sm sm:p-5"
                                                 >
-                                                    <p className="font-semibold">
+                                                    <p className="break-words font-semibold">
                                                         {
                                                             assignment.assigneeName
                                                         }
+                                                    </p>
+                                                    <p className="mt-2 text-sm leading-6">
+                                                        {t("admin.range", {
+                                                            startSurah:
+                                                                adminSurahName(
+                                                                    assignment.startSurahNumber,
+                                                                ) ??
+                                                                assignment.startSurahNumber,
+                                                            startAyah:
+                                                                assignment.startAyahNumber,
+                                                            endSurah:
+                                                                adminSurahName(
+                                                                    assignment.endSurahNumber,
+                                                                ) ??
+                                                                assignment.endSurahNumber,
+                                                            endAyah:
+                                                                assignment.endAyahNumber,
+                                                        })}
                                                     </p>
                                                     <p className="mt-1 text-sm leading-6 text-muted-foreground">
                                                         {groupsT(

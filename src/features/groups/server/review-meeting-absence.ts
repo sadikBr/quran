@@ -17,6 +17,8 @@ const inputSchema = z.object({
     groupId: z.string().min(1),
     attendanceId: z.string().min(1),
     decision: z.enum(["accepted", "unaccepted"]),
+    confirmRemoval: z.boolean().default(false),
+    expectedExcuse: z.string().max(1000).nullable(),
 });
 
 export default async function reviewMeetingAbsence(input: unknown) {
@@ -44,6 +46,7 @@ export default async function reviewMeetingAbsence(input: unknown) {
             .select({
                 userId: groupMeetingAttendance.userId,
                 status: groupMeetingAttendance.status,
+                excuse: groupMeetingAttendance.excuse,
                 role: groupMember.role,
                 membershipStartedAt: groupMember.createdAt,
                 hostUserId: groupMeeting.hostUserId,
@@ -71,32 +74,23 @@ export default async function reviewMeetingAbsence(input: unknown) {
                     isNotNull(groupMeetingSession.finalizedAt),
                 ),
             )
-            .limit(1);
+            .limit(1)
+            .for("update", { of: groupMeetingAttendance });
         if (!absence || absence.status === "present") {
             return { success: false as const, reason: "not_found" };
         }
         if (absence.status !== "pending") {
             return { success: false as const, reason: "already_reviewed" };
         }
-
-        const updated = await transaction
-            .update(groupMeetingAttendance)
-            .set({ status: parsed.data.decision })
-            .where(
-                and(
-                    eq(groupMeetingAttendance.id, parsed.data.attendanceId),
-                    eq(groupMeetingAttendance.status, "pending"),
-                ),
-            )
-            .returning({ id: groupMeetingAttendance.id });
-        // Only one request may finalize a pending absence, including when two
-        // tabs submit different decisions at the same time.
-        if (updated.length === 0) {
-            return { success: false as const, reason: "already_reviewed" };
+        if (absence.excuse !== parsed.data.expectedExcuse) {
+            return { success: false as const, reason: "excuse_changed" };
         }
 
         const recentAttendance = await transaction
-            .select({ status: groupMeetingAttendance.status })
+            .select({
+                id: groupMeetingAttendance.id,
+                status: groupMeetingAttendance.status,
+            })
             .from(groupMeetingAttendance)
             .innerJoin(
                 groupMeetingSession,
@@ -125,7 +119,11 @@ export default async function reviewMeetingAbsence(input: unknown) {
 
         let consecutiveUnaccepted = 0;
         for (const attendance of recentAttendance) {
-            if (attendance.status !== "unaccepted") break;
+            const status =
+                attendance.id === parsed.data.attendanceId
+                    ? parsed.data.decision
+                    : attendance.status;
+            if (status !== "unaccepted") break;
             consecutiveUnaccepted += 1;
         }
 
@@ -133,6 +131,26 @@ export default async function reviewMeetingAbsence(input: unknown) {
             consecutiveUnaccepted >= 3 &&
             absence.role === "member" &&
             absence.hostUserId !== absence.userId;
+        if (canRemove && !parsed.data.confirmRemoval) {
+            return { success: false as const, reason: "removal_confirmation" };
+        }
+
+        const updated = await transaction
+            .update(groupMeetingAttendance)
+            .set({ status: parsed.data.decision })
+            .where(
+                and(
+                    eq(groupMeetingAttendance.id, parsed.data.attendanceId),
+                    eq(groupMeetingAttendance.status, "pending"),
+                ),
+            )
+            .returning({ id: groupMeetingAttendance.id });
+        // Only one request may finalize a pending absence, including when two
+        // tabs submit different decisions at the same time.
+        if (updated.length === 0) {
+            return { success: false as const, reason: "already_reviewed" };
+        }
+
         if (canRemove) {
             await transaction
                 .delete(groupMember)

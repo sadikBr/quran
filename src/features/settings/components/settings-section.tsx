@@ -8,8 +8,8 @@ export default function SettingsSection({
     children: React.ReactNode;
 }) {
     return (
-        <section className="grid gap-7 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-12">
-            <div className="relative self-start ps-5 before:absolute before:top-0 before:bottom-0 before:start-0 before:w-px before:bg-gradient-to-b before:from-primary before:via-primary/30 before:to-transparent">
+        <section className="rounded-2xl border border-border/70 bg-card/70 p-4 shadow-sm sm:p-6">
+            <div className="border-b border-border/60 pb-4">
                 <p className="text-[0.68rem] font-semibold tracking-[0.2em] text-primary">
                     {eyebrow}
                 </p>
@@ -17,7 +17,9 @@ export default function SettingsSection({
                     {title}
                 </h2>
             </div>
-            <div className="space-y-8">{children}</div>
+            <div className="divide-y divide-border/50 [&>*]:py-5 [&>*:last-child]:pb-0">
+                {children}
+            </div>
         </section>
     );
 }

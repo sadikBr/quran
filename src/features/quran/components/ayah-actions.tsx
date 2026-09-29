@@ -55,76 +55,26 @@ function TafsirReadingPane({
     direction: string;
 }) {
     const t = useTranslations("Reader");
-    const tafsirScrollRef = useRef<HTMLElement>(null);
-    const [hasMoreTafsir, setHasMoreTafsir] = useState(false);
     const isRightToLeft = direction === "rtl";
-
-    useEffect(() => {
-        const tafsirElement = tafsirScrollRef.current;
-
-        if (!tafsirElement) return;
-
-        const updateScrollState = () => {
-            const remainingSpace =
-                tafsirElement.scrollHeight -
-                tafsirElement.scrollTop -
-                tafsirElement.clientHeight;
-
-            setHasMoreTafsir(remainingSpace > 4);
-        };
-
-        updateScrollState();
-        tafsirElement.addEventListener("scroll", updateScrollState, {
-            passive: true,
-        });
-
-        return () => {
-            tafsirElement.removeEventListener("scroll", updateScrollState);
-        };
-    }, []);
-
     return (
-        <div className="relative mt-3">
-            <section
-                ref={tafsirScrollRef}
-                // biome-ignore lint/a11y/noNoninteractiveTabindex: Allow keyboard scrolling of the commentary.
-                tabIndex={0}
-                aria-label={t("actions.tafsirCommentary")}
-                className="max-h-[min(42dvh,32rem)] overflow-y-auto overscroll-contain rounded-sm px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        <section
+            aria-label={t("actions.tafsirCommentary")}
+            className="mt-4 rounded-xl border border-border/60 bg-card/50 p-4 sm:p-5"
+        >
+            <p
+                dir={isRightToLeft ? "rtl" : "ltr"}
+                lang={isRightToLeft ? "ar" : undefined}
+                className={cn(
+                    "whitespace-pre-line text-start text-card-foreground/90 transition-opacity",
+                    isRightToLeft
+                        ? "font-(family-name:--font-tafsir) text-lg leading-[2.05] sm:text-xl sm:leading-[2.15]"
+                        : "font-serif text-base leading-8 sm:text-lg sm:leading-9",
+                    isLoading && "opacity-35",
+                )}
             >
-                <p
-                    dir={isRightToLeft ? "rtl" : "ltr"}
-                    lang={isRightToLeft ? "ar" : undefined}
-                    className={`pt-2 pb-5 whitespace-pre-line text-start text-card-foreground/90 transition-opacity ${
-                        isRightToLeft
-                            ? "font-(family-name:--font-tafsir) text-lg leading-[2.05] sm:text-xl sm:leading-[2.15]"
-                            : "font-serif text-base leading-8 sm:text-lg sm:leading-9"
-                    } ${isLoading ? "opacity-35" : ""}`}
-                    style={{ textAlignLast: isRightToLeft ? "right" : "left" }}
-                >
-                    {text}
-                </p>
-            </section>
-            {hasMoreTafsir && (
-                <button
-                    type="button"
-                    onClick={() =>
-                        tafsirScrollRef.current?.scrollBy({
-                            top: tafsirScrollRef.current.clientHeight * 0.7,
-                            behavior: window.matchMedia(
-                                "(prefers-reduced-motion: reduce)",
-                            ).matches
-                                ? "auto"
-                                : "smooth",
-                        })
-                    }
-                    className="mx-auto mt-2 flex items-center gap-1.5 rounded-md px-3 py-2 text-xs text-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                    {t("actions.continueReading")}
-                    <ChevronDown aria-hidden="true" className="size-3" />
-                </button>
-            )}
-        </div>
+                {text}
+            </p>
+        </section>
     );
 }
 
@@ -189,7 +139,7 @@ function QuranAyahPreview({
                     type="button"
                     aria-expanded={isExpanded}
                     onClick={() => setIsExpanded((expanded) => !expanded)}
-                    className="mx-auto mt-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="mx-auto mt-3 flex min-h-11 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                     {isExpanded
                         ? t("actions.showLess")
@@ -275,23 +225,23 @@ function ActionTile({
             aria-pressed={pressed}
             onClick={onClick}
             className={cn(
-                "group flex min-h-28 w-full min-w-0 flex-col items-start rounded-2xl border border-border/55 bg-muted/20 p-4 text-start transition-[border-color,background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:bg-primary/5 hover:shadow-[0_12px_28px_-22px_hsl(var(--foreground)/0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60",
+                "group grid min-h-24 w-full min-w-0 grid-cols-[2.25rem_minmax(0,1fr)] content-center items-center gap-x-3 rounded-xl border border-border/55 bg-card/50 p-3.5 text-start transition-colors hover:border-primary/25 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60",
                 pressed && "border-primary/25 bg-primary/8",
                 className,
             )}
         >
             <span
                 className={cn(
-                    "flex size-9 shrink-0 items-center justify-center rounded-xl bg-background/80 text-primary ring-1 ring-border/50 transition-colors group-hover:bg-primary group-hover:text-primary-foreground [&_svg]:size-4",
-                    pressed && "bg-primary text-primary-foreground",
+                    "row-span-2 flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-primary transition-colors group-hover:bg-primary/10 [&_svg]:size-4",
+                    pressed && "bg-primary/15 text-primary",
                 )}
             >
                 {icon}
             </span>
-            <span className="mt-3 block min-w-0 text-sm font-semibold leading-5 text-card-foreground sm:text-base">
+            <span className="block min-w-0 text-sm font-semibold leading-6 text-card-foreground">
                 {title}
             </span>
-            <span className="mt-1 block min-w-0 text-xs leading-5 text-muted-foreground sm:text-[0.8125rem]">
+            <span className="mt-0.5 block min-w-0 text-xs leading-5 text-muted-foreground">
                 {description}
             </span>
         </button>
@@ -341,6 +291,24 @@ export default function AyahActions({
     const [isReflectionVisible, setIsReflectionVisible] = useState(false);
     const [isCollectionsVisible, setIsCollectionsVisible] = useState(false);
     const [isShareVisible, setIsShareVisible] = useState(false);
+    const previousView = useRef("actions");
+    const currentView = isShareVisible
+        ? "share"
+        : isCollectionsVisible
+          ? "collections"
+          : isReflectionVisible
+            ? "reflection"
+            : isTafsirVisible
+              ? "tafsir"
+              : "actions";
+    useEffect(() => {
+        if (previousView.current === currentView) return;
+        previousView.current = currentView;
+        const heading = document.getElementById("ayah-actions-title");
+        heading?.focus({ preventScroll: true });
+        heading?.closest("[data-ayah-actions-scroll]")?.scrollTo({ top: 0 });
+    }, [currentView]);
+
     const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
     const [collections, setCollections] = useState(initialCollections);
     const [collectionIds, setCollectionIds] = useState(initialCollectionIds);
@@ -550,7 +518,7 @@ export default function AyahActions({
                 <button
                     type="button"
                     onClick={() => setIsCollectionsVisible(false)}
-                    className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 pe-12 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                     <ArrowLeft
                         aria-hidden="true"
@@ -558,22 +526,28 @@ export default function AyahActions({
                     />
                     {t("actions.back")}
                 </button>
-                <header className="relative mt-7 pe-9">
-                    <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                        <FolderHeart className="size-5" />
+                <header className="mt-4 border-b border-border/55 pb-4">
+                    <div className="flex items-center gap-3">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-primary">
+                            <FolderHeart
+                                aria-hidden="true"
+                                className="size-4"
+                            />
+                        </span>
+                        <h1
+                            id="ayah-actions-title"
+                            tabIndex={-1}
+                            className="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+                        >
+                            {t("actions.organizeBookmark")}
+                        </h1>
                     </div>
-                    <h1
-                        id="ayah-actions-title"
-                        className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
-                    >
-                        {t("actions.organizeBookmark")}
-                    </h1>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    <p className="mt-3 text-sm leading-6 text-muted-foreground">
                         {t("actions.organizeDescription")}
                     </p>
                 </header>
 
-                <div className="mt-6 space-y-2" aria-busy={isSavingCollections}>
+                <div className="mt-4 space-y-2" aria-busy={isSavingCollections}>
                     {collections.length === 0 ? (
                         <div className="rounded-2xl bg-muted/40 px-5 py-6 text-center">
                             <p className="font-medium">
@@ -602,7 +576,7 @@ export default function AyahActions({
                                                 ),
                                             )
                                         }
-                                        className="rounded-full bg-background px-3 py-1.5 text-xs font-medium text-primary ring-1 ring-primary/15 transition-colors hover:bg-primary/8 disabled:opacity-50"
+                                        className="min-h-11 rounded-xl bg-background px-3 py-1.5 text-xs font-medium text-primary ring-1 ring-primary/15 transition-colors hover:bg-primary/8 disabled:opacity-50"
                                     >
                                         {t(
                                             `actions.collectionSuggestions.${suggestion}`,
@@ -625,17 +599,17 @@ export default function AyahActions({
                                     onClick={() =>
                                         toggleCollection(collection.id)
                                     }
-                                    className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-start transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
+                                    className={`flex min-h-14 w-full items-center gap-3 rounded-xl border px-3.5 py-3 text-start transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
                                         selected
-                                            ? "bg-primary/12 text-foreground ring-1 ring-primary/20"
-                                            : "bg-muted/35 text-foreground hover:bg-muted/60"
+                                            ? "border-primary/25 bg-card/70 text-foreground"
+                                            : "border-border/55 bg-card/50 text-foreground hover:bg-muted/40"
                                     }`}
                                 >
                                     <span
-                                        className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${
+                                        className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${
                                             selected
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-background text-muted-foreground"
+                                                ? "bg-primary/15 text-primary"
+                                                : "bg-muted/60 text-muted-foreground"
                                         }`}
                                     >
                                         {selected ? (
@@ -644,7 +618,7 @@ export default function AyahActions({
                                             <FolderHeart className="size-4" />
                                         )}
                                     </span>
-                                    <span className="min-w-0 flex-1 truncate font-medium">
+                                    <span className="min-w-0 flex-1 break-words text-sm font-medium">
                                         {collection.name}
                                     </span>
                                 </button>
@@ -654,7 +628,7 @@ export default function AyahActions({
                 </div>
 
                 <form
-                    className="mt-5 rounded-2xl border border-dashed border-primary/25 bg-primary/[0.035] p-4"
+                    className="mt-5 border-t border-border/55 pt-4"
                     onSubmit={(event) => {
                         event.preventDefault();
                         createCollection();
@@ -705,7 +679,7 @@ export default function AyahActions({
                 <button
                     type="button"
                     onClick={() => setIsReflectionVisible(false)}
-                    className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 pe-12 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                     <ArrowLeft
                         aria-hidden="true"
@@ -713,12 +687,13 @@ export default function AyahActions({
                     />
                     {t("actions.back")}
                 </button>
-                <header className="relative isolate mt-7 pe-9">
+                <header className="relative isolate mt-4 pe-9">
                     <p className="text-xs font-semibold tracking-[0.16em] text-primary">
                         {t("actions.privateReflection")}
                     </p>
                     <h1
                         id="ayah-actions-title"
+                        tabIndex={-1}
                         className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
                     >
                         <SurahTitle
@@ -735,13 +710,7 @@ export default function AyahActions({
                     </p>
                 </header>
 
-                <p
-                    dir="rtl"
-                    lang="ar"
-                    className="ayah quran-display-text mt-6 rounded-xl bg-muted/45 px-5 py-4 text-center leading-loose text-foreground"
-                >
-                    <TajweedText text={arabicText} />
-                </p>
+                <QuranAyahPreview text={arabicText} ayahNumber={ayahNumber} />
 
                 <label
                     htmlFor="ayah-reflection"
@@ -751,13 +720,15 @@ export default function AyahActions({
                 </label>
                 <Textarea
                     id="ayah-reflection"
+                    dir="auto"
+                    maxLength={4000}
                     value={reflectionDraft}
                     onChange={(event) =>
                         setReflectionDraft(event.target.value.slice(0, 4000))
                     }
                     placeholder={t("actions.reflectionPlaceholder")}
                     rows={7}
-                    className="mt-2 resize-y bg-muted/35 leading-6"
+                    className="mt-2 min-h-40 resize-y rounded-xl bg-muted/35 text-start leading-6"
                     disabled={isSavingReflection}
                 />
                 <div className="mt-2 flex justify-end text-xs text-muted-foreground">
@@ -805,7 +776,7 @@ export default function AyahActions({
                 <button
                     type="button"
                     onClick={() => setIsTafsirVisible(false)}
-                    className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 pe-12 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                     <ArrowLeft
                         aria-hidden="true"
@@ -813,7 +784,7 @@ export default function AyahActions({
                     />
                     {t("actions.back")}
                 </button>
-                <header className="mt-6 pe-9">
+                <header className="mt-4 pe-9">
                     <div className="flex items-center gap-3">
                         <span
                             aria-hidden="true"
@@ -826,6 +797,7 @@ export default function AyahActions({
                     <div className="mt-4 flex flex-wrap items-center gap-3">
                         <h1
                             id="ayah-actions-title"
+                            tabIndex={-1}
                             className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
                         >
                             <SurahTitle
@@ -896,6 +868,7 @@ export default function AyahActions({
                 <div className="mt-2 flex min-w-0 items-end justify-between gap-4">
                     <h1
                         id="ayah-actions-title"
+                        tabIndex={-1}
                         className="min-w-0 text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl"
                     >
                         <SurahTitle
@@ -904,7 +877,7 @@ export default function AyahActions({
                             surahName={surahName}
                         />
                     </h1>
-                    <p className="mb-0.5 shrink-0 rounded-full bg-primary/9 px-3 py-1.5 text-xs font-medium text-primary ring-1 ring-primary/10">
+                    <p className="mb-0.5 shrink-0 rounded-lg bg-muted/60 px-3 py-1.5 text-xs font-medium text-muted-foreground">
                         {t("actions.ayah", { number: ayahNumber })}
                     </p>
                 </div>
@@ -920,7 +893,7 @@ export default function AyahActions({
                                 ? retryAudio()
                                 : toggleAudio(globalAyahNumber, audioStreams)
                         }
-                        className="w-full min-w-0 overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/12 via-primary/7 to-transparent p-4 text-start text-foreground transition-[border-color,background-color] hover:border-primary/25 hover:from-primary/16 hover:via-primary/9 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait"
+                        className="w-full min-w-0 overflow-hidden rounded-xl border border-primary/20 bg-primary/5 p-4 text-start text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait"
                     >
                         <span className="flex items-center gap-4">
                             <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_8px_22px_-12px_hsl(var(--primary))]">

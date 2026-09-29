@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { BookOpen, UserRound } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -106,20 +106,17 @@ export default async function ProfilePage() {
                     />
                 </StickyAppHeader>
 
-                <section className="py-10 sm:py-14">
-                    <span className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                        <UserRound aria-hidden="true" className="size-5" />
-                    </span>
-                    <p className="mt-6 text-xs font-semibold tracking-[0.2em] text-primary">
+                <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
+                    <p className="text-xs font-semibold tracking-[0.2em] text-primary">
                         {t("page.eyebrow")}
                     </p>
                     <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
                         {t("page.title")}
                     </h1>
-                    <p className="mt-4 max-w-xl leading-7 text-muted-foreground">
+                    <p className="mt-3 max-w-xl text-sm leading-7 text-muted-foreground">
                         {t("page.description")}
                     </p>
-                    <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+                    <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-border/60 pb-6 text-xs text-muted-foreground">
                         <span>
                             {t("page.memberSince", { date: memberSince })}
                         </span>

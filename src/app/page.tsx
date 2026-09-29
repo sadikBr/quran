@@ -4,7 +4,6 @@ import {
     BookOpen,
     BookText,
     MoonStar,
-    Search,
     UsersRound,
 } from "lucide-react";
 import type { Metadata } from "next";
@@ -175,7 +174,12 @@ export default async function Home() {
                     )}
                 </StickyAppHeader>
 
-                <section className="relative min-h-[35rem] w-dvw max-w-none self-center text-foreground sm:min-h-[39rem] lg:min-h-[42rem] dark:text-white">
+                <section
+                    className={cn(
+                        "relative w-dvw max-w-none self-center text-foreground dark:text-white",
+                        session && "flex flex-col",
+                    )}
+                >
                     <div
                         aria-hidden="true"
                         className="absolute inset-x-0 -top-20 bottom-0 overflow-hidden"
@@ -197,104 +201,146 @@ export default async function Home() {
                             )}
                         />
                         <span className="absolute inset-0 hidden bg-[radial-gradient(circle_at_72%_20%,rgba(255,255,255,0.08),transparent_32%)] dark:block" />
+                        {session && (
+                            <span className="absolute inset-0 bg-background/35 dark:bg-background/25" />
+                        )}
                     </div>
                     <span
                         aria-hidden="true"
                         className="pointer-events-none absolute inset-x-0 bottom-0 z-1 h-28 bg-linear-to-t from-background via-background/70 to-transparent sm:h-40"
                     />
 
-                    <div className="relative z-10 mx-auto flex min-h-[35rem] w-full max-w-6xl flex-col justify-between px-4 py-6 sm:min-h-[39rem] sm:px-6 sm:py-10 lg:min-h-[42rem] lg:py-14">
-                        <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between sm:gap-6">
-                            <p className="max-w-48 text-[0.65rem] font-semibold tracking-[0.2em] text-foreground/65 uppercase sm:max-w-none dark:text-white/65">
+                    <div
+                        className={cn(
+                            "relative z-10 mx-auto flex w-full max-w-7xl flex-col px-4 py-6 sm:px-6 sm:py-10",
+                            session && "gap-8 py-8 sm:gap-10 sm:py-12 lg:px-10",
+                        )}
+                    >
+                        <div
+                            className={cn(
+                                "flex flex-col items-start gap-4 sm:flex-row sm:justify-between sm:gap-6",
+                                session && "items-center sm:justify-center",
+                            )}
+                        >
+                            <p
+                                className={cn(
+                                    "max-w-48 text-[0.65rem] font-semibold tracking-[0.2em] text-foreground/65 uppercase sm:max-w-none dark:text-white/65",
+                                    session && "hidden",
+                                )}
+                            >
                                 {t("hero.intro")}
                             </p>
                             <p
                                 dir="rtl"
                                 lang="ar"
-                                className="ayah max-w-xs self-end text-right text-2xl leading-[1.7] text-foreground/85 sm:self-auto sm:text-3xl lg:text-4xl dark:text-white/90"
+                                className={cn(
+                                    "ayah max-w-xs self-end text-right text-2xl leading-[1.7] text-foreground/85 sm:self-auto sm:text-3xl lg:text-4xl dark:text-white/90",
+                                    session &&
+                                        "max-w-none self-center text-center",
+                                )}
                             >
                                 وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا
                             </p>
                         </div>
 
-                        <div className="me-auto max-w-3xl pt-12 pb-12 sm:pt-16 sm:pb-16">
-                            <p className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                <span className="h-px w-8 bg-primary" />
-                                {t("hero.eyebrow")}
-                            </p>
-                            <h1 className="text-4xl font-semibold leading-[1.08] tracking-tight text-balance sm:text-6xl lg:text-7xl">
-                                {t("hero.title")}
-                            </h1>
-                            <p className="mt-6 max-w-xl text-base leading-7 text-foreground/70 sm:text-lg sm:leading-8 dark:text-white/70">
-                                {t("hero.description")}
-                            </p>
-
-                            <div className="mt-7 flex items-center gap-3 text-foreground/70 dark:text-white/70">
-                                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-background/30 text-primary backdrop-blur-sm dark:bg-white/10">
-                                    {hasPendingWird ? (
-                                        <MoonStar className="size-4" />
-                                    ) : (
-                                        <BookOpen className="size-4" />
+                        <div
+                            className={cn(
+                                "me-auto max-w-3xl pb-12 pt-8 sm:pb-16 sm:pt-12",
+                                session &&
+                                    "mx-auto grid w-full max-w-none items-center gap-8 pb-0 pt-0 sm:pb-0 sm:pt-0 lg:grid-cols-[minmax(0,1.5fr)_minmax(20rem,1fr)] lg:gap-16",
+                            )}
+                        >
+                            <div>
+                                <p
+                                    className={cn(
+                                        "mb-4 flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-primary uppercase",
+                                        session && "justify-start",
                                     )}
-                                </span>
-                                <div>
-                                    <p className="text-[0.62rem] font-semibold tracking-[0.14em] uppercase">
-                                        {hasPendingWird
-                                            ? t("hero.todayWird")
-                                            : savedNumber === null
-                                              ? t("progress.startingPlace")
-                                              : t("progress.continueFrom")}
-                                    </p>
-                                    <p className="mt-0.5 text-sm font-semibold text-foreground dark:text-white">
-                                        {hasPendingWird
-                                            ? t("hero.wirdReady")
-                                            : readingPlace}
-                                    </p>
-                                </div>
+                                >
+                                    <span className="h-px w-8 bg-primary" />
+                                    {t("hero.eyebrow")}
+                                </p>
+                                <h1 className="text-4xl font-semibold leading-snug tracking-tight text-balance sm:text-5xl sm:leading-tight lg:text-6xl xl:text-7xl">
+                                    {t("hero.title")}
+                                </h1>
+                                <p
+                                    className={cn(
+                                        "mt-6 max-w-xl text-base leading-7 text-foreground/70 sm:text-lg sm:leading-8 dark:text-white/70",
+                                        session && "max-w-2xl",
+                                    )}
+                                >
+                                    {t("hero.description")}
+                                </p>
                             </div>
+                            <div
+                                className={cn(
+                                    session &&
+                                        "rounded-2xl border border-border/60 bg-background/65 p-5 shadow-xl backdrop-blur-md sm:p-7",
+                                )}
+                            >
+                                <div
+                                    className={cn(
+                                        "mt-7 flex items-center gap-3 text-foreground/70 dark:text-white/70",
+                                        session &&
+                                            "mt-0 w-full items-start text-start",
+                                    )}
+                                >
+                                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-background/30 text-primary backdrop-blur-sm dark:bg-white/10">
+                                        {hasPendingWird ? (
+                                            <MoonStar
+                                                aria-hidden="true"
+                                                className="size-4"
+                                            />
+                                        ) : (
+                                            <BookOpen
+                                                aria-hidden="true"
+                                                className="size-4"
+                                            />
+                                        )}
+                                    </span>
+                                    <div>
+                                        <p className="text-xs font-semibold tracking-[0.14em] uppercase">
+                                            {hasPendingWird
+                                                ? t("hero.todayWird")
+                                                : savedNumber === null
+                                                  ? t("progress.startingPlace")
+                                                  : t("progress.continueFrom")}
+                                        </p>
+                                        <p className="mt-2 text-base font-semibold leading-7 text-foreground dark:text-white">
+                                            {hasPendingWird
+                                                ? t("hero.wirdReady")
+                                                : readingPlace}
+                                        </p>
+                                    </div>
+                                </div>
 
-                            <div className="mt-6 grid gap-2 sm:flex sm:flex-wrap sm:gap-3">
-                                <Button
-                                    asChild
-                                    size="lg"
-                                    variant="default"
-                                    className="h-12 w-full rounded-xl px-7 shadow-lg shadow-black/20 sm:w-auto"
+                                <div
+                                    className={cn(
+                                        "mt-6 grid gap-2 sm:flex sm:flex-wrap sm:gap-3",
+                                        session && "mt-6 w-full sm:block",
+                                    )}
                                 >
-                                    <Link href={href}>
-                                        {continueReadingLabel}
-                                        <ArrowRight
-                                            aria-hidden="true"
-                                            className={cn(
-                                                preferences.language === "ar" &&
-                                                    "rotate-180",
-                                            )}
-                                        />
-                                    </Link>
-                                </Button>
-                                <Button
-                                    asChild
-                                    size="lg"
-                                    variant="ghost"
-                                    className="h-12 w-full rounded-xl border border-foreground/15 bg-background/20 px-7 text-foreground hover:bg-background/40 hover:text-foreground sm:w-auto dark:border-white/15 dark:bg-white/8 dark:text-white dark:hover:bg-white/14 dark:hover:text-white"
-                                >
-                                    <Link href="/quran">
-                                        {t("hero.explore")}
-                                    </Link>
-                                </Button>
-                                <Button
-                                    asChild
-                                    size="lg"
-                                    variant="link"
-                                    className="h-12 justify-start rounded-xl px-3 text-foreground/75 hover:text-foreground sm:w-auto dark:text-white/75 dark:hover:text-white"
-                                >
-                                    <Link href="/quran/search">
-                                        <Search
-                                            aria-hidden="true"
-                                            className="size-4"
-                                        />
-                                        {t("hero.search")}
-                                    </Link>
-                                </Button>
+                                    <Button
+                                        asChild
+                                        size="lg"
+                                        variant="default"
+                                        className={cn(
+                                            "h-12 w-full rounded-xl px-7 shadow-lg shadow-black/20 sm:w-auto",
+                                            session && "sm:w-full",
+                                        )}
+                                    >
+                                        <Link href={href}>
+                                            {continueReadingLabel}
+                                            <ArrowRight
+                                                aria-hidden="true"
+                                                className={cn(
+                                                    preferences.language ===
+                                                        "ar" && "rotate-180",
+                                                )}
+                                            />
+                                        </Link>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -302,7 +348,7 @@ export default async function Home() {
 
                 <section
                     aria-labelledby="reader-tools"
-                    className="py-20 sm:py-28"
+                    className="py-10 sm:py-16"
                 >
                     <div>
                         <div className="mx-auto max-w-2xl text-center">
@@ -320,9 +366,12 @@ export default async function Home() {
                             </p>
                         </div>
 
-                        <div className="mt-14 grid gap-12 md:grid-cols-3 md:gap-10 lg:gap-14">
+                        <div className="mt-8 grid gap-4 md:grid-cols-3">
                             {readerTools.map(({ icon: Icon, key }) => (
-                                <article key={key} className="text-start">
+                                <article
+                                    key={key}
+                                    className="rounded-2xl border border-border/60 bg-card/60 p-5 text-start sm:p-6"
+                                >
                                     <span className="text-primary">
                                         <Icon
                                             aria-hidden="true"
@@ -346,7 +395,7 @@ export default async function Home() {
                     </div>
                 </section>
 
-                <section className="mx-auto mb-12 max-w-2xl py-12 text-center sm:py-16">
+                <section className="mx-auto mb-8 max-w-2xl border-t border-border/60 px-4 py-8 text-center sm:py-10">
                     <BookText
                         aria-hidden="true"
                         className="mx-auto size-7 text-primary"
@@ -357,18 +406,6 @@ export default async function Home() {
                     <p className="mx-auto mt-3 max-w-lg leading-7 text-muted-foreground">
                         {t("closing.description")}
                     </p>
-                    <Button asChild className="mt-7 rounded-xl px-6">
-                        <Link href="/quran">
-                            {t("closing.browse")}
-                            <ArrowRight
-                                aria-hidden="true"
-                                className={cn(
-                                    preferences.language === "ar" &&
-                                        "rotate-180",
-                                )}
-                            />
-                        </Link>
-                    </Button>
                 </section>
             </div>
         </main>

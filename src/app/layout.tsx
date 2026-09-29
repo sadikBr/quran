@@ -131,6 +131,22 @@ export default async function RootLayout({
                                 <ThemePreferenceSync />
                                 <Toaster
                                     closeButton
+                                    dir={
+                                        preferences.language === "ar"
+                                            ? "rtl"
+                                            : "ltr"
+                                    }
+                                    visibleToasts={3}
+                                    offset={{
+                                        top: "calc(1rem + env(safe-area-inset-top))",
+                                        left: "1rem",
+                                        right: "1rem",
+                                    }}
+                                    mobileOffset={{
+                                        top: "calc(0.75rem + env(safe-area-inset-top))",
+                                        left: "0.75rem",
+                                        right: "0.75rem",
+                                    }}
                                     position={
                                         preferences.language === "ar"
                                             ? "top-left"
@@ -140,14 +156,24 @@ export default async function RootLayout({
                                         duration: 5000,
                                         unstyled: true,
                                         classNames: {
-                                            toast: "font-sans relative flex w-full items-start gap-3 rounded-xl border border-border bg-card px-4 py-3 text-card-foreground shadow-lg",
-                                            content: "min-w-0 flex-1 pe-5",
-                                            title: "font-sans text-sm font-semibold tracking-normal",
+                                            toast: "font-sans relative flex min-h-16 w-full items-center gap-3 rounded-xl border border-border/70 bg-card px-4 py-3.5 text-start text-card-foreground shadow-lg shadow-black/10",
+                                            content: "min-w-0 flex-1 pe-8",
+                                            icon: "flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-primary [&_svg]:size-4",
+                                            title: "font-sans break-words text-sm font-medium leading-6 tracking-normal",
                                             description:
-                                                "mt-1 font-sans text-sm leading-5 text-muted-foreground",
+                                                "mt-1 break-words font-sans text-xs leading-6 text-muted-foreground",
                                             closeButton:
-                                                "absolute top-2.5 end-2.5 flex size-6 items-center justify-center rounded-md border-0 bg-transparent text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
-                                            error: "border-destructive/30",
+                                                "absolute top-1/2 end-1.5 flex size-11 -translate-y-1/2 items-center justify-center rounded-lg border-0! bg-transparent! text-muted-foreground! shadow-none! transition-colors hover:bg-muted! hover:text-foreground! focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4",
+                                            success:
+                                                "border-s-2 border-s-emerald-500/70 [&_[data-icon]]:bg-emerald-500/10 [&_[data-icon]]:text-emerald-600 dark:[&_[data-icon]]:text-emerald-400",
+                                            error: "border-s-2 border-s-destructive [&_[data-icon]]:bg-destructive/10 [&_[data-icon]]:text-destructive",
+                                            warning:
+                                                "border-s-2 border-s-amber-500 [&_[data-icon]]:bg-amber-500/10 [&_[data-icon]]:text-amber-600",
+                                            info: "border-s-2 border-s-primary",
+                                            actionButton:
+                                                "min-h-11 shrink-0 rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground",
+                                            cancelButton:
+                                                "min-h-11 shrink-0 rounded-lg bg-muted px-3 text-xs font-medium text-muted-foreground",
                                         },
                                     }}
                                 />

@@ -21,6 +21,7 @@ export interface MeetingAttendanceHistory {
     leftAt: Date | null;
     durationSeconds: number;
     status: "present" | "pending" | "accepted" | "unaccepted";
+    excuse: string | null;
 }
 
 export interface MeetingHistoryEntry {
@@ -42,7 +43,7 @@ export default async function getMeetingHistory(
     const limit = Math.min(25, Math.max(1, options.limit ?? 10));
     const offset = Math.max(0, options.offset ?? 0);
     const [membership] = await db
-        .select({ id: groupMember.id })
+        .select({ id: groupMember.id, role: groupMember.role })
         .from(groupMember)
         .where(
             and(
@@ -52,6 +53,7 @@ export default async function getMeetingHistory(
         )
         .limit(1);
     if (!membership) return [];
+    const canReview = isAdmin && membership.role === "supervisor";
 
     // The cron normally finalizes an occurrence. This fallback also makes
     // completed meetings appear when running locally without the scheduler.
@@ -93,6 +95,7 @@ export default async function getMeetingHistory(
             leftAt: groupMeetingAttendance.leftAt,
             attendedSeconds: groupMeetingAttendance.attendedSeconds,
             status: groupMeetingAttendance.status,
+            excuse: groupMeetingAttendance.excuse,
         })
         .from(groupMeetingAttendance)
         .innerJoin(user, eq(groupMeetingAttendance.userId, user.id))
@@ -138,6 +141,10 @@ export default async function getMeetingHistory(
                     leftAt: row.leftAt ?? activeEnd ?? row.lastSeenAt,
                     durationSeconds: row.attendedSeconds + activeSeconds,
                     status: row.status as MeetingAttendanceHistory["status"],
+                    excuse:
+                        canReview || row.userId === requestingUserId
+                            ? row.excuse
+                            : null,
                 };
             })
             .sort(
@@ -173,7 +180,7 @@ export default async function getMeetingHistory(
             participantCount: sessionAttendance.filter(
                 (item) => item.status === "present",
             ).length,
-            attendance: isAdmin
+            attendance: canReview
                 ? sessionAttendance
                 : sessionAttendance.filter(
                       (item) => item.userId === requestingUserId,

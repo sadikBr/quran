@@ -2,7 +2,7 @@
 
 import { Check, LoaderCircle, Sparkles, Trophy } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import updateMemorizationProgress from "../server/update-memorization-progress";
 
@@ -16,6 +16,7 @@ export default function MemorizationProgressMap({
         () => new Set(initialCompletedHizbs),
     );
     const [pendingHizb, setPendingHizb] = useState<number | null>(null);
+    const saveInFlight = useRef(false);
     const completedCount = completedHizbs.size;
     const percentage = Math.round((completedCount / 60) * 100);
     const nextHizb = useMemo(
@@ -27,7 +28,8 @@ export default function MemorizationProgressMap({
     );
 
     async function toggleHizb(hizbNumber: number) {
-        if (pendingHizb !== null) return;
+        if (saveInFlight.current) return;
+        saveInFlight.current = true;
 
         const wasCompleted = completedHizbs.has(hizbNumber);
         const next = new Set(completedHizbs);
@@ -36,35 +38,41 @@ export default function MemorizationProgressMap({
         setCompletedHizbs(next);
         setPendingHizb(hizbNumber);
 
-        const result = await updateMemorizationProgress({
-            hizbNumber,
-            completed: !wasCompleted,
-        });
-        setPendingHizb(null);
-
-        if (!result.success) {
+        try {
+            const result = await updateMemorizationProgress({
+                hizbNumber,
+                completed: !wasCompleted,
+            });
+            if (!result.success) {
+                setCompletedHizbs(completedHizbs);
+                toast.error(t("updateFailed"));
+                return;
+            }
+            toast.success(
+                t(wasCompleted ? "markedInProgress" : "markedComplete", {
+                    number: String(hizbNumber),
+                }),
+            );
+        } catch {
             setCompletedHizbs(completedHizbs);
             toast.error(t("updateFailed"));
-            return;
+        } finally {
+            saveInFlight.current = false;
+            setPendingHizb(null);
         }
-
-        toast.success(
-            t(wasCompleted ? "markedInProgress" : "markedComplete", {
-                number: String(hizbNumber),
-            }),
-        );
     }
 
     return (
-        <div className="mt-9">
-            <section className="relative isolate overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary/[0.14] via-primary/[0.07] to-muted/30 p-5 ring-1 ring-primary/15 sm:p-8">
-                <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -top-28 -end-20 -z-10 size-72 rounded-full bg-primary/12 blur-3xl"
-                />
-                <div className="grid items-center gap-7 md:grid-cols-[auto_minmax(0,1fr)] md:gap-10">
+        <div className="mt-6">
+            <section className="rounded-2xl border border-primary/20 bg-card/80 p-4 shadow-sm sm:p-6">
+                <div className="grid items-center gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-6">
                     <div
-                        className="relative mx-auto grid size-40 shrink-0 place-items-center rounded-full p-3 shadow-xl shadow-primary/10 sm:size-48"
+                        role="progressbar"
+                        aria-label={t("progressEyebrow")}
+                        aria-valuemin={0}
+                        aria-valuemax={60}
+                        aria-valuenow={completedCount}
+                        className="relative mx-auto grid size-28 shrink-0 place-items-center rounded-full p-1.5 sm:size-32"
                         style={{
                             background: `conic-gradient(var(--primary) ${percentage}%, color-mix(in oklch, var(--muted), transparent 5%) 0)`,
                         }}
@@ -76,7 +84,10 @@ export default function MemorizationProgressMap({
                                 ) : (
                                     <Sparkles className="mx-auto mb-1 size-5 text-primary" />
                                 )}
-                                <p className="text-3xl font-bold tracking-tight sm:text-4xl">
+                                <p
+                                    dir="ltr"
+                                    className="text-2xl font-bold tracking-tight"
+                                >
                                     {completedCount}
                                     <span className="text-lg font-medium text-muted-foreground">
                                         /60
@@ -89,11 +100,11 @@ export default function MemorizationProgressMap({
                         </div>
                     </div>
 
-                    <div className="text-center md:text-start">
+                    <div className="text-center sm:text-start">
                         <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                             {t("progressEyebrow")}
                         </p>
-                        <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+                        <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">
                             {completedCount === 60
                                 ? t("completeTitle")
                                 : completedCount === 0
@@ -110,7 +121,7 @@ export default function MemorizationProgressMap({
                                   })}
                         </p>
                         {nextHizb && (
-                            <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-background/75 px-4 py-2 text-sm font-semibold text-primary ring-1 ring-primary/15">
+                            <div className="mt-3 inline-flex items-center gap-2 rounded-lg bg-primary/5 px-3 py-2 text-xs font-semibold text-primary">
                                 <span className="size-2 rounded-full bg-primary" />
                                 {t("nextHizb", {
                                     number: String(nextHizb),
@@ -139,7 +150,26 @@ export default function MemorizationProgressMap({
                     </p>
                 </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                    {t("personalRecord")}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-2">
+                        <Check
+                            aria-hidden="true"
+                            className="size-4 text-primary"
+                        />
+                        {t("legendComplete")}
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                        <span
+                            aria-hidden="true"
+                            className="size-4 rounded border border-border bg-muted/30"
+                        />
+                        {t("legendOpen")}
+                    </span>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                     {Array.from({ length: 30 }, (_, index) => {
                         const juzNumber = index + 1;
                         const hizbs = [juzNumber * 2 - 1, juzNumber * 2];

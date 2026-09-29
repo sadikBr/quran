@@ -82,6 +82,7 @@
             "title": "Today’s Wird",
             "back": "Back to Wird overview",
             "progress": "Reading progress",
+            "notStarted": "You haven’t started reading yet",
             "progressSummary": "{completed, number} of {total, number} ayahs · {percentage, number}%",
             "progressCount": "{completed, number} of {total, number} ayahs completed",
             "markReached": "I reached here",

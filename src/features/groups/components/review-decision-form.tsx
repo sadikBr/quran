@@ -93,7 +93,7 @@ export default function ReviewDecisionForm({
     }
 
     return (
-        <section className="rounded-3xl bg-primary/[0.07] p-5 ring-1 ring-primary/15 sm:p-7">
+        <section className="rounded-2xl border border-primary/15 bg-primary/[0.035] p-4 sm:p-6">
             <h2 className="text-xl font-semibold">{t("decisionTitle")}</h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 {t("decisionDescription")}
@@ -169,7 +169,7 @@ export default function ReviewDecisionForm({
                     variant="outline"
                     disabled={pending}
                     onClick={() => save(false)}
-                    className="min-h-12 rounded-xl"
+                    className="h-auto min-h-12 rounded-xl whitespace-normal px-3 py-3 text-center"
                 >
                     {t(onSaved ? "saveAndReturnToQueue" : "saveAndReturn")}
                 </Button>

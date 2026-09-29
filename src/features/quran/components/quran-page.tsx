@@ -16,7 +16,7 @@ import WarshQuranPage from "./warsh-quran-page";
 
 export default async function QuranPage({ page }: { page: number }) {
     if (
-        Number.isNaN(page) ||
+        !Number.isInteger(page) ||
         page < QuranInfo.minPageNumber ||
         page > QuranInfo.maxPageNumber
     ) {

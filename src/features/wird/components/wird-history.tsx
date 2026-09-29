@@ -21,7 +21,10 @@ export default function WirdHistory({ stats }: { stats: WirdHistoryStats }) {
     });
 
     return (
-        <section className="mt-14" aria-labelledby="wird-history-title">
+        <section
+            className="mt-8 border-t border-border/60 pt-6"
+            aria-labelledby="wird-history-title"
+        >
             <div className="max-w-2xl">
                 <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                     {t("eyebrow")}
@@ -37,7 +40,7 @@ export default function WirdHistory({ stats }: { stats: WirdHistoryStats }) {
                 </p>
             </div>
 
-            <div className="mt-8 grid gap-6 sm:grid-cols-3">
+            <div className="mt-5 grid gap-3 sm:grid-cols-3 [&>article]:rounded-xl [&>article]:border [&>article]:border-border/60 [&>article]:bg-card/60 [&>article]:p-4">
                 <article className="flex items-center gap-4">
                     <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                         <Flame aria-hidden="true" className="size-5" />
@@ -79,7 +82,7 @@ export default function WirdHistory({ stats }: { stats: WirdHistoryStats }) {
                 </article>
             </div>
 
-            <div className="mt-9 bg-muted/35 px-5 py-6 sm:px-7">
+            <div className="mt-5 rounded-2xl border border-border/70 bg-card/80 p-3 sm:p-6">
                 <div className="flex items-center justify-between gap-4">
                     <h3 className="font-semibold">{t("lastSevenDays")}</h3>
                     <p className="text-xs text-muted-foreground">
@@ -90,7 +93,7 @@ export default function WirdHistory({ stats }: { stats: WirdHistoryStats }) {
                         })}
                     </p>
                 </div>
-                <div dir="ltr" className="mt-5 grid grid-cols-7 gap-2">
+                <div dir="ltr" className="mt-5 grid grid-cols-7 gap-1 sm:gap-2">
                     {stats.lastSevenDays.map((day) => {
                         const date = new Date(`${day.date}T12:00:00Z`);
                         return (
@@ -102,7 +105,7 @@ export default function WirdHistory({ stats }: { stats: WirdHistoryStats }) {
                                     {dayFormatter.format(date)}
                                 </span>
                                 <span
-                                    className={`flex size-9 items-center justify-center rounded-full ${
+                                    className={`flex size-8 items-center justify-center rounded-lg sm:size-9 ${
                                         day.completed
                                             ? "bg-primary text-primary-foreground"
                                             : "bg-background text-muted-foreground/35"

@@ -81,9 +81,10 @@
         "reader": {
             "title": "ورد اليوم",
             "back": "العودة إلى ملخّص الورد",
-            "progress": "موضع القراءة",
+            "progress": "تقدّم الورد",
+            "notStarted": "لم تبدأ القراءة بعد",
             "progressSummary": "أتممت {completed, number} من {total, number} آية · {percentage, number}%",
-            "progressCount": "أتممت {completed, number} من {total, number} آية",
+            "progressCount": "قرأت {completed, number} من أصل {total, number} آية",
             "markReached": "بلغتُ هذا الموضع",
             "reached": "تمّت قراءتها",
             "saveAtAyah": "حفظ موضع القراءة عند الآية {number, number}",

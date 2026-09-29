@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import PreferenceCard from "@/features/settings/components/settings-card";
 
 type NotificationStatus =
     | "checking"
@@ -180,17 +179,20 @@ export default function PushNotificationSetting({
     ];
 
     return (
-        <PreferenceCard title={t("title")} description={t("description")}>
-            <div className="flex min-h-11 items-center justify-between gap-4 px-1">
+        <div>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-background/50 p-3 sm:p-4">
                 <div className="flex min-w-0 items-center gap-2.5">
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                         {status === "enabled" ? (
                             <BellRing className="size-4" aria-hidden="true" />
                         ) : (
                             <BellOff className="size-4" aria-hidden="true" />
                         )}
                     </span>
-                    <span className="truncate text-sm font-medium">
+                    <span
+                        aria-live="polite"
+                        className="text-sm font-medium leading-6"
+                    >
                         {t(`status.${status}`)}
                     </span>
                 </div>
@@ -206,7 +208,7 @@ export default function PushNotificationSetting({
                             ? disableNotifications
                             : enableNotifications
                     }
-                    className="rounded-lg"
+                    className="min-h-11 shrink-0 rounded-xl"
                 >
                     {isUpdating && (
                         <LoaderCircle
@@ -222,13 +224,19 @@ export default function PushNotificationSetting({
                     {t("blockedHint")}
                 </p>
             )}
-            <div className="mt-4 divide-y divide-border/60 border-border/60 border-t">
+            <div className="mt-5">
+                <h3 className="text-sm font-semibold">{t("title")}</h3>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                    {t("description")}
+                </p>
+            </div>
+            <div className="mt-3 grid gap-3 lg:grid-cols-3">
                 {categories.map((category) => {
                     const id = `notification-${category.translationKey}`;
                     return (
                         <div
                             key={category.key}
-                            className="flex items-center justify-between gap-5 py-4"
+                            className="flex items-start justify-between gap-3 rounded-xl border border-border/60 bg-background/30 p-4"
                         >
                             <label
                                 htmlFor={id}
@@ -259,6 +267,6 @@ export default function PushNotificationSetting({
                     );
                 })}
             </div>
-        </PreferenceCard>
+        </div>
     );
 }

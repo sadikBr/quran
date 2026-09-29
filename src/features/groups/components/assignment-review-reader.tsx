@@ -15,7 +15,7 @@ export default function AssignmentReviewReader({
     const locale = useLocale();
 
     return (
-        <div className="space-y-10">
+        <div className="min-w-0 space-y-6 sm:space-y-8">
             {groups.map((group) => (
                 <section key={group.surah.number}>
                     <div className="mb-6 flex items-center gap-4">
@@ -36,7 +36,7 @@ export default function AssignmentReviewReader({
                         dir="rtl"
                         lang="ar"
                         data-riwayah={riwayah}
-                        className="ayah assignment-review-quran quran-reader-text rounded-3xl bg-muted/25 px-5 py-7 text-center leading-[2.6] ring-1 ring-border/40 sm:px-8 sm:py-9"
+                        className="ayah assignment-review-quran quran-reader-text rounded-2xl border border-border/50 bg-card/60 px-3 py-5 text-center leading-[2.6] sm:px-5 sm:py-7"
                     >
                         {group.ayahs.map((ayah) => (
                             <span

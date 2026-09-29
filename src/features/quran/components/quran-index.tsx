@@ -51,7 +51,7 @@ export default function QuranIndex({
     const preferences = useSettings();
 
     const surahsToDisplay = useMemo(() => {
-        var filteredSurahs = [...surahs];
+        let filteredSurahs = [...surahs];
 
         if (revelationTypeFilter !== undefined) {
             const filterString =
@@ -66,6 +66,12 @@ export default function QuranIndex({
         if (searchFilter !== "") {
             filteredSurahs = filteredSurahs.filter(
                 (surah) =>
+                    String(surah.number) ===
+                        searchFilter
+                            .trim()
+                            .replace(/[٠-٩]/g, (digit) =>
+                                String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)),
+                            ) ||
                     normalizeForSearch(surah.name).includes(
                         normalizeForSearch(searchFilter),
                     ) ||
@@ -99,22 +105,61 @@ export default function QuranIndex({
     return (
         <div
             data-quran-scroll-container
-            className="mx-auto h-full max-w-5xl overflow-y-auto p-4"
+            className="mx-auto h-full max-w-6xl overflow-y-auto px-4 pb-12 pt-6 sm:px-6 sm:pt-8"
         >
-            <div className="mb-9">
+            <header className="mb-6 border-b border-border/60 pb-6">
+                <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                    {t("index.title")}
+                </h1>
+                <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                    {t("index.description")}
+                </p>
+            </header>
+            <div className="mb-6 rounded-2xl border border-border/70 bg-card/80 p-3 sm:p-4">
                 <div
                     role="tablist"
                     aria-label={t("index.sectionsLabel")}
-                    className="grid grid-cols-3 border-border/60 border-b"
+                    className={`grid grid-cols-3 ${activeSection === "surahs" ? "border-b border-border/60" : ""}`}
                 >
                     {sections.map((section) => (
                         <button
                             key={section}
                             type="button"
                             role="tab"
+                            id={`${section}-index-tab`}
+                            tabIndex={activeSection === section ? 0 : -1}
                             aria-selected={activeSection === section}
                             aria-controls={`${section}-index-panel`}
                             onClick={() => setActiveSection(section)}
+                            onKeyDown={(event) => {
+                                const current = sections.indexOf(section);
+                                const direction =
+                                    preferences.language === "ar" ? -1 : 1;
+                                let next = current;
+                                if (event.key === "ArrowRight")
+                                    next =
+                                        (current +
+                                            direction +
+                                            sections.length) %
+                                        sections.length;
+                                else if (event.key === "ArrowLeft")
+                                    next =
+                                        (current -
+                                            direction +
+                                            sections.length) %
+                                        sections.length;
+                                else if (event.key === "Home") next = 0;
+                                else if (event.key === "End")
+                                    next = sections.length - 1;
+                                else return;
+                                event.preventDefault();
+                                setActiveSection(sections[next]);
+                                document
+                                    .getElementById(
+                                        `${sections[next]}-index-tab`,
+                                    )
+                                    ?.focus();
+                            }}
                             className={`relative min-w-0 px-2 py-3.5 text-sm font-semibold outline-none transition-colors after:absolute after:inset-x-[22%] after:-bottom-px after:h-0.5 after:origin-center after:rounded-full after:bg-primary after:transition-transform focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-4 sm:py-4 ${
                                 activeSection === section
                                     ? "text-primary after:scale-x-100"
@@ -128,7 +173,7 @@ export default function QuranIndex({
 
                 {activeSection === "surahs" && (
                     <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-8">
-                        <div className="relative min-w-0 flex-1 border-border/70 border-b transition-colors focus-within:border-primary">
+                        <div className="relative min-w-0 flex-1">
                             <Label htmlFor="search-filter" className="sr-only">
                                 {t("index.searchLabel")}
                             </Label>
@@ -143,14 +188,14 @@ export default function QuranIndex({
                                     setSearchFilter(event.target.value)
                                 }
                                 placeholder={t("index.searchPlaceholder")}
-                                className="h-12 rounded-none border-0 bg-transparent ps-10 pe-10 shadow-none placeholder:text-muted-foreground/70 focus-visible:ring-0"
+                                className="h-12 rounded-xl border-border/70 bg-background ps-10 pe-10 text-start shadow-none placeholder:text-muted-foreground/70"
                             />
                             {searchFilter !== "" && (
                                 <button
                                     type="button"
                                     onClick={() => setSearchFilter("")}
                                     aria-label={t("index.clearFilters")}
-                                    className="absolute top-1/2 end-1 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    className="absolute top-1/2 end-1 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 >
                                     <X aria-hidden="true" className="size-4" />
                                 </button>
@@ -194,13 +239,15 @@ export default function QuranIndex({
                 <div
                     id="surahs-index-panel"
                     role="tabpanel"
-                    className="outline-none"
+                    aria-labelledby="surahs-index-tab"
+                    className="grid gap-3 outline-none md:grid-cols-2"
                 >
                     {surahsToDisplay.length > 0 ? (
                         surahsToDisplay.map((surah) => (
                             <SurahFrame
                                 key={surah.number}
                                 surah={surah}
+                                compact
                                 href={getReadingHref(
                                     surah.number,
                                     preferences,
@@ -211,7 +258,7 @@ export default function QuranIndex({
                     ) : (
                         <div
                             aria-live="polite"
-                            className="mt-6 flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed bg-card/60 px-6 text-center"
+                            className="col-span-full flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed bg-card/60 px-6 text-center"
                         >
                             <span className="mb-4 flex size-11 items-center justify-center rounded-full bg-accent text-accent-foreground">
                                 <SearchX
@@ -225,6 +272,16 @@ export default function QuranIndex({
                             <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
                                 {t("index.noResultsDescription")}
                             </p>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSearchFilter("");
+                                    setRevelationTypeFilter(undefined);
+                                }}
+                                className="mt-4 min-h-11 rounded-xl border px-4 text-sm font-medium text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                {t("index.clearFilters")}
+                            </button>
                         </div>
                     )}
                 </div>
@@ -232,6 +289,7 @@ export default function QuranIndex({
                 <div
                     id={`${activeSection}-index-panel`}
                     role="tabpanel"
+                    aria-labelledby={`${activeSection}-index-tab`}
                     className="outline-none"
                 >
                     <QuranDivisionIndex

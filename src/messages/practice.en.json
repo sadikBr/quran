@@ -1,6 +1,8 @@
 {
     "Practice": {
         "header": "Quran practice",
+        "personalTitle": "Personal practice",
+        "personalDescription": "Ranges you chose for memorization and revision, separate from your circle assignments.",
         "back": "Back to dashboard",
         "eyebrow": "YOUR PRACTICE RANGE",
         "title": "Prepare what you need to memorize.",
@@ -76,6 +78,7 @@
             },
             "progressSummary": "{completed, number} of {total, number} ayahs · {percentage, number}%",
             "progressCount": "{completed, number} of {total, number} ayahs completed",
+            "notStarted": "You haven’t started practicing yet",
             "showText": "Show text",
             "hideText": "Hide text",
             "revealAyah": "Reveal ayah {number, number}",

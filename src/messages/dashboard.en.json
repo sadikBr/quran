@@ -2,7 +2,7 @@
     "Dashboard": {
         "eyebrow": "YOUR DASHBOARD",
         "welcome": "Welcome back, {name}.",
-        "introduction": "Return to the Quran at your own pace. Your reading space is ready whenever you are.",
+        "introduction": "Keep track of your assignments, circle meetings, and progress in reading and memorization.",
         "reading": {
             "eyebrow": "Your reading place",
             "page": "page",
@@ -38,7 +38,7 @@
         },
         "saved": {
             "eyebrow": "Your collection",
-            "title": "Saved ayahs",
+            "title": "Saved verses",
             "description": "Return to bookmarks and private reflections from your reading.",
             "searchLabel": "Search saved ayahs",
             "searchPlaceholder": "Search saved ayahs…",

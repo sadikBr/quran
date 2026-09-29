@@ -17,9 +17,11 @@ import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import ConfirmationDialog from "@/components/ui/confirmation-dialog";
 import type { MeetingHistoryEntry } from "../server/get-meeting-history";
 import { getMeetingDisplayTimezone } from "../server/meeting-schedule";
 import reviewMeetingAbsence from "../server/review-meeting-absence";
+import AbsenceExcuse from "./absence-excuse";
 
 function formatDuration(totalSeconds: number, locale: string) {
     const totalMinutes = Math.max(0, Math.round(totalSeconds / 60));
@@ -36,10 +38,16 @@ function AbsenceReview({
     groupId,
     attendanceId,
     status,
+    excuse,
+    name,
+    meetingDate,
 }: {
     groupId: string;
     attendanceId: string;
     status: "pending" | "accepted" | "unaccepted";
+    excuse: string | null;
+    name: string;
+    meetingDate: string;
 }) {
     const t = useTranslations("Groups.meeting.history");
     const router = useRouter();
@@ -50,8 +58,15 @@ function AbsenceReview({
         "accepted" | "unaccepted" | null
     >(null);
     const savingRef = useRef(false);
+    const [confirmation, setConfirmation] = useState<{
+        decision: "accepted" | "unaccepted";
+        removal: boolean;
+    } | null>(null);
 
-    async function decide(decision: "accepted" | "unaccepted") {
+    async function decide(
+        decision: "accepted" | "unaccepted",
+        confirmRemoval = false,
+    ) {
         if (savingRef.current || savedDecision || status !== "pending") return;
         savingRef.current = true;
         setPendingDecision(decision);
@@ -60,19 +75,29 @@ function AbsenceReview({
                 groupId,
                 attendanceId,
                 decision,
+                expectedExcuse: excuse,
+                confirmRemoval,
             });
+            if (!result.success && result.reason === "removal_confirmation") {
+                setConfirmation({ decision, removal: true });
+                return;
+            }
             if (!result.success) {
+                setConfirmation(null);
                 toast.error(
                     t(
                         result.reason === "already_reviewed"
                             ? "alreadyReviewed"
-                            : "reviewError",
+                            : result.reason === "excuse_changed"
+                              ? "excuseChanged"
+                              : "reviewError",
                     ),
                 );
                 router.refresh();
                 return;
             }
             setSavedDecision(decision);
+            setConfirmation(null);
             toast.success(t(result.removed ? "memberRemoved" : "reviewSaved"));
             router.refresh();
         } catch {
@@ -104,8 +129,10 @@ function AbsenceReview({
                 size="sm"
                 variant="outline"
                 disabled={pendingDecision !== null}
-                onClick={() => decide("accepted")}
-                className="h-8 rounded-lg"
+                onClick={() =>
+                    setConfirmation({ decision: "accepted", removal: false })
+                }
+                className="min-h-11 rounded-lg px-3 sm:min-h-9"
             >
                 {pendingDecision === "accepted" ? (
                     <LoaderCircle className="size-3.5 animate-spin" />
@@ -119,8 +146,10 @@ function AbsenceReview({
                 size="sm"
                 variant="outline"
                 disabled={pendingDecision !== null}
-                onClick={() => decide("unaccepted")}
-                className="h-8 rounded-lg"
+                onClick={() =>
+                    setConfirmation({ decision: "unaccepted", removal: false })
+                }
+                className="min-h-11 rounded-lg px-3 sm:min-h-9"
             >
                 {pendingDecision === "unaccepted" ? (
                     <LoaderCircle className="size-3.5 animate-spin" />
@@ -129,6 +158,54 @@ function AbsenceReview({
                 )}
                 {t("rejectAbsence")}
             </Button>
+            <ConfirmationDialog
+                open={confirmation !== null}
+                onOpenChange={(open) => {
+                    if (!open) setConfirmation(null);
+                }}
+                title={t(
+                    confirmation?.removal
+                        ? "removalTitle"
+                        : "confirmationTitle",
+                )}
+                description={
+                    confirmation?.removal
+                        ? t("confirmRemoval", { name, date: meetingDate })
+                        : t("confirmAbsence", {
+                              name,
+                              date: meetingDate,
+                              decision: t(
+                                  `statuses.${confirmation?.decision ?? "accepted"}`,
+                              ),
+                          })
+                }
+                confirmLabel={t(
+                    confirmation?.removal
+                        ? "confirmRemovalButton"
+                        : "confirmDecision",
+                )}
+                cancelLabel={t("cancelDecision")}
+                destructive={confirmation?.decision === "unaccepted"}
+                pending={pendingDecision !== null}
+                onConfirm={() => {
+                    if (confirmation)
+                        void decide(
+                            confirmation.decision,
+                            confirmation.removal,
+                        );
+                }}
+            >
+                {excuse && (
+                    <div className="mt-4 rounded-xl border bg-muted/30 p-4">
+                        <p className="text-xs font-semibold text-muted-foreground">
+                            {t("explainAbsence")}
+                        </p>
+                        <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6">
+                            {excuse}
+                        </p>
+                    </div>
+                )}
+            </ConfirmationDialog>
         </div>
     );
 }
@@ -206,7 +283,7 @@ export default function MeetingHistory({
                                     <CalendarDays className="size-4" />
                                 </span>
                                 <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-semibold sm:text-base">
+                                    <p className="text-sm font-semibold leading-6 sm:text-base">
                                         {formatDate(session.scheduledStartsAt)}
                                     </p>
                                     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -283,6 +360,15 @@ export default function MeetingHistory({
                                                                 status={
                                                                     attendance.status
                                                                 }
+                                                                excuse={
+                                                                    attendance.excuse
+                                                                }
+                                                                name={
+                                                                    attendance.name
+                                                                }
+                                                                meetingDate={formatDate(
+                                                                    session.scheduledStartsAt,
+                                                                )}
                                                             />
                                                         </div>
                                                     ) : (
@@ -291,6 +377,42 @@ export default function MeetingHistory({
                                                                 `statuses.${attendance.status}`,
                                                             )}
                                                         </span>
+                                                    )}
+                                                    {attendance.status !==
+                                                        "present" && (
+                                                        <div className="col-span-full mt-3 rounded-xl border bg-background/40 p-4">
+                                                            {isAdmin ? (
+                                                                <>
+                                                                    <p className="mb-2 text-xs font-semibold text-muted-foreground">
+                                                                        {t(
+                                                                            "explainAbsence",
+                                                                        )}
+                                                                    </p>
+                                                                    <p className="whitespace-pre-wrap break-words text-sm">
+                                                                        {attendance.excuse ||
+                                                                            t(
+                                                                                "noExcuse",
+                                                                            )}
+                                                                    </p>
+                                                                </>
+                                                            ) : (
+                                                                <AbsenceExcuse
+                                                                    groupId={
+                                                                        groupId
+                                                                    }
+                                                                    attendanceId={
+                                                                        attendance.id
+                                                                    }
+                                                                    excuse={
+                                                                        attendance.excuse
+                                                                    }
+                                                                    pending={
+                                                                        attendance.status ===
+                                                                        "pending"
+                                                                    }
+                                                                />
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
                                             ),

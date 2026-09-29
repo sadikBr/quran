@@ -1,4 +1,4 @@
-import { ArrowRight, BookMarked, RefreshCcw } from "lucide-react";
+import { ArrowRight, BookMarked, ChevronDown, RefreshCcw } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -124,21 +124,21 @@ export default async function PracticePage() {
                     />
                 </StickyAppHeader>
 
-                <section className="py-10 sm:py-14">
-                    <div className="max-w-2xl">
+                <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
+                    <div className="border-b border-border/60 pb-6">
                         <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
                             {t("eyebrow")}
                         </p>
                         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
                             {t("title")}
                         </h1>
-                        <p className="mt-4 leading-7 text-muted-foreground">
+                        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
                             {t("description")}
                         </p>
                     </div>
 
                     {assignedWork.length > 0 && (
-                        <section className="mt-10">
+                        <section className="mt-6">
                             <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                                 {groupsT("eyebrow")}
                             </p>
@@ -149,7 +149,7 @@ export default async function PracticePage() {
                                 {assignedWork.map((assignment) => (
                                     <article
                                         key={assignment.id}
-                                        className="rounded-3xl bg-primary/[0.07] p-6 ring-1 ring-primary/15"
+                                        className="flex flex-col rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm sm:p-5"
                                     >
                                         <div className="flex flex-wrap items-center justify-between gap-2">
                                             <span className="text-xs font-semibold tracking-[0.12em] text-primary uppercase">
@@ -157,7 +157,18 @@ export default async function PracticePage() {
                                                     `kinds.${assignment.kind}`,
                                                 )}
                                             </span>
-                                            <span className="rounded-full bg-background/70 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
+                                            <span
+                                                className={cn(
+                                                    "rounded-lg px-2.5 py-1 text-xs font-medium",
+                                                    assignment.status ===
+                                                        "needs_revision"
+                                                        ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                                                        : assignment.status ===
+                                                            "completed"
+                                                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                                                          : "bg-muted text-muted-foreground",
+                                                )}
+                                            >
                                                 {groupsT(
                                                     `statuses.${assignment.status}`,
                                                 )}
@@ -228,83 +239,11 @@ export default async function PracticePage() {
                                                 </p>
                                             </div>
                                         )}
-                                        <Button
-                                            asChild
-                                            className="mt-5 rounded-xl"
-                                        >
-                                            <Link
-                                                href={`/practice/${assignment.id}/read`}
-                                            >
-                                                {assignment.progress
-                                                    ? t("continue")
-                                                    : t("start")}
-                                                <ArrowRight
-                                                    className={cn(
-                                                        "size-4",
-                                                        isArabic &&
-                                                            "rotate-180",
-                                                    )}
-                                                />
-                                            </Link>
-                                        </Button>
-                                    </article>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-
-                    {assignments.length > 0 && (
-                        <div className="mt-10 grid gap-4 lg:grid-cols-2">
-                            {assignments.map((assignment) => (
-                                <section
-                                    key={assignment.id}
-                                    className="relative overflow-hidden rounded-3xl bg-primary/[0.07] p-6 ring-1 ring-primary/15"
-                                >
-                                    <div className="flex h-full flex-col">
-                                        <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-primary uppercase">
-                                            {assignment.kind ===
-                                            "memorization" ? (
-                                                <BookMarked
-                                                    aria-hidden="true"
-                                                    className="size-4"
-                                                />
-                                            ) : (
-                                                <RefreshCcw
-                                                    aria-hidden="true"
-                                                    className="size-4"
-                                                />
-                                            )}
-                                            {t(`kinds.${assignment.kind}`)}
-                                        </div>
-                                        <h2 className="mt-3 text-lg font-semibold leading-8 sm:text-xl">
-                                            {t("range", {
-                                                startSurah:
-                                                    surahName(
-                                                        assignment.start
-                                                            .surahNumber,
-                                                    ) ?? "",
-                                                startAyah:
-                                                    assignment.start.ayahNumber,
-                                                endSurah:
-                                                    surahName(
-                                                        assignment.end
-                                                            .surahNumber,
-                                                    ) ?? "",
-                                                endAyah:
-                                                    assignment.end.ayahNumber,
-                                            })}
-                                        </h2>
-                                        <p className="mt-2 text-sm text-muted-foreground">
-                                            {t("riwayah", {
-                                                riwayah: t(
-                                                    `riwayahs.${assignment.riwayah}`,
-                                                ),
-                                            })}
-                                        </p>
-                                        <div className="mt-6 flex flex-wrap items-center gap-2 lg:mt-auto lg:pt-6">
+                                        <div className="mt-auto pt-5">
                                             <Button
                                                 asChild
-                                                className="rounded-xl"
+                                                variant="outline"
+                                                className="min-h-11 w-full rounded-xl sm:w-auto"
                                             >
                                                 <Link
                                                     href={`/practice/${assignment.id}/read`}
@@ -322,34 +261,137 @@ export default async function PracticePage() {
                                                     />
                                                 </Link>
                                             </Button>
-                                            <DeletePracticeButton
-                                                assignmentId={assignment.id}
-                                            />
                                         </div>
-                                    </div>
-                                </section>
-                            ))}
-                        </div>
+                                    </article>
+                                ))}
+                            </div>
+                        </section>
                     )}
 
-                    <section className="mt-10 max-w-3xl rounded-3xl bg-muted/40 p-5 ring-1 ring-border/50 sm:p-8">
-                        <h2 className="text-xl font-semibold">
-                            {t(
-                                assignments.length > 0
-                                    ? "form.editTitle"
-                                    : "form.createTitle",
-                            )}
-                        </h2>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                            {t("form.description")}
-                        </p>
-                        <PracticeRangeForm
-                            surahs={options}
-                            navigation={navigation}
-                            assignments={assignments}
-                            locale={preferences.language}
-                        />
-                    </section>
+                    {assignments.length > 0 && (
+                        <section
+                            className="mt-8"
+                            aria-labelledby="personal-practice-title"
+                        >
+                            <h2
+                                id="personal-practice-title"
+                                className="text-xl font-semibold"
+                            >
+                                {t("personalTitle")}
+                            </h2>
+                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                {t("personalDescription")}
+                            </p>
+                            <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                                {assignments.map((assignment) => (
+                                    <section
+                                        key={assignment.id}
+                                        className="relative overflow-hidden rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm sm:p-5"
+                                    >
+                                        <div className="flex h-full flex-col">
+                                            <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-primary uppercase">
+                                                {assignment.kind ===
+                                                "memorization" ? (
+                                                    <BookMarked
+                                                        aria-hidden="true"
+                                                        className="size-4"
+                                                    />
+                                                ) : (
+                                                    <RefreshCcw
+                                                        aria-hidden="true"
+                                                        className="size-4"
+                                                    />
+                                                )}
+                                                {t(`kinds.${assignment.kind}`)}
+                                            </div>
+                                            <h3 className="mt-3 text-base font-semibold leading-7 sm:text-lg">
+                                                {t("range", {
+                                                    startSurah:
+                                                        surahName(
+                                                            assignment.start
+                                                                .surahNumber,
+                                                        ) ?? "",
+                                                    startAyah:
+                                                        assignment.start
+                                                            .ayahNumber,
+                                                    endSurah:
+                                                        surahName(
+                                                            assignment.end
+                                                                .surahNumber,
+                                                        ) ?? "",
+                                                    endAyah:
+                                                        assignment.end
+                                                            .ayahNumber,
+                                                })}
+                                            </h3>
+                                            <p className="mt-2 text-sm text-muted-foreground">
+                                                {t("riwayah", {
+                                                    riwayah: t(
+                                                        `riwayahs.${assignment.riwayah}`,
+                                                    ),
+                                                })}
+                                            </p>
+                                            <div className="mt-6 flex flex-wrap items-center gap-2 lg:mt-auto lg:pt-6">
+                                                <Button
+                                                    asChild
+                                                    className="min-h-11 w-full rounded-xl sm:w-auto"
+                                                >
+                                                    <Link
+                                                        href={`/practice/${assignment.id}/read`}
+                                                    >
+                                                        {assignment.progress
+                                                            ? t("continue")
+                                                            : t("start")}
+                                                        <ArrowRight
+                                                            aria-hidden="true"
+                                                            className={cn(
+                                                                "size-4",
+                                                                isArabic &&
+                                                                    "rotate-180",
+                                                            )}
+                                                        />
+                                                    </Link>
+                                                </Button>
+                                                <DeletePracticeButton
+                                                    assignmentId={assignment.id}
+                                                />
+                                            </div>
+                                        </div>
+                                    </section>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    <details
+                        open={assignments.length === 0}
+                        className="group mt-6 rounded-2xl border border-border/70 bg-card/60"
+                    >
+                        <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
+                            <h2 className="text-lg font-semibold">
+                                {t(
+                                    assignments.length > 0
+                                        ? "form.editTitle"
+                                        : "form.createTitle",
+                                )}
+                            </h2>
+                            <ChevronDown
+                                aria-hidden="true"
+                                className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                            />
+                        </summary>
+                        <div className="border-t border-border/60 px-4 pb-5 pt-3 sm:px-6">
+                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                {t("form.description")}
+                            </p>
+                            <PracticeRangeForm
+                                surahs={options}
+                                navigation={navigation}
+                                assignments={assignments}
+                                locale={preferences.language}
+                            />
+                        </div>
+                    </details>
                 </section>
             </div>
         </main>

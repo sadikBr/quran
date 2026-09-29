@@ -76,7 +76,7 @@ export async function updateBookmark(
             }
         });
 
-        revalidatePath("/dashboard");
+        revalidatePath("/bookmarks");
         return { success: true };
     } catch {
         return {
@@ -139,7 +139,7 @@ export async function updateReflection(
             }
         });
 
-        revalidatePath("/dashboard");
+        revalidatePath("/bookmarks");
         return { success: true };
     } catch {
         return {

@@ -181,13 +181,8 @@ export default function SavedAyahsSection({
 
     if (savedAyahs.length === 0) {
         return (
-            <section
-                className="mt-12 sm:mt-16"
-                aria-labelledby="saved-ayahs-title"
-            >
-                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                    {t("saved.eyebrow")}
-                </p>
+            <section className="mt-8" aria-labelledby="saved-ayahs-title">
+                <p className="sr-only">{t("saved.eyebrow")}</p>
                 <div className="mt-4 grid gap-5 border-primary/15 border-t pt-6 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                         <Bookmark aria-hidden="true" className="size-5" />
@@ -222,9 +217,9 @@ export default function SavedAyahsSection({
     }
 
     return (
-        <section className="mt-16" aria-labelledby="saved-ayahs-title">
-            <div className="flex flex-col gap-5 border-b border-primary/15 pb-6 sm:flex-row sm:items-end sm:justify-between">
-                <div className="max-w-xl">
+        <section className="mt-8" aria-labelledby="saved-ayahs-title">
+            <div className="rounded-2xl border border-border/70 bg-card/70 p-3 sm:p-4">
+                <div className="sr-only">
                     <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                         {t("saved.eyebrow")}
                     </p>
@@ -240,10 +235,10 @@ export default function SavedAyahsSection({
                 </div>
 
                 {savedAyahs.length > 0 && (
-                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                    <div className="flex w-full flex-col gap-3 sm:flex-row">
                         <label
                             htmlFor="saved-ayah-search"
-                            className="relative block sm:w-56"
+                            className="relative block min-w-0 flex-1"
                         >
                             <span className="sr-only">
                                 {t("saved.searchLabel")}
@@ -260,7 +255,7 @@ export default function SavedAyahsSection({
                                     setRequestedPage(1);
                                 }}
                                 placeholder={t("saved.searchPlaceholder")}
-                                className="border-0 bg-muted/55 ps-9 shadow-none"
+                                className="h-11 rounded-xl border-border/70 bg-background ps-9 text-start shadow-none"
                             />
                         </label>
                         <Combobox
@@ -292,7 +287,7 @@ export default function SavedAyahsSection({
                                 aria-label={t("saved.filterLabel")}
                                 placeholder={t("saved.allSurahs")}
                                 showClear
-                                className="w-full border-0 bg-muted/55 shadow-none sm:w-48"
+                                className="h-11 w-full rounded-xl border-border/70 bg-background shadow-none sm:w-52"
                             />
                             <ComboboxContent
                                 dir={locale === "ar" ? "rtl" : "ltr"}
@@ -325,7 +320,7 @@ export default function SavedAyahsSection({
             </div>
 
             {savedAyahs.length > 0 && (
-                <div className="mt-5 rounded-2xl bg-primary/[0.055] p-3.5 ring-1 ring-primary/12 sm:p-4">
+                <div className="mt-3 rounded-2xl border border-border/60 bg-card/50 p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-2.5">
                             <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -392,14 +387,14 @@ export default function SavedAyahsSection({
                         </form>
                     )}
 
-                    <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                    <div className="mt-4 flex flex-wrap gap-2">
                         <button
                             type="button"
                             onClick={() => {
                                 setCollectionFilter("all");
                                 setRequestedPage(1);
                             }}
-                            className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors ${
+                            className={`min-h-11 shrink-0 rounded-xl px-3.5 py-2 text-xs font-semibold transition-colors ${
                                 collectionFilter === "all"
                                     ? "bg-primary text-primary-foreground"
                                     : "bg-background/70 text-muted-foreground hover:text-foreground"
@@ -415,7 +410,7 @@ export default function SavedAyahsSection({
                                 setCollectionFilter("unfiled");
                                 setRequestedPage(1);
                             }}
-                            className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors ${
+                            className={`min-h-11 shrink-0 rounded-xl px-3.5 py-2 text-xs font-semibold transition-colors ${
                                 collectionFilter === "unfiled"
                                     ? "bg-primary text-primary-foreground"
                                     : "bg-background/70 text-muted-foreground hover:text-foreground"
@@ -426,7 +421,7 @@ export default function SavedAyahsSection({
                         {collections.map((collection) => (
                             <div
                                 key={collection.id}
-                                className={`flex shrink-0 items-center overflow-hidden rounded-full transition-colors ${
+                                className={`flex min-h-11 shrink-0 items-center overflow-hidden rounded-xl transition-colors ${
                                     collectionFilter === collection.id
                                         ? "bg-primary text-primary-foreground"
                                         : "bg-background/70 text-muted-foreground"
@@ -438,7 +433,7 @@ export default function SavedAyahsSection({
                                         setCollectionFilter(collection.id);
                                         setRequestedPage(1);
                                     }}
-                                    className="py-2 ps-3.5 pe-2 text-xs font-semibold hover:text-foreground"
+                                    className="min-h-11 py-2 ps-3.5 pe-2 text-xs font-semibold hover:text-foreground"
                                 >
                                     {collection.name}
                                     <span className="ms-1.5 opacity-65">
@@ -458,7 +453,7 @@ export default function SavedAyahsSection({
                                         aria-label={t(
                                             "saved.cancelDeleteCollection",
                                         )}
-                                        className="flex size-7 items-center justify-center rounded-full opacity-70 transition-opacity hover:bg-background/30 hover:opacity-100 disabled:opacity-30"
+                                        className="flex size-11 items-center justify-center rounded-lg opacity-70 transition-opacity hover:bg-background/30 hover:opacity-100 disabled:opacity-30"
                                     >
                                         <X className="size-3" />
                                     </button>
@@ -486,7 +481,7 @@ export default function SavedAyahsSection({
                                             : "saved.deleteCollection",
                                         { name: collection.name },
                                     )}
-                                    className="me-1 flex size-7 items-center justify-center rounded-full opacity-55 transition-opacity hover:bg-destructive/12 hover:text-destructive hover:opacity-100 disabled:opacity-30"
+                                    className="me-1 flex size-11 items-center justify-center rounded-lg opacity-55 transition-opacity hover:bg-destructive/12 hover:text-destructive hover:opacity-100 disabled:opacity-30"
                                 >
                                     {pendingCollectionId === collection.id ? (
                                         <LoaderCircle className="size-3 animate-spin" />
@@ -528,7 +523,7 @@ export default function SavedAyahsSection({
                 </div>
             ) : (
                 <div>
-                    <div className="divide-y divide-primary/10">
+                    <div className="mt-5 space-y-4">
                         {visibleAyahs.map((ayah) => {
                             const locationNumber =
                                 readingMode === "page"
@@ -539,11 +534,11 @@ export default function SavedAyahsSection({
                             return (
                                 <article
                                     key={ayah.globalAyahNumber}
-                                    className="group px-1 py-6 sm:px-3 sm:py-7"
+                                    className="group rounded-2xl border border-border/70 bg-card/70 p-4 shadow-sm sm:p-6"
                                 >
                                     <div className="flex flex-wrap items-center justify-between gap-3">
                                         <div className="flex min-w-0 items-center gap-2.5">
-                                            <span className="truncate text-sm font-semibold text-primary">
+                                            <span className="text-sm font-semibold text-primary">
                                                 {ayah.surahName}
                                             </span>
                                             <span
@@ -595,7 +590,7 @@ export default function SavedAyahsSection({
                                                 asChild
                                                 variant="ghost"
                                                 size="sm"
-                                                className="text-primary hover:text-primary"
+                                                className="min-h-11 rounded-xl text-primary hover:text-primary"
                                             >
                                                 <Link href={href}>
                                                     {t("saved.openReader")}
@@ -616,7 +611,7 @@ export default function SavedAyahsSection({
                                                 onClick={() =>
                                                     setActiveAyah(ayah)
                                                 }
-                                                className="rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                                                className="min-h-11 min-w-11 rounded-xl text-muted-foreground hover:bg-primary/10 hover:text-primary"
                                                 title={t("saved.actionTitle")}
                                                 aria-label={t(
                                                     "saved.openActions",
@@ -646,7 +641,7 @@ export default function SavedAyahsSection({
                                                             );
                                                             setRequestedPage(1);
                                                         }}
-                                                        className="inline-flex items-center gap-1.5 rounded-full bg-primary/8 px-2.5 py-1 text-[0.7rem] font-medium text-primary transition-colors hover:bg-primary/14"
+                                                        className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-primary/8 px-2.5 py-1 text-[0.7rem] font-medium text-primary transition-colors hover:bg-primary/14"
                                                     >
                                                         <FolderHeart className="size-3" />
                                                         {collection.name}
@@ -657,7 +652,7 @@ export default function SavedAyahsSection({
                                     )}
                                     <Link
                                         href={href}
-                                        className="mt-4 block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        className="mt-5 block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                     >
                                         <p
                                             dir="rtl"
@@ -668,7 +663,7 @@ export default function SavedAyahsSection({
                                         </p>
                                     </Link>
                                     {ayah.reflection && (
-                                        <div className="mt-4 border-s-2 border-primary/25 ps-4">
+                                        <div className="mt-4 rounded-xl border-s-2 border-primary/25 bg-muted/30 px-4 py-3">
                                             <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
                                                 {ayah.reflection}
                                             </p>
@@ -679,7 +674,7 @@ export default function SavedAyahsSection({
                         })}
                     </div>
 
-                    <div className="mt-3 flex flex-col gap-3 border-t border-primary/15 pt-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                    <div className="mt-5 flex flex-col gap-3 border-t border-border/60 pt-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
                         <p aria-live="polite">
                             {t("saved.summary", {
                                 start: firstVisibleIndex + 1,

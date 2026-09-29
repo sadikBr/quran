@@ -1,0 +1,1 @@
+ALTER TABLE "group_meeting_attendance" ADD COLUMN "excuse" text;

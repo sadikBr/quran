@@ -199,33 +199,35 @@ export default function SettingsForm({
     }
 
     async function savePreferences() {
+        if (isSaving) return;
         setIsSaving(true);
-
-        const result = await updatePreferences(values);
-
-        setIsSaving(false);
-
-        if (!result.success) {
+        try {
+            const result = await updatePreferences(values);
+            if (!result.success) {
+                toast.error(commonT("feedback.preferencesUpdateFailed"));
+                return;
+            }
+            setTheme(values.theme);
+            setPreferences(values);
+            router.refresh();
+            toast.success(t("footer.success"));
+        } catch {
             toast.error(commonT("feedback.preferencesUpdateFailed"));
-            return;
+        } finally {
+            setIsSaving(false);
         }
-
-        setTheme(values.theme);
-        setPreferences(values);
-        router.refresh();
-        toast.success(t("footer.success"));
     }
 
     return (
         <form
-            className="mt-14"
+            className="mt-6"
             onSubmit={(event) => {
                 event.preventDefault();
                 savePreferences();
             }}
         >
-            <div className="space-y-16">
-                <div className="space-y-16">
+            <div className="space-y-5">
+                <div className="space-y-5">
                     <SettingsSection
                         eyebrow={t("sections.appearance.eyebrow")}
                         title={t("sections.appearance.title")}
@@ -309,15 +311,17 @@ export default function SettingsForm({
                             <div
                                 className={`quran-font-step-${values.arabicTextSize} space-y-3`}
                             >
-                                <div className="flex min-h-20 flex-col items-center justify-center py-2 text-center">
-                                    <p
-                                        dir="rtl"
-                                        lang="ar"
-                                        className="ayah quran-display-text leading-[1.9] text-foreground transition-[font-size] duration-200"
-                                    >
-                                        {t("arabicTextSize.preview")}
-                                    </p>
-                                    <p className="mt-1 text-[0.68rem] font-medium tracking-wide text-muted-foreground">
+                                <div className="grid h-24 min-w-0 grid-rows-[minmax(0,1fr)_auto] gap-1 text-center">
+                                    <div className="flex min-h-0 min-w-0 items-center justify-center overflow-auto">
+                                        <p
+                                            dir="rtl"
+                                            lang="ar"
+                                            className="ayah quran-display-text leading-[1.9] text-foreground transition-[font-size] duration-200"
+                                        >
+                                            {t("arabicTextSize.preview")}
+                                        </p>
+                                    </div>
+                                    <p className="text-[0.68rem] font-medium tracking-wide text-muted-foreground">
                                         {t("arabicTextSize.step", {
                                             current: values.arabicTextSize,
                                             total: 5,
@@ -658,14 +662,14 @@ export default function SettingsForm({
                 </SettingsSection>
             </div>
 
-            <div className="mt-16 flex flex-col gap-5 pb-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="sticky bottom-0 z-20 mt-6 flex flex-col gap-3 rounded-t-xl border border-border/70 bg-background/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-6 text-muted-foreground">
                     {t("footer.note")}
                 </p>
                 <Button
                     type="submit"
                     disabled={isSaving}
-                    className="h-10 rounded-xl px-6 shadow-sm shadow-primary/10"
+                    className="min-h-11 w-full rounded-xl px-6 shadow-sm shadow-primary/10 sm:w-auto"
                 >
                     {isSaving ? t("footer.saving") : t("footer.save")}
                 </Button>

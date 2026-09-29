@@ -106,7 +106,7 @@ export async function createBookmarkCollection(
             return savedCollection;
         });
 
-        revalidatePath("/dashboard");
+        revalidatePath("/bookmarks");
         return { success: true, collection };
     } catch {
         return {
@@ -188,7 +188,7 @@ export async function updateBookmarkCollections(
             }
         });
 
-        revalidatePath("/dashboard");
+        revalidatePath("/bookmarks");
         return { success: true };
     } catch {
         return {
@@ -217,7 +217,7 @@ export async function deleteBookmarkCollection(
                     eq(bookmarkCollection.userId, userId),
                 ),
             );
-        revalidatePath("/dashboard");
+        revalidatePath("/bookmarks");
         return { success: true };
     } catch {
         return {

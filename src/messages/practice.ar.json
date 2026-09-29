@@ -1,6 +1,8 @@
 {
     "Practice": {
         "header": "التدرّب على القرآن",
+        "personalTitle": "تدرّبك الشخصي",
+        "personalDescription": "مقاطع اخترتها لنفسك للحفظ والمراجعة، مستقلة عن تكاليف الحلقة.",
         "back": "العودة إلى لوحة المتابعة",
         "eyebrow": "مَقْطَعُكَ لِلتَّدَرُّب",
         "title": "حدّد ما تريد حفظه أو مراجعته.",
@@ -75,7 +77,8 @@
                 "revision": "تدرّب على المراجعة"
             },
             "progressSummary": "بلغت {completed, number} من {total, number} آيات · {percentage, number}%",
-            "progressCount": "بلغت {completed, number} من {total, number} آيات",
+            "progressCount": "تدرّبت على {completed, number} من أصل {total, number} آية",
+            "notStarted": "لم تبدأ التدريب بعد",
             "showText": "أظهر النص",
             "hideText": "أخفِ النص",
             "revealAyah": "أظهر الآية {number, number}",

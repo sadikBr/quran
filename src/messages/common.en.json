@@ -26,6 +26,8 @@
             "continueReading": "Continue reading",
             "label": "Main navigation",
             "today": "Today",
+            "dashboard": "Dashboard",
+            "bookmarks": "Saved verses",
             "quran": "Quran",
             "assignments": "Assignments",
             "groups": "Groups"

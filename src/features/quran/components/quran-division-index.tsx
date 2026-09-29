@@ -55,7 +55,7 @@ export default function QuranDivisionIndex({
                 </p>
             </div>
 
-            <div className="grid gap-x-14 gap-y-1 md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2">
                 {references.map((reference) => {
                     const surah = surahsByNumber.get(reference.surahNumber);
                     const surahName =
@@ -72,13 +72,13 @@ export default function QuranDivisionIndex({
                                 surah: surahName ?? reference.surahNumber,
                                 ayah: reference.ayahNumber,
                             })}
-                            className="group grid min-w-0 grid-cols-[3.25rem_minmax(0,1fr)_auto] items-center gap-x-4 rounded-md px-1 py-5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className="group grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-border/70 bg-card px-4 py-5 outline-none transition-colors hover:border-primary/40 hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-ring"
                         >
-                            <span className="text-center text-3xl font-medium tracking-tight text-primary/45 tabular-nums transition-colors group-hover:text-primary group-focus-visible:text-primary">
+                            <span className="text-center text-xl font-semibold text-primary tabular-nums">
                                 {numberFormatter.format(reference.number)}
                             </span>
                             <span className="min-w-0">
-                                <span className="block truncate text-sm font-semibold text-foreground transition-colors group-hover:text-primary group-focus-visible:text-primary">
+                                <span className="block text-sm font-semibold text-foreground transition-colors group-hover:text-primary group-focus-visible:text-primary">
                                     {t("beginsAt", {
                                         surah:
                                             surahName ?? reference.surahNumber,

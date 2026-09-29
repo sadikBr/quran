@@ -54,6 +54,7 @@
             "browserOnSystem": "{browser} on {system}"
         },
         "delete": {
+            "restricted": "Account deletion is unavailable for platform administrators and circle supervisors. If you supervise a circle, ask the platform administrator to reassign it before deleting your account.",
             "title": "Delete account",
             "description": "This permanently removes your profile, preferences, and saved reading progress. This cannot be undone.",
             "currentPassword": "Current password",

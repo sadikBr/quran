@@ -45,6 +45,7 @@ export const config = {
         "/practice/:path*",
         "/memorization/:path*",
         "/dashboard",
+        "/bookmarks",
         "/profile",
         "/settings",
         "/assignments",

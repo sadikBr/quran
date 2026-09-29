@@ -62,8 +62,11 @@ export default async function MemorizationPage() {
             )}
         >
             <PageBackground />
-            <div className="mx-auto max-w-6xl px-4">
-                <StickyAppHeader navigation className="-mx-4 px-4">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6">
+                <StickyAppHeader
+                    navigation
+                    className="-mx-4 px-4 sm:-mx-6 sm:px-6"
+                >
                     <Link
                         href="/dashboard"
                         className="flex items-center gap-3 rounded-md"
@@ -83,15 +86,15 @@ export default async function MemorizationPage() {
                     />
                 </StickyAppHeader>
 
-                <section className="py-10 sm:py-14">
-                    <div className="max-w-3xl">
+                <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
+                    <div className="border-b border-border/60 pb-6">
                         <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
                             {t("eyebrow")}
                         </p>
                         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
                             {t("title")}
                         </h1>
-                        <p className="mt-4 leading-7 text-muted-foreground">
+                        <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
                             {t("description")}
                         </p>
                     </div>

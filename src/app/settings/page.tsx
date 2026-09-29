@@ -145,10 +145,10 @@ export default async function SettingsPage() {
             )}
         >
             <PageBackground />
-            <div className="mx-auto max-w-6xl px-5 sm:px-6">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6">
                 <StickyAppHeader
                     navigation
-                    className="-mx-5 px-5 sm:-mx-6 sm:px-6"
+                    className="-mx-4 px-4 sm:-mx-6 sm:px-6"
                 >
                     <Link
                         href="/"
@@ -167,8 +167,8 @@ export default async function SettingsPage() {
                     />
                 </StickyAppHeader>
 
-                <section className="py-12 sm:py-16">
-                    <div className="max-w-3xl">
+                <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
+                    <div className="border-b border-border/60 pb-6">
                         <span className="flex size-8 items-center justify-center text-primary">
                             <SlidersHorizontal
                                 aria-hidden="true"
@@ -178,12 +178,12 @@ export default async function SettingsPage() {
                         <p className="mt-4 text-[0.68rem] font-semibold tracking-[0.22em] text-primary">
                             {isAdmin ? adminT("account") : t("page.eyebrow")}
                         </p>
-                        <h1 className="mt-3 text-4xl font-semibold tracking-[-0.035em] sm:text-5xl">
+                        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
                             {isAdmin
                                 ? homeT("account.settings")
                                 : t("page.title")}
                         </h1>
-                        <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+                        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
                             {isAdmin
                                 ? adminT("preferencesDescription")
                                 : t("page.description")}
