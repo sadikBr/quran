@@ -20,6 +20,7 @@ import OfflineLibrarySetting from "@/features/offline/components/offline-library
 import EditionCombobox from "@/features/quran/components/edition-combobox";
 import ReciterCombobox from "@/features/quran/components/reciter-combobox";
 import type { Edition, Reciter } from "@/features/quran/types";
+import ThemeSelector from "@/features/settings/components/theme-selector";
 import { useSettings } from "@/features/settings/settings-provider";
 import { cn } from "@/lib/utils";
 import {
@@ -33,7 +34,6 @@ import {
     type Preferences,
     type ReadingMode,
     type Riwayah,
-    type Theme,
 } from "../preferences";
 import updatePreferences from "../server/update-preferences";
 import PreferenceCard from "./settings-card";
@@ -232,41 +232,23 @@ export default function SettingsForm({
                         eyebrow={t("sections.appearance.eyebrow")}
                         title={t("sections.appearance.title")}
                     >
-                        <PreferenceCard
-                            title={t("theme.title")}
-                            description={t("theme.description")}
-                        >
-                            <SettingField
-                                label={t("theme.label")}
-                                htmlFor="theme"
-                            >
-                                <Select
-                                    dir={direction}
-                                    value={values.theme}
-                                    onValueChange={(value) =>
-                                        updateValue("theme", value as Theme)
-                                    }
-                                >
-                                    <SelectTrigger
-                                        id="theme"
-                                        className={selectClassName}
-                                    >
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent position="popper">
-                                        <SelectItem value="system">
-                                            {t("theme.system")}
-                                        </SelectItem>
-                                        <SelectItem value="light">
-                                            {t("theme.light")}
-                                        </SelectItem>
-                                        <SelectItem value="dark">
-                                            {t("theme.dark")}
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </SettingField>
-                        </PreferenceCard>
+                        <section className="space-y-4">
+                            <div>
+                                <h3 className="text-sm font-semibold">
+                                    {t("theme.title")}
+                                </h3>
+                                <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
+                                    {t("theme.description")}
+                                </p>
+                            </div>
+                            <ThemeSelector
+                                value={values.theme}
+                                onChange={(theme) =>
+                                    updateValue("theme", theme)
+                                }
+                                disabled={isSaving}
+                            />
+                        </section>
 
                         <PreferenceCard
                             title={t("language.title")}

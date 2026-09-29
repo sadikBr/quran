@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark *, .emerald *));
 
 @theme inline {
     --color-background: var(--background);
@@ -73,6 +73,7 @@
 }
 
 :root {
+    color-scheme: light;
     --card: oklch(0.9686 0.0091 78.2818);
     --card-foreground: oklch(0.366 0.0251 49.6085);
     --popover: oklch(0.9686 0.0091 78.2818);
@@ -142,7 +143,9 @@
     --quran-basmala-font-size: 4.5rem;
 }
 
-.dark {
+.dark,
+.emerald {
+    color-scheme: dark;
     --background: oklch(0.2161 0.0061 56.0434);
     --foreground: oklch(0.9699 0.0013 106.4238);
     --card: oklch(0.2685 0.0063 34.2976);
@@ -206,6 +209,74 @@
         0px 2px 3px 0px hsl(0 0% 5% / 0.18), 0px 8px 10px -1px
         hsl(0 0% 5% / 0.18);
     --shadow-2xl: 0px 2px 3px 0px hsl(0 0% 5% / 0.45);
+}
+
+.emerald {
+    color-scheme: dark;
+    --background: #10332d;
+    --foreground: #f5f1df;
+    --card: #1a463e;
+    --card-foreground: #f5f1df;
+    --popover: #193f38;
+    --popover-foreground: #f5f1df;
+    --primary: #d8b766;
+    --primary-foreground: #102f29;
+    --division: #dfc783;
+    --secondary: #28574b;
+    --secondary-foreground: #f5f1df;
+    --muted: #153b33;
+    --muted-foreground: #b5c8bb;
+    --accent: #2b5648;
+    --accent-foreground: #f5e4b5;
+    --destructive: #f08d83;
+    --destructive-foreground: #351712;
+    --border: #416356;
+    --input: #577a69;
+    --ring: #d8b766;
+    --chart-1: #d8b766;
+    --chart-2: #81bba0;
+    --chart-3: #e7d8ab;
+    --chart-4: #8abfc1;
+    --chart-5: #c4a58a;
+    --sidebar: #163c34;
+    --sidebar-foreground: #f5f1df;
+    --sidebar-primary: #d8b766;
+    --sidebar-primary-foreground: #102f29;
+    --sidebar-accent: #28574b;
+    --sidebar-accent-foreground: #f5e4b5;
+    --sidebar-border: #416356;
+    --sidebar-ring: #d8b766;
+}
+
+/* Keep the home landscape tonal rather than brown in the emerald palette. */
+.emerald .home-landscape {
+    background-color: #28574b;
+    background-blend-mode: luminosity;
+    opacity: 1;
+}
+
+.emerald .home-landscape-shade {
+    background-image: linear-gradient(
+        90deg,
+        rgb(16 51 45 / 85%) 0%,
+        rgb(16 51 45 / 45%) 45%,
+        rgb(16 51 45 / 8%) 100%
+    );
+}
+
+.emerald .home-session-shade {
+    background: transparent;
+}
+
+@media (max-width: 1023px) {
+    .emerald .home-landscape-shade {
+        background-image: linear-gradient(
+            180deg,
+            rgb(16 51 45 / 12%) 0%,
+            rgb(16 51 45 / 45%) 45%,
+            rgb(16 51 45 / 85%) 100%
+        );
+    }
 }
 
 @layer base {

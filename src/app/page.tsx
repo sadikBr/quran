@@ -192,17 +192,17 @@ export default async function Home() {
                                     "max-lg:scale-x-100 lg:-scale-x-100",
                             )}
                         />
-                        <span className="absolute inset-0 hidden bg-[url('/meccan-surah-background-v2.webp')] bg-cover bg-position-[center_60%] sm:bg-bottom dark:block" />
+                        <span className="home-landscape absolute inset-0 hidden bg-[url('/meccan-surah-background-v2.webp')] bg-cover bg-position-[center_60%] sm:bg-bottom dark:block" />
                         <span
                             className={cn(
-                                "absolute inset-0 hidden bg-[linear-gradient(90deg,rgba(12,11,10,0.94)_0%,rgba(12,11,10,0.7)_48%,rgba(12,11,10,0.18)_100%)] max-lg:bg-[linear-gradient(180deg,rgba(12,11,10,0.38)_0%,rgba(12,11,10,0.68)_42%,rgba(12,11,10,0.96)_100%)] dark:block",
+                                "home-landscape-shade absolute inset-0 hidden bg-[linear-gradient(90deg,rgba(12,11,10,0.94)_0%,rgba(12,11,10,0.7)_48%,rgba(12,11,10,0.18)_100%)] max-lg:bg-[linear-gradient(180deg,rgba(12,11,10,0.38)_0%,rgba(12,11,10,0.68)_42%,rgba(12,11,10,0.96)_100%)] dark:block",
                                 preferences.language === "ar" &&
                                     "max-lg:scale-x-100 lg:-scale-x-100",
                             )}
                         />
                         <span className="absolute inset-0 hidden bg-[radial-gradient(circle_at_72%_20%,rgba(255,255,255,0.08),transparent_32%)] dark:block" />
                         {session && (
-                            <span className="absolute inset-0 bg-background/35 dark:bg-background/25" />
+                            <span className="home-session-shade absolute inset-0 bg-background/35 dark:bg-background/25" />
                         )}
                     </div>
                     <span

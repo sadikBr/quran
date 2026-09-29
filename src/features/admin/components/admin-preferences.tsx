@@ -1,25 +1,14 @@
 "use client";
 
-import {
-    Check,
-    Languages,
-    Loader2,
-    Monitor,
-    Moon,
-    Palette,
-    Sun,
-} from "lucide-react";
+import { Check, Languages, Loader2, Palette } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-    LANGUAGES,
-    type Preferences,
-    THEMES,
-} from "@/features/settings/preferences";
+import ThemeSelector from "@/features/settings/components/theme-selector";
+import { LANGUAGES, type Preferences } from "@/features/settings/preferences";
 import updatePreferences from "@/features/settings/server/update-preferences";
 import { useSettings } from "@/features/settings/settings-provider";
 
@@ -152,51 +141,11 @@ export default function AdminPreferences({
                             </p>
                         </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                        {THEMES.map((value) => {
-                            const Icon =
-                                value === "light"
-                                    ? Sun
-                                    : value === "dark"
-                                      ? Moon
-                                      : Monitor;
-                            return (
-                                <label
-                                    key={value}
-                                    className="relative min-w-0 cursor-pointer"
-                                >
-                                    <input
-                                        type="radio"
-                                        name="admin-theme"
-                                        value={value}
-                                        checked={theme === value}
-                                        onChange={() => setSelectedTheme(value)}
-                                        className="peer sr-only"
-                                    />
-                                    <span className="block overflow-hidden rounded-xl border bg-background/60 p-2 transition-colors hover:bg-muted/50 peer-checked:border-primary peer-checked:bg-primary/5 peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 sm:p-3">
-                                        <span
-                                            aria-hidden="true"
-                                            className={`relative flex h-20 overflow-hidden rounded-md border border-black/10 p-2 sm:h-28 sm:p-3 ${value === "light" ? "bg-[#faf7f2]" : value === "dark" ? "bg-[#211d19]" : "bg-linear-to-r from-[#faf7f2] from-50% to-[#211d19] to-50%"}`}
-                                        >
-                                            <span className="w-1/4 rounded-sm bg-stone-500/20" />
-                                            <span className="ms-2 flex-1 space-y-2 pt-1">
-                                                <span className="block h-2 w-2/3 rounded-sm bg-orange-500/70" />
-                                                <span className="block h-2 rounded-sm bg-stone-500/25" />
-                                                <span className="block h-6 rounded-sm border border-stone-500/20 bg-stone-500/10" />
-                                            </span>
-                                        </span>
-                                        <span className="mt-3 flex flex-wrap items-center justify-center gap-1.5 pb-1 text-xs font-medium sm:text-sm">
-                                            <Icon
-                                                className="size-4 shrink-0"
-                                                aria-hidden="true"
-                                            />
-                                            {t(`theme.${value}`)}
-                                        </span>
-                                    </span>
-                                </label>
-                            );
-                        })}
-                    </div>
+                    <ThemeSelector
+                        value={theme}
+                        onChange={setSelectedTheme}
+                        disabled={pending}
+                    />
                 </fieldset>
                 <div className="flex justify-end bg-muted/20 px-5 py-4 sm:px-8">
                     <Button disabled={pending} className="w-full sm:w-auto">

@@ -77,6 +77,7 @@ export default function UserMenu({
     labels?: UserMenuLabels;
 }) {
     const { resolvedTheme, setTheme } = useTheme();
+    const isDarkTheme = resolvedTheme === "dark" || resolvedTheme === "emerald";
     const locale = useLocale();
     const commonT = useTranslations("Common");
     const isAdmin = useIsPlatformAdmin();
@@ -107,7 +108,7 @@ export default function UserMenu({
     }
 
     function toggleTheme() {
-        changeTheme(resolvedTheme === "dark" ? "light" : "dark");
+        changeTheme(isDarkTheme ? "light" : "dark");
     }
 
     function signOut() {
@@ -164,12 +165,12 @@ export default function UserMenu({
                             onClick={toggleTheme}
                             className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-muted/65 text-muted-foreground transition-colors hover:bg-primary/12 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             aria-label={
-                                resolvedTheme === "dark"
+                                isDarkTheme
                                     ? labels.switchToLight
                                     : labels.switchToDark
                             }
                         >
-                            {resolvedTheme === "dark" ? (
+                            {isDarkTheme ? (
                                 <Sun aria-hidden="true" className="size-4" />
                             ) : (
                                 <Moon aria-hidden="true" className="size-4" />
