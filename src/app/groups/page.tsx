@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Shield, UsersRound } from "lucide-react";
+import { ArrowRight, Shield, UsersRound } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -69,10 +69,13 @@ export default async function GroupsPage({
         >
             <PageBackground />
             <div className="mx-auto max-w-5xl px-4 sm:px-6">
-                <StickyAppHeader className="-mx-4 px-4 sm:-mx-6 sm:px-6">
+                <StickyAppHeader
+                    navigation
+                    className="-mx-4 px-4 sm:-mx-6 sm:px-6"
+                >
                     <Link
                         href="/"
-                        className="flex items-center gap-3 rounded-md"
+                        className="flex items-center gap-3 rounded-lg outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
                     >
                         <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                             <UsersRound aria-hidden="true" className="size-5" />
@@ -89,18 +92,8 @@ export default async function GroupsPage({
                     />
                 </StickyAppHeader>
 
-                <section className="py-10 sm:py-14">
-                    <Link
-                        href="/dashboard"
-                        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
-                    >
-                        <ArrowLeft
-                            aria-hidden="true"
-                            className={cn("size-4", isArabic && "rotate-180")}
-                        />
-                        {t("back")}
-                    </Link>
-                    <div className="mt-9 max-w-2xl">
+                <section className="py-8 sm:py-14">
+                    <div className="max-w-2xl">
                         <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
                             {t("eyebrow")}
                         </p>
@@ -113,14 +106,17 @@ export default async function GroupsPage({
                     </div>
 
                     {groups.length > 0 ? (
-                        <div className="mt-10 divide-y divide-border/60 border-border/60 border-y">
+                        <div className="mt-8 divide-y divide-border/55 overflow-hidden rounded-3xl border border-border/60 bg-card/45 shadow-sm sm:mt-10">
                             {groups.map((group) => (
                                 <article
                                     key={group.id}
-                                    className="group grid gap-5 px-2 py-6 transition-colors hover:bg-muted/20 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:px-3"
+                                    className="group grid grid-cols-[2.75rem_minmax(0,1fr)] items-start gap-x-3 gap-y-3 px-4 py-5 transition-colors hover:bg-muted/25 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:gap-5 sm:px-5 sm:py-6"
                                 >
-                                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                        <UsersRound className="size-5" />
+                                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                        <UsersRound
+                                            aria-hidden="true"
+                                            className="size-5"
+                                        />
                                     </span>
                                     <div className="min-w-0">
                                         <div className="flex flex-wrap items-center gap-2">
@@ -148,7 +144,7 @@ export default async function GroupsPage({
                                     <Button
                                         asChild
                                         variant="ghost"
-                                        className="w-fit rounded-xl text-primary hover:text-primary"
+                                        className="col-start-2 w-fit rounded-xl px-0 text-primary hover:bg-transparent hover:text-primary sm:col-start-auto sm:px-4"
                                     >
                                         <Link href={`/groups/${group.id}`}>
                                             {t("open")}
@@ -164,9 +160,12 @@ export default async function GroupsPage({
                             ))}
                         </div>
                     ) : (
-                        <div className="mt-10 flex items-start gap-4 border-primary/15 border-t pt-6">
-                            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                <UsersRound className="size-5" />
+                        <div className="mt-8 flex items-start gap-4 rounded-3xl border border-primary/12 bg-primary/[0.045] p-5 shadow-sm sm:mt-10 sm:p-6">
+                            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                <UsersRound
+                                    aria-hidden="true"
+                                    className="size-5"
+                                />
                             </span>
                             <div>
                                 <h2 className="text-xl font-semibold">

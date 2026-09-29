@@ -1,14 +1,7 @@
 import {
-    ArrowLeft,
-    ArrowRight,
-    BookMarked,
-    CalendarDays,
     CalendarRange,
     ChevronDown,
     CirclePlus,
-    ClipboardCheck,
-    History,
-    RefreshCcw,
     Shield,
     UserRound,
     UsersRound,
@@ -23,7 +16,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
-import DeleteAssignmentButton from "@/features/groups/components/delete-assignment-button";
 import {
     GroupDangerActions,
     MemberActions,
@@ -33,29 +25,15 @@ import GroupInvite from "@/features/groups/components/group-invite";
 import GroupMeetingPanel from "@/features/groups/components/group-meeting-panel";
 import MeetingAgenda from "@/features/groups/components/meeting-agenda";
 import MeetingHistory from "@/features/groups/components/meeting-history";
-import MemberAssignmentForm from "@/features/groups/components/member-assignment-form";
-import MemberProgressSummary from "@/features/groups/components/member-progress-summary";
 import { isJaasConfigured } from "@/features/groups/server/create-jaas-token";
 import getGroupActivity from "@/features/groups/server/get-group-activity";
-import getGroupAssignments, {
-    type GroupAssignmentSummary,
-} from "@/features/groups/server/get-group-assignments";
+import getGroupAssignments from "@/features/groups/server/get-group-assignments";
 import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
 import { getGroupForUser } from "@/features/groups/server/get-groups";
 import getMeetingAgenda from "@/features/groups/server/get-meeting-agenda";
 import getMeetingHistory from "@/features/groups/server/get-meeting-history";
-import getMemberProgressSummaries from "@/features/groups/server/get-member-progress-summaries";
-import {
-    calculateMeetingState,
-    getMeetingDisplayTimezone,
-    getUpcomingMeetingOccurrences,
-} from "@/features/groups/server/meeting-schedule";
-import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
+import { calculateMeetingState } from "@/features/groups/server/meeting-schedule";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
-import {
-    getWarshChapters,
-    getWarshNavigationMeta,
-} from "@/features/quran/server/get-warsh-mushaf";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
@@ -73,16 +51,13 @@ function initials(name: string) {
 
 export default async function GroupPage({
     params,
-    searchParams,
 }: {
     params: Promise<{ groupId: string }>;
-    searchParams: Promise<{ assignment?: string }>;
 }) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) redirect("/sign-in");
 
-    const [{ groupId }, { assignment: focusedAssignmentId }] =
-        await Promise.all([params, searchParams]);
+    const { groupId } = await params;
     const [preferences, readingProgress, group] = await Promise.all([
         getPreferences(),
         getReadingProgress(),
@@ -90,7 +65,6 @@ export default async function GroupPage({
     ]);
     if (!group) notFound();
     const currentUserId = session.user.id;
-    const currentGroupId = group.id;
 
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
@@ -102,11 +76,6 @@ export default async function GroupPage({
         locale: preferences.language,
         messages,
         namespace: "Home",
-    });
-    const practiceT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Practice",
     });
     const isArabic = preferences.language === "ar";
     const isAdmin = group.role === "admin";
@@ -129,27 +98,14 @@ export default async function GroupPage({
         settings: homeT("account.settings"),
         signOut: homeT("account.signOut"),
     };
-    const [
-        assignments,
-        meeting,
-        meetingHistory,
-        activity,
-        memberProgressSummaries,
-        surahs,
-        warshChapters,
-        hafsNavigation,
-        warshNavigation,
-    ] = await Promise.all([
-        getGroupAssignments(group.id, session.user.id, isAdmin),
-        getGroupMeetingForUser(group.id, session.user.id),
-        getMeetingHistory(group.id, session.user.id, isAdmin, { limit: 3 }),
-        getGroupActivity(group.id, session.user.id, isAdmin),
-        getMemberProgressSummaries(group.id, session.user.id),
-        getSurahsMeta(),
-        isAdmin ? getWarshChapters() : Promise.resolve([]),
-        isAdmin ? getQuranNavigationMeta() : Promise.resolve(null),
-        isAdmin ? getWarshNavigationMeta() : Promise.resolve(null),
-    ]);
+    const [assignments, meeting, meetingHistory, activity, surahs] =
+        await Promise.all([
+            getGroupAssignments(group.id, session.user.id, isAdmin),
+            getGroupMeetingForUser(group.id, session.user.id),
+            getMeetingHistory(group.id, session.user.id, isAdmin, { limit: 2 }),
+            getGroupActivity(group.id, session.user.id, isAdmin),
+            getSurahsMeta(),
+        ]);
     const meetingState = meeting ? calculateMeetingState(meeting) : null;
     const agendaStartsAt = meetingState
         ? new Date(
@@ -167,237 +123,17 @@ export default async function GroupPage({
                   active: meetingState?.status === "active",
               })
             : null;
-    const assignmentMeetingOptions = meeting
-        ? getUpcomingMeetingOccurrences({ ...meeting, limit: 12 }).map(
-              (startsAt) => {
-                  const startsAtDate = new Date(startsAt);
-                  return {
-                      startsAt,
-                      label: new Intl.DateTimeFormat(preferences.language, {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                          timeZone: getMeetingDisplayTimezone(
-                              meeting.timezone,
-                              startsAtDate,
-                          ),
-                      }).format(startsAtDate),
-                  };
-              },
-          )
-        : [];
-    const warshCounts = new Map(
-        warshChapters.map((chapter) => [chapter.id, chapter.verses.length]),
-    );
-    const assignmentSurahs = surahs.map((surah) => ({
-        number: surah.number,
-        name: surah.name,
-        englishName: surah.englishName,
-        hafsAyahCount: surah.numberOfAyahs,
-        warshAyahCount: warshCounts.get(surah.number) ?? surah.numberOfAyahs,
-    }));
-    const surahName = (surahNumber: number) => {
-        const surah = surahs.find((item) => item.number === surahNumber);
-        return preferences.language === "ar" ? surah?.name : surah?.englishName;
-    };
-    const dateFormatter = new Intl.DateTimeFormat(preferences.language, {
-        dateStyle: "medium",
-        timeZone: "UTC",
-    });
-    const formatAssignmentDueAt = (dueAt: Date) =>
-        new Intl.DateTimeFormat(preferences.language, {
-            dateStyle: "medium",
-            timeStyle: "short",
-            timeZone: meeting
-                ? getMeetingDisplayTimezone(meeting.timezone, dueAt)
-                : "UTC",
-        }).format(dueAt);
-    const assignmentMembers = group.members
-        .filter((member) => isAdmin || member.userId === currentUserId)
-        .map((member) => ({
-            member,
-            assignments: assignments.filter(
-                (assignment) => assignment.assigneeId === member.userId,
-            ),
-            progress: memberProgressSummaries.find(
-                (summary) => summary.userId === member.userId,
-            ),
-        }))
-        .sort((first, second) => {
-            const priority = (memberAssignments: GroupAssignmentSummary[]) =>
-                memberAssignments.some(
-                    (assignment) => assignment.status === "submitted",
-                )
-                    ? 2
-                    : memberAssignments.some(
-                            (assignment) => assignment.status !== "completed",
-                        )
-                      ? 1
-                      : 0;
-
-            return (
-                priority(second.assignments) - priority(first.assignments) ||
-                first.member.name.localeCompare(
-                    second.member.name,
-                    preferences.language,
-                )
-            );
-        });
-
-    function renderAssignment(
-        assignment: GroupAssignmentSummary,
-        isHistory = false,
-    ) {
-        const Icon =
-            assignment.kind === "memorization" ? BookMarked : RefreshCcw;
-        const isMine = assignment.assigneeId === currentUserId;
-
-        return (
-            <article
-                key={assignment.id}
-                id={`assignment-${assignment.id}`}
-                className={cn(
-                    "grid scroll-mt-24 gap-4 px-4 py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5",
-                    isHistory && "bg-background/25",
-                    assignment.id === focusedAssignmentId &&
-                        "bg-primary/[0.075] ring-1 ring-inset ring-primary/25",
-                )}
-            >
-                <div className="flex min-w-0 items-start gap-3.5">
-                    <span
-                        className={cn(
-                            "flex size-9 shrink-0 items-center justify-center rounded-xl",
-                            isHistory
-                                ? "bg-muted text-muted-foreground"
-                                : "bg-primary/10 text-primary",
-                        )}
-                    >
-                        <Icon aria-hidden="true" className="size-4.5" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-semibold text-primary">
-                                {practiceT(`kinds.${assignment.kind}`)}
-                            </span>
-                            <span
-                                className={cn(
-                                    "rounded-full px-2.5 py-0.5 text-[0.7rem] ring-1",
-                                    assignment.status === "submitted"
-                                        ? "bg-primary/10 font-semibold text-primary ring-primary/20"
-                                        : assignment.status === "needs_revision"
-                                          ? "bg-destructive/8 text-destructive ring-destructive/15"
-                                          : "bg-background/70 text-muted-foreground ring-border/50",
-                                )}
-                            >
-                                {t(`assignments.statuses.${assignment.status}`)}
-                            </span>
-                        </div>
-                        <h4 className="mt-2 font-semibold leading-7">
-                            {practiceT("range", {
-                                startSurah:
-                                    surahName(assignment.startSurahNumber) ??
-                                    assignment.startSurahNumber,
-                                startAyah: assignment.startAyahNumber,
-                                endSurah:
-                                    surahName(assignment.endSurahNumber) ??
-                                    assignment.endSurahNumber,
-                                endAyah: assignment.endAyahNumber,
-                            })}
-                        </h4>
-                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
-                            {isHistory && assignment.reviewedAt ? (
-                                <span className="inline-flex items-center gap-1.5">
-                                    <CalendarDays
-                                        aria-hidden="true"
-                                        className="size-3.5"
-                                    />
-                                    {t("assignments.completedOn", {
-                                        date: dateFormatter.format(
-                                            assignment.reviewedAt,
-                                        ),
-                                    })}
-                                </span>
-                            ) : assignment.dueAt ? (
-                                <span className="inline-flex items-center gap-1.5">
-                                    <CalendarDays
-                                        aria-hidden="true"
-                                        className="size-3.5"
-                                    />
-                                    {t("assignments.due", {
-                                        date: formatAssignmentDueAt(
-                                            assignment.dueAt,
-                                        ),
-                                    })}
-                                </span>
-                            ) : null}
-                            <span>
-                                {t("assignments.riwayah", {
-                                    riwayah: t(
-                                        `assignments.riwayahs.${assignment.riwayah}`,
-                                    ),
-                                })}
-                            </span>
-                        </div>
-                        {assignment.instructions && (
-                            <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted-foreground">
-                                {assignment.instructions}
-                            </p>
-                        )}
-                        {assignment.reviewNote && (
-                            <div className="mt-3 rounded-xl bg-primary/[0.055] px-3.5 py-2.5 ring-1 ring-primary/10">
-                                <p className="text-xs font-semibold text-primary">
-                                    {t("assignments.feedback")}
-                                </p>
-                                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                    {assignment.reviewNote}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-1.5 sm:max-w-52 sm:justify-end">
-                    {isAdmin && assignment.status === "submitted" && (
-                        <Button asChild size="sm" className="rounded-xl">
-                            <Link
-                                href={`/groups/${currentGroupId}/review/${assignment.id}`}
-                            >
-                                <ClipboardCheck className="size-4" />
-                                {t("assignments.reviewNow")}
-                            </Link>
-                        </Button>
-                    )}
-                    {isMine && !isHistory && (
-                        <Button
-                            asChild
-                            variant="ghost"
-                            size="sm"
-                            className="rounded-xl text-primary hover:text-primary"
-                        >
-                            <Link href={`/practice/${assignment.id}/read`}>
-                                {t("assignments.open")}
-                                <ArrowRight
-                                    className={cn(
-                                        "size-4",
-                                        isArabic && "rotate-180",
-                                    )}
-                                />
-                            </Link>
-                        </Button>
-                    )}
-                    {isAdmin && (
-                        <DeleteAssignmentButton
-                            groupId={currentGroupId}
-                            assignmentId={assignment.id}
-                        />
-                    )}
-                </div>
-            </article>
-        );
-    }
+    const activeAssignmentCount = assignments.filter(
+        (assignment) => assignment.status !== "completed",
+    ).length;
+    const awaitingReviewCount = assignments.filter(
+        (assignment) => assignment.status === "submitted",
+    ).length;
+    const assignedMemberCount = new Set(
+        assignments
+            .filter((assignment) => assignment.status !== "completed")
+            .map((assignment) => assignment.assigneeId),
+    ).size;
 
     return (
         <main
@@ -409,8 +145,11 @@ export default async function GroupPage({
             )}
         >
             <PageBackground />
-            <div className="mx-auto max-w-5xl px-4 sm:px-6">
-                <StickyAppHeader className="-mx-4 px-4 sm:-mx-6 sm:px-6">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6">
+                <StickyAppHeader
+                    navigation
+                    className="-mx-4 px-4 sm:-mx-6 sm:px-6"
+                >
                     <Link href="/groups" className="flex items-center gap-3">
                         <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                             <UsersRound className="size-5" />
@@ -427,22 +166,16 @@ export default async function GroupPage({
                     />
                 </StickyAppHeader>
 
-                <section className="py-10 sm:py-14">
-                    <Link
-                        href="/groups"
-                        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
-                    >
-                        <ArrowLeft
-                            className={cn("size-4", isArabic && "rotate-180")}
-                        />
-                        {t("detail.back")}
-                    </Link>
-
-                    <div className="mt-9 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                <section className="py-8 sm:py-14">
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                         <div className="max-w-2xl">
                             <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-primary uppercase">
                                 {isAdmin && <Shield className="size-4" />}
-                                {t(`role.${group.role}`)}
+                                {t(
+                                    group.role === "admin"
+                                        ? "role.admin"
+                                        : "role.member",
+                                )}
                             </div>
                             <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
                                 {group.name}
@@ -467,26 +200,87 @@ export default async function GroupPage({
                         isHost={meeting?.hostUserId === session.user.id}
                         locale={preferences.language}
                         providerConfigured={isJaasConfigured()}
-                    />
-
-                    {meeting && meetingAgenda && (
-                        <MeetingAgenda
-                            groupId={group.id}
-                            agenda={meetingAgenda}
-                            currentUserId={session.user.id}
-                            isAdmin={isAdmin}
-                            locale={preferences.language}
-                            timezone={meeting.timezone}
-                            surahNames={Object.fromEntries(
-                                surahs.map((surah) => [
-                                    surah.number,
-                                    preferences.language === "ar"
-                                        ? surah.name
-                                        : surah.englishName,
-                                ]),
-                            )}
-                        />
-                    )}
+                    >
+                        {meeting && meetingAgenda && (
+                            <MeetingAgenda
+                                groupId={group.id}
+                                agenda={meetingAgenda}
+                                currentUserId={session.user.id}
+                                isAdmin={isAdmin}
+                                locale={preferences.language}
+                                timezone={meeting.timezone}
+                                embedded
+                                surahNames={Object.fromEntries(
+                                    surahs.map((surah) => [
+                                        surah.number,
+                                        preferences.language === "ar"
+                                            ? surah.name
+                                            : surah.englishName,
+                                    ]),
+                                )}
+                            />
+                        )}
+                    </GroupMeetingPanel>
+                    <section className="mt-10 overflow-hidden rounded-3xl bg-muted/30 ring-1 ring-border/55 sm:mt-12">
+                        <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                            <div>
+                                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                    {t("assignments.eyebrow")}
+                                </p>
+                                <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                                    {t("assignments.hubTitle")}
+                                </h2>
+                                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                                    {t(
+                                        isAdmin
+                                            ? "assignments.hubDescriptionAdmin"
+                                            : "assignments.hubDescriptionMember",
+                                    )}
+                                </p>
+                            </div>
+                            <Button
+                                asChild
+                                className="w-full rounded-xl lg:w-auto"
+                            >
+                                <Link
+                                    href={
+                                        isAdmin
+                                            ? `/assignments?view=manage&group=${group.id}`
+                                            : `/assignments?group=${group.id}`
+                                    }
+                                >
+                                    <CalendarRange className="size-4" />
+                                    {t("assignments.openHub")}
+                                </Link>
+                            </Button>
+                        </div>
+                        <div className="grid grid-cols-3 border-border/50 border-t">
+                            <div className="p-4 text-center sm:p-5">
+                                <strong className="text-2xl text-primary tabular-nums">
+                                    {activeAssignmentCount}
+                                </strong>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {t("assignments.hubActive")}
+                                </p>
+                            </div>
+                            <div className="border-border/50 border-x p-4 text-center sm:p-5">
+                                <strong className="text-2xl text-primary tabular-nums">
+                                    {assignedMemberCount}
+                                </strong>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {t("assignments.hubMembers")}
+                                </p>
+                            </div>
+                            <div className="p-4 text-center sm:p-5">
+                                <strong className="text-2xl text-primary tabular-nums">
+                                    {awaitingReviewCount}
+                                </strong>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {t("assignments.hubReview")}
+                                </p>
+                            </div>
+                        </div>
+                    </section>
 
                     {meeting && (
                         <MeetingHistory
@@ -499,419 +293,121 @@ export default async function GroupPage({
                         />
                     )}
 
-                    {isAdmin && (
-                        <section className="mt-10 rounded-3xl bg-primary/[0.07] p-6 ring-1 ring-primary/15 sm:p-7">
-                            <h2 className="text-lg font-semibold">
-                                {t("detail.inviteHeading")}
-                            </h2>
-                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                {t("detail.inviteDescription")}
-                            </p>
-                            <GroupInvite inviteCode={group.inviteCode} />
-                        </section>
-                    )}
-
                     <GroupActivityFeed
                         activity={activity}
                         currentUserId={session.user.id}
+                        groupId={group.id}
+                        isAdmin={isAdmin}
                         locale={preferences.language}
                         timezone={meeting?.timezone ?? "UTC"}
                     />
 
-                    <section className="mt-12">
-                        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                            <div>
-                                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                    {t("assignments.eyebrow")}
-                                </p>
-                                <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-                                    {t("assignments.title")}
-                                </h2>
-                                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                                    {t("assignments.description")}
-                                </p>
-                            </div>
-                            {isAdmin && (
-                                <Button
-                                    asChild
-                                    className="w-full shrink-0 rounded-xl sm:w-auto"
-                                >
-                                    <Link href={`/groups/${group.id}/plan`}>
-                                        <CalendarRange className="size-4" />
-                                        {t("assignments.planWeek")}
-                                    </Link>
-                                </Button>
-                            )}
-                        </div>
-
-                        {assignmentMembers.length > 0 ? (
-                            <div className="mt-6 divide-y divide-border/55 overflow-hidden rounded-3xl bg-muted/30 ring-1 ring-border/50">
-                                {assignmentMembers.map(
-                                    ({
-                                        member,
-                                        assignments: memberWork,
-                                        progress,
-                                    }) => {
-                                        const currentAssignments =
-                                            memberWork.filter(
-                                                (assignment) =>
-                                                    assignment.status !==
-                                                    "completed",
-                                            );
-                                        const completedAssignments = memberWork
-                                            .filter(
-                                                (assignment) =>
-                                                    assignment.status ===
-                                                    "completed",
-                                            )
-                                            .sort(
-                                                (first, second) =>
-                                                    (second.reviewedAt?.getTime() ??
-                                                        0) -
-                                                    (first.reviewedAt?.getTime() ??
-                                                        0),
-                                            );
-                                        const readyCount =
-                                            currentAssignments.filter(
-                                                (assignment) =>
-                                                    assignment.status ===
-                                                    "submitted",
-                                            ).length;
-
-                                        return (
-                                            <details
-                                                key={member.id}
-                                                className="group/member bg-background/20 open:bg-background/40"
-                                                open={
-                                                    readyCount > 0 ||
-                                                    memberWork.some(
-                                                        (assignment) =>
-                                                            assignment.id ===
-                                                            focusedAssignmentId,
-                                                    ) ||
-                                                    (!isAdmin &&
-                                                        currentAssignments.length >
-                                                            0)
-                                                }
-                                            >
-                                                <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/45 focus-visible:bg-muted/45 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">
-                                                    <Avatar className="size-11 shrink-0 border border-primary/15">
-                                                        {member.image && (
-                                                            <AvatarImage
-                                                                src={
-                                                                    member.image
-                                                                }
-                                                                alt=""
-                                                            />
-                                                        )}
-                                                        <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
-                                                            {initials(
-                                                                member.name,
-                                                            ) || (
-                                                                <UserRound className="size-4" />
-                                                            )}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                    <div className="min-w-0 flex-1">
-                                                        <h3 className="truncate font-semibold">
-                                                            {member.name}
-                                                        </h3>
-                                                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                                                            <span>
-                                                                {t(
-                                                                    "assignments.progress.compactAssignments",
-                                                                    {
-                                                                        completed:
-                                                                            progress?.completedAssignments ??
-                                                                            completedAssignments.length,
-                                                                        total:
-                                                                            progress?.totalAssignments ??
-                                                                            memberWork.length,
-                                                                    },
-                                                                )}
-                                                            </span>
-                                                            {progress?.attendanceRate !==
-                                                                null &&
-                                                                progress?.attendanceRate !==
-                                                                    undefined && (
-                                                                    <span>
-                                                                        {t(
-                                                                            "assignments.progress.compactAttendance",
-                                                                            {
-                                                                                rate: progress.attendanceRate,
-                                                                            },
-                                                                        )}
-                                                                    </span>
-                                                                )}
-                                                            {progress &&
-                                                                progress.unacceptedAbsenceStreak >
-                                                                    0 && (
-                                                                    <span className="font-semibold text-destructive">
-                                                                        {t(
-                                                                            "assignments.progress.compactAbsenceStreak",
-                                                                            {
-                                                                                count: progress.unacceptedAbsenceStreak,
-                                                                            },
-                                                                        )}
-                                                                    </span>
-                                                                )}
-                                                            {readyCount > 0 && (
-                                                                <span className="font-semibold text-primary sm:hidden">
-                                                                    {t(
-                                                                        "assignments.readyCount",
-                                                                        {
-                                                                            count: readyCount,
-                                                                        },
-                                                                    )}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    {readyCount > 0 && (
-                                                        <span className="hidden rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary sm:inline-flex">
-                                                            {t(
-                                                                "assignments.readyCount",
-                                                                {
-                                                                    count: readyCount,
-                                                                },
-                                                            )}
+                    <section className="mt-12 border-border/60 border-t pt-8 sm:mt-16 sm:pt-10">
+                        <details className="group/members overflow-hidden rounded-2xl border border-border/60 bg-card/45 shadow-sm">
+                            <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">
+                                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                    <UsersRound
+                                        aria-hidden="true"
+                                        className="size-5"
+                                    />
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                    <h2 className="font-semibold">
+                                        {t("detail.memberHeading")}
+                                    </h2>
+                                    <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground sm:text-sm">
+                                        {t("members", {
+                                            count: group.memberCount,
+                                        })}
+                                    </p>
+                                </div>
+                                <ChevronDown
+                                    aria-hidden="true"
+                                    className="size-4 shrink-0 text-muted-foreground transition-transform group-open/members:rotate-180"
+                                />
+                            </summary>
+                            <div className="divide-y divide-border/50 border-border/50 border-t">
+                                {group.members.map((member) => {
+                                    const isCurrentUser =
+                                        member.userId === session.user.id;
+                                    return (
+                                        <article
+                                            key={member.id}
+                                            className="flex items-center gap-3 px-4 py-4 sm:px-5"
+                                        >
+                                            <Avatar className="size-11 border border-primary/15">
+                                                {member.image && (
+                                                    <AvatarImage
+                                                        src={member.image}
+                                                        alt=""
+                                                    />
+                                                )}
+                                                <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
+                                                    {initials(member.name) || (
+                                                        <UserRound className="size-4" />
+                                                    )}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <h3 className="truncate font-semibold">
+                                                        {member.name}
+                                                    </h3>
+                                                    {isCurrentUser && (
+                                                        <span className="text-xs text-primary">
+                                                            {t("detail.you")}
                                                         </span>
                                                     )}
-                                                    <ChevronDown
-                                                        aria-hidden="true"
-                                                        className="size-4 shrink-0 text-muted-foreground transition-transform group-open/member:rotate-180"
-                                                    />
-                                                </summary>
-
-                                                <div className="border-t border-border/50">
-                                                    {progress && (
-                                                        <MemberProgressSummary
-                                                            summary={progress}
-                                                            locale={
-                                                                preferences.language
-                                                            }
-                                                            labels={{
-                                                                title: t(
-                                                                    "assignments.progress.title",
-                                                                ),
-                                                                completed: t(
-                                                                    "assignments.progress.completed",
-                                                                ),
-                                                                active: t(
-                                                                    "assignments.progress.active",
-                                                                ),
-                                                                awaitingReview:
-                                                                    t(
-                                                                        "assignments.progress.awaitingReview",
-                                                                        {
-                                                                            count: progress.awaitingReview,
-                                                                        },
-                                                                    ),
-                                                                attendance: t(
-                                                                    "assignments.progress.attendance",
-                                                                ),
-                                                                noAttendance: t(
-                                                                    "assignments.progress.noAttendance",
-                                                                ),
-                                                                attendanceDetail:
-                                                                    t(
-                                                                        "assignments.progress.attendanceDetail",
-                                                                        {
-                                                                            attended:
-                                                                                progress.attendedMeetings,
-                                                                            total: progress.countedMeetings,
-                                                                        },
-                                                                    ),
-                                                                absenceStreak:
-                                                                    t(
-                                                                        "assignments.progress.absenceStreak",
-                                                                    ),
-                                                                noAbsenceStreak:
-                                                                    t(
-                                                                        "assignments.progress.noAbsenceStreak",
-                                                                    ),
-                                                                excusedAbsences:
-                                                                    t(
-                                                                        "assignments.progress.excusedAbsences",
-                                                                        {
-                                                                            count: progress.excusedAbsences,
-                                                                        },
-                                                                    ),
-                                                            }}
-                                                        />
-                                                    )}
-                                                    {currentAssignments.length >
-                                                    0 ? (
-                                                        <div className="divide-y divide-border/45">
-                                                            {currentAssignments.map(
-                                                                (assignment) =>
-                                                                    renderAssignment(
-                                                                        assignment,
-                                                                    ),
-                                                            )}
-                                                        </div>
-                                                    ) : (
-                                                        <p className="px-5 py-5 text-sm text-muted-foreground">
-                                                            {t(
-                                                                "assignments.noCurrentForMember",
-                                                            )}
-                                                        </p>
-                                                    )}
-
-                                                    {completedAssignments.length >
-                                                        0 && (
-                                                        <details
-                                                            className="group/history border-t border-border/45"
-                                                            open={completedAssignments.some(
-                                                                (assignment) =>
-                                                                    assignment.id ===
-                                                                    focusedAssignmentId,
-                                                            )}
-                                                        >
-                                                            <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-3 text-xs font-semibold text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-                                                                <History
-                                                                    aria-hidden="true"
-                                                                    className="size-3.5"
-                                                                />
-                                                                {t(
-                                                                    "assignments.history",
-                                                                    {
-                                                                        count: completedAssignments.length,
-                                                                    },
-                                                                )}
-                                                                <ChevronDown
-                                                                    aria-hidden="true"
-                                                                    className="ms-auto size-3.5 transition-transform group-open/history:rotate-180"
-                                                                />
-                                                            </summary>
-                                                            <div className="divide-y divide-border/40 border-t border-border/40">
-                                                                {completedAssignments.map(
-                                                                    (
-                                                                        assignment,
-                                                                    ) =>
-                                                                        renderAssignment(
-                                                                            assignment,
-                                                                            true,
-                                                                        ),
-                                                                )}
-                                                            </div>
-                                                        </details>
-                                                    )}
                                                 </div>
-                                            </details>
-                                        );
-                                    },
-                                )}
+                                                <p className="truncate text-sm text-muted-foreground">
+                                                    {member.email}
+                                                </p>
+                                            </div>
+                                            <span className="hidden rounded-full bg-background/70 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50 sm:inline-flex">
+                                                {t(`role.${member.role}`)}
+                                            </span>
+                                            {isAdmin && !isCurrentUser && (
+                                                <MemberActions
+                                                    groupId={group.id}
+                                                    membershipId={member.id}
+                                                    role={member.role}
+                                                />
+                                            )}
+                                        </article>
+                                    );
+                                })}
                             </div>
-                        ) : (
-                            <div className="mt-6 rounded-3xl bg-muted/35 p-7 text-center ring-1 ring-border/50">
-                                <BookMarked className="mx-auto size-6 text-primary" />
-                                <h3 className="mt-4 font-semibold">
-                                    {t("assignments.emptyTitle")}
-                                </h3>
-                                <p className="mt-2 text-sm text-muted-foreground">
-                                    {t(
-                                        isAdmin
-                                            ? "assignments.emptyDescriptionAdmin"
-                                            : "assignments.emptyDescriptionMember",
-                                    )}
-                                </p>
-                            </div>
-                        )}
+                        </details>
 
-                        {isAdmin && hafsNavigation && warshNavigation && (
-                            <details className="group/create mt-6 overflow-hidden rounded-2xl bg-primary/[0.055] ring-1 ring-primary/12">
-                                <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 outline-none hover:bg-primary/[0.04] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
-                                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                        <CirclePlus className="size-4.5" />
+                        {isAdmin && (
+                            <details className="group/invite mt-3 overflow-hidden rounded-2xl border border-primary/15 bg-primary/[0.045] shadow-sm">
+                                <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-primary/[0.055] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">
+                                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                        <CirclePlus
+                                            aria-hidden="true"
+                                            className="size-5"
+                                        />
                                     </span>
                                     <div className="min-w-0 flex-1">
-                                        <h3 className="font-semibold">
-                                            {t("assignments.createTitle")}
-                                        </h3>
-                                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                                            {t("assignments.createDescription")}
+                                        <h2 className="font-semibold">
+                                            {t("detail.inviteHeading")}
+                                        </h2>
+                                        <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground sm:text-sm">
+                                            {t("detail.inviteDescription")}
                                         </p>
                                     </div>
-                                    <ChevronDown className="size-4 text-muted-foreground transition-transform group-open/create:rotate-180" />
+                                    <ChevronDown
+                                        aria-hidden="true"
+                                        className="size-4 shrink-0 text-muted-foreground transition-transform group-open/invite:rotate-180"
+                                    />
                                 </summary>
-                                <div className="border-t border-primary/10 p-5 sm:p-7">
-                                    <MemberAssignmentForm
-                                        groupId={group.id}
-                                        members={group.members}
-                                        surahs={assignmentSurahs}
-                                        navigationByRiwayah={{
-                                            hafs: hafsNavigation,
-                                            warsh: warshNavigation,
-                                        }}
-                                        meetingOptions={
-                                            assignmentMeetingOptions
-                                        }
-                                        locale={preferences.language}
+                                <div className="border-primary/10 border-t px-4 pb-5 sm:px-5">
+                                    <GroupInvite
+                                        inviteCode={group.inviteCode}
                                     />
                                 </div>
                             </details>
                         )}
-                    </section>
-
-                    <section className="mt-10">
-                        <h2 className="text-xl font-semibold">
-                            {t("detail.memberHeading")}
-                        </h2>
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                            {t("detail.memberDescription")}
-                        </p>
-                        <div className="mt-6 divide-y divide-border/50 overflow-hidden rounded-3xl bg-muted/35 ring-1 ring-border/50">
-                            {group.members.map((member) => {
-                                const isCurrentUser =
-                                    member.userId === session.user.id;
-                                return (
-                                    <article
-                                        key={member.id}
-                                        className="flex items-center gap-3 px-4 py-4 sm:px-5"
-                                    >
-                                        <Avatar className="size-11 border border-primary/15">
-                                            {member.image && (
-                                                <AvatarImage
-                                                    src={member.image}
-                                                    alt=""
-                                                />
-                                            )}
-                                            <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
-                                                {initials(member.name) || (
-                                                    <UserRound className="size-4" />
-                                                )}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <h3 className="truncate font-semibold">
-                                                    {member.name}
-                                                </h3>
-                                                {isCurrentUser && (
-                                                    <span className="text-xs text-primary">
-                                                        {t("detail.you")}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <p className="truncate text-sm text-muted-foreground">
-                                                {member.email}
-                                            </p>
-                                        </div>
-                                        <span className="hidden rounded-full bg-background/70 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50 sm:inline-flex">
-                                            {t(`role.${member.role}`)}
-                                        </span>
-                                        {isAdmin && !isCurrentUser && (
-                                            <MemberActions
-                                                groupId={group.id}
-                                                membershipId={member.id}
-                                                role={member.role}
-                                            />
-                                        )}
-                                    </article>
-                                );
-                            })}
-                        </div>
                     </section>
 
                     <GroupDangerActions

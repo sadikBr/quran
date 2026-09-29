@@ -210,8 +210,8 @@ export async function sendAssignmentNotification(
         : kind;
     const destination = reviewCompleted
         ? assignment.groupId
-            ? `/groups/${assignment.groupId}?assignment=${assignment.id}#assignment-${assignment.id}`
-            : "/practice"
+            ? `/assignments?group=${assignment.groupId}`
+            : "/assignments"
         : `/practice/${assignment.id}/read`;
     let sent = 0;
     let duplicate = 0;

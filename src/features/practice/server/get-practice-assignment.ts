@@ -2,7 +2,12 @@ import "server-only";
 
 import { and, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import db from "@/drizzle/db";
-import { memorizationGroup, practiceAssignment, user } from "@/drizzle/schema";
+import {
+    groupMeeting,
+    memorizationGroup,
+    practiceAssignment,
+    user,
+} from "@/drizzle/schema";
 import type { Riwayah } from "@/features/settings/preferences";
 import type { PracticeAssignment, PracticeKind } from "../types";
 
@@ -10,6 +15,7 @@ const activeStatuses = ["in_progress", "submitted", "needs_revision"];
 
 type AssignmentRow = typeof practiceAssignment.$inferSelect & {
     groupName: string | null;
+    meetingTimezone: string | null;
     assignedByName: string | null;
 };
 
@@ -37,6 +43,7 @@ function mapAssignment(result: AssignmentRow): PracticeAssignment {
         source: result.groupId ? "group" : "personal",
         groupId: result.groupId,
         groupName: result.groupName,
+        meetingTimezone: result.meetingTimezone,
         assignedByName: result.assignedByName,
         instructions: result.instructions,
         dueAt: result.dueAt,
@@ -69,6 +76,7 @@ function assignmentSelection() {
         createdAt: practiceAssignment.createdAt,
         updatedAt: practiceAssignment.updatedAt,
         groupName: memorizationGroup.name,
+        meetingTimezone: groupMeeting.timezone,
         assignedByName: user.name,
     };
 }
@@ -92,6 +100,10 @@ export default async function getPracticeAssignment(
             memorizationGroup,
             eq(practiceAssignment.groupId, memorizationGroup.id),
         )
+        .leftJoin(
+            groupMeeting,
+            eq(practiceAssignment.groupId, groupMeeting.groupId),
+        )
         .leftJoin(user, eq(practiceAssignment.assignedById, user.id))
         .where(
             and(
@@ -114,6 +126,10 @@ export async function getPracticeAssignments(
         .leftJoin(
             memorizationGroup,
             eq(practiceAssignment.groupId, memorizationGroup.id),
+        )
+        .leftJoin(
+            groupMeeting,
+            eq(practiceAssignment.groupId, groupMeeting.groupId),
         )
         .leftJoin(user, eq(practiceAssignment.assignedById, user.id))
         .where(
@@ -145,6 +161,10 @@ export async function getAssignedPracticeAssignments(
         .leftJoin(
             memorizationGroup,
             eq(practiceAssignment.groupId, memorizationGroup.id),
+        )
+        .leftJoin(
+            groupMeeting,
+            eq(practiceAssignment.groupId, groupMeeting.groupId),
         )
         .leftJoin(user, eq(practiceAssignment.assignedById, user.id))
         .where(

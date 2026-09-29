@@ -44,6 +44,7 @@ export default async function submitPracticeAssignment(input: unknown) {
         .where(eq(practiceAssignment.id, assignment.id));
 
     revalidatePath("/practice");
+    revalidatePath("/assignments");
     revalidatePath(`/practice/${assignment.id}/read`);
     if (assignment.groupId) revalidatePath(`/groups/${assignment.groupId}`);
     revalidatePath("/dashboard");

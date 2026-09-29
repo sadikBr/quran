@@ -77,7 +77,7 @@ export default async function reviewMemberAssignment(input: unknown) {
     revalidatePath(
         `/groups/${parsed.data.groupId}/review/${parsed.data.assignmentId}`,
     );
-    revalidatePath("/weekly");
+    revalidatePath("/assignments");
     revalidatePath("/practice");
     revalidatePath("/dashboard");
     return { success: true as const };

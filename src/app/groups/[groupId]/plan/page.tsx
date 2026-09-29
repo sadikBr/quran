@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarRange, UsersRound } from "lucide-react";
+import { CalendarRange, UsersRound } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -7,9 +7,14 @@ import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
-import WeeklyPlanEditor from "@/features/groups/components/weekly-plan-editor";
+import MeetingPlanEditor from "@/features/groups/components/meeting-plan-editor";
+import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
 import { getGroupForUser } from "@/features/groups/server/get-groups";
-import getWeeklyPlannerData from "@/features/groups/server/get-weekly-planner-data";
+import getMeetingPlannerData from "@/features/groups/server/get-meeting-planner-data";
+import {
+    getMeetingDisplayTimezone,
+    getUpcomingMeetingOccurrences,
+} from "@/features/groups/server/meeting-schedule";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import {
@@ -21,7 +26,7 @@ import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
-export default async function WeeklyPlanPage({
+export default async function MeetingPlanPage({
     params,
 }: {
     params: Promise<{ groupId: string }>;
@@ -40,13 +45,15 @@ export default async function WeeklyPlanPage({
 
     const [
         planner,
+        meeting,
         surahs,
         warshChapters,
         hafsNavigation,
         warshNavigation,
         messages,
     ] = await Promise.all([
-        getWeeklyPlannerData(groupId),
+        getMeetingPlannerData(groupId),
+        getGroupMeetingForUser(groupId, session.user.id),
         getSurahsMeta(),
         getWarshChapters(),
         getQuranNavigationMeta(),
@@ -63,6 +70,28 @@ export default async function WeeklyPlanPage({
         hafsAyahCount: surah.numberOfAyahs,
         warshAyahCount: warshCounts.get(surah.number) ?? surah.numberOfAyahs,
     }));
+    const meetingOptions = meeting
+        ? getUpcomingMeetingOccurrences({ ...meeting, limit: 12 }).map(
+              (startsAt) => {
+                  const startsAtDate = new Date(startsAt);
+                  return {
+                      startsAt,
+                      label: new Intl.DateTimeFormat(preferences.language, {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          timeZone: getMeetingDisplayTimezone(
+                              meeting.timezone,
+                              startsAtDate,
+                          ),
+                      }).format(startsAtDate),
+                  };
+              },
+          )
+        : [];
     const t = createTranslator({
         locale: preferences.language,
         messages,
@@ -101,10 +130,13 @@ export default async function WeeklyPlanPage({
             )}
         >
             <PageBackground />
-            <div className="mx-auto max-w-6xl px-4">
-                <StickyAppHeader className="-mx-4 px-4">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6">
+                <StickyAppHeader
+                    navigation
+                    className="-mx-4 px-4 sm:-mx-6 sm:px-6"
+                >
                     <Link
-                        href={`/groups/${groupId}`}
+                        href={`/assignments?view=manage&group=${groupId}`}
                         className="flex min-w-0 items-center gap-3 rounded-md"
                     >
                         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -123,17 +155,7 @@ export default async function WeeklyPlanPage({
                 </StickyAppHeader>
 
                 <section className="py-10 sm:py-14">
-                    <Link
-                        href={`/groups/${groupId}`}
-                        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
-                    >
-                        <ArrowLeft
-                            className={cn("size-4", isArabic && "rotate-180")}
-                        />
-                        {t("back", { group: group.name })}
-                    </Link>
-
-                    <div className="mt-9 flex max-w-3xl items-start gap-4">
+                    <div className="flex max-w-3xl items-start gap-4">
                         <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                             <CalendarRange className="size-6" />
                         </span>
@@ -150,11 +172,12 @@ export default async function WeeklyPlanPage({
                         </div>
                     </div>
 
-                    <WeeklyPlanEditor
+                    <MeetingPlanEditor
                         groupId={groupId}
                         members={group.members}
                         surahs={assignmentSurahs}
                         planner={planner}
+                        meetingOptions={meetingOptions}
                         navigationByRiwayah={{
                             hafs: hafsNavigation,
                             warsh: warshNavigation,

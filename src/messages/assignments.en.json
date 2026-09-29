@@ -1,0 +1,100 @@
+{
+    "Assignments": {
+        "header": "Assignments",
+        "back": "Back to dashboard",
+        "eyebrow": "GROUP ASSIGNMENTS",
+        "title": "Be ready for every meeting",
+        "description": "Your assignments are organized by meeting, so it is clear what needs attention now and what comes next.",
+        "filtering": "Showing assignments from {group}.",
+        "showAll": "Show all assignments",
+        "tabs": {
+            "label": "Assignment views",
+            "mine": "My assignments",
+            "manage": "Manage assignments"
+        },
+        "summary": {
+            "active": "{count, plural, one {# active assignment} other {# active assignments}}",
+            "ready": "{count, plural, one {# ready for review} other {# ready for review}}",
+            "meetings": "{count, plural, =0 {No linked meetings} one {# meeting} other {# meetings}}",
+            "progress": "Overall progress"
+        },
+        "meeting": {
+            "next": "Next meeting",
+            "later": "Later meeting",
+            "overdue": "Meeting has passed",
+            "unscheduled": "No meeting scheduled",
+            "unscheduledLabel": "Assignments without a meeting",
+            "assignmentCount": "{count, plural, one {# assignment} other {# assignments}}"
+        },
+        "sections": {
+            "overdue": {
+                "title": "Needs attention",
+                "description": "These assignments have passed their due date. Your saved place is still available."
+            },
+            "this_week": {
+                "title": "Due this week",
+                "description": "Focus on these ranges before the week ends."
+            },
+            "upcoming": {
+                "title": "Coming next",
+                "description": "Active work with a later due date, shown so you can prepare early."
+            }
+        },
+        "empty": {
+            "title": "No assignments are waiting",
+            "description": "You do not have any active group assignments. New work from your group will appear here.",
+            "practice": "Open personal practice",
+            "groups": "Open groups"
+        },
+        "card": {
+            "fromGroup": "{group}",
+            "assignedBy": "Assigned by {name}",
+            "due": "Due {date}",
+            "overdue": "Overdue since {date}",
+            "noDueDate": "No due date",
+            "range": "From {startSurah}, ayah {startAyah, number}, to {endSurah}, ayah {endAyah, number}",
+            "progress": "{completed, number} of {total, number} ayahs",
+            "continue": "Continue practice",
+            "start": "Start practice",
+            "reviewPending": "Ready for review",
+            "feedback": "Admin feedback",
+            "kinds": {
+                "memorization": "New memorization",
+                "revision": "Revision"
+            },
+            "statuses": {
+                "in_progress": "In progress",
+                "submitted": "Waiting for review",
+                "needs_revision": "Needs more work",
+                "completed": "Completed"
+            }
+        },
+        "dashboard": {
+            "eyebrow": "Upcoming assignments",
+            "title": "Your group assignments",
+            "active": "You have {count, plural, one {# active assignment} other {# active assignments}}. {ready, plural, =0 {Keep going at your pace.} one {# is ready for review.} other {# are ready for review.}}",
+            "empty": "No group assignments are waiting for you right now.",
+            "open": "View assignments"
+        },
+        "admin": {
+            "eyebrow": "ASSIGNMENT MANAGEMENT",
+            "title": "Prepare, publish, and review",
+            "description": "Manage every circle’s meeting plan and review queue from one place.",
+            "selectedGroup": "Selected circle",
+            "groupSummary": "{members, plural, one {# member} other {# members}} · {planned, plural, one {# learner with active work} other {# learners with active work}} · {review, plural, =0 {nothing awaiting review} one {# awaiting review} other {# awaiting review}}",
+            "planMeeting": "Plan a meeting",
+            "openGroup": "Open circle",
+            "active": "Active",
+            "learners": "Learners",
+            "awaitingReview": "To review",
+            "reviewTitle": "Ready for review",
+            "reviewDescription": "These learners are waiting for you to listen and record a decision.",
+            "currentTitle": "Current assignments",
+            "currentDescription": "Published work across this circle, ordered by its meeting date.",
+            "completedHistory": "Completed assignment history ({count, number})",
+            "range": "{startSurah} {startAyah, number} – {endSurah} {endAyah, number}",
+            "empty": "No active assignments in this circle yet. Plan the next meeting or create an individual assignment."
+        },
+        "loading": "Organizing your assignments by meeting…"
+    }
+}

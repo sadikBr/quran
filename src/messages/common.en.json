@@ -8,6 +8,24 @@
             "title": "Read Quran & Track Your Memorization",
             "description": "Read the Quran, listen to recitations, and keep your place."
         },
+        "navigation": {
+            "close": "Close menu",
+            "overview": "Your space",
+            "reading": "Read and memorize",
+            "together": "Your circles",
+            "home": "Home",
+            "menu": "Menu",
+            "shortcuts": "Your shortcuts",
+            "wird": "Daily Wird",
+            "practice": "Personal practice",
+            "memorization": "Memorization progress",
+            "continueReading": "Continue reading",
+            "label": "Main navigation",
+            "today": "Today",
+            "quran": "Quran",
+            "assignments": "Assignments",
+            "groups": "Groups"
+        },
         "loading": { "page": "Loading your page…", "label": "Loading" },
         "error": {
             "eyebrow": "SOMETHING WENT WRONG",

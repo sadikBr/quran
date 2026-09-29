@@ -12,6 +12,8 @@ import {
     userSettings,
 } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
+import { getUpcomingMeetingOccurrences } from "@/features/groups/server/meeting-schedule";
 import { sendAssignmentNotification } from "@/features/notifications/server/assignment-notifications";
 import {
     PRACTICE_KINDS,
@@ -31,12 +33,12 @@ const entrySchema = z.object({
 
 const inputSchema = z.object({
     groupId: z.string().min(1),
-    dueDate: z.iso.date(),
+    dueMeetingStartsAt: z.iso.datetime(),
     mode: z.enum(["draft", "publish"]),
     entries: z.array(entrySchema).min(1).max(100),
 });
 
-export default async function saveWeeklyPlan(input: unknown) {
+export default async function saveMeetingPlan(input: unknown) {
     const parsed = inputSchema.safeParse(input);
     if (!parsed.success) return { success: false as const, reason: "invalid" };
 
@@ -57,6 +59,21 @@ export default async function saveWeeklyPlan(input: unknown) {
             member.userId === session.user.id && member.role === "admin",
     );
     if (!admin) return { success: false as const, reason: "unauthorized" };
+
+    const meeting = await getGroupMeetingForUser(
+        parsed.data.groupId,
+        session.user.id,
+    );
+    const upcomingMeetingStarts = meeting
+        ? getUpcomingMeetingOccurrences({ ...meeting, limit: 12 })
+        : [];
+    const dueAt = new Date(parsed.data.dueMeetingStartsAt);
+    const isScheduledMeeting = upcomingMeetingStarts.some(
+        (startsAt) => new Date(startsAt).getTime() === dueAt.getTime(),
+    );
+    if (!isScheduledMeeting) {
+        return { success: false as const, reason: "invalid_meeting" };
+    }
 
     const memberById = new Map(
         memberships.map((member) => [
@@ -106,7 +123,6 @@ export default async function saveWeeklyPlan(input: unknown) {
     if (invalidRange)
         return { success: false as const, reason: "invalid_range" };
 
-    const dueAt = new Date(`${parsed.data.dueDate}T12:00:00.000Z`);
     const assignments = parsed.data.entries.map((entry) => {
         const riwayah = memberById.get(entry.assigneeId)?.riwayah ?? "hafs";
         return {
@@ -133,6 +149,7 @@ export default async function saveWeeklyPlan(input: unknown) {
                     and(
                         eq(practiceAssignment.groupId, parsed.data.groupId),
                         eq(practiceAssignment.status, "draft"),
+                        eq(practiceAssignment.dueAt, dueAt),
                     ),
                 );
 
@@ -154,7 +171,7 @@ export default async function saveWeeklyPlan(input: unknown) {
 
     revalidatePath(`/groups/${parsed.data.groupId}`);
     revalidatePath(`/groups/${parsed.data.groupId}/plan`);
-    revalidatePath("/weekly");
+    revalidatePath("/assignments");
     revalidatePath("/practice");
     revalidatePath("/dashboard");
     return { success: true as const, mode: parsed.data.mode };

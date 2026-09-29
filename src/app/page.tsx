@@ -82,7 +82,7 @@ export default async function Home() {
     const hasPendingWird = Boolean(
         dailyWird && !dailyWird.completed && !dailyWird.scheduledForFuture,
     );
-    const href = hasPendingWird ? "/wird" : readingHref;
+    const href = hasPendingWird ? "/wird/read" : readingHref;
     let continueReadingLabel = t("hero.beginReading");
     let readingPlace =
         preferences.readingMode === "page"
@@ -136,7 +136,10 @@ export default async function Home() {
         >
             <PageBackground />
             <div className="mx-auto flex min-h-dvh max-w-6xl flex-col px-4 sm:px-6">
-                <StickyAppHeader className="-mx-4 px-4 text-foreground transition-colors data-[scrolled=true]:text-foreground sm:-mx-6 sm:px-6 dark:text-white">
+                <StickyAppHeader
+                    navigation={Boolean(session)}
+                    className="-mx-4 px-4 text-foreground transition-colors data-[scrolled=true]:text-foreground sm:-mx-6 sm:px-6 dark:text-white"
+                >
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
@@ -153,7 +156,7 @@ export default async function Home() {
                         <UserMenu
                             name={session.user.name}
                             image={session.user.image}
-                            continueReadingHref={href}
+                            continueReadingHref={readingHref}
                             labels={accountLabels}
                         />
                     ) : (
@@ -254,6 +257,7 @@ export default async function Home() {
                                 <Button
                                     asChild
                                     size="lg"
+                                    variant="default"
                                     className="h-12 w-full rounded-xl px-7 shadow-lg shadow-black/20 sm:w-auto"
                                 >
                                     <Link href={href}>

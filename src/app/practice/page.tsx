@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BookMarked, RefreshCcw } from "lucide-react";
+import { ArrowRight, BookMarked, RefreshCcw } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -101,7 +101,10 @@ export default async function PracticePage() {
         >
             <PageBackground />
             <div className="mx-auto max-w-5xl px-4 sm:px-6">
-                <StickyAppHeader className="-mx-4 px-4 sm:-mx-6 sm:px-6">
+                <StickyAppHeader
+                    navigation
+                    className="-mx-4 px-4 sm:-mx-6 sm:px-6"
+                >
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
@@ -122,18 +125,7 @@ export default async function PracticePage() {
                 </StickyAppHeader>
 
                 <section className="py-10 sm:py-14">
-                    <Link
-                        href="/dashboard"
-                        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
-                    >
-                        <ArrowLeft
-                            aria-hidden="true"
-                            className={cn("size-4", isArabic && "rotate-180")}
-                        />
-                        {t("back")}
-                    </Link>
-
-                    <div className="mt-9 max-w-2xl">
+                    <div className="max-w-2xl">
                         <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
                             {t("eyebrow")}
                         </p>

@@ -1,4 +1,4 @@
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -63,7 +63,7 @@ export default async function MemorizationPage() {
         >
             <PageBackground />
             <div className="mx-auto max-w-6xl px-4">
-                <StickyAppHeader className="-mx-4 px-4">
+                <StickyAppHeader navigation className="-mx-4 px-4">
                     <Link
                         href="/dashboard"
                         className="flex items-center gap-3 rounded-md"
@@ -84,16 +84,7 @@ export default async function MemorizationPage() {
                 </StickyAppHeader>
 
                 <section className="py-10 sm:py-14">
-                    <Link
-                        href="/dashboard"
-                        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
-                    >
-                        <ArrowLeft
-                            className={cn("size-4", isArabic && "rotate-180")}
-                        />
-                        {t("back")}
-                    </Link>
-                    <div className="mt-9 max-w-3xl">
+                    <div className="max-w-3xl">
                         <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
                             {t("eyebrow")}
                         </p>

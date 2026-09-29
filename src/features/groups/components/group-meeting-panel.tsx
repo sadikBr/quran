@@ -12,9 +12,10 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type {
     GroupMeetingDetails,
     MeetingOccurrenceState,
@@ -54,6 +55,7 @@ export default function GroupMeetingPanel({
     isHost,
     locale,
     providerConfigured,
+    children,
 }: {
     groupId: string;
     meeting: GroupMeetingDetails | null;
@@ -62,11 +64,13 @@ export default function GroupMeetingPanel({
     isHost: boolean;
     locale: string;
     providerConfigured: boolean;
+    children?: ReactNode;
 }) {
     const t = useTranslations("Groups.meeting");
     const router = useRouter();
     const [now, setNow] = useState(Date.now());
     const [isSaving, setIsSaving] = useState(false);
+    const [scheduleOpen, setScheduleOpen] = useState(false);
     const [schedule, setSchedule] = useState<MeetingScheduleSlot[]>(
         meeting?.schedule ?? [{ weekday: 1, localTime: "20:00" }],
     );
@@ -113,6 +117,7 @@ export default function GroupMeetingPanel({
     }
 
     const active = state?.status === "active";
+    const canJoin = active && providerConfigured;
     const nextLabel =
         meeting && state?.nextStartsAt
             ? formatOccurrence(state.nextStartsAt, locale, meeting.timezone)
@@ -121,7 +126,13 @@ export default function GroupMeetingPanel({
     return (
         <section className="relative mt-10 overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary/[0.12] via-card to-card shadow-[0_24px_70px_-45px_hsl(var(--primary)/0.65)] ring-1 ring-primary/15">
             <div className="pointer-events-none absolute -end-20 -top-24 size-64 rounded-full bg-primary/10 blur-3xl" />
-            <div className="relative grid gap-7 px-5 py-7 sm:px-8 sm:py-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div
+                className={cn(
+                    "relative grid gap-7 px-5 py-7 sm:px-8 sm:py-8",
+                    canJoin &&
+                        "lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center",
+                )}
+            >
                 <div className="flex min-w-0 items-start gap-4">
                     <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20">
                         {active ? (
@@ -163,7 +174,7 @@ export default function GroupMeetingPanel({
                                         name: meeting.hostName,
                                     })}
                         </p>
-                        {meeting && (
+                        {meeting && meeting.schedule.length > 1 && (
                             <div className="mt-5 flex flex-wrap gap-2 text-xs text-muted-foreground">
                                 {meeting.schedule.map((slot) => (
                                     <span
@@ -177,11 +188,19 @@ export default function GroupMeetingPanel({
                                 ))}
                             </div>
                         )}
+                        {meeting && !canJoin && (
+                            <span className="mt-5 inline-flex w-fit items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-xs font-semibold text-primary ring-1 ring-primary/15">
+                                <CalendarClock className="size-4" />
+                                {active
+                                    ? t("providerUnavailable")
+                                    : t("notOpen")}
+                            </span>
+                        )}
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                    {active && providerConfigured ? (
+                {canJoin && (
+                    <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                         <Button
                             asChild
                             size="lg"
@@ -192,25 +211,20 @@ export default function GroupMeetingPanel({
                                 {t(isHost ? "start" : "join")}
                             </Link>
                         </Button>
-                    ) : (
-                        meeting && (
-                            <Button
-                                disabled
-                                size="lg"
-                                className="rounded-xl px-6"
-                            >
-                                <CalendarClock className="size-4.5" />
-                                {providerConfigured
-                                    ? t("notOpen")
-                                    : t("providerUnavailable")}
-                            </Button>
-                        )
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
 
+            {children}
+
             {isAdmin && (
-                <details className="group relative bg-background/35">
+                <details
+                    open={scheduleOpen}
+                    onToggle={(event) =>
+                        setScheduleOpen(event.currentTarget.open)
+                    }
+                    className="group relative bg-background/35"
+                >
                     <summary className="flex cursor-pointer list-none items-center gap-2 border-primary/10 border-t px-5 py-4 text-sm font-semibold text-muted-foreground outline-none transition-colors hover:bg-background/35 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:px-8 [&::-webkit-details-marker]:hidden">
                         <Settings2 className="size-4 text-primary" />
                         {meeting ? t("editSchedule") : t("configure")}

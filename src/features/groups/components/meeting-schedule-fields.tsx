@@ -76,6 +76,8 @@ export default function MeetingScheduleFields({
                         </select>
                         <Input
                             type="time"
+                            lang="en-GB"
+                            dir="ltr"
                             aria-label={t("time")}
                             required
                             value={slot.localTime}
@@ -84,7 +86,7 @@ export default function MeetingScheduleFields({
                                     localTime: event.target.value,
                                 })
                             }
-                            className="h-11 rounded-xl border-0 bg-background/80 shadow-sm ring-1 ring-border/60"
+                            className="h-11 rounded-xl border-0 bg-background/80 text-left shadow-sm ring-1 ring-border/60"
                         />
                         <Button
                             type="button"

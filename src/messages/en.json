@@ -13,7 +13,7 @@
             "intro": "A quiet place to read, listen, and reflect",
             "eyebrow": "Your Quran journey, in one place",
             "title": "Read, memorize, and keep going together.",
-            "description": "A calm reader for your daily Wird, focused memorization practice, and the weekly work you share with your Quran circle.",
+            "description": "A calm reader for your daily Wird, focused memorization practice, and the assignments you prepare for each Quran circle meeting.",
             "todayWird": "Today’s Wird",
             "wirdReady": "Your daily portion is ready",
             "beginReading": "Begin reading",
@@ -50,7 +50,7 @@
             },
             "groups": {
                 "eyebrow": "Community and accountability",
-                "title": "Weekly work tailored to every member.",
+                "title": "A clear plan for every circle meeting.",
                 "description": "Admins prepare an appropriate range for each learner, listen to their recitation, and decide what is complete or needs more revision."
             },
             "place": {

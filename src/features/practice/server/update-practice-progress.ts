@@ -69,6 +69,7 @@ export default async function updatePracticeProgress(input: unknown) {
         );
 
     revalidatePath("/practice");
+    revalidatePath("/assignments");
     revalidatePath("/practice/read");
     revalidatePath("/dashboard");
     return {

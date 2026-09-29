@@ -94,7 +94,7 @@ export default async function MeetingHistoryPage({
         >
             <PageBackground />
             <div className="mx-auto max-w-5xl px-4">
-                <StickyAppHeader className="-mx-4 px-4">
+                <StickyAppHeader navigation className="-mx-4 px-4">
                     <Link
                         href={`/groups/${groupId}`}
                         className="flex min-w-0 items-center gap-3 rounded-md"
@@ -115,17 +115,7 @@ export default async function MeetingHistoryPage({
                 </StickyAppHeader>
 
                 <section className="py-10 sm:py-14">
-                    <Link
-                        href={`/groups/${groupId}`}
-                        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
-                    >
-                        <ArrowLeft
-                            className={cn("size-4", isArabic && "rotate-180")}
-                        />
-                        {t("back", { group: group.name })}
-                    </Link>
-
-                    <div className="mt-9 flex max-w-3xl items-start gap-4">
+                    <div className="flex max-w-3xl items-start gap-4">
                         <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                             <History className="size-6" />
                         </span>

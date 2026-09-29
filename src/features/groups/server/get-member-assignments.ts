@@ -8,35 +8,19 @@ import type {
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
 
-export type WeeklyAssignmentPeriod = "overdue" | "this_week" | "upcoming";
-
-export interface WeeklyAssignment extends PracticeAssignment {
+export interface MemberAssignment extends PracticeAssignment {
     completedAyahs: number;
     totalAyahs: number;
     percentage: number;
-    period: WeeklyAssignmentPeriod;
 }
 
-export interface MemberWeeklyView {
-    weekStart: Date;
-    weekEnd: Date;
-    assignments: WeeklyAssignment[];
+export interface MemberAssignmentsView {
+    assignments: MemberAssignment[];
     surahs: Array<{
         number: number;
         name: string;
         englishName: string;
     }>;
-}
-
-function currentWeek(now = new Date()) {
-    const start = new Date(now);
-    const daysSinceMonday = (start.getUTCDay() + 6) % 7;
-    start.setUTCHours(0, 0, 0, 0);
-    start.setUTCDate(start.getUTCDate() - daysSinceMonday);
-    const end = new Date(start);
-    end.setUTCDate(end.getUTCDate() + 7);
-    end.setMilliseconds(end.getMilliseconds() - 1);
-    return { start, end };
 }
 
 function referencePosition(
@@ -78,13 +62,12 @@ function progressForAssignment(
     };
 }
 
-export default async function getMemberWeeklyView(
+export default async function getMemberAssignments(
     userId: string,
-): Promise<MemberWeeklyView> {
+): Promise<MemberAssignmentsView> {
     const assignments = await getAssignedPracticeAssignments(userId);
-    const { start: weekStart, end: weekEnd } = currentWeek();
     if (assignments.length === 0) {
-        return { weekStart, weekEnd, assignments: [], surahs: [] };
+        return { assignments: [], surahs: [] };
     }
 
     const needsWarsh = assignments.some(
@@ -101,28 +84,18 @@ export default async function getMemberWeeklyView(
         warshChapters.map((chapter) => [chapter.id, chapter.verses.length]),
     );
     return {
-        weekStart,
-        weekEnd,
         surahs: surahs.map(({ number, name, englishName }) => ({
             number,
             name,
             englishName,
         })),
         assignments: assignments.map((assignment) => {
-            const dueAt = assignment.dueAt;
-            const period: WeeklyAssignmentPeriod =
-                dueAt && dueAt < weekStart
-                    ? "overdue"
-                    : dueAt && dueAt <= weekEnd
-                      ? "this_week"
-                      : "upcoming";
             const counts =
                 assignment.riwayah === "warsh" ? warshCounts : hafsCounts;
 
             return {
                 ...assignment,
                 ...progressForAssignment(assignment, counts),
-                period,
             };
         }),
     };

@@ -75,7 +75,7 @@ export default function GroupForms({
     }
 
     return (
-        <section className="mt-14 border-primary/15 border-t pt-6 sm:mt-16">
+        <section className="mt-10 rounded-3xl border border-border/60 bg-card/45 p-4 shadow-sm sm:mt-12 sm:p-6 lg:p-7">
             <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted/50 p-1 sm:inline-grid sm:min-w-80">
                 <button
                     type="button"
@@ -109,9 +109,9 @@ export default function GroupForms({
                 </button>
             </div>
 
-            <div className="mt-8 grid gap-8 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-12">
+            <div className="mt-7 grid gap-7 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-12">
                 <div className="flex items-start gap-3">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         {mode === "create" ? (
                             <UsersRound aria-hidden="true" className="size-5" />
                         ) : (

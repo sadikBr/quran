@@ -46,6 +46,7 @@ export default async function deleteMemberAssignment(input: unknown) {
     if (deleted.length === 0) return { success: false as const };
 
     revalidatePath(`/groups/${parsed.data.groupId}`);
+    revalidatePath("/assignments");
     revalidatePath("/practice");
     revalidatePath("/dashboard");
     return { success: true as const };

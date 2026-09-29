@@ -1,4 +1,5 @@
 import type { Language } from "@/features/settings/preferences";
+import englishAssignmentsMessages from "@/messages/assignments.en.json";
 import englishAuthMessages from "@/messages/auth.en.json";
 import englishCommonMessages from "@/messages/common.en.json";
 import englishDashboardMessages from "@/messages/dashboard.en.json";
@@ -9,7 +10,6 @@ import englishPracticeMessages from "@/messages/practice.en.json";
 import englishProfileMessages from "@/messages/profile.en.json";
 import englishReaderMessages from "@/messages/reader.en.json";
 import englishSettingsMessages from "@/messages/settings.en.json";
-import englishWeeklyMessages from "@/messages/weekly.en.json";
 import englishWirdMessages from "@/messages/wird.en.json";
 
 const englishMessages = {
@@ -24,7 +24,7 @@ const englishMessages = {
     ...englishReaderMessages,
     ...englishSettingsMessages,
     ...englishWirdMessages,
-    ...englishWeeklyMessages,
+    ...englishAssignmentsMessages,
 };
 
 export type AppMessages = typeof englishMessages;
@@ -47,7 +47,7 @@ const messageLoaders: Record<
             reader,
             settings,
             wird,
-            weekly,
+            assignments,
         ] = await Promise.all([
             import("@/messages/auth.ar.json"),
             import("@/messages/common.ar.json"),
@@ -60,7 +60,7 @@ const messageLoaders: Record<
             import("@/messages/reader.ar.json"),
             import("@/messages/settings.ar.json"),
             import("@/messages/wird.ar.json"),
-            import("@/messages/weekly.ar.json"),
+            import("@/messages/assignments.ar.json"),
         ]);
 
         return {
@@ -76,7 +76,7 @@ const messageLoaders: Record<
                 ...reader.default,
                 ...settings.default,
                 ...wird.default,
-                ...weekly.default,
+                ...assignments.default,
             },
         };
     },

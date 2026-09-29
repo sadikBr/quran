@@ -28,6 +28,7 @@ export interface PracticeAssignment {
     source: "personal" | "group";
     groupId: string | null;
     groupName: string | null;
+    meetingTimezone: string | null;
     assignedByName: string | null;
     instructions: string | null;
     dueAt: Date | null;

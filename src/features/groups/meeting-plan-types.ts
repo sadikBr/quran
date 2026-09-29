@@ -1,7 +1,7 @@
 import type { PracticeKind, QuranReference } from "@/features/practice/types";
 import type { Riwayah } from "@/features/settings/preferences";
 
-export interface WeeklyPlanAssignment {
+export interface MeetingPlanAssignment {
     assigneeId: string;
     kind: PracticeKind;
     riwayah: Riwayah;
@@ -10,9 +10,12 @@ export interface WeeklyPlanAssignment {
     instructions: string;
 }
 
-export interface WeeklyPlannerData {
-    dueDate: string | null;
-    drafts: WeeklyPlanAssignment[];
-    previousDueDate: string | null;
-    previousAssignments: WeeklyPlanAssignment[];
+export interface MeetingPlannerData {
+    drafts: Array<
+        MeetingPlanAssignment & {
+            dueMeetingStartsAt: string;
+        }
+    >;
+    previousMeetingStartsAt: string | null;
+    previousAssignments: MeetingPlanAssignment[];
 }

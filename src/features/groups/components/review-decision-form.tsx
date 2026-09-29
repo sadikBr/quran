@@ -46,7 +46,7 @@ export default function ReviewDecisionForm({
                     : "revisionSuccess",
             ),
         );
-        router.push(`/groups/${groupId}`);
+        router.push(`/assignments?view=manage&group=${groupId}`);
         router.refresh();
     }
 

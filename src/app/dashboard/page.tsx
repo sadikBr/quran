@@ -62,7 +62,7 @@ function DashboardShortcut({
     return (
         <Link
             href={href}
-            className="group grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] items-start gap-3 rounded-xl px-2 py-4 outline-none transition-colors hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring sm:px-3"
+            className="group grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] items-start gap-3 rounded-xl px-3 py-4 outline-none transition-[background-color,box-shadow] hover:bg-background/70 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring"
         >
             <span
                 className={cn(
@@ -88,7 +88,7 @@ function DashboardShortcut({
                         )}
                     />
                 </h3>
-                <p className="mt-1 truncate text-xs leading-5 text-muted-foreground">
+                <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
                     {description}
                 </p>
             </div>
@@ -188,10 +188,10 @@ export default async function DashboardPage() {
         messages,
         namespace: "Groups",
     });
-    const weeklyT = createTranslator({
+    const assignmentsT = createTranslator({
         locale: preferences.language,
         messages,
-        namespace: "Weekly",
+        namespace: "Assignments",
     });
     const memorizationT = createTranslator({
         locale: preferences.language,
@@ -232,20 +232,20 @@ export default async function DashboardPage() {
     const FocusIcon = focusIsAssignment ? CalendarCheck2 : MoonStar;
     const focusHref = focusAssignment
         ? focusAssignment.status === "submitted"
-            ? "/weekly"
+            ? "/assignments"
             : `/practice/${focusAssignment.id}/read`
         : dailyWird?.completed || !dailyWird
           ? "/wird"
           : "/wird/read";
     const focusEyebrow = focusAssignment
         ? focusAssignment.groupName
-            ? weeklyT("card.fromGroup", {
+            ? assignmentsT("card.fromGroup", {
                   group: focusAssignment.groupName,
               })
-            : weeklyT("dashboard.eyebrow")
+            : assignmentsT("dashboard.eyebrow")
         : wirdT("dashboard.eyebrow");
     const focusTitle = focusAssignment
-        ? weeklyT(`card.kinds.${focusAssignment.kind}`)
+        ? assignmentsT(`card.kinds.${focusAssignment.kind}`)
         : dailyWird
           ? wirdT("today.goal", {
                 amount: dailyWird.amount,
@@ -263,10 +263,10 @@ export default async function DashboardPage() {
           : wirdT("dashboard.emptyDescription");
     const focusAction = focusAssignment
         ? focusAssignment.status === "submitted"
-            ? weeklyT("card.reviewPending")
+            ? assignmentsT("card.reviewPending")
             : focusAssignment.progress
-              ? weeklyT("card.continue")
-              : weeklyT("card.start")
+              ? assignmentsT("card.continue")
+              : assignmentsT("card.start")
         : !dailyWird
           ? wirdT("dashboard.setup")
           : dailyWird.completed
@@ -360,7 +360,10 @@ export default async function DashboardPage() {
         >
             <PageBackground />
             <div className="mx-auto max-w-6xl px-4 sm:px-6">
-                <StickyAppHeader className="-mx-4 px-4">
+                <StickyAppHeader
+                    navigation
+                    className="-mx-4 px-4 sm:-mx-6 sm:px-6"
+                >
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
@@ -380,7 +383,7 @@ export default async function DashboardPage() {
                     />
                 </StickyAppHeader>
 
-                <section className="py-8 sm:py-12">
+                <section className="py-7 sm:py-12">
                     <div className="max-w-3xl">
                         <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                             {t("eyebrow")}
@@ -396,7 +399,7 @@ export default async function DashboardPage() {
                     {nextGroupMeeting && (
                         <Link
                             href={`/groups/${nextGroupMeeting.groupId}`}
-                            className="group mx-1 mt-7 flex min-w-0 flex-col gap-4 rounded-2xl border border-primary/20 bg-card/55 px-4 py-4 shadow-sm shadow-primary/5 outline-none transition-[background-color,border-color] hover:border-primary/30 hover:bg-primary/[0.045] focus-visible:ring-2 focus-visible:ring-ring sm:mx-2 sm:px-5 lg:mx-0 lg:flex-row lg:items-center lg:justify-between lg:rounded-none lg:border-x-0 lg:bg-transparent lg:px-3 lg:shadow-none"
+                            className="group mt-6 flex min-w-0 flex-col gap-4 rounded-2xl border border-primary/20 bg-card/60 px-4 py-4 shadow-sm shadow-primary/5 outline-none transition-[background-color,border-color,box-shadow] hover:border-primary/30 hover:bg-card/80 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring sm:px-5 lg:flex-row lg:items-center lg:justify-between"
                         >
                             <div className="flex min-w-0 items-center gap-3.5">
                                 <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
@@ -459,7 +462,7 @@ export default async function DashboardPage() {
 
                     <section
                         className={cn(
-                            "border-border/50 border-y",
+                            "overflow-hidden rounded-3xl border border-border/60 bg-card/40 shadow-sm",
                             nextGroupMeeting ? "mt-4 sm:mt-5" : "mt-8 sm:mt-10",
                         )}
                     >
@@ -507,8 +510,10 @@ export default async function DashboardPage() {
                                                 variant="ghost"
                                                 className="min-h-11 w-full rounded-xl px-4 sm:w-auto"
                                             >
-                                                <Link href="/weekly">
-                                                    {weeklyT("dashboard.open")}
+                                                <Link href="/assignments">
+                                                    {assignmentsT(
+                                                        "dashboard.open",
+                                                    )}
                                                 </Link>
                                             </Button>
                                         )}
@@ -517,7 +522,7 @@ export default async function DashboardPage() {
 
                             <div className="contents">
                                 <Link
-                                    href="/weekly"
+                                    href="/assignments"
                                     className="group grid min-w-0 grid-cols-[auto_minmax(0,1fr)] content-center items-start gap-3 border-border/50 border-t px-2 py-6 outline-none transition-colors hover:bg-muted/25 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 lg:border-t-0 lg:border-s lg:px-6"
                                 >
                                     <span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -528,23 +533,30 @@ export default async function DashboardPage() {
                                     </span>
                                     <div className="min-w-0">
                                         <p className="text-[0.65rem] font-semibold tracking-[0.14em] text-primary uppercase">
-                                            {weeklyT("dashboard.eyebrow")}
+                                            {assignmentsT("dashboard.eyebrow")}
                                         </p>
                                         <div className="mt-1 flex items-baseline gap-2">
                                             <strong className="text-3xl font-semibold tabular-nums">
                                                 {assignedWork.length}
                                             </strong>
                                             <span className="text-sm font-semibold">
-                                                {weeklyT("dashboard.title")}
+                                                {assignmentsT(
+                                                    "dashboard.title",
+                                                )}
                                             </span>
                                         </div>
                                         <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">
                                             {assignedWork.length > 0
-                                                ? weeklyT("dashboard.active", {
-                                                      count: assignedWork.length,
-                                                      ready: readyAssignmentCount,
-                                                  })
-                                                : weeklyT("dashboard.empty")}
+                                                ? assignmentsT(
+                                                      "dashboard.active",
+                                                      {
+                                                          count: assignedWork.length,
+                                                          ready: readyAssignmentCount,
+                                                      },
+                                                  )
+                                                : assignmentsT(
+                                                      "dashboard.empty",
+                                                  )}
                                         </p>
                                     </div>
                                 </Link>
@@ -614,7 +626,7 @@ export default async function DashboardPage() {
 
                         <div
                             className={cn(
-                                "mt-6 grid gap-x-6 sm:grid-cols-2",
+                                "mt-6 grid gap-1 rounded-2xl bg-muted/25 p-1.5 ring-1 ring-border/50 sm:grid-cols-2 sm:p-2",
                                 !focusIsAssignment && "lg:grid-cols-3",
                             )}
                         >

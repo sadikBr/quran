@@ -133,6 +133,7 @@ export default async function createMemberAssignment(input: unknown) {
     });
 
     revalidatePath(`/groups/${parsed.data.groupId}`);
+    revalidatePath("/assignments");
     revalidatePath("/practice");
     revalidatePath("/dashboard");
     return { success: true as const };

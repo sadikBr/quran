@@ -6,13 +6,9 @@ import { practiceAssignment } from "@/drizzle/schema";
 import type { PracticeKind, QuranReference } from "@/features/practice/types";
 import type { Riwayah } from "@/features/settings/preferences";
 import type {
-    WeeklyPlanAssignment,
-    WeeklyPlannerData,
-} from "../weekly-planner-types";
-
-function calendarDate(value: Date | null) {
-    return value?.toISOString().slice(0, 10) ?? null;
-}
+    MeetingPlanAssignment,
+    MeetingPlannerData,
+} from "../meeting-plan-types";
 
 function mapAssignment(row: {
     assigneeId: string;
@@ -23,7 +19,7 @@ function mapAssignment(row: {
     endSurahNumber: number;
     endAyahNumber: number;
     instructions: string | null;
-}): WeeklyPlanAssignment {
+}): MeetingPlanAssignment {
     return {
         assigneeId: row.assigneeId,
         kind: row.kind as PracticeKind,
@@ -52,9 +48,9 @@ const selection = {
     dueAt: practiceAssignment.dueAt,
 };
 
-export default async function getWeeklyPlannerData(
+export default async function getMeetingPlannerData(
     groupId: string,
-): Promise<WeeklyPlannerData> {
+): Promise<MeetingPlannerData> {
     const [draftRows, publishedRows] = await Promise.all([
         db
             .select(selection)
@@ -90,9 +86,13 @@ export default async function getWeeklyPlannerData(
         : [];
 
     return {
-        dueDate: calendarDate(draftRows[0]?.dueAt ?? null),
-        drafts: draftRows.map(mapAssignment),
-        previousDueDate: calendarDate(previousDueAt),
+        drafts: draftRows
+            .filter((row) => row.dueAt !== null)
+            .map((row) => ({
+                ...mapAssignment(row),
+                dueMeetingStartsAt: row.dueAt?.toISOString() ?? "",
+            })),
+        previousMeetingStartsAt: previousDueAt?.toISOString() ?? null,
         previousAssignments: previousRows.map(mapAssignment),
     };
 }

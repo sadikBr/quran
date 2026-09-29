@@ -3,8 +3,8 @@
 import { useTranslations } from "next-intl";
 import PageBackground from "@/components/page-background";
 
-export default function WeeklyLoading() {
-    const t = useTranslations("Weekly");
+export default function AssignmentsLoading() {
+    const t = useTranslations("Assignments");
     return (
         <main aria-busy="true" className="relative min-h-dvh bg-background">
             <PageBackground />

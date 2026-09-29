@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import PageBackground from "@/components/page-background";
 
-export default function WeeklyPlanLoading() {
+export default function MeetingPlanLoading() {
     const t = useTranslations("Groups.planner");
 
     return (

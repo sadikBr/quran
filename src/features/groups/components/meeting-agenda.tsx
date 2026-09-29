@@ -44,6 +44,7 @@ export default function MeetingAgenda({
     locale,
     timezone,
     surahNames,
+    embedded = false,
 }: {
     groupId: string;
     agenda: MeetingAgendaData;
@@ -52,6 +53,7 @@ export default function MeetingAgenda({
     locale: string;
     timezone: string;
     surahNames: Record<number, string>;
+    embedded?: boolean;
 }) {
     const t = useTranslations("Groups.meeting.agenda");
     const assignmentsT = useTranslations("Groups.assignments");
@@ -94,39 +96,68 @@ export default function MeetingAgenda({
     }
 
     return (
-        <section className="mt-8 overflow-hidden rounded-3xl bg-muted/25 ring-1 ring-border/55">
-            <div className="flex flex-col gap-5 border-border/50 border-b px-5 py-6 sm:px-7 lg:flex-row lg:items-end lg:justify-between">
+        <section
+            className={cn(
+                "overflow-hidden",
+                embedded
+                    ? "border-primary/10 border-t bg-background/20"
+                    : "mt-8 rounded-3xl bg-muted/25 ring-1 ring-border/55",
+            )}
+        >
+            <div
+                className={cn(
+                    "flex flex-col gap-5 border-border/50 border-b px-5 sm:px-7",
+                    !embedded && "lg:flex-row lg:items-end lg:justify-between",
+                    embedded ? "py-5" : "py-6",
+                )}
+            >
                 <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs font-bold tracking-[0.14em] text-primary uppercase">
-                            {t(agenda.active ? "liveEyebrow" : "eyebrow")}
-                        </p>
-                        <span
-                            className={cn(
-                                "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[0.7rem] font-semibold",
-                                agenda.active
-                                    ? "bg-primary/10 text-primary"
-                                    : "bg-background/70 text-muted-foreground ring-1 ring-border/50",
-                            )}
-                        >
-                            <CircleDot
+                    {!embedded && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-xs font-bold tracking-[0.14em] text-primary uppercase">
+                                {t(agenda.active ? "liveEyebrow" : "eyebrow")}
+                            </p>
+                            <span
                                 className={cn(
-                                    "size-3",
-                                    agenda.active && "animate-pulse",
+                                    "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[0.7rem] font-semibold",
+                                    agenda.active
+                                        ? "bg-primary/10 text-primary"
+                                        : "bg-background/70 text-muted-foreground ring-1 ring-border/50",
                                 )}
-                            />
-                            {t(agenda.active ? "live" : "upcoming")}
-                        </span>
-                    </div>
-                    <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">
+                            >
+                                <CircleDot
+                                    className={cn(
+                                        "size-3",
+                                        agenda.active && "animate-pulse",
+                                    )}
+                                />
+                                {t(agenda.active ? "live" : "upcoming")}
+                            </span>
+                        </div>
+                    )}
+                    <h2
+                        className={cn(
+                            "font-semibold tracking-tight",
+                            embedded
+                                ? "text-lg sm:text-xl"
+                                : "mt-2 text-xl sm:text-2xl",
+                        )}
+                    >
                         {t("title")}
                     </h2>
-                    <p className="mt-1.5 text-sm text-muted-foreground">
-                        {formattedOccurrence}
-                    </p>
+                    {!embedded && (
+                        <p className="mt-1.5 text-sm text-muted-foreground">
+                            {formattedOccurrence}
+                        </p>
+                    )}
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 text-center sm:flex sm:text-start">
+                <div
+                    className={cn(
+                        "grid grid-cols-3 gap-2 text-center sm:flex sm:text-start",
+                        embedded && "max-w-xl",
+                    )}
+                >
                     <AgendaStat
                         icon={ClipboardCheck}
                         value={agenda.readyCount}
@@ -157,11 +188,13 @@ export default function MeetingAgenda({
                             key={member.userId}
                             className="group/member bg-background/15 open:bg-background/45"
                             open={
-                                member.queuePosition === 1 ||
-                                (isCurrentUser && member.assignments.length > 0)
+                                agenda.active &&
+                                (member.queuePosition === 1 ||
+                                    (isCurrentUser &&
+                                        member.assignments.length > 0))
                             }
                         >
-                            <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
+                            <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-8 [&::-webkit-details-marker]:hidden">
                                 <Avatar className="size-10 shrink-0 border border-primary/15">
                                     {member.image && (
                                         <AvatarImage
@@ -185,13 +218,9 @@ export default function MeetingAgenda({
                                         )}
                                     </div>
                                     <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                                        {member.assignments.length > 0
-                                            ? member.assignments
-                                                  .map((assignment) =>
-                                                      rangeLabel(assignment),
-                                                  )
-                                                  .join(" · ")
-                                            : t("noAssignment")}
+                                        {t("assignmentCount", {
+                                            count: member.assignments.length,
+                                        })}
                                     </p>
                                 </div>
 
@@ -223,10 +252,13 @@ export default function MeetingAgenda({
                                         )}
                                     </span>
                                 )}
-                                <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open/member:rotate-180" />
+                                <ChevronDown
+                                    aria-hidden="true"
+                                    className="ms-auto size-4 shrink-0 text-muted-foreground transition-transform group-open/member:rotate-180"
+                                />
                             </summary>
 
-                            <div className="border-border/45 border-t px-4 py-4 sm:px-6">
+                            <div className="border-border/45 border-t px-5 py-4 sm:px-8">
                                 {member.assignments.length > 0 ? (
                                     <div className="grid gap-2">
                                         {member.assignments.map(

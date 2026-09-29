@@ -69,7 +69,10 @@ export default async function ProfilePage() {
         >
             <PageBackground />
             <div className="mx-auto max-w-5xl px-4 sm:px-6">
-                <StickyAppHeader className="-mx-4 px-4 sm:-mx-6 sm:px-6">
+                <StickyAppHeader
+                    navigation
+                    className="-mx-4 px-4 sm:-mx-6 sm:px-6"
+                >
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md text-sm font-semibold tracking-wide outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"

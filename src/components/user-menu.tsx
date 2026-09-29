@@ -1,19 +1,14 @@
 "use client";
 
 import {
-    BookOpen,
-    CalendarCheck2,
-    LayoutDashboard,
     LoaderCircle,
     LogOut,
     Moon,
     Settings,
     Sun,
     UserRound,
-    UsersRound,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useState } from "react";
@@ -25,7 +20,6 @@ import {
 } from "@/features/settings/preferences";
 import updatePreferences from "@/features/settings/server/update-preferences";
 import { useSettings } from "@/features/settings/settings-provider";
-import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
     DropdownMenu,
@@ -74,7 +68,6 @@ const DEFAULT_LABELS: UserMenuLabels = {
 export default function UserMenu({
     name,
     image,
-    continueReadingHref,
     labels = DEFAULT_LABELS,
 }: {
     name: string;
@@ -83,16 +76,11 @@ export default function UserMenu({
     labels?: UserMenuLabels;
 }) {
     const { resolvedTheme, setTheme } = useTheme();
-    const pathname = usePathname();
     const locale = useLocale();
     const commonT = useTranslations("Common");
-    const groupsT = useTranslations("Groups");
-    const weeklyT = useTranslations("Weekly");
     const { setPreferences, ...preferences } = useSettings();
     const [selectedTheme, setSelectedTheme] = useState(preferences.theme);
     const [isSigningOut, setIsSigningOut] = useState(false);
-    const isCurrent = (href: string) =>
-        pathname === href || pathname.startsWith(`${href}/`);
 
     async function changeTheme(theme: Theme) {
         const previousTheme = selectedTheme;
@@ -137,155 +125,83 @@ export default function UserMenu({
     }
 
     return (
-        <DropdownMenu dir={locale === "ar" ? "rtl" : "ltr"}>
-            <DropdownMenuTrigger asChild>
-                <button
-                    type="button"
-                    className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    aria-label={labels.openMenu}
-                >
-                    <Avatar className="size-10 border border-primary/20">
-                        {image && <AvatarImage src={image} alt="" />}
-                        <AvatarFallback className="bg-primary/10 font-semibold text-primary">
-                            {getInitials(name)}
-                        </AvatarFallback>
-                    </Avatar>
-                </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-                align="end"
-                className="w-[min(16rem,calc(100vw-1rem))] p-1.5"
-            >
-                <DropdownMenuLabel className="flex items-center justify-between gap-3 px-2.5 py-2.5">
-                    <div>
-                        <p className="text-sm font-semibold text-foreground">
-                            {name}
-                        </p>
-                        <p className="mt-0.5 text-xs font-normal text-muted-foreground">
-                            {labels.readingSpace}
-                        </p>
-                    </div>
+        <div className="flex items-center gap-2 sm:gap-3">
+            <DropdownMenu dir={locale === "ar" ? "rtl" : "ltr"}>
+                <DropdownMenuTrigger asChild>
                     <button
                         type="button"
-                        onClick={toggleTheme}
-                        className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-muted/65 text-muted-foreground transition-colors hover:bg-primary/12 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        aria-label={
-                            resolvedTheme === "dark"
-                                ? labels.switchToLight
-                                : labels.switchToDark
-                        }
+                        className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        aria-label={labels.openMenu}
                     >
-                        {resolvedTheme === "dark" ? (
-                            <Sun aria-hidden="true" className="size-4" />
-                        ) : (
-                            <Moon aria-hidden="true" className="size-4" />
-                        )}
+                        <Avatar className="size-10 border border-primary/20">
+                            {image && <AvatarImage src={image} alt="" />}
+                            <AvatarFallback className="bg-primary/10 font-semibold text-primary">
+                                {getInitials(name)}
+                            </AvatarFallback>
+                        </Avatar>
                     </button>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {continueReadingHref && (
-                    <>
-                        <DropdownMenuItem
-                            asChild
-                            className="mt-1 cursor-pointer rounded-md bg-primary px-2.5 py-2 font-semibold text-primary-foreground shadow-sm focus:bg-primary/90 focus:text-primary-foreground"
-                        >
-                            <Link href={continueReadingHref}>
-                                <BookOpen
-                                    aria-hidden="true"
-                                    className="text-primary-foreground"
-                                />
-                                {labels.continueReading}
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="my-0.5 opacity-0" />
-                    </>
-                )}
-                <DropdownMenuItem asChild>
-                    <Link
-                        href="/dashboard"
-                        aria-current={
-                            isCurrent("/dashboard") ? "page" : undefined
-                        }
-                        className={cn(
-                            isCurrent("/dashboard") &&
-                                "bg-primary/8 text-primary",
-                        )}
-                    >
-                        <LayoutDashboard aria-hidden="true" />
-                        {labels.dashboard}
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link
-                        href="/weekly"
-                        aria-current={isCurrent("/weekly") ? "page" : undefined}
-                        className={cn(
-                            isCurrent("/weekly") && "bg-primary/8 text-primary",
-                        )}
-                    >
-                        <CalendarCheck2 aria-hidden="true" />
-                        {weeklyT("header")}
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link
-                        href="/groups"
-                        aria-current={isCurrent("/groups") ? "page" : undefined}
-                        className={cn(
-                            isCurrent("/groups") && "bg-primary/8 text-primary",
-                        )}
-                    >
-                        <UsersRound aria-hidden="true" />
-                        {groupsT("header")}
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link
-                        href="/profile"
-                        aria-current={
-                            isCurrent("/profile") ? "page" : undefined
-                        }
-                        className={cn(
-                            isCurrent("/profile") &&
-                                "bg-primary/8 text-primary",
-                        )}
-                    >
-                        <UserRound aria-hidden="true" />
-                        {labels.profile}
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link
-                        href="/settings"
-                        aria-current={
-                            isCurrent("/settings") ? "page" : undefined
-                        }
-                        className={cn(
-                            isCurrent("/settings") &&
-                                "bg-primary/8 text-primary",
-                        )}
-                    >
-                        <Settings aria-hidden="true" />
-                        {labels.settings}
-                    </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                    variant="destructive"
-                    disabled={isSigningOut}
-                    onSelect={signOut}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                    align="end"
+                    className="w-[min(16rem,calc(100vw-1rem))] p-1.5"
                 >
-                    {isSigningOut ? (
-                        <LoaderCircle
-                            aria-hidden="true"
-                            className="animate-spin"
-                        />
-                    ) : (
-                        <LogOut aria-hidden="true" />
-                    )}
-                    {labels.signOut}
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+                    <DropdownMenuLabel className="flex items-center justify-between gap-3 px-2.5 py-2.5">
+                        <div>
+                            <p className="text-sm font-semibold text-foreground">
+                                {name}
+                            </p>
+                            <p className="mt-0.5 text-xs font-normal text-muted-foreground">
+                                {labels.readingSpace}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={toggleTheme}
+                            className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-muted/65 text-muted-foreground transition-colors hover:bg-primary/12 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            aria-label={
+                                resolvedTheme === "dark"
+                                    ? labels.switchToLight
+                                    : labels.switchToDark
+                            }
+                        >
+                            {resolvedTheme === "dark" ? (
+                                <Sun aria-hidden="true" className="size-4" />
+                            ) : (
+                                <Moon aria-hidden="true" className="size-4" />
+                            )}
+                        </button>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                        <Link href="/profile">
+                            <UserRound aria-hidden="true" />
+                            {labels.profile}
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                        <Link href="/settings">
+                            <Settings aria-hidden="true" />
+                            {labels.settings}
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        variant="destructive"
+                        disabled={isSigningOut}
+                        onSelect={signOut}
+                    >
+                        {isSigningOut ? (
+                            <LoaderCircle
+                                aria-hidden="true"
+                                className="animate-spin"
+                            />
+                        ) : (
+                            <LogOut aria-hidden="true" />
+                        )}
+                        {labels.signOut}
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
     );
 }

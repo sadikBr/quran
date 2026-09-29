@@ -101,6 +101,7 @@ export default async function getAssignmentReview(
             source: "group",
             groupId: row.groupId,
             groupName: row.groupName,
+            meetingTimezone: null,
             assignedByName: null,
             instructions: row.instructions,
             dueAt: row.dueAt,

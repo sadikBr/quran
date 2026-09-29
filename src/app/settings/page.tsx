@@ -136,7 +136,10 @@ export default async function SettingsPage() {
         >
             <PageBackground />
             <div className="mx-auto max-w-6xl px-5 sm:px-6">
-                <StickyAppHeader className="-mx-5 px-5 sm:-mx-6 sm:px-6">
+                <StickyAppHeader
+                    navigation
+                    className="-mx-5 px-5 sm:-mx-6 sm:px-6"
+                >
                     <Link
                         href="/"
                         className="group flex items-center gap-3 rounded-md text-sm font-semibold tracking-wide outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
