@@ -207,7 +207,9 @@ export async function sendAssignmentNotification(
     });
     const deliveryKind = reviewKind
         ? `${kind}:${assignment.reviewedAt?.toISOString() ?? "latest"}`
-        : kind;
+        : kind === "due_soon" && assignment.reviewedAt && assignment.dueAt
+          ? `${kind}:${assignment.dueAt.toISOString()}`
+          : kind;
     const destination = reviewCompleted
         ? assignment.groupId
             ? `/assignments?group=${assignment.groupId}`

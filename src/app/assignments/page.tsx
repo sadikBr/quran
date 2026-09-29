@@ -216,9 +216,14 @@ export default async function AssignmentsPage({
     const activeAdminAssignments = selectedGroupAssignments.filter(
         (assignment) => assignment.status !== "completed",
     );
-    const reviewQueue = activeAdminAssignments.filter(
-        (assignment) => assignment.status === "submitted",
-    );
+    const reviewQueue = activeAdminAssignments
+        .filter((assignment) => assignment.status === "submitted")
+        .sort(
+            (a, b) =>
+                (a.submittedAt?.getTime() ?? Infinity) -
+                    (b.submittedAt?.getTime() ?? Infinity) ||
+                a.id.localeCompare(b.id),
+        );
     const currentAdminAssignments = activeAdminAssignments.filter(
         (assignment) => assignment.status !== "submitted",
     );
@@ -818,7 +823,7 @@ export default async function AssignmentsPage({
 
                                 {reviewQueue.length > 0 && (
                                     <div className="mt-8">
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex flex-wrap items-center gap-3">
                                             <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                                 <ClipboardCheck className="size-5" />
                                             </span>
@@ -832,6 +837,22 @@ export default async function AssignmentsPage({
                                                     )}
                                                 </p>
                                             </div>
+                                            <Button
+                                                asChild
+                                                className="w-full sm:ms-auto sm:w-auto"
+                                            >
+                                                <Link
+                                                    href={`/groups/${selectedAdminGroup.id}/review/${reviewQueue[0].id}`}
+                                                >
+                                                    <ClipboardCheck className="size-4" />
+                                                    {groupsT(
+                                                        "review.startQueue",
+                                                        {
+                                                            count: reviewQueue.length,
+                                                        },
+                                                    )}
+                                                </Link>
+                                            </Button>
                                         </div>
                                         <div className="mt-4 grid gap-3 sm:grid-cols-2">
                                             {reviewQueue.map((assignment) => (
@@ -900,7 +921,15 @@ export default async function AssignmentsPage({
                                                                         assignment.assigneeName
                                                                     }
                                                                 </h3>
-                                                                <span className="rounded-full bg-background/70 px-2.5 py-0.5 text-[0.7rem] text-muted-foreground ring-1 ring-border/50">
+                                                                <span
+                                                                    className={cn(
+                                                                        "rounded-md px-2.5 py-1 text-[0.7rem] font-medium ring-1",
+                                                                        assignment.status ===
+                                                                            "needs_revision"
+                                                                            ? "bg-amber-500/10 text-amber-800 ring-amber-500/25 dark:text-amber-300"
+                                                                            : "bg-background/70 text-muted-foreground ring-border/50",
+                                                                    )}
+                                                                >
                                                                     {groupsT(
                                                                         `assignments.statuses.${assignment.status}`,
                                                                     )}

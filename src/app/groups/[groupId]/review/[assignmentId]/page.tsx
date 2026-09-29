@@ -1,4 +1,4 @@
-import { BookMarked, CalendarCheck2, RefreshCcw } from "lucide-react";
+import { CalendarCheck2 } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -8,9 +8,9 @@ import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
-import AssignmentReviewReader from "@/features/groups/components/assignment-review-reader";
-import ReviewDecisionForm from "@/features/groups/components/review-decision-form";
+import AssignmentReview from "@/features/groups/components/assignment-review";
 import getAssignmentReview from "@/features/groups/server/get-assignment-review";
+import getReviewQueue from "@/features/groups/server/get-review-queue";
 import getPracticeReaderData from "@/features/practice/server/get-practice-reader-data";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -32,17 +32,13 @@ export default async function AssignmentReviewPage({
         getReadingProgress(),
     ]);
     if (!review) notFound();
+    const queue = await getReviewQueue(groupId, session.user.id);
 
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
         messages,
         namespace: "Groups.review",
-    });
-    const practiceT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Practice",
     });
     const homeT = createTranslator({
         locale: preferences.language,
@@ -58,18 +54,6 @@ export default async function AssignmentReviewPage({
               showTranslation: false,
           })
         : [];
-    const surahName = (number: number) => {
-        const surah = readerGroups.find(
-            (group) => group.surah.number === number,
-        )?.surah;
-        return isArabic ? surah?.name : surah?.englishName;
-    };
-    const dateFormatter = new Intl.DateTimeFormat(preferences.language, {
-        dateStyle: "medium",
-        timeZone: "Africa/Casablanca",
-    });
-    const KindIcon =
-        assignment.kind === "memorization" ? BookMarked : RefreshCcw;
     const readingNumber =
         preferences.readingMode === "page"
             ? (readingProgress.lastPageNumber ?? 1)
@@ -119,7 +103,7 @@ export default async function AssignmentReviewPage({
                 </StickyAppHeader>
 
                 <section className="py-10 sm:py-14">
-                    <div className="max-w-3xl">
+                    <div className={isReady ? "hidden" : "max-w-3xl"}>
                         <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
                             {t("eyebrow")}
                         </p>
@@ -142,94 +126,26 @@ export default async function AssignmentReviewPage({
                             </p>
                             <Button asChild className="mt-6 rounded-xl">
                                 <Link
-                                    href={`/assignments?view=manage&group=${groupId}`}
+                                    href={
+                                        queue[0]
+                                            ? `/groups/${groupId}/review/${queue[0].id}`
+                                            : `/assignments?view=manage&group=${groupId}`
+                                    }
                                 >
-                                    {t("returnToGroup")}
+                                    {queue[0]
+                                        ? t("startQueue", {
+                                              count: queue.length,
+                                          })
+                                        : t("returnToGroup")}
                                 </Link>
                             </Button>
                         </section>
                     ) : (
-                        <>
-                            <section className="mt-10 grid gap-4 rounded-3xl bg-muted/35 p-5 ring-1 ring-border/50 sm:grid-cols-2 sm:p-7 lg:grid-cols-4">
-                                <div>
-                                    <p className="text-xs text-muted-foreground">
-                                        {t("learner")}
-                                    </p>
-                                    <p className="mt-1 font-semibold">
-                                        {review.assignee.name}
-                                    </p>
-                                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                                        {review.assignee.email}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-muted-foreground">
-                                        {t("assignment")}
-                                    </p>
-                                    <p className="mt-1 inline-flex items-center gap-2 font-semibold">
-                                        <KindIcon className="size-4 text-primary" />
-                                        {practiceT(`kinds.${assignment.kind}`)}
-                                    </p>
-                                </div>
-                                <div className="sm:col-span-2">
-                                    <p className="text-xs text-muted-foreground">
-                                        {practiceT("range", {
-                                            startSurah:
-                                                surahName(
-                                                    assignment.start
-                                                        .surahNumber,
-                                                ) ??
-                                                assignment.start.surahNumber,
-                                            startAyah:
-                                                assignment.start.ayahNumber,
-                                            endSurah:
-                                                surahName(
-                                                    assignment.end.surahNumber,
-                                                ) ?? assignment.end.surahNumber,
-                                            endAyah: assignment.end.ayahNumber,
-                                        })}
-                                    </p>
-                                    {assignment.submittedAt && (
-                                        <p className="mt-2 font-semibold text-primary">
-                                            {t("submitted", {
-                                                date: dateFormatter.format(
-                                                    assignment.submittedAt,
-                                                ),
-                                            })}
-                                        </p>
-                                    )}
-                                </div>
-                            </section>
-
-                            {assignment.instructions && (
-                                <section className="mt-6 rounded-2xl bg-background/55 px-5 py-4 ring-1 ring-border/50">
-                                    <p className="text-xs font-semibold text-primary">
-                                        {t("instructions")}
-                                    </p>
-                                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                        {assignment.instructions}
-                                    </p>
-                                </section>
-                            )}
-
-                            <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-                                <section>
-                                    <h2 className="mb-5 text-xl font-semibold">
-                                        {t("quranText")}
-                                    </h2>
-                                    <AssignmentReviewReader
-                                        groups={readerGroups}
-                                        riwayah={assignment.riwayah}
-                                    />
-                                </section>
-                                <div className="lg:sticky lg:top-24">
-                                    <ReviewDecisionForm
-                                        groupId={groupId}
-                                        assignmentId={assignmentId}
-                                    />
-                                </div>
-                            </div>
-                        </>
+                        <AssignmentReview
+                            review={review}
+                            readerGroups={readerGroups}
+                            pendingCount={queue.length}
+                        />
                     )}
                 </section>
             </div>

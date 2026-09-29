@@ -54,6 +54,7 @@ function mount() {
         },
         "@/components/app-primary-nav": "Nav",
         "@/components/ui/button": { Button: "Button" },
+        "./meeting-review-panel": "ReviewPanel",
     };
     const context = {
         exports: {},

@@ -64,6 +64,7 @@ export default async function GroupMeetingPage({
                 locale={preferences.language}
                 displayName={session.user.name}
                 email={session.user.email}
+                canReview={isHost}
             />
         </main>
     );

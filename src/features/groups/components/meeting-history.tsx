@@ -14,7 +14,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import type { MeetingHistoryEntry } from "../server/get-meeting-history";
@@ -46,21 +46,55 @@ function AbsenceReview({
     const [pendingDecision, setPendingDecision] = useState<
         "accepted" | "unaccepted" | null
     >(null);
+    const [savedDecision, setSavedDecision] = useState<
+        "accepted" | "unaccepted" | null
+    >(null);
+    const savingRef = useRef(false);
 
     async function decide(decision: "accepted" | "unaccepted") {
+        if (savingRef.current || savedDecision || status !== "pending") return;
+        savingRef.current = true;
         setPendingDecision(decision);
-        const result = await reviewMeetingAbsence({
-            groupId,
-            attendanceId,
-            decision,
-        });
-        setPendingDecision(null);
-        if (!result.success) {
+        try {
+            const result = await reviewMeetingAbsence({
+                groupId,
+                attendanceId,
+                decision,
+            });
+            if (!result.success) {
+                toast.error(
+                    t(
+                        result.reason === "already_reviewed"
+                            ? "alreadyReviewed"
+                            : "reviewError",
+                    ),
+                );
+                router.refresh();
+                return;
+            }
+            setSavedDecision(decision);
+            toast.success(t(result.removed ? "memberRemoved" : "reviewSaved"));
+            router.refresh();
+        } catch {
             toast.error(t("reviewError"));
-            return;
+        } finally {
+            savingRef.current = false;
+            setPendingDecision(null);
         }
-        toast.success(t(result.removed ? "memberRemoved" : "reviewSaved"));
-        router.refresh();
+    }
+
+    const finalDecision = status !== "pending" ? status : savedDecision;
+    if (finalDecision) {
+        return (
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:justify-end">
+                <span className="rounded-lg bg-muted px-2.5 py-1 font-medium">
+                    {t(`statuses.${finalDecision}`)}
+                </span>
+                <span className="text-muted-foreground">
+                    {t("decisionFinal")}
+                </span>
+            </div>
+        );
     }
 
     return (
@@ -68,7 +102,7 @@ function AbsenceReview({
             <Button
                 type="button"
                 size="sm"
-                variant={status === "accepted" ? "default" : "outline"}
+                variant="outline"
                 disabled={pendingDecision !== null}
                 onClick={() => decide("accepted")}
                 className="h-8 rounded-lg"
@@ -83,7 +117,7 @@ function AbsenceReview({
             <Button
                 type="button"
                 size="sm"
-                variant={status === "unaccepted" ? "destructive" : "outline"}
+                variant="outline"
                 disabled={pendingDecision !== null}
                 onClick={() => decide("unaccepted")}
                 className="h-8 rounded-lg"

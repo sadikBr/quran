@@ -75,11 +75,25 @@ export default async function reviewMeetingAbsence(input: unknown) {
         if (!absence || absence.status === "present") {
             return { success: false as const, reason: "not_found" };
         }
+        if (absence.status !== "pending") {
+            return { success: false as const, reason: "already_reviewed" };
+        }
 
-        await transaction
+        const updated = await transaction
             .update(groupMeetingAttendance)
             .set({ status: parsed.data.decision })
-            .where(eq(groupMeetingAttendance.id, parsed.data.attendanceId));
+            .where(
+                and(
+                    eq(groupMeetingAttendance.id, parsed.data.attendanceId),
+                    eq(groupMeetingAttendance.status, "pending"),
+                ),
+            )
+            .returning({ id: groupMeetingAttendance.id });
+        // Only one request may finalize a pending absence, including when two
+        // tabs submit different decisions at the same time.
+        if (updated.length === 0) {
+            return { success: false as const, reason: "already_reviewed" };
+        }
 
         const recentAttendance = await transaction
             .select({ status: groupMeetingAttendance.status })
@@ -139,6 +153,7 @@ export default async function reviewMeetingAbsence(input: unknown) {
     });
 
     revalidatePath(`/groups/${parsed.data.groupId}`);
+    revalidatePath(`/groups/${parsed.data.groupId}/history`);
     revalidatePath("/groups");
     revalidatePath("/dashboard");
     return result;

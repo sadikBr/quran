@@ -21,6 +21,7 @@ export interface GroupAssignmentSummary {
     instructions: string | null;
     reviewNote: string | null;
     reviewedAt: Date | null;
+    submittedAt: Date | null;
 }
 
 export default async function getGroupAssignments(
@@ -57,6 +58,7 @@ export default async function getGroupAssignments(
             instructions: practiceAssignment.instructions,
             reviewNote: practiceAssignment.reviewNote,
             reviewedAt: practiceAssignment.reviewedAt,
+            submittedAt: practiceAssignment.submittedAt,
         })
         .from(practiceAssignment)
         .innerJoin(user, eq(practiceAssignment.assigneeId, user.id))

@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AppPrimaryNav from "@/components/app-primary-nav";
 import { Button } from "@/components/ui/button";
+import MeetingReviewPanel from "./meeting-review-panel";
 
 type MeetingApi = {
     executeCommand: (command: string) => void;
@@ -42,6 +43,7 @@ export default function JaasMeeting({
     locale,
     displayName,
     email,
+    canReview = false,
 }: {
     appId: string;
     roomName: string;
@@ -50,10 +52,14 @@ export default function JaasMeeting({
     locale: string;
     displayName: string;
     email: string;
+    canReview?: boolean;
 }) {
     const t = useTranslations("Groups.meeting.room");
     const [sdkReady, setSdkReady] = useState(false);
     const [leaving, setLeaving] = useState(false);
+    const [reviewOpen, setReviewOpen] = useState(false);
+    const [reviewVisited, setReviewVisited] = useState(false);
+    const reviewT = useTranslations("Groups.review");
     const router = useRouter();
     const apiRef = useRef<MeetingApi | null>(null);
     const leavingRef = useRef(false);
@@ -176,8 +182,25 @@ export default function JaasMeeting({
 
     return (
         <div className="flex h-dvh min-h-[34rem] flex-col overflow-hidden bg-[#11100f]">
-            <header className="flex h-[calc(4rem+env(safe-area-inset-top))] shrink-0 items-center justify-between gap-3 border-border/60 border-b bg-background px-3 pt-[env(safe-area-inset-top)] text-foreground sm:h-[calc(5rem+env(safe-area-inset-top))] sm:px-4">
+            <header className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-2 border-border/60 border-b bg-background px-3 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] text-foreground sm:min-h-20 sm:flex-nowrap sm:px-4">
                 <AppPrimaryNav />
+                {canReview && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        aria-expanded={reviewOpen}
+                        aria-controls="meeting-review-panel"
+                        className="order-last w-full sm:order-none sm:w-auto"
+                        onClick={() => {
+                            setReviewVisited(true);
+                            setReviewOpen((open) => !open);
+                        }}
+                    >
+                        {reviewT(
+                            reviewOpen ? "backToMeeting" : "openInMeeting",
+                        )}
+                    </Button>
+                )}
                 <Button
                     onClick={leaveMeeting}
                     disabled={leaving}
@@ -194,55 +217,72 @@ export default function JaasMeeting({
                     {t("leave")}
                 </Button>
             </header>
-            <div className="relative min-h-0 flex-1 [&>div]:h-full [&_iframe]:h-full [&_iframe]:w-full">
-                {sdkReady ? (
-                    <JaaSMeeting
-                        appId={appId}
-                        roomName={roomName}
-                        jwt={token}
-                        lang={locale === "ar" ? "ar" : "en"}
-                        userInfo={{ displayName, email }}
-                        configOverwrite={{
-                            prejoinConfig: {
-                                enabled: false,
-                                hideDisplayName: true,
-                            },
-                            disableInitialGUM: true,
-                            startWithAudioMuted: true,
-                            startWithVideoMuted: true,
-                            disableDeepLinking: true,
-                        }}
-                        interfaceConfigOverwrite={{
-                            MOBILE_APP_PROMO: false,
-                        }}
-                        onApiReady={(api) => {
-                            if (!mountedRef.current || leavingRef.current) {
-                                try {
-                                    api.executeCommand("hangup");
-                                } finally {
-                                    api.dispose();
+            <div className="relative flex min-h-0 flex-1">
+                <div
+                    className={`relative min-h-0 min-w-0 flex-1 [&>div]:h-full [&_iframe]:h-full [&_iframe]:w-full ${reviewOpen ? "max-lg:invisible" : ""}`}
+                >
+                    {sdkReady ? (
+                        <JaaSMeeting
+                            appId={appId}
+                            roomName={roomName}
+                            jwt={token}
+                            lang={locale === "ar" ? "ar" : "en"}
+                            userInfo={{ displayName, email }}
+                            configOverwrite={{
+                                prejoinConfig: {
+                                    enabled: false,
+                                    hideDisplayName: true,
+                                },
+                                disableInitialGUM: true,
+                                startWithAudioMuted: true,
+                                startWithVideoMuted: true,
+                                disableDeepLinking: true,
+                            }}
+                            interfaceConfigOverwrite={{
+                                MOBILE_APP_PROMO: false,
+                            }}
+                            onApiReady={(api) => {
+                                if (!mountedRef.current || leavingRef.current) {
+                                    try {
+                                        api.executeCommand("hangup");
+                                    } finally {
+                                        api.dispose();
+                                    }
+                                    return;
                                 }
-                                return;
-                            }
-                            apiRef.current = api;
-                            api.addEventListener(
-                                "videoConferenceJoined",
-                                joinMeeting,
-                            );
-                            api.addEventListener(
-                                "videoConferenceLeft",
-                                clearPresence,
-                            );
-                        }}
-                        onReadyToClose={finishLeaving}
-                        spinner={MeetingSpinner}
-                        getIFrameRef={(parentNode) => {
-                            parentNode.style.height = "100%";
-                            parentNode.style.width = "100%";
-                        }}
-                    />
-                ) : (
-                    <MeetingSpinner />
+                                apiRef.current = api;
+                                api.addEventListener(
+                                    "videoConferenceJoined",
+                                    joinMeeting,
+                                );
+                                api.addEventListener(
+                                    "videoConferenceLeft",
+                                    clearPresence,
+                                );
+                            }}
+                            onReadyToClose={finishLeaving}
+                            spinner={MeetingSpinner}
+                            getIFrameRef={(parentNode) => {
+                                parentNode.style.height = "100%";
+                                parentNode.style.width = "100%";
+                            }}
+                        />
+                    ) : (
+                        <MeetingSpinner />
+                    )}
+                </div>
+                {canReview && (
+                    <aside
+                        id="meeting-review-panel"
+                        aria-label={reviewT("openInMeeting")}
+                        dir={locale === "ar" ? "rtl" : "ltr"}
+                        hidden={!reviewOpen}
+                        className="absolute inset-0 overflow-y-auto overscroll-contain bg-background p-4 text-foreground lg:static lg:w-[min(44rem,48vw)] lg:shrink-0 lg:border-s lg:p-6"
+                    >
+                        {reviewVisited && (
+                            <MeetingReviewPanel groupId={groupId} />
+                        )}
+                    </aside>
                 )}
             </div>
         </div>
