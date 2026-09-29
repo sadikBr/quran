@@ -2,6 +2,7 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
+import { THEMES } from "../preferences";
 import { useSettings } from "../settings-provider";
 import { THEME_COLORS } from "../theme-colors";
 
@@ -20,6 +21,14 @@ export default function ThemePreferenceSync() {
 
     useEffect(() => {
         if (!resolvedTheme || !(resolvedTheme in THEME_COLORS)) return;
+        // A hot update can add themes after next-themes captured its original
+        // class list. Ensure old palettes never remain active together.
+        for (const name of THEMES) {
+            document.documentElement.classList.toggle(
+                name,
+                name === resolvedTheme,
+            );
+        }
         const color = THEME_COLORS[resolvedTheme as keyof typeof THEME_COLORS];
         // Update every server-provided entry, including system-theme media entries.
         // Keep their media attributes intact so navigation can reconcile them.

@@ -9,6 +9,7 @@ export function ThemeProvider({
 }: React.ComponentProps<typeof NextThemesProvider>) {
     return (
         <NextThemesProvider
+            key={THEMES.join(":")}
             themes={[...THEMES]}
             enableColorScheme={false}
             {...props}
