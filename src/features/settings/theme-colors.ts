@@ -5,4 +5,6 @@ export const THEME_COLORS = {
     emerald: "#10332d",
     sapphire: "#101b30",
     rose: "#faf5f3",
+    aurora: "#19152c",
+    pearl: "#faf6ed",
 } as const;

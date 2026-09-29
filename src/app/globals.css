@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *));
+@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *));
 
 @theme inline {
     --color-background: var(--background);
@@ -145,7 +145,8 @@
 
 .dark,
 .emerald,
-.sapphire {
+.sapphire,
+.aurora {
     color-scheme: dark;
     --background: oklch(0.2161 0.0061 56.0434);
     --foreground: oklch(0.9699 0.0013 106.4238);
@@ -283,6 +284,138 @@
     --sidebar-accent-foreground: #f3dfb6;
     --sidebar-border: #3b506d;
     --sidebar-ring: #e2c78d;
+}
+
+.aurora {
+    color-scheme: dark;
+    --background: #19152c;
+    --foreground: #f2eef9;
+    --card: #29223e;
+    --primary: #99dfce;
+    --primary-foreground: #152b29;
+    --division: #ceb9f2;
+    --secondary: #3b3054;
+    --secondary-foreground: #f2eef9;
+    --muted: #221c34;
+    --muted-foreground: #bfb3d2;
+    --accent: #34483f;
+    --accent-foreground: #d3f7e9;
+    --destructive: #f0a1b3;
+    --destructive-foreground: #371925;
+    --border: #544663;
+    --input: #807092;
+    --ring: #99dfce;
+    --chart-1: #99dfce;
+    --chart-2: #ceb9f2;
+    --chart-3: #e8bbcf;
+    --chart-4: #9fc7ef;
+    --chart-5: #ddcf9e;
+    --card-foreground: #f2eef9;
+    --popover: #29223e;
+    --popover-foreground: #f2eef9;
+    --sidebar: #29223e;
+    --sidebar-foreground: #f2eef9;
+    --sidebar-primary: #99dfce;
+    --sidebar-primary-foreground: #152b29;
+    --sidebar-accent: #34483f;
+    --sidebar-accent-foreground: #d3f7e9;
+    --sidebar-border: #544663;
+    --sidebar-ring: #99dfce;
+}
+
+.pearl {
+    color-scheme: light;
+    --background: #faf6ed;
+    --foreground: #3d3b32;
+    --card: #f0e7d6;
+    --primary: #7e592c;
+    --primary-foreground: #ffffff;
+    --division: #326b68;
+    --secondary: #e4d8c0;
+    --secondary-foreground: #4c4436;
+    --muted: #eee8db;
+    --muted-foreground: #726752;
+    --accent: #dce9e2;
+    --accent-foreground: #285e58;
+    --destructive: #a5373b;
+    --destructive-foreground: #ffffff;
+    --border: #cec0a4;
+    --input: #a29172;
+    --ring: #7e592c;
+    --chart-1: #7e592c;
+    --chart-2: #326b68;
+    --chart-3: #856587;
+    --chart-4: #a15d44;
+    --chart-5: #667347;
+    --card-foreground: #3d3b32;
+    --popover: #f0e7d6;
+    --popover-foreground: #3d3b32;
+    --sidebar: #f0e7d6;
+    --sidebar-foreground: #3d3b32;
+    --sidebar-primary: #7e592c;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #dce9e2;
+    --sidebar-accent-foreground: #285e58;
+    --sidebar-border: #cec0a4;
+    --sidebar-ring: #7e592c;
+}
+
+.aurora .home-landscape {
+    background-color: #706084;
+    background-blend-mode: luminosity;
+}
+.aurora .home-landscape-shade {
+    background-image:
+        radial-gradient(
+            ellipse at 80% 15%,
+            rgb(100 218 183 / 18%),
+            transparent 55%
+        ),
+        linear-gradient(
+            90deg,
+            rgb(25 21 44 / 88%),
+            rgb(25 21 44 / 45%) 45%,
+            rgb(25 21 44 / 8%)
+        );
+}
+.aurora .home-session-shade {
+    background: transparent;
+}
+.pearl .home-landscape-light {
+    background-color: #dccca8;
+    background-blend-mode: luminosity;
+}
+.pearl .home-landscape-light-shade {
+    background-image: linear-gradient(
+        90deg,
+        rgb(250 246 237 / 94%),
+        rgb(250 246 237 / 62%) 48%,
+        rgb(250 246 237 / 12%)
+    );
+}
+@media (max-width: 1023px) {
+    .aurora .home-landscape-shade {
+        background-image:
+            radial-gradient(
+                ellipse at 80% 15%,
+                rgb(100 218 183 / 18%),
+                transparent 55%
+            ),
+            linear-gradient(
+                180deg,
+                rgb(25 21 44 / 12%),
+                rgb(25 21 44 / 45%) 45%,
+                rgb(25 21 44 / 85%)
+            );
+    }
+    .pearl .home-landscape-light-shade {
+        background-image: linear-gradient(
+            180deg,
+            rgb(250 246 237 / 22%),
+            rgb(250 246 237 / 60%) 44%,
+            rgb(250 246 237 / 94%)
+        );
+    }
 }
 
 .rose {

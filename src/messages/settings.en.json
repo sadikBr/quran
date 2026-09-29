@@ -37,7 +37,9 @@
             "dark": "Dark",
             "emerald": "Emerald & gold",
             "sapphire": "Midnight Sapphire",
-            "rose": "Rose Quartz"
+            "rose": "Rose Quartz",
+            "aurora": "Aurora",
+            "pearl": "Desert Pearl"
         },
         "language": {
             "title": "Language",
