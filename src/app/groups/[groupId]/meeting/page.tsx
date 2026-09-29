@@ -63,6 +63,7 @@ export default async function GroupMeetingPage({
                 groupId={groupId}
                 locale={preferences.language}
                 displayName={session.user.name}
+                email={session.user.email}
                 isHost={isHost}
             />
         </main>

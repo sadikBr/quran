@@ -10,6 +10,17 @@ export function isJaasConfigured() {
     );
 }
 
+function getJaasAvatar(image?: string | null) {
+    if (!image || image.length > 2_048) return "";
+
+    try {
+        const url = new URL(image);
+        return url.protocol === "https:" ? url.toString() : "";
+    } catch {
+        return "";
+    }
+}
+
 export async function createJaasToken({
     roomName,
     user,
@@ -49,7 +60,10 @@ export async function createJaasToken({
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                avatar: user.image ?? "",
+                // JaaS embeds the JWT in its iframe URL. Profile uploads are
+                // stored as large data URLs, so only include a short public
+                // HTTPS avatar here or the resulting URL becomes invalid.
+                avatar: getJaasAvatar(user.image),
                 moderator: moderator ? "true" : "false",
             },
         },
