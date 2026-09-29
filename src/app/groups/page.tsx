@@ -6,11 +6,9 @@ import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
-import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import GroupForms from "@/features/groups/components/group-forms";
 import { getGroupsForUser } from "@/features/groups/server/get-groups";
-import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -23,9 +21,8 @@ export default async function GroupsPage({
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) redirect("/sign-in");
 
-    const [preferences, readingProgress, groups, params] = await Promise.all([
+    const [preferences, groups, params] = await Promise.all([
         getPreferences(),
-        getReadingProgress(),
         getGroupsForUser(session.user.id),
         searchParams,
     ]);
@@ -35,28 +32,7 @@ export default async function GroupsPage({
         messages,
         namespace: "Groups",
     });
-    const homeT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Home",
-    });
     const isArabic = preferences.language === "ar";
-    const readingNumber =
-        preferences.readingMode === "page"
-            ? (readingProgress.lastPageNumber ?? 1)
-            : (readingProgress.lastSurahNumber ?? 1);
-    const continueReadingHref = `/quran/${preferences.readingMode}/${readingNumber}`;
-    const accountLabels = {
-        openMenu: homeT("account.openMenu"),
-        readingSpace: homeT("account.readingSpace"),
-        switchToLight: homeT("account.switchToLight"),
-        switchToDark: homeT("account.switchToDark"),
-        continueReading: homeT("account.continueReading"),
-        dashboard: homeT("account.dashboard"),
-        profile: homeT("account.profile"),
-        settings: homeT("account.settings"),
-        signOut: homeT("account.signOut"),
-    };
 
     return (
         <main
@@ -72,25 +48,7 @@ export default async function GroupsPage({
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
-                >
-                    <Link
-                        href="/"
-                        className="flex items-center gap-3 rounded-lg outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                        <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                            <UsersRound aria-hidden="true" className="size-5" />
-                        </span>
-                        <span className="text-sm font-semibold tracking-wide">
-                            {t("header")}
-                        </span>
-                    </Link>
-                    <UserMenu
-                        name={session.user.name}
-                        image={session.user.image}
-                        continueReadingHref={continueReadingHref}
-                        labels={accountLabels}
-                    />
-                </StickyAppHeader>
+                />
 
                 <section className="py-8 sm:py-14">
                     <div className="max-w-2xl">

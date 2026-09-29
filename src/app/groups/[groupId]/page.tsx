@@ -14,7 +14,6 @@ import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import {
     GroupDangerActions,
@@ -34,7 +33,6 @@ import getMeetingAgenda from "@/features/groups/server/get-meeting-agenda";
 import getMeetingHistory from "@/features/groups/server/get-meeting-history";
 import { calculateMeetingState } from "@/features/groups/server/meeting-schedule";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
-import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -58,9 +56,8 @@ export default async function GroupPage({
     if (!session) redirect("/sign-in");
 
     const { groupId } = await params;
-    const [preferences, readingProgress, group] = await Promise.all([
+    const [preferences, group] = await Promise.all([
         getPreferences(),
-        getReadingProgress(),
         getGroupForUser(groupId, session.user.id),
     ]);
     if (!group) notFound();
@@ -72,30 +69,9 @@ export default async function GroupPage({
         messages,
         namespace: "Groups",
     });
-    const homeT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Home",
-    });
     const isArabic = preferences.language === "ar";
     const isAdmin = group.role === "supervisor";
     const canLeave = !isAdmin;
-    const readingNumber =
-        preferences.readingMode === "page"
-            ? (readingProgress.lastPageNumber ?? 1)
-            : (readingProgress.lastSurahNumber ?? 1);
-    const continueReadingHref = `/quran/${preferences.readingMode}/${readingNumber}`;
-    const accountLabels = {
-        openMenu: homeT("account.openMenu"),
-        readingSpace: homeT("account.readingSpace"),
-        switchToLight: homeT("account.switchToLight"),
-        switchToDark: homeT("account.switchToDark"),
-        continueReading: homeT("account.continueReading"),
-        dashboard: homeT("account.dashboard"),
-        profile: homeT("account.profile"),
-        settings: homeT("account.settings"),
-        signOut: homeT("account.signOut"),
-    };
     const [assignments, meeting, meetingHistory, activity, surahs] =
         await Promise.all([
             getGroupAssignments(group.id, session.user.id, isAdmin),
@@ -147,22 +123,7 @@ export default async function GroupPage({
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
-                >
-                    <Link href="/groups" className="flex items-center gap-3">
-                        <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                            <UsersRound className="size-5" />
-                        </span>
-                        <span className="max-w-52 truncate text-sm font-semibold">
-                            {group.name}
-                        </span>
-                    </Link>
-                    <UserMenu
-                        name={session.user.name}
-                        image={session.user.image}
-                        continueReadingHref={continueReadingHref}
-                        labels={accountLabels}
-                    />
-                </StickyAppHeader>
+                />
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
                     <div className="flex flex-col gap-4 border-b border-border/60 pb-6 sm:flex-row sm:items-center sm:justify-between sm:pb-8">

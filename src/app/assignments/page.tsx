@@ -17,7 +17,6 @@ import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
-import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import DeleteAssignmentButton from "@/features/groups/components/delete-assignment-button";
 import MemberAssignmentForm from "@/features/groups/components/member-assignment-form";
@@ -40,7 +39,6 @@ import {
     getWarshChapters,
     getWarshNavigationMeta,
 } from "@/features/quran/server/get-warsh-mushaf";
-import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -62,14 +60,12 @@ export default async function AssignmentsPage({
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) redirect("/sign-in");
 
-    const [query, preferences, readingProgress, memberWork, groups] =
-        await Promise.all([
-            searchParams,
-            getPreferences(),
-            getReadingProgress(),
-            getMemberAssignments(session.user.id),
-            getGroupsForUser(session.user.id),
-        ]);
+    const [query, preferences, memberWork, groups] = await Promise.all([
+        searchParams,
+        getPreferences(),
+        getMemberAssignments(session.user.id),
+        getGroupsForUser(session.user.id),
+    ]);
     const adminGroups = groups.filter((group) => group.role === "supervisor");
     const filteredGroup = groups.find((group) => group.id === query.group);
     const requestedAdminGroup = adminGroups.find(
@@ -118,28 +114,7 @@ export default async function AssignmentsPage({
         messages,
         namespace: "Groups",
     });
-    const homeT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Home",
-    });
     const isArabic = preferences.language === "ar";
-    const readingNumber =
-        preferences.readingMode === "page"
-            ? (readingProgress.lastPageNumber ?? 1)
-            : (readingProgress.lastSurahNumber ?? 1);
-    const continueReadingHref = `/quran/${preferences.readingMode}/${readingNumber}`;
-    const accountLabels = {
-        openMenu: homeT("account.openMenu"),
-        readingSpace: homeT("account.readingSpace"),
-        switchToLight: homeT("account.switchToLight"),
-        switchToDark: homeT("account.switchToDark"),
-        continueReading: homeT("account.continueReading"),
-        dashboard: homeT("account.dashboard"),
-        profile: homeT("account.profile"),
-        settings: homeT("account.settings"),
-        signOut: homeT("account.signOut"),
-    };
     const now = new Date();
     const totalAyahs = filteredAssignments.reduce(
         (total, assignment) => total + assignment.totalAyahs,
@@ -425,25 +400,7 @@ export default async function AssignmentsPage({
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
-                >
-                    <Link
-                        href="/"
-                        className="flex items-center gap-3 rounded-md"
-                    >
-                        <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                            <CalendarCheck2 className="size-5" />
-                        </span>
-                        <span className="text-sm font-semibold tracking-wide">
-                            {t("header")}
-                        </span>
-                    </Link>
-                    <UserMenu
-                        name={session.user.name}
-                        image={session.user.image}
-                        continueReadingHref={continueReadingHref}
-                        labels={accountLabels}
-                    />
-                </StickyAppHeader>
+                />
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
                     <div>

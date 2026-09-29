@@ -1,13 +1,8 @@
 "use client";
 
-import {
-    BookOpen,
-    ChevronLeft,
-    ChevronRight,
-    CloudOff,
-    Languages,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, CloudOff, Languages } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import AppLogo from "@/components/app-logo";
 import AppPrimaryNav from "@/components/app-primary-nav";
 import { Button } from "@/components/ui/button";
 import { getArabicNumber } from "@/lib/arabic-numbers";
@@ -141,23 +136,11 @@ export default function OfflineQuranReader({
             <header className="sticky top-0 z-30 border-b border-border/40 bg-background/88 backdrop-blur-xl">
                 <div className="mx-auto flex h-[calc(4rem+env(safe-area-inset-top))] max-w-6xl items-center justify-between gap-4 px-4 pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] sm:px-6">
                     <AppPrimaryNav />
-                    <div className="flex min-w-0 items-center gap-3">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm shadow-primary/20">
-                            <BookOpen className="size-5" aria-hidden="true" />
-                        </span>
-                        <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold tracking-tight sm:text-base">
-                                {labels.title}
-                            </p>
-                            <p className="mt-0.5 flex items-center gap-1.5 text-[0.65rem] font-medium tracking-[0.08em] text-muted-foreground uppercase">
-                                <CloudOff
-                                    aria-hidden="true"
-                                    className="size-3 text-primary"
-                                />
-                                {labels.offline}
-                            </p>
-                        </div>
-                    </div>
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <CloudOff className="size-4" aria-hidden="true" />
+                        {labels.offline}
+                    </span>
+                    <AppLogo />
                 </div>
             </header>
 

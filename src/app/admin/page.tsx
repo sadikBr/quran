@@ -14,7 +14,6 @@ import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
-import UserMenu from "@/components/user-menu";
 import db from "@/drizzle/db";
 import {
     adminActivity,
@@ -42,18 +41,13 @@ export default async function AdminPage({
 }: {
     searchParams: Promise<{ page?: string; activity?: string }>;
 }) {
-    const admin = await requirePlatformAdmin();
+    await requirePlatformAdmin();
     const preferences = await getPreferences();
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
         messages,
         namespace: "Admin",
-    });
-    const homeT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Home.account",
     });
     const params = await searchParams;
     const page = pageNumber(params.page);
@@ -86,35 +80,11 @@ export default async function AdminPage({
         .orderBy(desc(adminActivity.createdAt), adminActivity.id)
         .limit(21)
         .offset((activityPage - 1) * 20);
-    const labels = {
-        openMenu: homeT("openMenu"),
-        readingSpace: t("account"),
-        switchToLight: homeT("switchToLight"),
-        switchToDark: homeT("switchToDark"),
-        continueReading: homeT("continueReading"),
-        dashboard: t("title"),
-        profile: homeT("profile"),
-        settings: homeT("settings"),
-        signOut: homeT("signOut"),
-    };
     return (
         <main className="relative isolate min-h-dvh overflow-x-clip bg-background">
             <PageBackground />
             <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                <StickyAppHeader navigation>
-                    <Link
-                        href="/admin"
-                        className="flex items-center gap-3 text-sm font-semibold"
-                    >
-                        <ShieldCheck className="size-5 text-primary" />
-                        {t("account")}
-                    </Link>
-                    <UserMenu
-                        name={admin.name}
-                        image={admin.image}
-                        labels={labels}
-                    />
-                </StickyAppHeader>
+                <StickyAppHeader navigation />
                 <div className="space-y-8 pb-14 pt-8 sm:space-y-10 sm:pt-12">
                     <header className="relative flex items-start justify-between gap-6 border-b border-border/60 pb-8 sm:pb-10">
                         <div className="min-w-0">

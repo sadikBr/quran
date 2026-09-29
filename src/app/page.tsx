@@ -13,7 +13,6 @@ import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
-import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
@@ -110,20 +109,6 @@ export default async function Home() {
         );
     }
 
-    const accountLabels = {
-        openMenu: t("account.openMenu"),
-        readingSpace: t("account.readingSpace"),
-        switchToLight: t("account.switchToLight"),
-        switchToDark: t("account.switchToDark"),
-        continueReading: hasPendingWird
-            ? continueReadingLabel
-            : t("account.continueReading"),
-        dashboard: t("account.dashboard"),
-        profile: t("account.profile"),
-        settings: t("account.settings"),
-        signOut: t("account.signOut"),
-    };
-
     return (
         <main
             lang={preferences.language}
@@ -138,41 +123,7 @@ export default async function Home() {
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 text-foreground transition-colors data-[scrolled=true]:text-foreground sm:-mx-6 sm:px-6 dark:text-white"
-                >
-                    <Link
-                        href="/"
-                        className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                        <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:-rotate-3">
-                            <BookOpen aria-hidden="true" className="size-5" />
-                        </span>
-                        <span className="hidden text-sm font-semibold tracking-wide sm:inline">
-                            {t("brand")}
-                        </span>
-                    </Link>
-
-                    {session ? (
-                        <UserMenu
-                            name={session.user.name}
-                            image={session.user.image}
-                            continueReadingHref={readingHref}
-                            labels={accountLabels}
-                        />
-                    ) : (
-                        <div className="flex items-center gap-1 sm:gap-2">
-                            <Button asChild size="sm" variant="ghost">
-                                <Link href="/sign-in">
-                                    {t("header.signIn")}
-                                </Link>
-                            </Button>
-                            <Button asChild size="sm">
-                                <Link href="/sign-up">
-                                    {t("header.createAccount")}
-                                </Link>
-                            </Button>
-                        </div>
-                    )}
-                </StickyAppHeader>
+                />
 
                 <section
                     className={cn(

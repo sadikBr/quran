@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
+import AppLogo from "@/components/app-logo";
 import AppPrimaryNav from "@/components/app-primary-nav";
 import { Button } from "@/components/ui/button";
 
@@ -55,6 +56,7 @@ export default function MeetingWaitingRoom({
                         {t("leave")}
                     </Link>
                 </Button>
+                <AppLogo />
             </header>
             <section className="flex flex-1 items-center justify-center px-6 py-16 text-center">
                 <div className="max-w-md">

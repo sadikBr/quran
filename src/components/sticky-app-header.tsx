@@ -1,7 +1,8 @@
 "use client";
 
-import { Children, type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import AppLogo from "./app-logo";
 import AppPrimaryNav from "./app-primary-nav";
 
 export default function StickyAppHeader({
@@ -9,13 +10,11 @@ export default function StickyAppHeader({
     className,
     navigation = false,
 }: {
-    children: ReactNode;
+    children?: ReactNode;
     className?: string;
     navigation?: boolean;
 }) {
     const [hasScrolled, setHasScrolled] = useState(false);
-    const childItems = Children.toArray(children);
-    const trailingContent = navigation ? childItems.at(-1) : null;
 
     useEffect(() => {
         const updateScrollState = () => setHasScrolled(window.scrollY > 4);
@@ -39,7 +38,7 @@ export default function StickyAppHeader({
             {navigation ? (
                 <>
                     <AppPrimaryNav />
-                    <div className="shrink-0">{trailingContent}</div>
+                    <AppLogo />
                 </>
             ) : (
                 children

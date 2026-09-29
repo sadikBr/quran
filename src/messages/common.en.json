@@ -31,9 +31,17 @@
             "bookmarks": "Saved verses",
             "quran": "Quran",
             "assignments": "Assignments",
-            "groups": "Groups"
+            "groups": "Groups",
+            "account": "Account",
+            "appearance": "Appearance",
+            "signOut": "Sign out",
+            "signIn": "Sign in",
+            "signUp": "Create account"
         },
-        "loading": { "page": "Loading your page…", "label": "Loading" },
+        "loading": {
+            "page": "Loading your page…",
+            "label": "Loading"
+        },
         "error": {
             "eyebrow": "SOMETHING WENT WRONG",
             "title": "We couldn’t load this page",

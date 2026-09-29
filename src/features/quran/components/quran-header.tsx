@@ -3,6 +3,7 @@
 import { LibraryBig } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import AppLogo from "@/components/app-logo";
 import AppPrimaryNav from "@/components/app-primary-nav";
 import type { Riwayah } from "@/features/settings/preferences";
 
@@ -65,6 +66,7 @@ export default function QuranHeader({
                         )}
                     </nav>
                 )}
+                <AppLogo />
             </div>
         </header>
     );

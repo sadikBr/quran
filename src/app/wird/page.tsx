@@ -12,14 +12,12 @@ import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
-import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import KhatmahMilestones from "@/features/khatmah/components/khatmah-milestones";
 import KhatmahPlanner from "@/features/khatmah/components/khatmah-planner";
 import getKhatmahHistory from "@/features/khatmah/server/get-khatmah-history";
 import getKhatmahPlan from "@/features/khatmah/server/get-khatmah-plan";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
-import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import CompleteWirdButton from "@/features/wird/components/complete-wird-button";
 import WirdHistory from "@/features/wird/components/wird-history";
@@ -33,10 +31,7 @@ export default async function WirdPage() {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) redirect("/sign-in");
 
-    const [preferences, readingProgress] = await Promise.all([
-        getPreferences(),
-        getReadingProgress(),
-    ]);
+    const [preferences] = await Promise.all([getPreferences()]);
     const [messages, wird, history, khatmahPlan, khatmahHistory, surahs] =
         await Promise.all([
             getMessages(preferences.language),
@@ -51,27 +46,6 @@ export default async function WirdPage() {
         messages,
         namespace: "Wird",
     });
-    const homeT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Home",
-    });
-    const savedNumber =
-        preferences.readingMode === "page"
-            ? readingProgress.lastPageNumber
-            : readingProgress.lastSurahNumber;
-    const continueReadingHref = `/quran/${preferences.readingMode}/${savedNumber ?? 1}`;
-    const accountLabels = {
-        openMenu: homeT("account.openMenu"),
-        readingSpace: homeT("account.readingSpace"),
-        switchToLight: homeT("account.switchToLight"),
-        switchToDark: homeT("account.switchToDark"),
-        continueReading: homeT("account.continueReading"),
-        dashboard: homeT("account.dashboard"),
-        profile: homeT("account.profile"),
-        settings: homeT("account.settings"),
-        signOut: homeT("account.signOut"),
-    };
     const isArabic = preferences.language === "ar";
     const startName = isArabic
         ? wird?.start.surahName
@@ -125,25 +99,7 @@ export default async function WirdPage() {
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
-                >
-                    <Link
-                        href="/"
-                        className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                        <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                            <BookOpen aria-hidden="true" className="size-5" />
-                        </span>
-                        <span className="text-sm font-semibold tracking-wide">
-                            {homeT("brand")}
-                        </span>
-                    </Link>
-                    <UserMenu
-                        name={session.user.name}
-                        image={session.user.image}
-                        continueReadingHref={continueReadingHref}
-                        labels={accountLabels}
-                    />
-                </StickyAppHeader>
+                />
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
                     <div className="border-b border-border/60 pb-6">

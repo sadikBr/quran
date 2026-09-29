@@ -1,14 +1,13 @@
-import { BookMarked } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { createTranslator } from "next-intl";
+import AppLogo from "@/components/app-logo";
 import AppPrimaryNav from "@/components/app-primary-nav";
 import { auth } from "@/features/auth/auth";
 import PracticeReader from "@/features/practice/components/practice-reader";
 import getPracticeAssignment from "@/features/practice/server/get-practice-assignment";
 import getPracticeReaderData from "@/features/practice/server/get-practice-reader-data";
 import getPreferences from "@/features/settings/server/get-preferences";
-import { getMessages, getTextDirection } from "@/i18n/config";
+import { getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
 export default async function PracticeReaderPage({
@@ -26,15 +25,7 @@ export default async function PracticeReaderPage({
     ]);
     if (!assignment) redirect("/practice");
 
-    const [messages, groups] = await Promise.all([
-        getMessages(preferences.language),
-        getPracticeReaderData(assignment, preferences),
-    ]);
-    const t = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Practice.reader",
-    });
+    const groups = await getPracticeReaderData(assignment, preferences);
     const isArabic = preferences.language === "ar";
 
     return (
@@ -49,13 +40,7 @@ export default async function PracticeReaderPage({
             <header className="sticky top-0 z-30 bg-background/92 backdrop-blur-xl">
                 <div className="mx-auto flex h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] max-w-4xl items-center justify-between gap-4 px-3 sm:px-5">
                     <AppPrimaryNav />
-                    <div className="flex items-center gap-2 text-sm font-semibold">
-                        <BookMarked
-                            aria-hidden="true"
-                            className="size-4 text-primary"
-                        />
-                        {t(`kinds.${assignment.kind}`)}
-                    </div>
+                    <AppLogo />
                 </div>
             </header>
 

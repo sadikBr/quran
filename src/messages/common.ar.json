@@ -31,7 +31,12 @@
             "bookmarks": "الآيات المفضّلة",
             "quran": "القرآن",
             "assignments": "التكاليف",
-            "groups": "الحِلَق"
+            "groups": "الحِلَق",
+            "account": "الحساب",
+            "appearance": "المظهر",
+            "signOut": "تسجيل الخروج",
+            "signIn": "تسجيل الدخول",
+            "signUp": "إنشاء حساب"
         },
         "loading": {
             "page": "جارٍ تحميل الصفحة…",

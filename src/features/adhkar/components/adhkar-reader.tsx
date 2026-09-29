@@ -148,7 +148,7 @@ export default function AdhkarReader({
                 {showIndex && (
                     <div
                         id="adhkar-index"
-                        className="mb-4 grid grid-cols-5 gap-1.5 sm:grid-cols-8 lg:grid-cols-4"
+                        className="mb-4 grid max-h-80 grid-cols-2 auto-rows-max content-start gap-2 overflow-y-auto overscroll-contain p-1 sm:grid-cols-4 lg:grid-cols-2"
                     >
                         {entries.map((item, position) => (
                             <button
@@ -159,19 +159,28 @@ export default function AdhkarReader({
                                 }
                                 aria-label={
                                     ar
-                                        ? `الذكر ${position + 1}${read.includes(item.ID) ? "، تمت قراءته" : ""}`
-                                        : `Dhikr ${position + 1}${read.includes(item.ID) ? ", read" : ""}`
+                                        ? `الذكر ${position + 1}: ${item.label[ar ? "ar" : "en"]}${read.includes(item.ID) ? "، تمت قراءته" : ""}`
+                                        : `Dhikr ${position + 1}: ${item.label[ar ? "ar" : "en"]}${read.includes(item.ID) ? ", read" : ""}`
                                 }
                                 onClick={() => {
                                     goTo(position);
                                     setShowIndex(false);
                                 }}
-                                className={`flex min-h-11 items-center justify-center gap-1 rounded-lg border text-sm ${index === position ? "border-primary bg-primary/10 text-primary" : "border-transparent hover:bg-muted"}`}
+                                className={`relative flex min-h-14 min-w-0 w-full flex-col items-center justify-center gap-0.5 rounded-xl border px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-primary ${index === position ? "border-primary/40 bg-primary/10 text-primary" : "border-border/60 hover:bg-muted"}`}
                             >
-                                {position + 1}
+                                <span className="w-5 shrink-0 text-[10px] leading-4 tabular-nums text-muted-foreground">
+                                    {position + 1}
+                                </span>
+                                <span
+                                    dir={ar ? "rtl" : "ltr"}
+                                    lang={ar ? "ar" : "en"}
+                                    className="w-full min-w-0 whitespace-normal break-words text-center text-xs leading-5"
+                                >
+                                    {item.label[ar ? "ar" : "en"]}
+                                </span>
                                 {read.includes(item.ID) && (
                                     <Check
-                                        className="size-3 text-primary"
+                                        className="absolute end-1.5 top-1.5 size-3 text-primary"
                                         aria-hidden="true"
                                     />
                                 )}
@@ -255,7 +264,7 @@ export default function AdhkarReader({
                                 ? "نص الذكر، مرّر لقراءة النص الطويل"
                                 : "Dhikr text; scroll for longer passages"
                         }
-                        className="flex h-[clamp(15rem,42svh,24rem)] flex-col overflow-y-auto overscroll-contain px-4 py-5 [overflow-anchor:none] [scrollbar-gutter:stable_both-edges] sm:px-8 sm:py-6 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-primary"
+                        className="flex h-[clamp(11rem,32svh,16rem)] flex-col overflow-y-auto overscroll-contain px-4 py-3 [overflow-anchor:none] [scrollbar-gutter:stable_both-edges] sm:h-[clamp(15rem,42svh,24rem)] sm:px-8 sm:py-6 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-primary"
                     >
                         {entry.ARABIC_TEXT && (
                             <div
@@ -294,7 +303,7 @@ export default function AdhkarReader({
                             </div>
                         )}
                     </section>
-                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-t px-3 py-3 sm:px-6">
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-t px-3 py-2 sm:px-6 sm:py-3">
                         <div>
                             <p className="text-sm font-medium">
                                 {ar
@@ -337,7 +346,7 @@ export default function AdhkarReader({
                                         : `Add repetition, current count ${counts[entry.ID] || 0}`
                                 }
                                 onClick={countRepetition}
-                                className="group relative isolate flex size-18 shrink-0 touch-manipulation flex-col items-center justify-center rounded-full bg-primary/5 text-primary transition-colors hover:bg-primary/10 active:bg-primary/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                                className="group relative isolate flex size-14 shrink-0 touch-manipulation flex-col items-center justify-center rounded-full bg-primary/5 text-primary transition-colors hover:bg-primary/10 active:bg-primary/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:size-18"
                             >
                                 <svg
                                     viewBox="0 0 72 72"
@@ -395,14 +404,14 @@ export default function AdhkarReader({
                             variant="outline"
                             size="icon"
                             disabled={index === 0}
-                            className="size-12 shrink-0"
+                            className="size-11 shrink-0 sm:size-12"
                             onClick={() => goTo(index - 1)}
                             aria-label={ar ? "الذكر السابق" : "Previous dhikr"}
                         >
                             <PreviousIcon className="size-4" />
                         </Button>
                         <Button
-                            className="h-12 min-w-0 flex-1 rounded-xl"
+                            className="h-11 min-w-0 flex-1 rounded-xl sm:h-12"
                             disabled={finished}
                             onClick={complete}
                         >
@@ -419,7 +428,7 @@ export default function AdhkarReader({
                             variant="outline"
                             size="icon"
                             disabled={index === entries.length - 1}
-                            className="size-12 shrink-0"
+                            className="size-11 shrink-0 sm:size-12"
                             onClick={() => goTo(index + 1)}
                             aria-label={
                                 ar

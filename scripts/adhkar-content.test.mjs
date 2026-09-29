@@ -46,6 +46,10 @@ test("all four bundled collections have valid, unique, traceable entries", () =>
         assert.ok(entries.length > 0);
         assert.equal(new Set(entries.map((e) => e.ID)).size, entries.length);
         for (const e of entries) {
+            assert.ok(e.label.ar.trim().length > 0);
+            assert.ok(e.label.en.trim().length > 0);
+            assert.ok(e.label.ar.length < 40);
+            assert.ok(e.label.en.length < 50);
             assert.ok(e.originalText.length > 0);
             assert.ok(e.ARABIC_TEXT.length > 0 || e.notes.length > 0);
             assert.ok(Number.isInteger(e.sourceId));

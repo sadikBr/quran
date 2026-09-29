@@ -6,7 +6,6 @@ import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
-import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import DeletePracticeButton from "@/features/practice/components/delete-practice-button";
 import PracticeRangeForm from "@/features/practice/components/practice-range-form";
@@ -20,7 +19,6 @@ import {
     getWarshChapters,
     getWarshNavigationMeta,
 } from "@/features/quran/server/get-warsh-mushaf";
-import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -29,14 +27,12 @@ export default async function PracticePage() {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) redirect("/sign-in");
 
-    const [preferences, assignments, assignedWork, readingProgress, surahs] =
-        await Promise.all([
-            getPreferences(),
-            getPracticeAssignments(session.user.id),
-            getAssignedPracticeAssignments(session.user.id),
-            getReadingProgress(),
-            getSurahsMeta(),
-        ]);
+    const [preferences, assignments, assignedWork, surahs] = await Promise.all([
+        getPreferences(),
+        getPracticeAssignments(session.user.id),
+        getAssignedPracticeAssignments(session.user.id),
+        getSurahsMeta(),
+    ]);
     const [warshChapters, navigation] = await Promise.all([
         preferences.riwayah === "warsh"
             ? getWarshChapters()
@@ -58,32 +54,11 @@ export default async function PracticePage() {
         messages,
         namespace: "Practice",
     });
-    const homeT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Home",
-    });
     const groupsT = createTranslator({
         locale: preferences.language,
         messages,
         namespace: "Groups.assignments",
     });
-    const continueReadingHref = `/quran/${preferences.readingMode}/${
-        preferences.readingMode === "page"
-            ? (readingProgress.lastPageNumber ?? 1)
-            : (readingProgress.lastSurahNumber ?? 1)
-    }`;
-    const accountLabels = {
-        openMenu: homeT("account.openMenu"),
-        readingSpace: homeT("account.readingSpace"),
-        switchToLight: homeT("account.switchToLight"),
-        switchToDark: homeT("account.switchToDark"),
-        continueReading: homeT("account.continueReading"),
-        dashboard: homeT("account.dashboard"),
-        profile: homeT("account.profile"),
-        settings: homeT("account.settings"),
-        signOut: homeT("account.signOut"),
-    };
     const isArabic = preferences.language === "ar";
     const surahName = (number: number) => {
         const surah = surahs.find((item) => item.number === number);
@@ -104,25 +79,7 @@ export default async function PracticePage() {
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
-                >
-                    <Link
-                        href="/"
-                        className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                        <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                            <BookMarked aria-hidden="true" className="size-5" />
-                        </span>
-                        <span className="text-sm font-semibold tracking-wide">
-                            {t("header")}
-                        </span>
-                    </Link>
-                    <UserMenu
-                        name={session.user.name}
-                        image={session.user.image}
-                        continueReadingHref={continueReadingHref}
-                        labels={accountLabels}
-                    />
-                </StickyAppHeader>
+                />
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
                     <div className="border-b border-border/60 pb-6">

@@ -19,7 +19,6 @@ import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
-import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import { getGroupsForUser } from "@/features/groups/server/get-groups";
 import { getNextGroupMeetingForUser } from "@/features/groups/server/get-next-group-meeting";
@@ -125,11 +124,6 @@ export default async function DashboardPage() {
         locale: preferences.language,
         messages,
         namespace: "Dashboard",
-    });
-    const homeT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Home",
     });
     const wirdT = createTranslator({
         locale: preferences.language,
@@ -266,18 +260,6 @@ export default async function DashboardPage() {
         }
     }
 
-    const accountLabels = {
-        openMenu: homeT("account.openMenu"),
-        readingSpace: homeT("account.readingSpace"),
-        switchToLight: homeT("account.switchToLight"),
-        switchToDark: homeT("account.switchToDark"),
-        continueReading: homeT("account.continueReading"),
-        dashboard: homeT("account.dashboard"),
-        profile: homeT("account.profile"),
-        settings: homeT("account.settings"),
-        signOut: homeT("account.signOut"),
-    };
-
     return (
         <main
             lang={preferences.language}
@@ -292,25 +274,7 @@ export default async function DashboardPage() {
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
-                >
-                    <Link
-                        href="/"
-                        className="group flex items-center gap-3 rounded-md outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                        <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:-rotate-3">
-                            <BookOpen aria-hidden="true" className="size-5" />
-                        </span>
-                        <span className="text-sm font-semibold tracking-wide">
-                            {homeT("brand")}
-                        </span>
-                    </Link>
-                    <UserMenu
-                        name={session.user.name}
-                        image={session.user.image}
-                        continueReadingHref={continueReadingHref}
-                        labels={accountLabels}
-                    />
-                </StickyAppHeader>
+                />
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
                     <div className="border-b border-border/60 pb-6 sm:pb-8">

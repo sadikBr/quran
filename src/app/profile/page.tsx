@@ -1,18 +1,14 @@
 import { and, eq } from "drizzle-orm";
-import { BookOpen } from "lucide-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import ProfileForm from "@/components/profile-form";
 import StickyAppHeader from "@/components/sticky-app-header";
-import UserMenu from "@/components/user-menu";
 import db from "@/drizzle/db";
 import { groupMember } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
-import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -38,41 +34,17 @@ export default async function ProfilePage() {
     const canDeleteAccount =
         !(await isPlatformAdmin(session.user.id)) && !supervised;
 
-    const [preferences, readingProgress] = await Promise.all([
-        getPreferences(),
-        getReadingProgress(),
-    ]);
+    const [preferences] = await Promise.all([getPreferences()]);
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
         messages,
         namespace: "Profile",
     });
-    const homeT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Home",
-    });
-    const accountLabels = {
-        openMenu: homeT("account.openMenu"),
-        readingSpace: homeT("account.readingSpace"),
-        switchToLight: homeT("account.switchToLight"),
-        switchToDark: homeT("account.switchToDark"),
-        continueReading: homeT("account.continueReading"),
-        dashboard: homeT("account.dashboard"),
-        profile: homeT("account.profile"),
-        settings: homeT("account.settings"),
-        signOut: homeT("account.signOut"),
-    };
     const memberSince = new Intl.DateTimeFormat(preferences.language, {
         month: "long",
         year: "numeric",
     }).format(session.user.createdAt);
-    const savedNumber =
-        preferences.readingMode === "page"
-            ? readingProgress.lastPageNumber
-            : readingProgress.lastSurahNumber;
-    const continueReadingHref = `/quran/${preferences.readingMode}/${savedNumber ?? 1}`;
 
     return (
         <main
@@ -88,23 +60,7 @@ export default async function ProfilePage() {
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
-                >
-                    <Link
-                        href="/"
-                        className="group flex items-center gap-3 rounded-md text-sm font-semibold tracking-wide outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                        <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:-rotate-3">
-                            <BookOpen aria-hidden="true" className="size-5" />
-                        </span>
-                        {homeT("brand")}
-                    </Link>
-                    <UserMenu
-                        name={session.user.name}
-                        image={session.user.image}
-                        continueReadingHref={continueReadingHref}
-                        labels={accountLabels}
-                    />
-                </StickyAppHeader>
+                />
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
                     <p className="text-xs font-semibold tracking-[0.2em] text-primary">

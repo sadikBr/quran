@@ -1,6 +1,7 @@
 export type AdhkarEntry = {
     ID: number;
     sourceId: number;
+    label: { ar: string; en: string };
     ARABIC_TEXT: string;
     repeat: number | null;
     notes: string;

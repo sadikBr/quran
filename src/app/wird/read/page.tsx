@@ -1,7 +1,7 @@
-import { BookOpen } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
+import AppLogo from "@/components/app-logo";
 import AppPrimaryNav from "@/components/app-primary-nav";
 import { auth } from "@/features/auth/auth";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -43,13 +43,7 @@ export default async function WirdReaderPage() {
             <header className="sticky top-0 z-30 bg-background/92 backdrop-blur-xl">
                 <div className="mx-auto flex h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] max-w-4xl items-center justify-between gap-4 px-3 sm:px-5">
                     <AppPrimaryNav />
-                    <div className="flex items-center gap-2 text-sm font-semibold">
-                        <BookOpen
-                            aria-hidden="true"
-                            className="size-4 text-primary"
-                        />
-                        <span>{t("title")}</span>
-                    </div>
+                    <AppLogo />
                 </div>
             </header>
 

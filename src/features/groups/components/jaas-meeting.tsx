@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
+import AppLogo from "@/components/app-logo";
 import AppPrimaryNav from "@/components/app-primary-nav";
 import { Button } from "@/components/ui/button";
 import MeetingReviewPanel from "./meeting-review-panel";
@@ -216,6 +217,7 @@ export default function JaasMeeting({
                     )}
                     {t("leave")}
                 </Button>
+                <AppLogo />
             </header>
             <div className="relative flex min-h-0 flex-1">
                 <div

@@ -3,13 +3,11 @@ import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
-import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";
-import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import SavedAyahsSection from "@/features/saved-ayahs/components/saved-ayahs-section";
 import getBookmarkCollections from "@/features/saved-ayahs/server/get-bookmark-collections";
 import getSavedAyahs from "@/features/saved-ayahs/server/get-saved-ayahs";
@@ -22,14 +20,12 @@ export default async function BookmarksPage() {
     if (!session) redirect("/sign-in");
     const [
         preferences,
-        readingProgress,
         savedAyahs,
         bookmarkCollections,
         surahs,
         hafsNavigation,
     ] = await Promise.all([
         getPreferences(),
-        getReadingProgress(),
         getSavedAyahs(session.user.id),
         getBookmarkCollections(session.user.id),
         getSurahsMeta(),
@@ -92,32 +88,11 @@ export default async function BookmarksPage() {
     });
 
     const messages = await getMessages(preferences.language);
-    const homeT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Home",
-    });
     const t = createTranslator({
         locale: preferences.language,
         messages,
         namespace: "Dashboard.saved",
     });
-    const number =
-        preferences.readingMode === "page"
-            ? (readingProgress.lastPageNumber ?? 1)
-            : (readingProgress.lastSurahNumber ?? 1);
-    const continueReadingHref = `/quran/${preferences.readingMode}/${number}`;
-    const accountLabels = {
-        openMenu: homeT("account.openMenu"),
-        readingSpace: homeT("account.readingSpace"),
-        switchToLight: homeT("account.switchToLight"),
-        switchToDark: homeT("account.switchToDark"),
-        continueReading: homeT("account.continueReading"),
-        dashboard: homeT("account.dashboard"),
-        profile: homeT("account.profile"),
-        settings: homeT("account.settings"),
-        signOut: homeT("account.signOut"),
-    };
 
     return (
         <main
@@ -130,14 +105,7 @@ export default async function BookmarksPage() {
         >
             <PageBackground />
             <div className="mx-auto max-w-6xl px-4 sm:px-6">
-                <StickyAppHeader navigation>
-                    <UserMenu
-                        name={session.user.name}
-                        image={session.user.image}
-                        continueReadingHref={continueReadingHref}
-                        labels={accountLabels}
-                    />
-                </StickyAppHeader>
+                <StickyAppHeader navigation />
                 <section className="pb-12 pt-5 sm:pt-8">
                     <h1 className="text-3xl font-semibold sm:text-4xl">
                         {t("title")}

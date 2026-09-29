@@ -6,13 +6,11 @@ import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
-import UserMenu from "@/components/user-menu";
 import { auth } from "@/features/auth/auth";
 import AssignmentReview from "@/features/groups/components/assignment-review";
 import getAssignmentReview from "@/features/groups/server/get-assignment-review";
 import getReviewQueue from "@/features/groups/server/get-review-queue";
 import getPracticeReaderData from "@/features/practice/server/get-practice-reader-data";
-import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -26,10 +24,9 @@ export default async function AssignmentReviewPage({
     if (!session) redirect("/sign-in");
 
     const { groupId, assignmentId } = await params;
-    const [preferences, review, readingProgress] = await Promise.all([
+    const [preferences, review] = await Promise.all([
         getPreferences(),
         getAssignmentReview(groupId, assignmentId, session.user.id),
-        getReadingProgress(),
     ]);
     if (!review) notFound();
     const queue = await getReviewQueue(groupId, session.user.id);
@@ -40,11 +37,6 @@ export default async function AssignmentReviewPage({
         messages,
         namespace: "Groups.review",
     });
-    const homeT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Home",
-    });
     const isArabic = preferences.language === "ar";
     const assignment = review.assignment;
     const isReady = assignment.status === "submitted";
@@ -54,22 +46,6 @@ export default async function AssignmentReviewPage({
               showTranslation: false,
           })
         : [];
-    const readingNumber =
-        preferences.readingMode === "page"
-            ? (readingProgress.lastPageNumber ?? 1)
-            : (readingProgress.lastSurahNumber ?? 1);
-    const continueReadingHref = `/quran/${preferences.readingMode}/${readingNumber}`;
-    const accountLabels = {
-        openMenu: homeT("account.openMenu"),
-        readingSpace: homeT("account.readingSpace"),
-        switchToLight: homeT("account.switchToLight"),
-        switchToDark: homeT("account.switchToDark"),
-        continueReading: homeT("account.continueReading"),
-        dashboard: homeT("account.dashboard"),
-        profile: homeT("account.profile"),
-        settings: homeT("account.settings"),
-        signOut: homeT("account.signOut"),
-    };
 
     return (
         <main
@@ -82,25 +58,7 @@ export default async function AssignmentReviewPage({
         >
             <PageBackground />
             <div className="mx-auto max-w-6xl px-4">
-                <StickyAppHeader navigation className="-mx-4 px-4">
-                    <Link
-                        href={`/assignments?view=manage&group=${groupId}`}
-                        className="inline-flex min-w-0 items-center gap-3"
-                    >
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                            <CalendarCheck2 className="size-5" />
-                        </span>
-                        <span className="truncate text-sm font-semibold">
-                            {assignment.groupName}
-                        </span>
-                    </Link>
-                    <UserMenu
-                        name={session.user.name}
-                        image={session.user.image}
-                        continueReadingHref={continueReadingHref}
-                        labels={accountLabels}
-                    />
-                </StickyAppHeader>
+                <StickyAppHeader navigation className="-mx-4 px-4" />
 
                 <section className="py-10 sm:py-14">
                     <div className={isReady ? "hidden" : "max-w-3xl"}>

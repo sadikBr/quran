@@ -1,12 +1,10 @@
-import { BookOpen, SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
-import UserMenu from "@/components/user-menu";
 import { env } from "@/data/env/server";
 import AdminPreferences from "@/features/admin/components/admin-preferences";
 import { auth } from "@/features/auth/auth";
@@ -14,7 +12,6 @@ import { isPlatformAdmin } from "@/features/auth/permissions";
 import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
 import type { Edition, Reciter } from "@/features/quran/types";
-import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import SettingsForm from "@/features/settings/components/settings-form";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
@@ -75,15 +72,11 @@ export default async function SettingsPage() {
     }
 
     const isAdmin = await isPlatformAdmin(session.user.id);
-    const [preferences, editions, { reciters }, readingProgress] =
-        await Promise.all([
-            getPreferences(),
-            isAdmin ? Promise.resolve([]) : getAvailableQuranEditions(),
-            isAdmin
-                ? Promise.resolve({ reciters: [] })
-                : getAvailableReciters(),
-            getReadingProgress(),
-        ]);
+    const [preferences, editions, { reciters }] = await Promise.all([
+        getPreferences(),
+        isAdmin ? Promise.resolve([]) : getAvailableQuranEditions(),
+        isAdmin ? Promise.resolve({ reciters: [] }) : getAvailableReciters(),
+    ]);
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
@@ -100,22 +93,6 @@ export default async function SettingsPage() {
         messages,
         namespace: "Admin",
     });
-    const accountLabels = {
-        openMenu: homeT("account.openMenu"),
-        readingSpace: homeT("account.readingSpace"),
-        switchToLight: homeT("account.switchToLight"),
-        switchToDark: homeT("account.switchToDark"),
-        continueReading: homeT("account.continueReading"),
-        dashboard: homeT("account.dashboard"),
-        profile: homeT("account.profile"),
-        settings: homeT("account.settings"),
-        signOut: homeT("account.signOut"),
-    };
-    const savedNumber =
-        preferences.readingMode === "page"
-            ? readingProgress.lastPageNumber
-            : readingProgress.lastSurahNumber;
-    const continueReadingHref = `/quran/${preferences.readingMode}/${savedNumber ?? 1}`;
 
     const arabicEditions = editions.filter(
         (edition) =>
@@ -149,23 +126,7 @@ export default async function SettingsPage() {
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
-                >
-                    <Link
-                        href="/"
-                        className="group flex items-center gap-3 rounded-md text-sm font-semibold tracking-wide outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                        <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:-rotate-3">
-                            <BookOpen aria-hidden="true" className="size-6" />
-                        </span>
-                        {homeT("brand")}
-                    </Link>
-                    <UserMenu
-                        name={session.user.name}
-                        image={session.user.image}
-                        continueReadingHref={continueReadingHref}
-                        labels={accountLabels}
-                    />
-                </StickyAppHeader>
+                />
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
                     <div className="border-b border-border/60 pb-6">

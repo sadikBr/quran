@@ -30,11 +30,7 @@ export default async function AdhkarPage({
         >
             <PageBackground />
             <div className="mx-auto max-w-6xl px-4 sm:px-6">
-                <StickyAppHeader navigation>
-                    <span className="text-sm font-semibold text-muted-foreground">
-                        {ar ? "حصن المسلم" : "Hisn al-Muslim"}
-                    </span>
-                </StickyAppHeader>
+                <StickyAppHeader navigation />
                 <header className="flex items-center justify-between gap-4 pb-6 pt-5 sm:pb-8 sm:pt-8">
                     <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                         <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/15 sm:size-14">
