@@ -8,7 +8,9 @@ import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import UserMenu from "@/components/user-menu";
 import { env } from "@/data/env/server";
+import AdminPreferences from "@/features/admin/components/admin-preferences";
 import { auth } from "@/features/auth/auth";
+import { isPlatformAdmin } from "@/features/auth/permissions";
 import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
 import type { Edition, Reciter } from "@/features/quran/types";
@@ -72,11 +74,14 @@ export default async function SettingsPage() {
         redirect("/sign-in");
     }
 
+    const isAdmin = await isPlatformAdmin(session.user.id);
     const [preferences, editions, { reciters }, readingProgress] =
         await Promise.all([
             getPreferences(),
-            getAvailableQuranEditions(),
-            getAvailableReciters(),
+            isAdmin ? Promise.resolve([]) : getAvailableQuranEditions(),
+            isAdmin
+                ? Promise.resolve({ reciters: [] })
+                : getAvailableReciters(),
             getReadingProgress(),
         ]);
     const messages = await getMessages(preferences.language);
@@ -89,6 +94,11 @@ export default async function SettingsPage() {
         locale: preferences.language,
         messages,
         namespace: "Home",
+    });
+    const adminT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Admin",
     });
     const accountLabels = {
         openMenu: homeT("account.openMenu"),
@@ -166,24 +176,32 @@ export default async function SettingsPage() {
                             />
                         </span>
                         <p className="mt-4 text-[0.68rem] font-semibold tracking-[0.22em] text-primary">
-                            {t("page.eyebrow")}
+                            {isAdmin ? adminT("account") : t("page.eyebrow")}
                         </p>
                         <h1 className="mt-3 text-4xl font-semibold tracking-[-0.035em] sm:text-5xl">
-                            {t("page.title")}
+                            {isAdmin
+                                ? homeT("account.settings")
+                                : t("page.title")}
                         </h1>
                         <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                            {t("page.description")}
+                            {isAdmin
+                                ? adminT("preferencesDescription")
+                                : t("page.description")}
                         </p>
                     </div>
 
-                    <SettingsForm
-                        preferences={preferences}
-                        vapidPublicKey={env.VAPID_PUBLIC_KEY ?? null}
-                        arabicEditions={arabicEditions}
-                        reciters={localizedReciters}
-                        translationEditions={translationEditions}
-                        tafsirEditions={tafsirEditions}
-                    />
+                    {isAdmin ? (
+                        <AdminPreferences preferences={preferences} />
+                    ) : (
+                        <SettingsForm
+                            preferences={preferences}
+                            vapidPublicKey={env.VAPID_PUBLIC_KEY ?? null}
+                            arabicEditions={arabicEditions}
+                            reciters={localizedReciters}
+                            translationEditions={translationEditions}
+                            tafsirEditions={tafsirEditions}
+                        />
+                    )}
                 </section>
             </div>
         </main>

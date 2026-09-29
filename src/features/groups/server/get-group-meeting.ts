@@ -38,7 +38,7 @@ export async function getGroupMeetingForUser(
         .where(eq(groupMeeting.groupId, groupId))
         .limit(1);
 
-    if (!meeting) return null;
+    if (!meeting?.hostUserId) return null;
 
     const schedule = await db
         .select({
@@ -52,5 +52,5 @@ export async function getGroupMeetingForUser(
             asc(groupMeetingSchedule.localTime),
         );
 
-    return { ...meeting, schedule };
+    return { ...meeting, hostUserId: meeting.hostUserId, schedule };
 }

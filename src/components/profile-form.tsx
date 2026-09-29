@@ -49,11 +49,13 @@ export default function ProfileForm({
     initialImage,
     initialEmail,
     currentSessionToken,
+    canDeleteAccount = true,
 }: {
     initialName: string;
     initialImage: string | null;
     initialEmail: string;
     currentSessionToken: string;
+    canDeleteAccount?: boolean;
 }) {
     const t = useTranslations("Profile");
     const locale = useLocale();
@@ -589,69 +591,73 @@ export default function ProfileForm({
                     </div>
                 </section>
 
-                <section className="mt-12 border-s-2 border-destructive/70 bg-destructive/5 py-6 pe-6 ps-5 sm:py-7 sm:pe-7 sm:ps-6">
-                    <div className="flex items-start gap-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-destructive text-white">
-                            <AlertTriangle
-                                aria-hidden="true"
-                                className="size-4"
-                            />
-                        </span>
-                        <div>
-                            <h2 className="font-semibold text-destructive">
-                                {t("delete.title")}
-                            </h2>
-                            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                {t("delete.description")}
-                            </p>
+                {canDeleteAccount && (
+                    <section className="mt-12 border-s-2 border-destructive/70 bg-destructive/5 py-6 pe-6 ps-5 sm:py-7 sm:pe-7 sm:ps-6">
+                        <div className="flex items-start gap-3">
+                            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-destructive text-white">
+                                <AlertTriangle
+                                    aria-hidden="true"
+                                    className="size-4"
+                                />
+                            </span>
+                            <div>
+                                <h2 className="font-semibold text-destructive">
+                                    {t("delete.title")}
+                                </h2>
+                                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                    {t("delete.description")}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    <form
-                        onSubmit={handleDeleteAccount}
-                        className="mt-6 grid gap-4"
-                    >
-                        <div className="grid gap-2">
-                            <Label htmlFor="delete-password">
-                                {t("delete.currentPassword")}
-                            </Label>
-                            <Input
-                                id="delete-password"
-                                type="password"
-                                value={deletePassword}
-                                onChange={(event) =>
-                                    setDeletePassword(event.target.value)
-                                }
-                                autoComplete="current-password"
-                                required
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="delete-confirmation">
-                                {t("delete.confirmation")}
-                            </Label>
-                            <Input
-                                id="delete-confirmation"
-                                value={deleteConfirmation}
-                                onChange={(event) =>
-                                    setDeleteConfirmation(event.target.value)
-                                }
-                                autoComplete="off"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <Button
-                                type="submit"
-                                variant="destructive"
-                                disabled={isDeleting}
-                            >
-                                {isDeleting
-                                    ? t("delete.deleting")
-                                    : t("delete.submit")}
-                            </Button>
-                        </div>
-                    </form>
-                </section>
+                        <form
+                            onSubmit={handleDeleteAccount}
+                            className="mt-6 grid gap-4"
+                        >
+                            <div className="grid gap-2">
+                                <Label htmlFor="delete-password">
+                                    {t("delete.currentPassword")}
+                                </Label>
+                                <Input
+                                    id="delete-password"
+                                    type="password"
+                                    value={deletePassword}
+                                    onChange={(event) =>
+                                        setDeletePassword(event.target.value)
+                                    }
+                                    autoComplete="current-password"
+                                    required
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="delete-confirmation">
+                                    {t("delete.confirmation")}
+                                </Label>
+                                <Input
+                                    id="delete-confirmation"
+                                    value={deleteConfirmation}
+                                    onChange={(event) =>
+                                        setDeleteConfirmation(
+                                            event.target.value,
+                                        )
+                                    }
+                                    autoComplete="off"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <Button
+                                    type="submit"
+                                    variant="destructive"
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting
+                                        ? t("delete.deleting")
+                                        : t("delete.submit")}
+                                </Button>
+                            </div>
+                        </form>
+                    </section>
+                )}
             </div>
         </div>
     );

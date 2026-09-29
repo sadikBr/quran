@@ -57,7 +57,7 @@
             "continue": "Continue practice",
             "start": "Start practice",
             "reviewPending": "Ready for review",
-            "feedback": "Admin feedback",
+            "feedback": "Supervisor feedback",
             "kinds": {
                 "memorization": "New memorization",
                 "revision": "Revision"

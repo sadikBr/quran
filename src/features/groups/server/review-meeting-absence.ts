@@ -33,7 +33,7 @@ export default async function reviewMeetingAbsence(input: unknown) {
             and(
                 eq(groupMember.groupId, parsed.data.groupId),
                 eq(groupMember.userId, session.user.id),
-                eq(groupMember.role, "admin"),
+                eq(groupMember.role, "supervisor"),
             ),
         )
         .limit(1);
@@ -126,6 +126,7 @@ export default async function reviewMeetingAbsence(input: unknown) {
                     and(
                         eq(groupMember.groupId, parsed.data.groupId),
                         eq(groupMember.userId, absence.userId),
+                        eq(groupMember.role, "member"),
                     ),
                 );
         }

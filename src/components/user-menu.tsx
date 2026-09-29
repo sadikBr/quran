@@ -13,6 +13,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useIsPlatformAdmin } from "@/features/auth/account-role-provider";
 import { authClient } from "@/features/auth/auth-client";
 import {
     DEFAULT_PREFERENCES,
@@ -78,6 +79,8 @@ export default function UserMenu({
     const { resolvedTheme, setTheme } = useTheme();
     const locale = useLocale();
     const commonT = useTranslations("Common");
+    const isAdmin = useIsPlatformAdmin();
+    const adminT = useTranslations("Admin");
     const { setPreferences, ...preferences } = useSettings();
     const [selectedTheme, setSelectedTheme] = useState(preferences.theme);
     const [isSigningOut, setIsSigningOut] = useState(false);
@@ -151,7 +154,9 @@ export default function UserMenu({
                                 {name}
                             </p>
                             <p className="mt-0.5 text-xs font-normal text-muted-foreground">
-                                {labels.readingSpace}
+                                {isAdmin
+                                    ? adminT("account")
+                                    : labels.readingSpace}
                             </p>
                         </div>
                         <button

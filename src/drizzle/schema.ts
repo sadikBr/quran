@@ -1,6 +1,6 @@
+export * from "./schema/admin-activity";
 export * from "./schema/auth-schema";
 export * from "./schema/bookmark-collection";
-export * from "./schema/enums";
 export * from "./schema/khatmah-history";
 export * from "./schema/khatmah-plan";
 export * from "./schema/memorization-group";

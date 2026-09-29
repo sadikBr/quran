@@ -56,7 +56,7 @@ export default async function saveMeetingPlan(input: unknown) {
         .where(eq(groupMember.groupId, parsed.data.groupId));
     const admin = memberships.find(
         (member) =>
-            member.userId === session.user.id && member.role === "admin",
+            member.userId === session.user.id && member.role === "supervisor",
     );
     if (!admin) return { success: false as const, reason: "unauthorized" };
 

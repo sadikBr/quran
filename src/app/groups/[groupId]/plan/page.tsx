@@ -41,7 +41,7 @@ export default async function MeetingPlanPage({
         getGroupForUser(groupId, session.user.id),
     ]);
     if (!group) notFound();
-    if (group.role !== "admin") redirect(`/groups/${groupId}`);
+    if (group.role !== "supervisor") redirect(`/groups/${groupId}`);
 
     const [
         planner,

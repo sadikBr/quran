@@ -41,7 +41,7 @@ export default async function createMemberAssignment(input: unknown) {
                 and(
                     eq(groupMember.groupId, parsed.data.groupId),
                     eq(groupMember.userId, session.user.id),
-                    eq(groupMember.role, "admin"),
+                    eq(groupMember.role, "supervisor"),
                 ),
             )
             .limit(1),

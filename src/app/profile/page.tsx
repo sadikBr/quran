@@ -1,3 +1,4 @@
+import { and, eq } from "drizzle-orm";
 import { BookOpen, UserRound } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -7,7 +8,10 @@ import PageBackground from "@/components/page-background";
 import ProfileForm from "@/components/profile-form";
 import StickyAppHeader from "@/components/sticky-app-header";
 import UserMenu from "@/components/user-menu";
+import db from "@/drizzle/db";
+import { groupMember } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import { isPlatformAdmin } from "@/features/auth/permissions";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
@@ -21,6 +25,18 @@ export default async function ProfilePage() {
     if (!session) {
         redirect("/sign-in");
     }
+    const [supervised] = await db
+        .select({ id: groupMember.id })
+        .from(groupMember)
+        .where(
+            and(
+                eq(groupMember.userId, session.user.id),
+                eq(groupMember.role, "supervisor"),
+            ),
+        )
+        .limit(1);
+    const canDeleteAccount =
+        !(await isPlatformAdmin(session.user.id)) && !supervised;
 
     const [preferences, readingProgress] = await Promise.all([
         getPreferences(),
@@ -120,6 +136,7 @@ export default async function ProfilePage() {
                         </span>
                     </div>
                     <ProfileForm
+                        canDeleteAccount={canDeleteAccount}
                         initialName={session.user.name}
                         initialImage={session.user.image ?? null}
                         initialEmail={session.user.email}

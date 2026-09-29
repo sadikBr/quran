@@ -106,6 +106,7 @@ export async function GET(request: Request) {
         Omit<CandidateMeeting, "occurrenceStartsAt">
     >();
     for (const row of meetingRows) {
+        if (!row.hostUserId || !row.enabled) continue;
         const meeting = meetings.get(row.id) ?? {
             id: row.id,
             groupId: row.groupId,

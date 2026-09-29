@@ -1,4 +1,5 @@
 import type { Language } from "@/features/settings/preferences";
+import englishAdminMessages from "@/messages/admin.en.json";
 import englishAssignmentsMessages from "@/messages/assignments.en.json";
 import englishAuthMessages from "@/messages/auth.en.json";
 import englishCommonMessages from "@/messages/common.en.json";
@@ -13,6 +14,7 @@ import englishSettingsMessages from "@/messages/settings.en.json";
 import englishWirdMessages from "@/messages/wird.en.json";
 
 const englishMessages = {
+    ...englishAdminMessages,
     ...englishAuthMessages,
     ...englishCommonMessages,
     ...englishHomeMessages,
@@ -48,6 +50,7 @@ const messageLoaders: Record<
             settings,
             wird,
             assignments,
+            admin,
         ] = await Promise.all([
             import("@/messages/auth.ar.json"),
             import("@/messages/common.ar.json"),
@@ -61,6 +64,7 @@ const messageLoaders: Record<
             import("@/messages/settings.ar.json"),
             import("@/messages/wird.ar.json"),
             import("@/messages/assignments.ar.json"),
+            import("@/messages/admin.ar.json"),
         ]);
 
         return {
@@ -77,6 +81,7 @@ const messageLoaders: Record<
                 ...settings.default,
                 ...wird.default,
                 ...assignments.default,
+                ...admin.default,
             },
         };
     },

@@ -70,7 +70,7 @@ export default async function AssignmentsPage({
             getMemberAssignments(session.user.id),
             getGroupsForUser(session.user.id),
         ]);
-    const adminGroups = groups.filter((group) => group.role === "admin");
+    const adminGroups = groups.filter((group) => group.role === "supervisor");
     const filteredGroup = groups.find((group) => group.id === query.group);
     const requestedAdminGroup = adminGroups.find(
         (group) => group.id === query.group,

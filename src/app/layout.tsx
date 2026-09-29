@@ -8,11 +8,15 @@ import {
 } from "next/font/google";
 import { createTranslator, NextIntlClientProvider } from "next-intl";
 import "./globals.css";
+import { headers } from "next/headers";
 import { Toaster } from "sonner";
 import ConnectionStatus from "@/components/connection-status";
 import ContentProtection from "@/components/content-protection";
 import NavigationFeedback from "@/components/navigation-feedback";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AccountRoleProvider } from "@/features/auth/account-role-provider";
+import { auth } from "@/features/auth/auth";
+import { isPlatformAdmin } from "@/features/auth/permissions";
 import OfflineLibraryManager from "@/features/offline/components/offline-library-manager";
 import ThemePreferenceSync from "@/features/settings/components/theme-preference-sync";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -67,6 +71,8 @@ export default async function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const session = await auth.api.getSession({ headers: await headers() });
+    const isAdmin = session ? await isPlatformAdmin(session.user.id) : false;
     const preferences = await getPreferences();
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
@@ -101,51 +107,56 @@ export default async function RootLayout({
                     now={new Date()}
                     timeZone="Africa/Casablanca"
                 >
-                    <ThemeProvider
-                        attribute="class"
-                        enableSystem
-                        defaultTheme={preferences.theme}
-                        disableTransitionOnChange
+                    <AccountRoleProvider
+                        isAdmin={isAdmin}
+                        isAuthenticated={Boolean(session)}
                     >
-                        <SettingsProvider preferences={preferences}>
-                            <a
-                                href="#main-content"
-                                className="fixed top-3 start-3 z-[100] -translate-y-20 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg outline-none transition-transform focus:translate-y-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                            >
-                                {t("accessibility.skipToContent")}
-                            </a>
-                            <ContentProtection />
-                            <ConnectionStatus />
-                            <OfflineLibraryManager />
-                            <NavigationFeedback />
-                            <ThemePreferenceSync />
-                            <Toaster
-                                closeButton
-                                position={
-                                    preferences.language === "ar"
-                                        ? "top-left"
-                                        : "top-right"
-                                }
-                                toastOptions={{
-                                    duration: 5000,
-                                    unstyled: true,
-                                    classNames: {
-                                        toast: "font-sans relative flex w-full items-start gap-3 rounded-xl border border-border bg-card px-4 py-3 text-card-foreground shadow-lg",
-                                        content: "min-w-0 flex-1 pe-5",
-                                        title: "font-sans text-sm font-semibold tracking-normal",
-                                        description:
-                                            "mt-1 font-sans text-sm leading-5 text-muted-foreground",
-                                        closeButton:
-                                            "absolute top-2.5 end-2.5 flex size-6 items-center justify-center rounded-md border-0 bg-transparent text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
-                                        error: "border-destructive/30",
-                                    },
-                                }}
-                            />
-                            <div id="main-content" tabIndex={-1}>
-                                {children}
-                            </div>
-                        </SettingsProvider>
-                    </ThemeProvider>
+                        <ThemeProvider
+                            attribute="class"
+                            enableSystem
+                            defaultTheme={preferences.theme}
+                            disableTransitionOnChange
+                        >
+                            <SettingsProvider preferences={preferences}>
+                                <a
+                                    href="#main-content"
+                                    className="fixed top-3 start-3 z-[100] -translate-y-20 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg outline-none transition-transform focus:translate-y-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                >
+                                    {t("accessibility.skipToContent")}
+                                </a>
+                                <ContentProtection />
+                                <ConnectionStatus />
+                                <OfflineLibraryManager />
+                                <NavigationFeedback />
+                                <ThemePreferenceSync />
+                                <Toaster
+                                    closeButton
+                                    position={
+                                        preferences.language === "ar"
+                                            ? "top-left"
+                                            : "top-right"
+                                    }
+                                    toastOptions={{
+                                        duration: 5000,
+                                        unstyled: true,
+                                        classNames: {
+                                            toast: "font-sans relative flex w-full items-start gap-3 rounded-xl border border-border bg-card px-4 py-3 text-card-foreground shadow-lg",
+                                            content: "min-w-0 flex-1 pe-5",
+                                            title: "font-sans text-sm font-semibold tracking-normal",
+                                            description:
+                                                "mt-1 font-sans text-sm leading-5 text-muted-foreground",
+                                            closeButton:
+                                                "absolute top-2.5 end-2.5 flex size-6 items-center justify-center rounded-md border-0 bg-transparent text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                                            error: "border-destructive/30",
+                                        },
+                                    }}
+                                />
+                                <div id="main-content" tabIndex={-1}>
+                                    {children}
+                                </div>
+                            </SettingsProvider>
+                        </ThemeProvider>
+                    </AccountRoleProvider>
                 </NextIntlClientProvider>
             </body>
         </html>

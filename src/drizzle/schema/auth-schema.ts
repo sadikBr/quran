@@ -1,18 +1,38 @@
-import { relations } from "drizzle-orm";
-import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import {
+    boolean,
+    check,
+    index,
+    pgTable,
+    text,
+    timestamp,
+    uniqueIndex,
+} from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt } from "../helpers";
 
-export const user = pgTable("user", {
-    id,
+export const user = pgTable(
+    "user",
+    {
+        id,
 
-    name: text("name").notNull(),
-    email: text("email").notNull().unique(),
-    emailVerified: boolean("email_verified").default(false).notNull(),
-    image: text("image"),
+        name: text("name").notNull(),
+        email: text("email").notNull().unique(),
+        emailVerified: boolean("email_verified").default(false).notNull(),
+        image: text("image"),
+        role: text("role", { enum: ["admin", "member"] })
+            .notNull()
+            .default("member"),
 
-    createdAt,
-    updatedAt,
-});
+        createdAt,
+        updatedAt,
+    },
+    (table) => [
+        check("user_role_check", sql`${table.role} in ('admin', 'member')`),
+        uniqueIndex("single_platform_admin_idx")
+            .on(table.role)
+            .where(sql`${table.role} = 'admin'`),
+    ],
+);
 
 export const session = pgTable(
     "session",

@@ -41,6 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 migrations/
+!src/drizzle/migrations/
+!src/drizzle/migrations/**
 
 # Local database fixtures used for manual UI testing
 .local-test-data/

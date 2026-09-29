@@ -26,7 +26,7 @@ export interface MeetingAgendaMember {
     userId: string;
     name: string;
     image: string | null;
-    role: "admin" | "member";
+    role: "supervisor" | "member";
     attendance: "present" | "waiting" | "not_started";
     queuePosition: number | null;
     assignments: MeetingAgendaAssignment[];

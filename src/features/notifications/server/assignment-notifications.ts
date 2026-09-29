@@ -177,7 +177,7 @@ export async function sendAssignmentNotification(
     if (
         !assignment ||
         !assignment.groupName ||
-        assignment.assigneeRole === "admin" ||
+        assignment.assigneeRole === "supervisor" ||
         assignment.remindersEnabled === false ||
         assignment.status === "draft" ||
         (reviewKind && !statusMatchesReview) ||

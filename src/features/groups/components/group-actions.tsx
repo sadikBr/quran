@@ -1,15 +1,6 @@
 "use client";
 
-import {
-    Ellipsis,
-    LoaderCircle,
-    LogOut,
-    Shield,
-    ShieldOff,
-    Trash2,
-    UserMinus,
-    X,
-} from "lucide-react";
+import { Ellipsis, LogOut, UserMinus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -21,28 +12,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-    deleteGroup,
-    leaveGroup,
-    removeGroupMember,
-    updateMemberRole,
-} from "../server/manage-group";
+import { leaveGroup, removeGroupMember } from "../server/manage-group";
 import type { GroupRole } from "../types";
-
-function showFailure(
-    reason: string | undefined,
-    t: ReturnType<typeof useTranslations>,
-) {
-    toast.error(
-        t(
-            reason === "last_admin"
-                ? "lastAdmin"
-                : reason === "meeting_host"
-                  ? "meetingHost"
-                  : "failed",
-        ),
-    );
-}
 
 export function MemberActions({
     groupId,
@@ -56,76 +27,51 @@ export function MemberActions({
     const t = useTranslations("Groups.detail");
     const router = useRouter();
     const [pending, setPending] = useState(false);
-    const [confirmingRemoval, setConfirmingRemoval] = useState(false);
-
-    async function changeRole() {
-        setPending(true);
-        const result = await updateMemberRole({
-            groupId,
-            membershipId,
-            role: role === "admin" ? "member" : "admin",
-        });
-        setPending(false);
-        if (!result.success) return showFailure(result.reason, t);
-        toast.success(t("updated"));
-        router.refresh();
-    }
-
+    const [confirming, setConfirming] = useState(false);
+    if (role === "supervisor") return null;
     async function remove() {
         setPending(true);
-        const result = await removeGroupMember({ groupId, membershipId });
-        setPending(false);
-        if (!result.success) return showFailure(result.reason, t);
-        toast.success(t("updated"));
-        router.refresh();
+        try {
+            const result = await removeGroupMember({ groupId, membershipId });
+            if (!result.success) {
+                toast.error(t("failed"));
+                return;
+            }
+            toast.success(t("updated"));
+            router.refresh();
+        } catch {
+            toast.error(t("failed"));
+        } finally {
+            setPending(false);
+        }
     }
-
     return (
-        <DropdownMenu
-            onOpenChange={(open) => {
-                if (!open) setConfirmingRemoval(false);
-            }}
-        >
+        <DropdownMenu onOpenChange={() => setConfirming(false)}>
             <DropdownMenuTrigger asChild>
                 <Button
-                    type="button"
                     variant="ghost"
                     size="icon"
                     disabled={pending}
                     aria-label={t("actions")}
-                    className="rounded-full"
                 >
-                    <Ellipsis aria-hidden="true" />
+                    <Ellipsis />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={changeRole}>
-                    {role === "admin" ? <ShieldOff /> : <Shield />}
-                    {t(role === "admin" ? "makeMember" : "makeAdmin")}
-                </DropdownMenuItem>
                 <DropdownMenuItem
                     variant="destructive"
                     disabled={pending}
                     onSelect={(event) => {
-                        if (!confirmingRemoval) {
+                        if (!confirming) {
                             event.preventDefault();
-                            setConfirmingRemoval(true);
-                            return;
+                            setConfirming(true);
+                        } else {
+                            void remove();
                         }
-                        remove();
                     }}
-                    className={
-                        confirmingRemoval
-                            ? "max-w-72 whitespace-normal"
-                            : undefined
-                    }
                 >
-                    {pending ? (
-                        <LoaderCircle className="animate-spin" />
-                    ) : (
-                        <UserMinus />
-                    )}
-                    {confirmingRemoval ? t("confirmRemove") : t("remove")}
+                    <UserMinus />
+                    {t(confirming ? "confirmRemove" : "remove")}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -134,103 +80,61 @@ export function MemberActions({
 
 export function GroupDangerActions({
     groupId,
-    isAdmin,
     canLeave,
 }: {
     groupId: string;
-    isAdmin: boolean;
+    isAdmin?: boolean;
     canLeave: boolean;
 }) {
     const t = useTranslations("Groups.detail");
     const router = useRouter();
     const [pending, setPending] = useState(false);
-    const [confirming, setConfirming] = useState<"leave" | "delete" | null>(
-        null,
-    );
-
+    const [confirming, setConfirming] = useState(false);
+    if (!canLeave) return null;
     async function leave() {
         setPending(true);
-        const result = await leaveGroup({ groupId });
-        setPending(false);
-        if (!result.success) return showFailure(result.reason, t);
-        router.push("/groups");
-        router.refresh();
+        try {
+            const result = await leaveGroup({ groupId });
+            if (!result.success) {
+                toast.error(t("meetingHost"));
+                return;
+            }
+            router.push("/groups");
+            router.refresh();
+        } catch {
+            toast.error(t("failed"));
+        } finally {
+            setPending(false);
+        }
     }
-
-    async function removeGroup() {
-        setPending(true);
-        const result = await deleteGroup({ groupId });
-        setPending(false);
-        if (!result.success) return showFailure(undefined, t);
-        router.push("/groups");
-        router.refresh();
-    }
-
-    if (confirming) {
-        const isDeleting = confirming === "delete";
-        return (
-            <div className="mt-10 rounded-2xl border border-destructive/15 bg-destructive/[0.035] p-4">
-                <p className="text-sm leading-6 text-muted-foreground">
-                    {t(isDeleting ? "confirmDelete" : "confirmLeave")}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                    <Button
-                        type="button"
-                        variant="destructive"
-                        disabled={pending}
-                        onClick={isDeleting ? removeGroup : leave}
-                        className="rounded-xl"
-                    >
-                        {pending ? (
-                            <LoaderCircle className="size-4 animate-spin" />
-                        ) : isDeleting ? (
-                            <Trash2 className="size-4" />
-                        ) : (
-                            <LogOut className="size-4" />
-                        )}
-                        {t(isDeleting ? "delete" : "leave")}
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        disabled={pending}
-                        onClick={() => setConfirming(null)}
-                        className="rounded-xl"
-                    >
-                        <X className="size-4" />
-                        {t("cancel")}
-                    </Button>
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div className="mt-10 flex flex-wrap gap-2 border-t border-border/50 pt-6">
-            {canLeave && (
+        <div className="mt-10 border-t border-border/50 pt-6">
+            {confirming && (
+                <p className="mb-3 text-sm text-muted-foreground">
+                    {t("confirmLeave")}
+                </p>
+            )}
+            <div className="flex gap-2">
                 <Button
-                    type="button"
-                    variant="outline"
+                    variant={confirming ? "destructive" : "outline"}
                     disabled={pending}
-                    onClick={() => setConfirming("leave")}
-                    className="rounded-xl"
+                    onClick={() =>
+                        confirming ? void leave() : setConfirming(true)
+                    }
                 >
-                    <LogOut aria-hidden="true" className="size-4" />
+                    <LogOut className="size-4" />
                     {t("leave")}
                 </Button>
-            )}
-            {isAdmin && (
-                <Button
-                    type="button"
-                    variant="destructive"
-                    disabled={pending}
-                    onClick={() => setConfirming("delete")}
-                    className="rounded-xl"
-                >
-                    <Trash2 aria-hidden="true" className="size-4" />
-                    {t("delete")}
-                </Button>
-            )}
+                {confirming && (
+                    <Button
+                        variant="ghost"
+                        disabled={pending}
+                        onClick={() => setConfirming(false)}
+                    >
+                        {t("cancel")}
+                    </Button>
+                )}
+            </div>
         </div>
     );
 }

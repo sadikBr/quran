@@ -4,18 +4,18 @@
         "back": "Back to dashboard",
         "eyebrow": "LEARN TOGETHER",
         "title": "Your Quran circles",
-        "description": "Create a private group for family, friends, or students and manage assignments for every meeting.",
-        "emptyTitle": "Begin your first Quran circle",
-        "emptyDescription": "Create a group to organize learners, or join one using an invitation code.",
+        "description": "Join your Quran circles and follow their meetings, assignments and reviews.",
+        "emptyTitle": "Join your first Quran circle",
+        "emptyDescription": "Ask your circle supervisor for an invitation code to join.",
         "members": "{count, plural, one {# member} other {# members}}",
         "role": {
-            "admin": "Admin",
+            "supervisor": "Supervisor",
             "member": "Member"
         },
         "open": "Open group",
         "create": {
             "title": "Create a group",
-            "description": "You will become its first admin and receive a private invitation code.",
+            "description": "Choose a supervisor and set the circle’s meeting schedule.",
             "name": "Group name",
             "namePlaceholder": "e.g. Our family Quran circle",
             "details": "Short description (optional)",
@@ -27,7 +27,7 @@
         },
         "join": {
             "title": "Join a group",
-            "description": "Enter the invitation code shared with you by a group admin.",
+            "description": "Enter the invitation code shared with you by a circle supervisor.",
             "code": "Invitation code",
             "codePlaceholder": "Enter code",
             "submit": "Join group",
@@ -39,7 +39,7 @@
         "detail": {
             "back": "All groups",
             "memberHeading": "Group members",
-            "memberDescription": "View the people in this circle and manage their roles and access.",
+            "memberDescription": "View the people in this circle and manage their membership.",
             "you": "You",
             "inviteHeading": "Invite someone",
             "inviteDescription": "Share this private link or code with someone you want to add.",
@@ -47,7 +47,7 @@
             "copyCode": "Copy code",
             "copyLink": "Copy invitation link",
             "copied": "Copied to clipboard.",
-            "adminOnly": "Only group admins can see the invitation code.",
+            "adminOnly": "Only circle supervisors can see the invitation code.",
             "actions": "Member actions",
             "makeAdmin": "Make admin",
             "makeMember": "Make member",
@@ -58,8 +58,8 @@
             "confirmLeave": "Leave this group? You will need a new invitation to return.",
             "confirmDelete": "Delete this group permanently? This cannot be undone.",
             "cancel": "Cancel",
-            "lastAdmin": "Choose another admin before removing or changing the final admin.",
-            "meetingHost": "Choose another meeting host before changing or removing this admin.",
+            "lastAdmin": "Choose another supervisor before removing or changing the final admin.",
+            "meetingHost": "The platform admin must appoint a replacement before the supervisor can leave.",
             "updated": "Group membership updated.",
             "failed": "We couldn’t update the group. Please try again."
         },
@@ -76,7 +76,7 @@
             "hubReview": "To review",
             "emptyTitle": "No active assignments",
             "emptyDescriptionAdmin": "Create the first assignment for a member of this group.",
-            "emptyDescriptionMember": "Your group admin has not assigned you a range yet.",
+            "emptyDescriptionMember": "Your circle supervisor has not assigned you a range yet.",
             "createTitle": "Create an assignment",
             "createDescription": "The range will use the selected learner’s riwayah and Quran numbering.",
             "planWeek": "Plan the next meeting",
@@ -114,7 +114,7 @@
             },
             "open": "Open practice",
             "reviewNow": "Review now",
-            "feedback": "Admin feedback",
+            "feedback": "Supervisor feedback",
             "currentCount": "{count, plural, =0 {No current assignments} one {# current assignment} other {# current assignments}}",
             "completedCount": "{count, plural, one {# completed} other {# completed}}",
             "readyCount": "{count, plural, one {# ready for review} other {# ready for review}}",
@@ -201,7 +201,7 @@
             "revisionSuccess": "The assignment was returned for more work.",
             "error": "We couldn’t save this review. The assignment may already have been reviewed.",
             "notReadyTitle": "This assignment is not waiting for review",
-            "notReadyDescription": "The learner may still be working on it, or another admin has already reviewed it.",
+            "notReadyDescription": "The learner may still be working on it, or another supervisor has already reviewed it.",
             "returnToGroup": "Return to group"
         },
         "dashboard": {
@@ -237,7 +237,7 @@
             "liveEyebrow": "MEETING OPEN",
             "setupTitle": "Choose your weekly meeting times",
             "setupDescriptionAdmin": "Add the days and times when your circle meets. The room will open for three hours at each scheduled time.",
-            "setupDescriptionMember": "A group admin has not scheduled the meeting yet.",
+            "setupDescriptionMember": "A circle supervisor has not scheduled the meeting yet.",
             "liveTitle": "Your Quran circle is meeting now",
             "pausedTitle": "Group meetings are paused",
             "closesIn": "The room remains open for {hours, plural, =0 {} one {# hour } other {# hours }}{minutes, plural, =0 {} one {# minute} other {# minutes}}.",
@@ -286,7 +286,7 @@
                 "next": "Next",
                 "page": "Page {page}",
                 "statuses": {
-                    "pending": "Awaiting the admin’s decision",
+                    "pending": "Awaiting the supervisor’s decision",
                     "accepted": "Absence accepted",
                     "unaccepted": "Absence not accepted"
                 }

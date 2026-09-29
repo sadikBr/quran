@@ -12,6 +12,10 @@
         "db:push": "drizzle-kit push",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "drizzle-kit migrate",
+        "db:bootstrap-admin": "node scripts/bootstrap-admin.mjs",
+        "db:setup": "node scripts/setup-database.mjs",
+        "test:admin": "node --test scripts/bootstrap-admin.test.mjs",
+        "test:admin:integration": "bun test scripts/admin-permissions.integration.test.mjs",
         "push:keys": "web-push generate-vapid-keys --json"
     },
     "dependencies": {

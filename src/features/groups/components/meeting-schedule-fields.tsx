@@ -56,7 +56,7 @@ export default function MeetingScheduleFields({
                 {schedule.map((slot, index) => (
                     <div
                         key={`${index}-${slot.weekday}`}
-                        className="grid grid-cols-[minmax(0,1fr)_7.75rem_auto] items-center gap-2 sm:grid-cols-[minmax(12rem,1fr)_9rem_auto]"
+                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 min-[400px]:grid-cols-[minmax(0,1fr)_9rem_auto] sm:grid-cols-[minmax(12rem,1fr)_9rem_auto]"
                     >
                         <select
                             aria-label={t("day")}
@@ -66,7 +66,7 @@ export default function MeetingScheduleFields({
                                     weekday: Number(event.target.value),
                                 })
                             }
-                            className="h-11 rounded-xl border-0 bg-background/80 px-3 text-sm shadow-sm ring-1 ring-border/60 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className="col-span-2 h-11 min-w-0 rounded-xl border-0 bg-background/80 px-3 text-sm shadow-sm ring-1 ring-border/60 outline-none focus-visible:ring-2 focus-visible:ring-ring min-[400px]:col-span-1"
                         >
                             {[1, 2, 3, 4, 5, 6, 7].map((weekday) => (
                                 <option key={weekday} value={weekday}>

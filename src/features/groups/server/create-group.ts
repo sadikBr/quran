@@ -1,19 +1,22 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { z } from "zod";
 import db from "@/drizzle/db";
 import {
+    adminActivity,
     groupMeeting,
     groupMeetingSchedule,
     groupMember,
     memorizationGroup,
+    user,
 } from "@/drizzle/schema";
-import { auth } from "@/features/auth/auth";
+import { getPlatformAdmin } from "@/features/auth/permissions";
 import { isValidTimezone } from "./meeting-schedule";
 
 const inputSchema = z.object({
+    supervisorId: z.string().min(1).optional(),
     name: z.string().trim().min(2).max(80),
     description: z.string().trim().max(300).optional(),
     timezone: z.string().min(1).max(100),
@@ -44,8 +47,8 @@ export default async function createGroup(input: unknown) {
         return { success: false as const };
     }
 
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (!session) return { success: false as const };
+    const admin = await getPlatformAdmin();
+    if (!admin) return { success: false as const };
 
     const groupId = crypto.randomUUID();
     const membershipId = crypto.randomUUID();
@@ -53,23 +56,37 @@ export default async function createGroup(input: unknown) {
 
     try {
         await db.transaction(async (transaction) => {
+            const [supervisor] = parsed.data.supervisorId
+                ? await transaction
+                      .select()
+                      .from(user)
+                      .where(eq(user.id, parsed.data.supervisorId))
+                      .for("update")
+                : [];
+            if (
+                parsed.data.supervisorId &&
+                (!supervisor || supervisor.role !== "member")
+            )
+                throw new Error("Invalid supervisor");
             await transaction.insert(memorizationGroup).values({
                 id: groupId,
                 name: parsed.data.name,
                 description: parsed.data.description || null,
                 inviteCode: createInviteCode(),
-                createdById: session.user.id,
+                createdById: admin.id,
             });
-            await transaction.insert(groupMember).values({
-                id: membershipId,
-                groupId,
-                userId: session.user.id,
-                role: "admin",
-            });
+            if (supervisor)
+                await transaction.insert(groupMember).values({
+                    id: membershipId,
+                    groupId,
+                    userId: supervisor.id,
+                    role: "supervisor",
+                });
             await transaction.insert(groupMeeting).values({
                 id: meetingId,
                 groupId,
-                hostUserId: session.user.id,
+                hostUserId: supervisor?.id ?? null,
+                enabled: Boolean(supervisor),
                 roomName: `circle-${crypto.randomUUID()}`,
                 timezone: parsed.data.timezone,
             });
@@ -81,12 +98,21 @@ export default async function createGroup(input: unknown) {
                     localTime: slot.localTime,
                 })),
             );
+            await transaction.insert(adminActivity).values({
+                id: crypto.randomUUID(),
+                actorId: admin.id,
+                action: "circle_created",
+                groupId,
+                groupName: parsed.data.name,
+                details: { supervisorId: supervisor?.id },
+            });
         });
     } catch {
         return { success: false as const };
     }
 
     revalidatePath("/groups");
+    revalidatePath("/admin");
     revalidatePath("/dashboard");
     return { success: true as const, groupId };
 }

@@ -78,10 +78,8 @@ export default async function GroupPage({
         namespace: "Home",
     });
     const isArabic = preferences.language === "ar";
-    const isAdmin = group.role === "admin";
-    const canLeave =
-        !isAdmin ||
-        group.members.filter((member) => member.role === "admin").length > 1;
+    const isAdmin = group.role === "supervisor";
+    const canLeave = !isAdmin;
     const readingNumber =
         preferences.readingMode === "page"
             ? (readingProgress.lastPageNumber ?? 1)
@@ -172,8 +170,8 @@ export default async function GroupPage({
                             <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-primary uppercase">
                                 {isAdmin && <Shield className="size-4" />}
                                 {t(
-                                    group.role === "admin"
-                                        ? "role.admin"
+                                    group.role === "supervisor"
+                                        ? "role.supervisor"
                                         : "role.member",
                                 )}
                             </div>

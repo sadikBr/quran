@@ -3,7 +3,12 @@ import { NextResponse } from "next/server";
 import webpush from "web-push";
 import { env } from "@/data/env/server";
 import db from "@/drizzle/db";
-import { pushSubscription, userSettings, userWird } from "@/drizzle/schema";
+import {
+    pushSubscription,
+    user,
+    userSettings,
+    userWird,
+} from "@/drizzle/schema";
 import {
     configureWebPush,
     isExpiredPushSubscription,
@@ -68,11 +73,13 @@ export async function GET(request: Request) {
             remindersEnabled: userSettings.wirdRemindersEnabled,
         })
         .from(pushSubscription)
+        .innerJoin(user, eq(pushSubscription.userId, user.id))
         .innerJoin(userWird, eq(pushSubscription.userId, userWird.userId))
         .innerJoin(
             userSettings,
             eq(pushSubscription.userId, userSettings.userId),
-        );
+        )
+        .where(eq(user.role, "member"));
 
     let sent = 0;
     let removed = 0;

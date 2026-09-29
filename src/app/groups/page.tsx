@@ -124,7 +124,8 @@ export default async function GroupsPage({
                                                 {group.name}
                                             </h2>
                                             <span className="inline-flex items-center gap-1.5 rounded-full bg-background/60 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
-                                                {group.role === "admin" && (
+                                                {group.role ===
+                                                    "supervisor" && (
                                                     <Shield className="size-3 text-primary" />
                                                 )}
                                                 {t(`role.${group.role}`)}

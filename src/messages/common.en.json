@@ -9,6 +9,9 @@
             "description": "Read the Quran, listen to recitations, and keep your place."
         },
         "navigation": {
+            "admin": "Platform administration",
+            "settings": "Settings",
+            "profile": "Profile",
             "search": "Search the Quran",
             "close": "Close menu",
             "overview": "Your space",

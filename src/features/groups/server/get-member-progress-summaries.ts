@@ -47,7 +47,7 @@ export default async function getMemberProgressSummaries(
         })
         .from(groupMember)
         .where(
-            requestingMembership.role === "admin"
+            requestingMembership.role === "supervisor"
                 ? eq(groupMember.groupId, groupId)
                 : and(
                       eq(groupMember.groupId, groupId),

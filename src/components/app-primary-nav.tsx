@@ -19,6 +19,10 @@ import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog } from "radix-ui";
 import { useEffect, useState } from "react";
+import {
+    useIsAuthenticated,
+    useIsPlatformAdmin,
+} from "@/features/auth/account-role-provider";
 import { cn } from "@/lib/utils";
 import {
     DropdownMenu,
@@ -95,6 +99,34 @@ const destinations = [
 ] as const;
 
 export default function AppPrimaryNav() {
+    const isAdmin = useIsPlatformAdmin();
+    const isAuthenticated = useIsAuthenticated();
+    const visibleDestinations = isAdmin
+        ? [
+              {
+                  href: "/admin",
+                  label: "admin",
+                  icon: LayoutDashboard,
+                  matches: (path: string) => path.startsWith("/admin"),
+              },
+              {
+                  href: "/settings",
+                  label: "settings",
+                  icon: UsersRound,
+                  matches: (path: string) => path === "/settings",
+              },
+              {
+                  href: "/profile",
+                  label: "profile",
+                  icon: Home,
+                  matches: (path: string) => path === "/profile",
+              },
+          ]
+        : isAuthenticated
+          ? destinations
+          : destinations.filter((destination) =>
+                ["/", "/quran", "/quran/search"].includes(destination.href),
+            );
     const pathname = usePathname();
     const locale = useLocale();
     const t = useTranslations("Common.navigation");
@@ -109,20 +141,32 @@ export default function AppPrimaryNav() {
         return () => desktop.removeEventListener("change", closeOnDesktop);
     }, []);
 
-    const mobileSections = [
-        { title: "overview", links: ["/", "/dashboard"] },
-        {
-            title: "reading",
-            links: [
-                "/quran",
-                "/quran/search",
-                "/wird",
-                "/practice",
-                "/memorization",
-            ],
-        },
-        { title: "together", links: ["/assignments", "/groups"] },
-    ] as const;
+    const sections = isAdmin
+        ? [{ title: "overview", links: ["/admin", "/settings", "/profile"] }]
+        : ([
+              { title: "overview", links: ["/", "/dashboard"] },
+              {
+                  title: "reading",
+                  links: [
+                      "/quran",
+                      "/quran/search",
+                      "/wird",
+                      "/practice",
+                      "/memorization",
+                  ],
+              },
+              { title: "together", links: ["/assignments", "/groups"] },
+          ] as const);
+    const mobileSections = sections
+        .map((section) => ({
+            ...section,
+            links: section.links.filter((href) =>
+                visibleDestinations.some(
+                    (destination) => destination.href === href,
+                ),
+            ),
+        }))
+        .filter((section) => section.links.length > 0);
 
     return (
         <>
@@ -179,7 +223,7 @@ export default function AppPrimaryNav() {
                                     <div className="space-y-1">
                                         {section.links.map((href) => {
                                             const destination =
-                                                destinations.find(
+                                                visibleDestinations.find(
                                                     (item) =>
                                                         item.href === href,
                                                 );
@@ -256,7 +300,7 @@ export default function AppPrimaryNav() {
                     </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-64 p-2">
-                    {destinations.map((destination) => {
+                    {visibleDestinations.map((destination) => {
                         const Icon = destination.icon;
                         const isCurrent = destination.matches(pathname);
 

@@ -64,7 +64,7 @@ export default async function getAssignmentReview(
             and(
                 eq(groupMember.groupId, groupId),
                 eq(groupMember.userId, adminUserId),
-                eq(groupMember.role, "admin"),
+                eq(groupMember.role, "supervisor"),
             ),
         )
         .where(

@@ -41,7 +41,7 @@ export default async function MeetingHistoryPage({
     ]);
     if (!group) notFound();
 
-    const isAdmin = group.role === "admin";
+    const isAdmin = group.role === "supervisor";
     const [meeting, historyRows, messages] = await Promise.all([
         getGroupMeetingForUser(groupId, session.user.id),
         getMeetingHistory(groupId, session.user.id, isAdmin, {

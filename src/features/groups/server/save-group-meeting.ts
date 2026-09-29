@@ -9,6 +9,7 @@ import {
     groupMeeting,
     groupMeetingSchedule,
     groupMember,
+    memorizationGroup,
 } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
 import { isValidTimezone } from "./meeting-schedule";
@@ -51,7 +52,7 @@ export default async function saveGroupMeeting(input: unknown) {
             and(
                 eq(groupMember.groupId, parsed.data.groupId),
                 eq(groupMember.userId, session.user.id),
-                eq(groupMember.role, "admin"),
+                eq(groupMember.role, "supervisor"),
             ),
         )
         .limit(1);
@@ -59,7 +60,24 @@ export default async function saveGroupMeeting(input: unknown) {
         return { success: false as const, reason: "unauthorized" as const };
     }
 
-    await db.transaction(async (transaction) => {
+    const result = await db.transaction(async (transaction) => {
+        await transaction
+            .select({ id: memorizationGroup.id })
+            .from(memorizationGroup)
+            .where(eq(memorizationGroup.id, parsed.data.groupId))
+            .for("update");
+        const [currentSupervisor] = await transaction
+            .select({ id: groupMember.id })
+            .from(groupMember)
+            .where(
+                and(
+                    eq(groupMember.groupId, parsed.data.groupId),
+                    eq(groupMember.userId, session.user.id),
+                    eq(groupMember.role, "supervisor"),
+                ),
+            );
+        if (!currentSupervisor)
+            return { success: false as const, reason: "unauthorized" as const };
         const [existing] = await transaction
             .select({ id: groupMeeting.id })
             .from(groupMeeting)
@@ -96,8 +114,9 @@ export default async function saveGroupMeeting(input: unknown) {
                 localTime: slot.localTime,
             })),
         );
+        return { success: true as const };
     });
 
     revalidatePath(`/groups/${parsed.data.groupId}`);
-    return { success: true as const };
+    return result;
 }

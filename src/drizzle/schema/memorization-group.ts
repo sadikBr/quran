@@ -1,6 +1,7 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
     boolean,
+    check,
     index,
     integer,
     pgTable,
@@ -20,7 +21,7 @@ export const memorizationGroup = pgTable(
         inviteCode: text("invite_code").notNull(),
         createdById: text("created_by_id")
             .notNull()
-            .references(() => user.id, { onDelete: "cascade" }),
+            .references(() => user.id, { onDelete: "restrict" }),
         createdAt,
         updatedAt,
     },
@@ -40,7 +41,9 @@ export const groupMember = pgTable(
         userId: text("user_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
-        role: text("role").notNull().default("member"),
+        role: text("role", { enum: ["supervisor", "member"] })
+            .notNull()
+            .default("member"),
         createdAt,
         updatedAt,
     },
@@ -50,6 +53,13 @@ export const groupMember = pgTable(
             table.userId,
         ),
         index("group_member_user_idx").on(table.userId),
+        check(
+            "group_member_role_check",
+            sql`${table.role} in ('supervisor', 'member')`,
+        ),
+        uniqueIndex("group_single_supervisor_idx")
+            .on(table.groupId)
+            .where(sql`${table.role} = 'supervisor'`),
     ],
 );
 
@@ -60,9 +70,9 @@ export const groupMeeting = pgTable(
         groupId: text("group_id")
             .notNull()
             .references(() => memorizationGroup.id, { onDelete: "cascade" }),
-        hostUserId: text("host_user_id")
-            .notNull()
-            .references(() => user.id, { onDelete: "cascade" }),
+        hostUserId: text("host_user_id").references(() => user.id, {
+            onDelete: "restrict",
+        }),
         roomName: text("room_name").notNull(),
         timezone: text("timezone").notNull(),
         activeWindowMinutes: integer("active_window_minutes")

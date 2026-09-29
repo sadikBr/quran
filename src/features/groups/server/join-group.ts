@@ -7,6 +7,7 @@ import { z } from "zod";
 import db from "@/drizzle/db";
 import { groupMember, memorizationGroup } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import { isPlatformAdmin } from "@/features/auth/permissions";
 
 const inputSchema = z.object({
     inviteCode: z.string().trim().min(1).max(30),
@@ -18,6 +19,8 @@ export default async function joinGroup(input: unknown) {
 
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) return { success: false as const, reason: "unauthorized" };
+    if (await isPlatformAdmin(session.user.id))
+        return { success: false as const, reason: "unauthorized" };
 
     const [group] = await db
         .select({ id: memorizationGroup.id })
