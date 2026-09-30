@@ -119,6 +119,15 @@ export default function ReciterCombobox({
                                             >
                                                 <span className="min-w-0 flex-1 leading-5">
                                                     {getLabel(reciter)}
+                                                    {reciter.availableSurahs &&
+                                                        reciter.availableSurahs
+                                                            .length < 114 && (
+                                                            <span className="block text-xs font-normal text-muted-foreground">
+                                                                {locale === "ar"
+                                                                    ? `تسجيلات غير مكتملة · ${reciter.availableSurahs.length}/114 سورة`
+                                                                    : `Partial recordings · ${reciter.availableSurahs.length}/114 surahs`}
+                                                            </span>
+                                                        )}
                                                 </span>
                                                 {badge && (
                                                     <span className="me-1 shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[0.6rem] font-semibold tracking-wide text-primary uppercase">

@@ -32,7 +32,7 @@ export const userSettings = pgTable("user_settings", {
     language: Language("language").notNull().default("en"),
     riwayah: Riwayah("riwayah").notNull().default("hafs"),
     arabicEdition: text("arabic_edition").notNull().default("quran-simple"),
-    reciter: text("reciter").notNull().default("everyayah/Alafasy_64kbps"),
+    reciter: text("reciter").notNull().default("quranpedia/255"),
     translationEdition: text("translation_edition")
         .notNull()
         .default("en.sahih"),

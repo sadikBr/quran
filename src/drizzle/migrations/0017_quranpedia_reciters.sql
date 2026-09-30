@@ -1,0 +1,1 @@
+ALTER TABLE "user_settings" ALTER COLUMN "reciter" SET DEFAULT 'quranpedia/255';

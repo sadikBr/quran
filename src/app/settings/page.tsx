@@ -12,6 +12,7 @@ import { isPlatformAdmin } from "@/features/auth/permissions";
 import SettingsNextStep from "@/features/onboarding/settings-next-step";
 import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
+import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import type { Edition, Reciter } from "@/features/quran/types";
 import SettingsForm from "@/features/settings/components/settings-form";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -73,10 +74,11 @@ export default async function SettingsPage() {
     }
 
     const isAdmin = await isPlatformAdmin(session.user.id);
-    const [preferences, editions, { reciters }] = await Promise.all([
+    const [preferences, editions, { reciters }, surahs] = await Promise.all([
         getPreferences(),
         isAdmin ? Promise.resolve([]) : getAvailableQuranEditions(),
         isAdmin ? Promise.resolve({ reciters: [] }) : getAvailableReciters(),
+        isAdmin ? Promise.resolve([]) : getSurahsMeta().catch(() => []),
     ]);
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
@@ -156,6 +158,7 @@ export default async function SettingsPage() {
                         <AdminPreferences preferences={preferences} />
                     ) : (
                         <SettingsForm
+                            surahs={surahs}
                             preferences={preferences}
                             vapidPublicKey={env.VAPID_PUBLIC_KEY ?? null}
                             arabicEditions={arabicEditions}

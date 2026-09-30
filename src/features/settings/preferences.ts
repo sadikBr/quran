@@ -63,7 +63,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
     language: "en",
     riwayah: "hafs",
     arabicEdition: "quran-simple",
-    reciter: "everyayah/Alafasy_64kbps",
+    reciter: "quranpedia/255",
     translationEdition: "en.sahih",
     tafsirEdition: "ar.muyassar",
     showTranslation: false,

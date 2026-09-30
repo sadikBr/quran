@@ -7,6 +7,7 @@ import getAvailableReciters from "../server/get-available-reciter";
 import getQuranNavigationMeta from "../server/get-quran-navigation-meta";
 import getQuranPageData from "../server/get-quran-page-data";
 import FocusModeToggle from "./focus-mode-toggle";
+import MissingRecitation from "./missing-recitation";
 import PageDivisionSummary from "./page-division-summary";
 import QuranAudioQueue from "./quran-audio-queue";
 import ReaderToolbar from "./reader-toolbar";
@@ -128,25 +129,34 @@ export default async function QuranPage({ page }: { page: number }) {
                     });
 
                 return (
-                    <Surah
-                        showSurahHeading
-                        showSurahDetails
-                        key={surah.name}
-                        surah={surah}
-                        ayahs={ayahs}
-                        translatedAyahs={
-                            preferences.showTranslation
-                                ? (translatedPageData?.data.ayahs.filter(
-                                      (ayah) =>
-                                          ayah.surah.number === surah.number,
-                                  ) ?? [])
-                                : []
-                        }
-                        showTranslation={preferences.showTranslation}
-                        translationEdition={translatedPageData?.data.edition}
-                        divisionMarkers={[...markerByAyah.values()]}
-                        riwayah="hafs"
-                    />
+                    <div key={surah.number}>
+                        <MissingRecitation
+                            reciter={reciter}
+                            surahNumber={surah.number}
+                        />
+                        <Surah
+                            showSurahHeading
+                            showSurahDetails
+                            key={surah.name}
+                            surah={surah}
+                            ayahs={ayahs}
+                            translatedAyahs={
+                                preferences.showTranslation
+                                    ? (translatedPageData?.data.ayahs.filter(
+                                          (ayah) =>
+                                              ayah.surah.number ===
+                                              surah.number,
+                                      ) ?? [])
+                                    : []
+                            }
+                            showTranslation={preferences.showTranslation}
+                            translationEdition={
+                                translatedPageData?.data.edition
+                            }
+                            divisionMarkers={[...markerByAyah.values()]}
+                            riwayah="hafs"
+                        />
+                    </div>
                 );
             })}
         </div>

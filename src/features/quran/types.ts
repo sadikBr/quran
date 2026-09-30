@@ -67,7 +67,11 @@ export interface Edition {
     direction: string;
 }
 
-export type HostType = "everyayah" | "mp3quran" | "islamic_network";
+export type HostType =
+    | "everyayah"
+    | "mp3quran"
+    | "islamic_network"
+    | "quranpedia";
 
 export interface QuranJsonResponse {
     note: string;
@@ -101,6 +105,7 @@ export interface Reciter {
     recitation?: string;
     surah_total?: number;
     surah_files?: number;
+    availableSurahs?: number[];
 }
 
 export interface WarshChapter {

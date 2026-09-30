@@ -12,6 +12,7 @@ import {
     getWarshPageVerses,
 } from "../server/get-warsh-mushaf";
 import FocusModeToggle from "./focus-mode-toggle";
+import MissingRecitation from "./missing-recitation";
 import PageDivisionSummary from "./page-division-summary";
 import QuranAudioQueue from "./quran-audio-queue";
 import ReaderToolbar from "./reader-toolbar";
@@ -164,33 +165,55 @@ export default async function WarshQuranPage({ page }: { page: number }) {
                 )?.chapter;
                 if (!source || !chapter) return null;
 
-                const ayahs = displayedBySurah.get(surahNumber) ?? [];
+                const ayahs = (displayedBySurah.get(surahNumber) ?? []).map(
+                    (ayah) => {
+                        const streams =
+                            reciter?.scope === "ayah" && !ayah.isBasmalaSentinel
+                                ? (audioQueue.find(
+                                      (item) =>
+                                          item.ayahNumber ===
+                                          (ayah.audioNumber ?? ayah.number),
+                                  )?.streams ?? [])
+                                : [];
+                        return {
+                            ...ayah,
+                            audio: streams[0],
+                            audioSecondary: streams.slice(1),
+                        };
+                    },
+                );
                 const mappedHafsGlobals = new Set(
                     ayahs.flatMap((ayah) => ayah.hafsGlobalNumbers ?? []),
                 );
                 const translation = translationsBySurah.get(surahNumber);
 
                 return (
-                    <Surah
-                        showSurahHeading
-                        showSurahDetails
-                        key={surahNumber}
-                        surah={{
-                            ...source.surahMeta,
-                            numberOfAyahs: chapter.verses.length,
-                        }}
-                        ayahs={ayahs}
-                        translatedAyahs={
-                            translation?.ayahs.filter((ayah) =>
-                                mappedHafsGlobals.has(ayah.number),
-                            ) ?? []
-                        }
-                        showTranslation={preferences.showTranslation}
-                        translationEdition={translation?.edition}
-                        highlightAyahs={false}
-                        divisionMarkers={[...markerByAyah.values()]}
-                        riwayah="warsh"
-                    />
+                    <div key={surahNumber}>
+                        <MissingRecitation
+                            reciter={reciter}
+                            surahNumber={surahNumber}
+                        />
+                        <Surah
+                            showSurahHeading
+                            showSurahDetails
+                            key={surahNumber}
+                            surah={{
+                                ...source.surahMeta,
+                                numberOfAyahs: chapter.verses.length,
+                            }}
+                            ayahs={ayahs}
+                            translatedAyahs={
+                                translation?.ayahs.filter((ayah) =>
+                                    mappedHafsGlobals.has(ayah.number),
+                                ) ?? []
+                            }
+                            showTranslation={preferences.showTranslation}
+                            translationEdition={translation?.edition}
+                            highlightAyahs={nativeAudio}
+                            divisionMarkers={[...markerByAyah.values()]}
+                            riwayah="warsh"
+                        />
+                    </div>
                 );
             })}
         </div>

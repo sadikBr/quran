@@ -1,3 +1,4 @@
+import { migrateReciterId } from "@/features/quran/helpers/quranpedia-reciters";
 import type { Edition, Reciter } from "@/features/quran/types";
 import {
     DEFAULT_PREFERENCES,
@@ -40,7 +41,9 @@ export function normalizeEditionPreferences(
     const arabicEdition = editions.find(
         (edition) => edition.identifier === preferences.arabicEdition,
     );
-    const reciter = reciters.find((item) => item.id === preferences.reciter);
+    const reciter = reciters.find(
+        (item) => item.id === migrateReciterId(preferences.reciter),
+    );
     const compatibleReciters = reciters.filter((item) =>
         isReciterCompatible(item, preferences.readingMode, preferences.riwayah),
     );
@@ -65,7 +68,15 @@ export function normalizeEditionPreferences(
                 preferences.riwayah,
             )
                 ? reciter.id
-                : (compatibleReciters[0]?.id ?? DEFAULT_PREFERENCES.reciter),
+                : (compatibleReciters.find(
+                      (item) =>
+                          item.id ===
+                          (preferences.riwayah === "warsh"
+                              ? "quranpedia/263"
+                              : DEFAULT_PREFERENCES.reciter),
+                  )?.id ??
+                  compatibleReciters[0]?.id ??
+                  DEFAULT_PREFERENCES.reciter),
         translationEdition:
             translationEdition?.type === "translation" &&
             translationEdition.language === "en"

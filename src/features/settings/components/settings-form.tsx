@@ -20,7 +20,8 @@ import PushNotificationSetting from "@/features/notifications/components/push-no
 import OfflineLibrarySetting from "@/features/offline/components/offline-library-setting";
 import EditionCombobox from "@/features/quran/components/edition-combobox";
 import ReciterCombobox from "@/features/quran/components/reciter-combobox";
-import type { Edition, Reciter } from "@/features/quran/types";
+import ReciterCoverage from "@/features/quran/components/reciter-coverage";
+import type { Edition, Reciter, SurahType } from "@/features/quran/types";
 import ThemeSelector from "@/features/settings/components/theme-selector";
 import { useSettings } from "@/features/settings/settings-provider";
 import { cn } from "@/lib/utils";
@@ -63,6 +64,7 @@ const TRANSLATION_NAME_KEYS = {
 } as const;
 
 export default function SettingsForm({
+    surahs = [],
     preferences,
     vapidPublicKey,
     arabicEditions,
@@ -70,6 +72,7 @@ export default function SettingsForm({
     translationEditions,
     tafsirEditions,
 }: {
+    surahs?: SurahType[];
     preferences: Preferences;
     vapidPublicKey: string | null;
     arabicEditions: Edition[];
@@ -615,27 +618,37 @@ export default function SettingsForm({
                             label={t("reciter.label")}
                             htmlFor="reciter"
                         >
-                            <ReciterCombobox
-                                id="reciter"
-                                reciters={availableReciters}
-                                value={values.reciter}
-                                onValueChange={(value) =>
-                                    updateValue("reciter", value)
-                                }
-                                placeholder={t("reciter.placeholder")}
-                                className={selectClassName}
-                                emptyMessage={t("reciter.empty")}
-                                groupBy={(reciter) =>
-                                    reciter.scope === "surah"
-                                        ? t("reciter.wholeSurah")
-                                        : t("reciter.ayahByAyah")
-                                }
-                                getBadge={(reciter) =>
-                                    reciter.bitrate_kbps
-                                        ? `${reciter.bitrate_kbps} kbps`
-                                        : reciter.host.replace("_", " ")
-                                }
-                            />
+                            <div className="flex min-w-0 items-center gap-1">
+                                <div className="min-w-0 flex-1">
+                                    <ReciterCombobox
+                                        id="reciter"
+                                        reciters={availableReciters}
+                                        value={values.reciter}
+                                        onValueChange={(value) =>
+                                            updateValue("reciter", value)
+                                        }
+                                        placeholder={t("reciter.placeholder")}
+                                        className={selectClassName}
+                                        emptyMessage={t("reciter.empty")}
+                                        groupBy={(reciter) =>
+                                            reciter.scope === "surah"
+                                                ? t("reciter.wholeSurah")
+                                                : t("reciter.ayahByAyah")
+                                        }
+                                        getBadge={(reciter) =>
+                                            reciter.bitrate_kbps
+                                                ? `${reciter.bitrate_kbps} kbps`
+                                                : reciter.host.replace("_", " ")
+                                        }
+                                    />
+                                </div>
+                                <ReciterCoverage
+                                    reciter={reciters.find(
+                                        (r) => r.id === values.reciter,
+                                    )}
+                                    surahs={surahs}
+                                />
+                            </div>
                         </SettingField>
                         <p className="text-xs leading-5 text-muted-foreground">
                             {values.riwayah === "warsh" &&

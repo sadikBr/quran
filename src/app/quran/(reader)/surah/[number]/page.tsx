@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import FocusModeToggle from "@/features/quran/components/focus-mode-toggle";
+import MissingRecitation from "@/features/quran/components/missing-recitation";
 import QuranAudioQueue from "@/features/quran/components/quran-audio-queue";
 import QuranPageNavigation from "@/features/quran/components/quran-page-navigation";
 import ReaderToolbar from "@/features/quran/components/reader-toolbar";
@@ -135,7 +136,9 @@ export default async function SurahPage({
                 : getWarshAudioAyahNumbers(warshVerse, surahNumber)[0]
             : ayah.numberInSurah;
         const streams =
-            reciter?.scope === "ayah" && audioAyahNumber !== undefined
+            !ayah.isBasmalaSentinel &&
+            reciter?.scope === "ayah" &&
+            audioAyahNumber !== undefined
                 ? getRecitationStreams(reciter, {
                       surahNumber,
                       ayahNumber: audioAyahNumber,
@@ -234,6 +237,10 @@ export default async function SurahPage({
                         )}
                         <FocusModeToggle embedded />
                     </ReaderToolbar>
+                    <MissingRecitation
+                        reciter={reciter}
+                        surahNumber={surahNumber}
+                    />
                     <Surah
                         surah={displayedSurah}
                         ayahs={ayahsWithAudio}

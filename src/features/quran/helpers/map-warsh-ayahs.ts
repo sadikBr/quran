@@ -2,13 +2,11 @@ import type { AyahType, Reciter, WarshChapter, WarshVerse } from "../types";
 
 const WARSH_FATIHA_BASMALA = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
 
-const NATIVE_WARSH_AYAH_RECITERS = new Set([
-    "everyayah/warsh/warsh_yassin_al_jazaery_64kbps",
-]);
-
 export function usesNativeWarshAyahNumbering(reciter?: Reciter) {
     return (
-        reciter?.scope === "ayah" && NATIVE_WARSH_AYAH_RECITERS.has(reciter.id)
+        reciter?.scope === "ayah" &&
+        reciter.host === "quranpedia" &&
+        reciter.recitation === "warsh"
     );
 }
 
