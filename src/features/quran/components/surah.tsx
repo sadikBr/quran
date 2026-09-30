@@ -24,9 +24,7 @@ function SurahDetail({ label, value }: { label: string; value: number }) {
             >
                 {String(value).padStart(2, "0")}
             </span>
-            <span className="sr-only">
-                {label}
-            </span>
+            <span className="sr-only">{label}</span>
         </span>
     );
 }
