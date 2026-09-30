@@ -56,15 +56,7 @@ export default async function QuranPage({ page }: { page: number }) {
         }))
         .filter((ayah) => ayah.streams.length > 0);
     const pageJuzs = [...new Set(pageData.data.ayahs.map((ayah) => ayah.juz))];
-    const pageSurahNames = Object.values(pageData.data.surahs).map((surah) =>
-        preferences.language === "ar" ? surah.name : surah.englishName,
-    );
-    const pageHizbQuarters = [
-        ...new Set(pageData.data.ayahs.map((ayah) => ayah.hizbQuarter)),
-    ];
-    const pageHizbs = [
-        ...new Set(pageHizbQuarters.map((quarter) => Math.ceil(quarter / 4))),
-    ];
+    const firstAyah = pageData.data.ayahs[0];
     const markerByAyah = new Map<number, QuranDivisionMarker>();
 
     function addMarkers(
@@ -95,10 +87,12 @@ export default async function QuranPage({ page }: { page: number }) {
             className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-0 overflow-auto p-3 sm:p-4"
         >
             <PageDivisionSummary
-                surahNames={pageSurahNames}
+                continuationSurah={
+                    firstAyah?.numberInSurah > 1 ? firstAyah.surah : undefined
+                }
                 juzs={pageJuzs}
-                hizbs={pageHizbs}
-                hizbQuarters={pageHizbQuarters}
+                page={page}
+                navigation={navigation}
             />
             <ReaderToolbar>
                 {pageData.data.edition.identifier === "quran-tajweed" && (
@@ -135,6 +129,8 @@ export default async function QuranPage({ page }: { page: number }) {
 
                 return (
                     <Surah
+                        showSurahHeading
+                        showSurahDetails
                         key={surah.name}
                         surah={surah}
                         ayahs={ayahs}

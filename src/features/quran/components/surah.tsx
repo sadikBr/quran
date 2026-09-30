@@ -11,6 +11,26 @@ import Ayah from "./ayah";
 import SurahBasmala from "./surah-basmala";
 import TranslationAyah from "./translation-ayah";
 
+function SurahDetail({ label, value }: { label: string; value: number }) {
+    return (
+        <span className="relative flex size-10 shrink-0 items-center justify-center sm:size-12">
+            <span
+                aria-hidden="true"
+                className="absolute size-7 rotate-45 rounded-[3px] border border-primary/30 bg-primary/[0.035] sm:size-8"
+            />
+            <span
+                dir="ltr"
+                className="relative font-sans text-[11px] font-medium leading-none text-primary tabular-nums sm:text-xs"
+            >
+                {String(value).padStart(2, "0")}
+            </span>
+            <span className="sr-only">
+                {label}
+            </span>
+        </span>
+    );
+}
+
 export default function Surah({
     surah,
     ayahs,
@@ -20,6 +40,7 @@ export default function Surah({
     highlightAyahs = true,
     divisionMarkers = [],
     showSurahHeading = false,
+    showSurahDetails = false,
     riwayah = "hafs",
 }: {
     surah: SurahType;
@@ -30,6 +51,7 @@ export default function Surah({
     highlightAyahs?: boolean;
     divisionMarkers?: QuranDivisionMarkerType[];
     showSurahHeading?: boolean;
+    showSurahDetails?: boolean;
     riwayah?: Riwayah;
 }) {
     const t = useTranslations("Reader");
@@ -60,20 +82,44 @@ export default function Surah({
 
     return (
         <>
-            <div className="rtl quran-reading-surface" data-riwayah={riwayah}>
+            <div
+                className="rtl quran-reading-surface"
+                data-riwayah={riwayah}
+                data-surah-heading={
+                    beginsAtSurahStart && showSurahHeading ? "true" : undefined
+                }
+            >
                 {beginsAtSurahStart && showSurahHeading && (
-                    <header className="mb-4 flex items-center justify-center gap-3 text-primary">
+                    <header
+                        dir="rtl"
+                        className="mx-auto mt-2 mb-0 flex w-fit max-w-full items-center justify-center gap-2 text-primary sm:gap-3"
+                    >
+                        {showSurahDetails && (
+                            <SurahDetail
+                                label={t("surah.number")}
+                                value={surah.number}
+                            />
+                        )}
                         <span
                             aria-hidden="true"
-                            className="h-px w-8 bg-primary/25"
+                            className="h-px w-6 shrink bg-gradient-to-r from-transparent to-primary/25 sm:w-9"
                         />
-                        <h2 className="surah-name text-4xl leading-none sm:text-5xl">
+                        <h2
+                            aria-label={surah.name}
+                            className="surah-name quran-surah-heading shrink-0 leading-none"
+                        >
                             {getArabicNumber(surah.number)}
                         </h2>
                         <span
                             aria-hidden="true"
-                            className="h-px w-8 bg-primary/25"
+                            className="h-px w-6 shrink bg-gradient-to-l from-transparent to-primary/25 sm:w-9"
                         />
+                        {showSurahDetails && (
+                            <SurahDetail
+                                label={t("surah.ayahCount")}
+                                value={surah.numberOfAyahs}
+                            />
+                        )}
                     </header>
                 )}
                 {beginsAtSurahStart && (
@@ -93,7 +139,7 @@ export default function Surah({
                 <div
                     dir="rtl"
                     lang="ar"
-                    className="quran-reading-flow mt-0 py-2 text-justify sm:py-3"
+                    className="quran-reading-flow quran-reader-text mt-0 py-2 text-justify sm:py-3"
                     style={{ textAlignLast: "center" }}
                 >
                     {readingAyahs.map((ayah) => {

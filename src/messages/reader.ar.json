@@ -128,11 +128,17 @@
             "fallback": "معنى الآية"
         },
         "surah": {
+            "number": "رقم السورة",
+            "ayahCount": "عدد الآيات",
             "ayahs": "آيات",
             "meccan": "مكية",
             "medinan": "مدنية"
         },
         "divisions": {
+            "previousPage": "الصفحة السابقة",
+            "nextPage": "الصفحة التالية",
+            "mushafStart": "بداية المصحف",
+            "mushafEnd": "نهاية المصحف",
             "pageSummary": "تقسيمات القراءة",
             "juz": "الجزء",
             "hizb": "الحزب",

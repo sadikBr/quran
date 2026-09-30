@@ -751,6 +751,22 @@ body.focus-mode .quran-focus-chrome {
     font-size: var(--quran-basmala-font-size);
 }
 
+/* The surah-name font has smaller visible glyphs than the ayah font. */
+.quran-surah-heading {
+    font-size: calc(var(--quran-reader-font-size, 2.25rem) * 1.6);
+}
+
+.quran-surah-summary {
+    font-size: calc(var(--quran-reader-font-size, 2.25rem) * 1.15);
+}
+
+/* Keep decorated openings together without changing standalone/numbered basmalas. */
+.quran-reading-surface[data-surah-heading="true"] .quran-basmala-text {
+    font-size: calc(var(--quran-basmala-font-size) * 0.85);
+    line-height: 1.2;
+    margin-bottom: -0.5rem;
+}
+
 @media (min-width: 640px) {
     .quran-font-step-1 {
         --quran-reader-font-size: 1.875rem;

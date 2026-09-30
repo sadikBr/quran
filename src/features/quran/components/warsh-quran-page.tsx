@@ -74,17 +74,11 @@ export default async function WarshQuranPage({ page }: { page: number }) {
     );
     const displayedAyahs = [...displayedBySurah.values()].flat();
     const pageJuzs = [...new Set(displayedAyahs.map((ayah) => ayah.juz))];
-    const pageQuarters = [
-        ...new Set(displayedAyahs.map((ayah) => ayah.hizbQuarter)),
-    ];
-    const pageHizbs = [
-        ...new Set(pageQuarters.map((quarter) => Math.ceil(quarter / 4))),
-    ];
-    const pageSurahNames = surahNumbers.flatMap((number) => {
-        const surah = sourceBySurah.get(number)?.surahMeta;
-        if (!surah) return [];
-        return [preferences.language === "ar" ? surah.name : surah.englishName];
-    });
+    const firstAyah = displayedAyahs[0];
+    const continuationSurah =
+        firstAyah?.numberInSurah > 1
+            ? sourceBySurah.get(surahNumbers[0])?.surahMeta
+            : undefined;
     const markerByAyah = new Map<number, QuranDivisionMarker>();
 
     function addMarkers(
@@ -147,10 +141,10 @@ export default async function WarshQuranPage({ page }: { page: number }) {
             className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-0 overflow-auto p-3 sm:p-4"
         >
             <PageDivisionSummary
-                surahNames={pageSurahNames}
+                continuationSurah={continuationSurah}
                 juzs={pageJuzs}
-                hizbs={pageHizbs}
-                hizbQuarters={pageQuarters}
+                page={page}
+                navigation={navigation}
             />
             <ReaderToolbar>
                 {audioQueue.length > 0 && (
@@ -178,6 +172,8 @@ export default async function WarshQuranPage({ page }: { page: number }) {
 
                 return (
                     <Surah
+                        showSurahHeading
+                        showSurahDetails
                         key={surahNumber}
                         surah={{
                             ...source.surahMeta,

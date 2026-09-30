@@ -128,11 +128,17 @@
             "fallback": "Translation"
         },
         "surah": {
+            "number": "Surah no.",
+            "ayahCount": "Ayah count",
             "ayahs": "Ayahs",
             "meccan": "Meccan",
             "medinan": "Medinan"
         },
         "divisions": {
+            "previousPage": "Previous page",
+            "nextPage": "Next page",
+            "mushafStart": "Start of Quran",
+            "mushafEnd": "End of Quran",
             "pageSummary": "Reading divisions",
             "juz": "Juz",
             "hizb": "Hizb",

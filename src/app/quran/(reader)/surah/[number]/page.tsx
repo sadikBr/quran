@@ -238,6 +238,7 @@ export default async function SurahPage({
                         surah={displayedSurah}
                         ayahs={ayahsWithAudio}
                         showSurahHeading
+                        showSurahDetails
                         translatedAyahs={
                             preferences.showTranslation
                                 ? (translatedSurahData?.ayahs ?? [])

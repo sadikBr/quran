@@ -243,8 +243,17 @@ export default function OfflineQuranReader({
                                 </span>
                                 <span className="h-px flex-1 bg-gradient-to-l from-transparent to-current rtl:bg-gradient-to-r" />
                             </div>
-                            <h1 className="ayah text-[clamp(2.35rem,7vw,4.5rem)] font-normal leading-[1.55] text-foreground">
-                                {surah.name}
+                            <h1
+                                dir="rtl"
+                                lang="ar"
+                                aria-label={surah.name}
+                                className="surah-name font-normal leading-[1.2] text-foreground"
+                                style={{
+                                    fontSize:
+                                        "calc(var(--quran-reader-font-size, 2.25rem) * 1.85)",
+                                }}
+                            >
+                                {getArabicNumber(surah.number)}
                             </h1>
                             <p className="mt-1 text-xs font-medium tracking-[0.1em] text-primary uppercase sm:text-sm">
                                 {hafsSurah?.englishName ?? surah.englishName}
@@ -262,7 +271,7 @@ export default function OfflineQuranReader({
                         <div
                             dir="rtl"
                             lang="ar"
-                            className="quran-reading-surface relative mx-auto max-w-4xl pb-10 sm:pb-14"
+                            className="quran-reading-surface relative mx-auto max-w-5xl pb-10 sm:pb-14"
                             data-riwayah={riwayah}
                         >
                             {showTranslation && riwayah === "hafs" ? (
@@ -294,13 +303,13 @@ export default function OfflineQuranReader({
                                 </div>
                             ) : (
                                 <p
-                                    className="ayah quran-reading-flow quran-reader-text py-2 text-justify text-foreground sm:py-4"
+                                    className="ayah quran-reading-flow quran-reader-text py-2 text-justify text-foreground sm:py-3"
                                     style={{ textAlignLast: "center" }}
                                 >
                                     {surah.ayahs.map((ayah) => (
                                         <span
                                             key={ayah.number}
-                                            className="me-[0.3em]"
+                                            className="me-[0.35em]"
                                         >
                                             {ayah.text}
                                             <span className="frame relative mx-[0.12em] inline-block align-[0.08em] text-[1.04em] text-primary">
