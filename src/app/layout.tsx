@@ -9,6 +9,7 @@ import {
 import { createTranslator, NextIntlClientProvider } from "next-intl";
 import "./globals.css";
 import { headers } from "next/headers";
+import { Suspense } from "react";
 import { Toaster } from "sonner";
 import ConnectionStatus from "@/components/connection-status";
 import ContentProtection from "@/components/content-protection";
@@ -18,6 +19,7 @@ import { AccountRoleProvider } from "@/features/auth/account-role-provider";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
 import OfflineLibraryManager from "@/features/offline/components/offline-library-manager";
+import TourRunner from "@/features/onboarding/tour-runner";
 import ThemePreferenceSync from "@/features/settings/components/theme-preference-sync";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { SettingsProvider } from "@/features/settings/settings-provider";
@@ -199,6 +201,11 @@ export default async function RootLayout({
                                 />
                                 <div id="main-content" tabIndex={-1}>
                                     {children}
+                                    {session && (
+                                        <Suspense fallback={null}>
+                                            <TourRunner />
+                                        </Suspense>
+                                    )}
                                 </div>
                             </SettingsProvider>
                         </ThemeProvider>

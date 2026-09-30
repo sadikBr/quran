@@ -14,6 +14,7 @@ import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
+import GuideDirectory from "@/features/onboarding/guide-directory";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -296,6 +297,8 @@ export default async function Home() {
                         </div>
                     </div>
                 </section>
+
+                {session && <GuideDirectory welcome />}
 
                 <section
                     aria-labelledby="reader-tools"

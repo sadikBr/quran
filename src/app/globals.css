@@ -1,6 +1,87 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+.copper.copper {
+    color-scheme: dark;
+    --background: #241b18;
+    --foreground: #f7e9df;
+    --card: #30231e;
+    --card-foreground: #f7e9df;
+    --popover: #30231e;
+    --popover-foreground: #f7e9df;
+    --primary: #efb18c;
+    --primary-foreground: #291b14;
+    --secondary: #3a2c25;
+    --secondary-foreground: #f7e9df;
+    --muted: #3a2c25;
+    --muted-foreground: #c6b1a5;
+    --accent: #34433a;
+    --accent-foreground: #c6dfcd;
+    --destructive: #f09a91;
+    --destructive-foreground: #241b18;
+    --border: #695044;
+    --input: #896b59;
+    --ring: #efb18c;
+    --division: #b6d9c0;
+    --chart-1: #efb18c;
+    --chart-2: #b6d9c0;
+    --chart-3: #f09a91;
+    --chart-4: #c6b1a5;
+    --chart-5: #c6dfcd;
+    --sidebar: #30231e;
+    --sidebar-foreground: #f7e9df;
+    --sidebar-primary: #efb18c;
+    --sidebar-primary-foreground: #291b14;
+    --sidebar-accent: #34433a;
+    --sidebar-accent-foreground: #c6dfcd;
+    --sidebar-border: #695044;
+    --sidebar-ring: #efb18c;
+}
+
+.celadon.celadon {
+    color-scheme: light;
+    --background: #f0f6f1;
+    --foreground: #203d30;
+    --card: #e3eee6;
+    --card-foreground: #203d30;
+    --popover: #e3eee6;
+    --popover-foreground: #203d30;
+    --primary: #23664f;
+    --primary-foreground: #ffffff;
+    --secondary: #dce9df;
+    --secondary-foreground: #203d30;
+    --muted: #dce9df;
+    --muted-foreground: #52695b;
+    --accent: #ede5d3;
+    --accent-foreground: #695127;
+    --destructive: #a53840;
+    --destructive-foreground: #ffffff;
+    --border: #acc9b6;
+    --input: #6f917c;
+    --ring: #23664f;
+    --division: #805728;
+    --chart-1: #23664f;
+    --chart-2: #805728;
+    --chart-3: #a53840;
+    --chart-4: #52695b;
+    --chart-5: #695127;
+    --sidebar: #e3eee6;
+    --sidebar-foreground: #203d30;
+    --sidebar-primary: #23664f;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #ede5d3;
+    --sidebar-accent-foreground: #695127;
+    --sidebar-border: #acc9b6;
+    --sidebar-ring: #23664f;
+}
+
+.tour-highlight {
+    outline: 3px solid var(--primary);
+    outline-offset: 6px;
+    scroll-margin-top: 5rem;
+    scroll-margin-bottom: 18rem;
+}
+
 /* Shared outer shell for page content and navigation; reading measures stay local. */
 @utility app-container {
     width: 100%;
@@ -12,7 +93,7 @@
     }
 }
 
-@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *, .ruby *, .obsidian *, .lagoon *));
+@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *, .ruby *, .obsidian *, .lagoon *, .copper *));
 
 @theme inline {
     --color-background: var(--background);
@@ -155,6 +236,7 @@
 }
 
 .dark,
+.copper,
 .emerald,
 .sapphire,
 .ruby,

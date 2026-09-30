@@ -101,7 +101,10 @@ export default async function WirdPage() {
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
                 />
 
-                <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
+                <section
+                    data-tour="wird-page"
+                    className="pb-12 pt-5 sm:pb-16 sm:pt-8"
+                >
                     <div className="border-b border-border/60 pb-6">
                         <p className="text-xs font-semibold tracking-[0.18em] text-primary">
                             {t("eyebrow")}
@@ -202,7 +205,10 @@ export default async function WirdPage() {
                                                 asChild
                                                 className="min-h-11"
                                             >
-                                                <Link href={startReadingHref}>
+                                                <Link
+                                                    data-tour="wird-read"
+                                                    href={startReadingHref}
+                                                >
                                                     <BookOpen
                                                         aria-hidden="true"
                                                         className="size-4"
@@ -250,7 +256,9 @@ export default async function WirdPage() {
 
                     <KhatmahMilestones stats={khatmahHistory} />
 
-                    <WirdHistory stats={history} />
+                    <div data-tour="wird-history">
+                        <WirdHistory stats={history} />
+                    </div>
                 </section>
             </div>
         </main>

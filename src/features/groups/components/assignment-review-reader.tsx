@@ -44,7 +44,7 @@ export default function AssignmentReviewReader({
                                 className="me-[0.35em] inline"
                             >
                                 <TajweedText text={ayah.text} />{" "}
-                                <span className="frame inline-block align-[0.08em] text-sidebar-accent">
+                                <span className="frame inline-block align-[0.08em] text-primary">
                                     {getArabicNumber(ayah.numberInSurah)}
                                 </span>{" "}
                             </span>

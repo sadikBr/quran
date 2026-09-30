@@ -6,6 +6,7 @@ export * from "./schema/khatmah-history";
 export * from "./schema/khatmah-plan";
 export * from "./schema/memorization-group";
 export * from "./schema/memorization-progress";
+export * from "./schema/onboarding";
 export * from "./schema/practice-assignment";
 export * from "./schema/push-subscription";
 export * from "./schema/reading-progress";

@@ -1,5 +1,7 @@
 // Hex colors are understood by browser chrome and installed-app status bars.
 export const THEME_COLORS = {
+    copper: "#241b18",
+    celadon: "#f0f6f1",
     light: "#fcfaf6",
     dark: "#1b1917",
     emerald: "#10332d",

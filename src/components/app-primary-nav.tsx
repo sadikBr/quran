@@ -33,6 +33,12 @@ import useAccountMenuActions from "./use-account-menu-actions";
 
 const destinations = [
     {
+        href: "/guide",
+        label: "guide",
+        icon: BookOpen,
+        matches: (path: string) => path === "/guide",
+    },
+    {
         href: "/azkar",
         label: "adhkar",
         icon: MoonStar,
@@ -156,11 +162,13 @@ export default function AppPrimaryNav() {
     ];
     // A single ordered model and rendering path for every header and screen size.
     const sections = isAdmin
-        ? [{ title: "overview", links: ["/admin"] }]
+        ? [{ title: "overview", links: ["/admin", "/guide"] }]
         : [
               {
                   title: "overview",
-                  links: isAuthenticated ? ["/", "/dashboard"] : ["/"],
+                  links: isAuthenticated
+                      ? ["/", "/dashboard", "/guide"]
+                      : ["/"],
               },
               {
                   title: "reading",

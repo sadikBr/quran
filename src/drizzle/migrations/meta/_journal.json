@@ -99,6 +99,20 @@
       "when": 1790775681888,
       "tag": "0013_cancel_meeting",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790784206940,
+      "tag": "0014_user_guides",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1790785273402,
+      "tag": "0015_copper_celadon_themes",
+      "breakpoints": true
     }
   ]
 }

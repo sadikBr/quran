@@ -175,7 +175,10 @@ export default function RandomStartTest({
     }
     return (
         <div className="mt-6 space-y-5">
-            <section className="rounded-2xl border border-border bg-card/70 p-4 sm:p-6">
+            <section
+                data-tour="test-settings"
+                className="rounded-2xl border border-border bg-card/70 p-4 sm:p-6"
+            >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <h2 className="text-sm font-semibold">
@@ -295,7 +298,10 @@ export default function RandomStartTest({
                     )}
                     <div className="grid gap-5 border-t border-border/50 pt-5 md:grid-cols-2 md:gap-8">
                         <fieldset disabled={pending} className="min-w-0">
-                            <legend className="text-sm font-medium">
+                            <legend
+                                data-tour="test-count"
+                                className="text-sm font-medium"
+                            >
                                 {t(
                                     mode === "random"
                                         ? "continuationCount"
@@ -434,6 +440,7 @@ export default function RandomStartTest({
                             pending ||
                             (!custom && completedCount === 0)
                         }
+                        data-tour="test-start"
                         onClick={() => draw()}
                         className="min-h-12 w-full shrink-0 rounded-xl px-6 sm:w-auto"
                     >

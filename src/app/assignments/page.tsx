@@ -395,7 +395,10 @@ export default async function AssignmentsPage({
                     }
                     className="mt-5 w-full rounded-xl sm:w-auto"
                 >
-                    <Link href={`/practice/${assignment.id}/read`}>
+                    <Link
+                        data-tour="assignment-practice"
+                        href={`/practice/${assignment.id}/read`}
+                    >
                         {assignment.status === "submitted"
                             ? t("card.reviewPending")
                             : assignment.progress
@@ -412,6 +415,7 @@ export default async function AssignmentsPage({
 
     return (
         <main
+            data-tour="assignments-page"
             lang={preferences.language}
             dir={getTextDirection(preferences.language)}
             className={cn(

@@ -272,7 +272,7 @@ export default function OfflineQuranReader({
                                             key={ayah.number}
                                             className="group/translation relative py-7 sm:grid sm:grid-cols-[3rem_minmax(0,1fr)] sm:gap-5 sm:py-9"
                                         >
-                                            <span className="frame mb-2 inline-block text-2xl text-primary/70 sm:mt-2 sm:mb-0 sm:text-center sm:text-3xl">
+                                            <span className="frame mb-2 inline-block text-2xl text-primary sm:mt-2 sm:mb-0 sm:text-center sm:text-3xl">
                                                 {getArabicNumber(ayah.number)}
                                             </span>
                                             <div>
@@ -303,7 +303,7 @@ export default function OfflineQuranReader({
                                             className="me-[0.3em]"
                                         >
                                             {ayah.text}
-                                            <span className="frame relative mx-[0.12em] inline-block align-[0.08em] text-[1.04em] text-primary/75">
+                                            <span className="frame relative mx-[0.12em] inline-block align-[0.08em] text-[1.04em] text-primary">
                                                 {getArabicNumber(ayah.number)}
                                             </span>{" "}
                                         </span>

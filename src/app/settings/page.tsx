@@ -9,6 +9,7 @@ import { env } from "@/data/env/server";
 import AdminPreferences from "@/features/admin/components/admin-preferences";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
+import SettingsNextStep from "@/features/onboarding/settings-next-step";
 import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
 import type { Edition, Reciter } from "@/features/quran/types";
@@ -163,6 +164,7 @@ export default async function SettingsPage() {
                             tafsirEditions={tafsirEditions}
                         />
                     )}
+                    {!isAdmin && <SettingsNextStep />}
                 </section>
             </div>
         </main>

@@ -115,7 +115,7 @@ export default function Ayah({
                     <Link
                         href={resolvedActionsHref}
                         scroll={false}
-                        className="frame relative inline-block rounded-sm text-sidebar-accent transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="frame relative inline-block rounded-sm text-primary transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         aria-label={t("ayah.openActions", {
                             number: ayah.numberInSurah,
                         })}

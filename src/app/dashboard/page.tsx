@@ -24,6 +24,7 @@ import { getGroupsForUser } from "@/features/groups/server/get-groups";
 import { getNextGroupMeetingForUser } from "@/features/groups/server/get-next-group-meeting";
 import { getMeetingDisplayTimezone } from "@/features/groups/server/meeting-schedule";
 import getMemorizationProgress from "@/features/memorization/server/get-memorization-progress";
+import GuideDirectory from "@/features/onboarding/guide-directory";
 import {
     getAssignedPracticeAssignments,
     getPracticeAssignments,
@@ -276,6 +277,7 @@ export default async function DashboardPage() {
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
                 />
 
+                <GuideDirectory welcome />
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
                     <div className="border-b border-border/60 pb-6 sm:pb-8">
                         <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
