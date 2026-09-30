@@ -1,11 +1,44 @@
 import type { QuranReference } from "@/features/practice/types";
 import type { QuranNavigationMeta } from "@/features/quran/navigation-types";
 
+export function availableStarts<T extends QuranReference>(
+    pool: T[],
+    seen: QuranReference[],
+    count: number,
+    surahs: { number: number; numberOfAyahs: number }[],
+) {
+    const key = (point: QuranReference) =>
+        `${point.surahNumber}:${point.ayahNumber}`;
+    const excluded = new Set(seen.map(key));
+    const counts = new Map(
+        surahs.map((surah) => [surah.number, surah.numberOfAyahs]),
+    );
+    const full = new Set<string>();
+    let remaining = 0;
+    for (let index = pool.length - 1; index >= 0; index--) {
+        const point = pool[index];
+        const next = pool[index + 1];
+        const adjacent =
+            next &&
+            (point.ayahNumber === counts.get(point.surahNumber)
+                ? next.surahNumber === point.surahNumber + 1 &&
+                  next.ayahNumber === 1
+                : next.surahNumber === point.surahNumber &&
+                  next.ayahNumber === point.ayahNumber + 1);
+        remaining = adjacent ? remaining + 1 : 0;
+        if (remaining >= count) full.add(key(point));
+    }
+    const unseen = pool.filter((point) => !excluded.has(key(point)));
+    const preferred = unseen.filter((point) => full.has(key(point)));
+    return preferred.length ? preferred : unseen;
+}
+
 export function continuationReferences(
     pool: QuranReference[],
     start: QuranReference,
     count: number,
     surahs: { number: number; numberOfAyahs: number }[],
+    spanSurahs = true,
 ) {
     const index = pool.findIndex(
         (point) =>
@@ -15,6 +48,7 @@ export function continuationReferences(
     if (index < 0) return [];
     const selected = [pool[index]];
     for (const next of pool.slice(index + 1, index + count + 1)) {
+        if (!spanSurahs && next.surahNumber !== start.surahNumber) break;
         const previous = selected[selected.length - 1];
         const lastAyah = surahs.find(
             (surah) => surah.number === previous.surahNumber,

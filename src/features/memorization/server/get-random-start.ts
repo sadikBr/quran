@@ -13,15 +13,22 @@ import {
     getWarshNavigationMeta,
 } from "@/features/quran/server/get-warsh-mushaf";
 import getPreferences from "@/features/settings/server/get-preferences";
-import { continuationReferences, randomStartPool } from "../random-start";
+import {
+    availableStarts,
+    continuationReferences,
+    randomStartPool,
+} from "../random-start";
 import getMemorizationProgress from "./get-memorization-progress";
 
 const schema = z.object({
     continuationCount: z.number().int().min(1).max(30).optional().default(5),
+    spanSurahs: z.boolean().optional().default(true),
     range: z
         .object({ start: quranReferenceSchema, end: quranReferenceSchema })
         .optional(),
     previous: quranReferenceSchema.optional(),
+    seen: z.array(quranReferenceSchema).max(7000).optional().default([]),
+    retry: quranReferenceSchema.optional(),
 });
 
 export default async function getRandomStart(input: z.input<typeof schema>) {
@@ -64,18 +71,31 @@ export default async function getRandomStart(input: z.input<typeof schema>) {
                       ? ("error" as const)
                       : ("empty" as const),
             };
-        const alternatives = pool.filter(
-            (point) =>
-                point.surahNumber !== previous?.surahNumber ||
-                point.ayahNumber !== previous?.ayahNumber,
-        );
-        const choices = alternatives.length ? alternatives : pool;
+        const choices = parsed.data.retry
+            ? pool.filter(
+                  (point) =>
+                      point.surahNumber === parsed.data.retry?.surahNumber &&
+                      point.ayahNumber === parsed.data.retry.ayahNumber,
+              )
+            : availableStarts(
+                  pool,
+                  [...parsed.data.seen, ...(previous ? [previous] : [])],
+                  0,
+                  surahs,
+              );
+        if (!choices.length)
+            return {
+                error: parsed.data.retry
+                    ? ("invalid" as const)
+                    : ("exhausted" as const),
+            };
         const start = choices[randomInt(choices.length)];
         const references = continuationReferences(
             pool,
             start,
             parsed.data.continuationCount,
             surahs,
+            parsed.data.spanSurahs,
         );
         const surah = surahs.find((item) => item.number === start.surahNumber);
         if (!surah) return { error: "error" as const };

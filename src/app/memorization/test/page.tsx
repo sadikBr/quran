@@ -59,6 +59,8 @@ export default async function RandomTestPage() {
                     </p>
                 </div>
                 <RandomStartTest
+                    key={`${session.user.id}:${preferences.riwayah}`}
+                    storageKey={`random-start:${session.user.id}:${preferences.riwayah}`}
                     surahs={surahs}
                     navigation={navigation}
                     locale={preferences.language}

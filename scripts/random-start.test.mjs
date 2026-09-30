@@ -1,8 +1,36 @@
 import { expect, test } from "bun:test";
 import {
+    availableStarts,
     continuationReferences,
     randomStartPool,
 } from "../src/features/memorization/random-start";
+
+test("prefer full-length starts without repeating any seen reference", () => {
+    const surahs = [{ number: 1, numberOfAyahs: 5 }];
+    const pool = Array.from({ length: 5 }, (_, index) => ({
+        surahNumber: 1,
+        ayahNumber: index + 1,
+    }));
+    expect(availableStarts(pool, [], 2, surahs)).toEqual(pool.slice(0, 3));
+    expect(availableStarts(pool, [], 0, surahs)).toEqual(pool);
+    expect(availableStarts(pool, [pool[0]], 0, surahs)).toEqual(pool.slice(1));
+    expect(availableStarts(pool, [pool[0], pool[2]], 2, surahs)).toEqual([
+        pool[1],
+    ]);
+    expect(availableStarts(pool, pool.slice(0, 3), 2, surahs)).toEqual(
+        pool.slice(3),
+    );
+    expect(availableStarts(pool, pool, 2, surahs)).toEqual([]);
+});
+test("full-length preference does not cross unmemorized gaps", () => {
+    const surahs = [{ number: 1, numberOfAyahs: 10 }];
+    const pool = [1, 2, 7, 8, 9, 10].map((ayahNumber) => ({
+        surahNumber: 1,
+        ayahNumber,
+    }));
+    expect(availableStarts(pool, [], 3, surahs)).toEqual([pool[2]]);
+    expect(availableStarts(pool, [], 30, surahs)).toEqual(pool);
+});
 
 test("continuation crosses surahs and returns the requested additional count", () => {
     const surahs = [
@@ -19,6 +47,8 @@ test("continuation crosses surahs and returns the requested additional count", (
         );
     const result = continuationReferences(pool, pool[0], 8, surahs);
     expect(result).toHaveLength(9);
+    expect(continuationReferences(pool, pool[0], 8, surahs, false)).toHaveLength(3);
+    expect(continuationReferences(pool, pool[0], 1, surahs, false)).toHaveLength(2);
     expect(result.at(-1)).toEqual({ surahNumber: 84, ayahNumber: 6 });
     expect(
         continuationReferences([pool[0], pool[2]], pool[0], 8, surahs),
