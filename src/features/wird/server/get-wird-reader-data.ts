@@ -48,6 +48,7 @@ export default async function getWirdReaderData(
                 ? mapWarshAyahs(surahData.ayahs, warshChapter, nativeWarshAudio)
                 : surahData.ayahs;
             const ayahs = displayedAyahs
+                .filter((ayah) => !ayah.isBasmalaSentinel)
                 .filter((ayah) =>
                     (ayah.hafsGlobalNumbers ?? [ayah.number]).some(
                         (number) =>
