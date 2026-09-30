@@ -135,6 +135,9 @@
             "medinan": "Medinan"
         },
         "divisions": {
+            "previousShort": "Previous",
+            "nextShort": "Next",
+            "summaryQuarter": "Quarter",
             "previousPage": "Previous page",
             "nextPage": "Next page",
             "mushafStart": "Start of Quran",

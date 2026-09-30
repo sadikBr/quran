@@ -760,6 +760,12 @@ body.focus-mode .quran-focus-chrome {
     font-size: calc(var(--quran-reader-font-size, 2.25rem) * 1.15);
 }
 
+@media (width < 40rem) {
+    .reader-summary-name {
+        font-size: min(calc(var(--quran-reader-font-size, 2.25rem) * 1.15), 7vw);
+    }
+}
+
 /* Keep decorated openings together without changing standalone/numbered basmalas. */
 .quran-reading-surface[data-surah-heading="true"] .quran-basmala-text {
     font-size: calc(var(--quran-basmala-font-size) * 0.85);

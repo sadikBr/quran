@@ -44,10 +44,17 @@ export default function PageDivisionSummary({
                   : undefined;
         return (
             <div className="min-w-0 text-center">
-                <p className="mb-0.5 text-[10px] text-muted-foreground sm:text-xs">
-                    {t(label)}
+                <p className="text-[10px] leading-tight text-muted-foreground sm:mb-0.5 sm:text-xs">
+                    <span className="sm:hidden">
+                        {t(
+                            label === "previousPage"
+                                ? "previousShort"
+                                : "nextShort",
+                        )}
+                    </span>
+                    <span className="hidden sm:inline">{t(label)}</span>
                 </p>
-                <p className="flex flex-wrap items-center justify-center gap-x-1.5 text-xs sm:text-sm">
+                <p className="flex flex-wrap items-center justify-center gap-x-1 text-[11px] leading-snug sm:gap-x-1.5 sm:text-sm">
                     {boundary ? (
                         t(boundary)
                     ) : quarter ? (
@@ -62,7 +69,12 @@ export default function PageDivisionSummary({
                                 ·
                             </span>
                             <span>
-                                {t("rub")}{" "}
+                                <span className="sm:hidden">
+                                    {t("summaryQuarter")}
+                                </span>
+                                <span className="hidden sm:inline">
+                                    {t("rub")}
+                                </span>{" "}
                                 <b
                                     dir="ltr"
                                     className="inline-block font-medium text-foreground"
@@ -81,27 +93,27 @@ export default function PageDivisionSummary({
     return (
         <aside
             aria-label={t("pageSummary")}
-            className="mb-2 shrink-0 border-b border-primary/15 px-1 pt-1 pb-3 text-muted-foreground sm:px-2"
+            className="mb-1 shrink-0 border-b border-primary/15 px-1 pt-0.5 pb-1.5 text-muted-foreground sm:mb-2 sm:px-2 sm:pt-1 sm:pb-3"
         >
             <div
                 dir="ltr"
-                className="grid grid-cols-2 items-center gap-x-2 gap-y-2 sm:grid-cols-[1fr_auto_1fr] sm:gap-x-5"
+                className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(0,1fr)] items-center gap-x-2 sm:grid-cols-[1fr_auto_1fr] sm:gap-x-5"
             >
                 <div
                     dir={locale === "ar" ? "rtl" : "ltr"}
-                    className="col-start-1 row-start-2 justify-self-start sm:row-start-1"
+                    className="min-w-0 justify-self-start"
                 >
                     {adjacent(page + 1, "nextPage")}
                 </div>
                 <div
                     dir={locale === "ar" ? "rtl" : "ltr"}
-                    className="col-span-2 col-start-1 row-start-1 flex flex-col items-center justify-center gap-1 sm:col-span-1 sm:col-start-2"
+                    className="flex min-w-0 flex-col items-center justify-center gap-0.5 sm:gap-1"
                 >
                     {continuationSurah && (
                         <span
                             role="img"
                             aria-label={continuationSurah.name}
-                            className="surah-name quran-surah-summary leading-none text-primary"
+                            className="surah-name quran-surah-summary reader-summary-name leading-none text-primary"
                         >
                             {getArabicNumber(continuationSurah.number)}
                         </span>
@@ -115,7 +127,7 @@ export default function PageDivisionSummary({
                 </div>
                 <div
                     dir={locale === "ar" ? "rtl" : "ltr"}
-                    className="col-start-2 row-start-2 justify-self-end sm:col-start-3 sm:row-start-1"
+                    className="min-w-0 justify-self-end"
                 >
                     {adjacent(page - 1, "previousPage")}
                 </div>

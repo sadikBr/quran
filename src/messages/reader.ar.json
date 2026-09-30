@@ -135,6 +135,9 @@
             "medinan": "مدنية"
         },
         "divisions": {
+            "previousShort": "السابقة",
+            "nextShort": "التالية",
+            "summaryQuarter": "الربع",
             "previousPage": "الصفحة السابقة",
             "nextPage": "الصفحة التالية",
             "mushafStart": "بداية المصحف",
