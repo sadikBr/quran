@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,6 +39,23 @@ export default function AbsenceExcuse({
             ? formatAbsenceReason(reason, "", locale).length + 2
             : 0);
     const [saving, setSaving] = useState(false);
+    useEffect(() => {
+        if (!pending) return;
+        // A supervisor may finalize this absence on another device. Refresh
+        // server props without discarding the member's unsaved input.
+        const refresh = () => {
+            if (document.visibilityState === "visible") router.refresh();
+        };
+        refresh();
+        window.addEventListener("focus", refresh);
+        document.addEventListener("visibilitychange", refresh);
+        const interval = window.setInterval(refresh, 30_000);
+        return () => {
+            window.removeEventListener("focus", refresh);
+            document.removeEventListener("visibilitychange", refresh);
+            window.clearInterval(interval);
+        };
+    }, [pending, router]);
     if (!pending)
         return excuse ? (
             <p className="whitespace-pre-wrap break-words text-sm">{excuse}</p>

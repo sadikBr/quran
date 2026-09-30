@@ -21,7 +21,12 @@ const source = ts.transpileModule(
     },
 ).outputText;
 
-function mount(action, overrides = {}) {
+async function mount(
+    action,
+    overrides = {},
+    availability = { next: "2026-10-10T12:00:00Z", timezone: "UTC" },
+) {
+    const effects = [];
     const states = [];
     const refs = [];
     const calls = [];
@@ -31,6 +36,10 @@ function mount(action, overrides = {}) {
     const modules = {
         "react/jsx-runtime": { jsx, jsxs: jsx },
         react: {
+            useEffect: (effect) => {
+                if (!effects.length) effects.push(effect);
+            },
+            useCallback: (callback) => callback,
             useState: (initial) => {
                 const index = stateIndex++;
                 if (!(index in states)) states[index] = initial;
@@ -53,7 +62,14 @@ function mount(action, overrides = {}) {
                 refresh: () => calls.push(["refresh"]),
             }),
         },
-        "next-intl": { useTranslations: () => (key) => key },
+        "next-intl": {
+            useTranslations: () => (key) => key,
+            useLocale: () => "en",
+        },
+        "../server/get-revision-availability": async () => availability,
+        "../server/meeting-schedule": {
+            getMeetingDisplayTimezone: (zone) => zone,
+        },
         "lucide-react": {
             CheckCircle2: "Check",
             LoaderCircle: "Loader",
@@ -75,6 +91,7 @@ function mount(action, overrides = {}) {
     };
     const context = {
         exports: {},
+        window: { addEventListener: () => {}, removeEventListener: () => {} },
         require: (name) => {
             assert.ok(name in modules);
             return modules[name];
@@ -95,6 +112,7 @@ function mount(action, overrides = {}) {
             context.exports.default({
                 groupId: "circle",
                 assignmentId: "one",
+                occurrence: "2026-10-10T12:00:00.000Z",
                 pendingCount: 2,
                 ...overrides,
             }),
@@ -109,13 +127,19 @@ function mount(action, overrides = {}) {
                 .map((node) => node.props),
         };
     };
+    render();
+    effects[0]();
+    await new Promise((resolve) => setImmediate(resolve));
     return { render, calls };
 }
 
 test("unsubmitted work only offers not completed", async () => {
-    const form = mount(() => ({ success: true, nextAssignmentId: null }), {
-        submitted: false,
-    });
+    const form = await mount(
+        () => ({ success: true, nextAssignmentId: null }),
+        {
+            submitted: false,
+        },
+    );
     assert.deepEqual(
         form.render().choices.map((choice) => choice.value),
         ["not_completed"],
@@ -128,7 +152,7 @@ test("unsubmitted work only offers not completed", async () => {
 });
 
 test("submitted work can be marked not completed", async () => {
-    const form = mount(() => ({ success: true, nextAssignmentId: null }));
+    const form = await mount(() => ({ success: true, nextAssignmentId: null }));
     form.render()
         .choices.find((choice) => choice.value === "not_completed")
         .onChange();
@@ -146,13 +170,17 @@ test("submitted work can be marked not completed", async () => {
 });
 
 test("Save and next advances to the fresh server-selected assignment", async () => {
-    const form = mount(() => ({ success: true, nextAssignmentId: "two" }));
+    const form = await mount(() => ({
+        success: true,
+        nextAssignmentId: "two",
+    }));
     form.render().note.onChange({ target: { value: "Review this verse" } });
     form.render().choices[1].onChange();
     await form.render().buttons[0].onClick();
     const input = form.calls.find(([name]) => name === "save")[1];
     assert.equal(input.note, "Review this verse");
     assert.equal(input.decision, "needs_revision");
+    assert.equal(input.occurrence, "2026-10-10T12:00:00.000Z");
     assert.equal(input.reviewNext, true);
     assert.ok(
         form.calls.some(
@@ -165,7 +193,10 @@ test("Save and next advances to the fresh server-selected assignment", async () 
 
 test("Last review finishes the queue; save and return does not continue it", async () => {
     for (const button of [0, 1]) {
-        const form = mount(() => ({ success: true, nextAssignmentId: null }));
+        const form = await mount(() => ({
+            success: true,
+            nextAssignmentId: null,
+        }));
         await form.render().buttons[button].onClick();
         assert.ok(
             form.calls.some(
@@ -191,7 +222,7 @@ test("Failed saves preserve feedback, enable retry, and never navigate", async (
             throw new Error("offline");
         },
     ]) {
-        const form = mount(action);
+        const form = await mount(action);
         form.render().note.onChange({
             target: { value: "Keep this feedback" },
         });
@@ -207,7 +238,7 @@ test("Failed saves preserve feedback, enable retry, and never navigate", async (
 
 test("Rapid repeated saves submit only one review", async () => {
     let resolve;
-    const form = mount(
+    const form = await mount(
         () =>
             new Promise((done) => {
                 resolve = done;
@@ -222,11 +253,14 @@ test("Rapid repeated saves submit only one review", async () => {
 
 test("Embedded review saves and advances without navigating or refreshing the call", async () => {
     const next = [];
-    const form = mount(() => ({ success: true, nextAssignmentId: "two" }), {
-        onSaved: async (id) => {
-            next.push(id);
+    const form = await mount(
+        () => ({ success: true, nextAssignmentId: "two" }),
+        {
+            onSaved: async (id) => {
+                next.push(id);
+            },
         },
-    });
+    );
     await form.render().buttons[0].onClick();
     assert.deepEqual(next, ["two"]);
     assert.equal(
@@ -237,15 +271,45 @@ test("Embedded review saves and advances without navigating or refreshing the ca
 
 test("Stale embedded review refreshes only the panel", async () => {
     let refreshed = false;
-    const form = mount(() => ({ success: false, reason: "not_submitted" }), {
-        onStale: () => {
-            refreshed = true;
+    const form = await mount(
+        () => ({ success: false, reason: "not_submitted" }),
+        {
+            onStale: () => {
+                refreshed = true;
+            },
         },
-    });
+    );
     await form.render().buttons[0].onClick();
     assert.equal(refreshed, true);
     assert.equal(
         form.calls.some(([name]) => name === "navigate" || name === "refresh"),
         false,
     );
+});
+
+test("missing next meeting blocks revision but preserves the feedback and allows approval", async () => {
+    const form = await mount(
+        () => ({ success: true }),
+        {},
+        { next: null, timezone: "UTC" },
+    );
+    form.render().note.onChange({
+        target: { value: "Keep this note while scheduling" },
+    });
+    form.render()
+        .choices.find((choice) => choice.value === "needs_revision")
+        .onChange();
+    const buttons = form.render().buttons;
+    const save = buttons.find((button) => button.children === "saveAndReturn");
+    assert.equal(save.disabled, true);
+    await save.onClick();
+    assert.equal(
+        form.calls.some(([name]) => name === "save"),
+        false,
+    );
+    assert.equal(form.render().note.value, "Keep this note while scheduling");
+    form.render()
+        .choices.find((choice) => choice.value === "completed")
+        .onChange();
+    assert.equal(form.render().buttons[0].disabled, false);
 });

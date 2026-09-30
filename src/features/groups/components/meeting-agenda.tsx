@@ -319,6 +319,13 @@ export default function MeetingAgenda({
                                                                     `statuses.${assignment.status}`,
                                                                 )}
                                                             </span>
+                                                            {assignment.carriedForward && (
+                                                                <span className="text-xs text-muted-foreground">
+                                                                    {t(
+                                                                        "carriedForward",
+                                                                    )}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         <p className="mt-1 text-xs text-muted-foreground">
                                                             {rangeLabel(
@@ -341,14 +348,9 @@ export default function MeetingAgenda({
                                                                     href={`/groups/${groupId}/review/${assignment.id}`}
                                                                 >
                                                                     <ClipboardCheck className="size-4" />
-                                                                    {assignment.status ===
-                                                                    "submitted"
-                                                                        ? t(
-                                                                              "review",
-                                                                          )
-                                                                        : assignmentsT(
-                                                                              "notCompletedAction",
-                                                                          )}
+                                                                    {assignmentsT(
+                                                                        "viewDetails",
+                                                                    )}
                                                                 </Link>
                                                             </Button>
                                                         )}

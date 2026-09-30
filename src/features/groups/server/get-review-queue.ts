@@ -1,14 +1,25 @@
 import "server-only";
 
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import db from "@/drizzle/db";
-import { groupMember, practiceAssignment } from "@/drizzle/schema";
+import { groupMember, practiceAssignment, user } from "@/drizzle/schema";
+import {
+    attendedAssignment,
+    getLiveReviewContext,
+} from "./live-review-context";
 
 // Keep the queue scoped to the authenticated supervisor's selected circle.
-export default async function getReviewQueue(groupId: string, userId: string) {
+export default async function getReviewQueue(
+    groupId: string,
+    userId: string,
+    occurrence: string,
+) {
+    const context = await getLiveReviewContext(groupId, userId, occurrence);
+    if (!context) return [];
     return db
-        .select({ id: practiceAssignment.id })
+        .select({ id: practiceAssignment.id, name: user.name })
         .from(practiceAssignment)
+        .innerJoin(user, eq(user.id, practiceAssignment.assigneeId))
         .innerJoin(
             groupMember,
             and(
@@ -20,7 +31,12 @@ export default async function getReviewQueue(groupId: string, userId: string) {
         .where(
             and(
                 eq(practiceAssignment.groupId, groupId),
-                eq(practiceAssignment.status, "submitted"),
+                inArray(practiceAssignment.status, [
+                    "submitted",
+                    "in_progress",
+                    "needs_revision",
+                ]),
+                attendedAssignment(context.id, context.startsAt),
             ),
         )
         .orderBy(

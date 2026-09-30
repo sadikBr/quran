@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -52,21 +52,27 @@ export default async function updatePracticeProgress(input: unknown) {
         return { success: false as const };
     }
 
-    await db
+    const updated = await db
         .update(practiceAssignment)
         .set({
             progressSurahNumber: reference.surahNumber,
             progressAyahNumber: reference.ayahNumber,
-            status: "in_progress",
-            submittedAt: null,
             updatedAt: new Date(),
         })
         .where(
             and(
                 eq(practiceAssignment.id, assignment.id),
                 eq(practiceAssignment.assigneeId, session.user.id),
+                inArray(practiceAssignment.status, [
+                    "in_progress",
+                    "submitted",
+                    "needs_revision",
+                    "not_completed",
+                ]),
             ),
-        );
+        )
+        .returning({ id: practiceAssignment.id });
+    if (!updated.length) return { success: false as const };
 
     revalidatePath("/practice");
     revalidatePath("/assignments");

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -92,6 +92,7 @@ export default function MeetingPlanEditor({
     const assignmentsT = useTranslations("Groups.assignments");
     const practiceT = useTranslations("Practice");
     const router = useRouter();
+    const saving = useRef(false);
     const initialMeetingStartsAt =
         meetingOptions.find((option) =>
             planner.drafts.some(
@@ -260,6 +261,7 @@ export default function MeetingPlanEditor({
     }
 
     async function save(mode: "draft" | "publish") {
+        if (saving.current) return;
         if (!dueMeetingStartsAt) {
             toast.error(t("noUpcomingMeetings"));
             return;
@@ -274,36 +276,43 @@ export default function MeetingPlanEditor({
             return;
         }
 
+        saving.current = true;
         setPendingMode(mode);
-        const result = await saveMeetingPlan({
-            groupId,
-            dueMeetingStartsAt,
-            mode,
-            entries: selected.map(
-                ({ assigneeId, kind, start, end, instructions }) => ({
-                    assigneeId,
-                    kind,
-                    start,
-                    end,
-                    instructions,
-                }),
-            ),
-        });
-        setPendingMode(null);
+        try {
+            const result = await saveMeetingPlan({
+                groupId,
+                dueMeetingStartsAt,
+                mode,
+                entries: selected.map(
+                    ({ assigneeId, kind, start, end, instructions }) => ({
+                        assigneeId,
+                        kind,
+                        start,
+                        end,
+                        instructions,
+                    }),
+                ),
+            });
 
-        if (!result.success) {
-            toast.error(t("saveError"));
-            return;
-        }
-        if (mode === "publish") {
-            toast.success(t("published"));
-            router.push(`/groups/${groupId}`);
+            if (!result.success) {
+                toast.error(t("saveError"));
+                return;
+            }
+            if (mode === "publish") {
+                toast.success(t("published"));
+                router.push(`/groups/${groupId}`);
+                router.refresh();
+                return;
+            }
+
+            toast.success(t("draftSaved"));
             router.refresh();
-            return;
+        } catch {
+            toast.error(t("saveError"));
+        } finally {
+            saving.current = false;
+            setPendingMode(null);
         }
-
-        toast.success(t("draftSaved"));
-        router.refresh();
     }
 
     return (

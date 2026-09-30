@@ -69,6 +69,7 @@ export default function JaasMeeting({
     const [leaving, setLeaving] = useState(false);
     const [reviewOpen, setReviewOpen] = useState(false);
     const [reviewVisited, setReviewVisited] = useState(false);
+    const [reviewReady, setReviewReady] = useState(false);
     const reviewT = useTranslations("Groups.review");
     const router = useRouter();
     const apiRef = useRef<MeetingApi | null>(null);
@@ -156,6 +157,7 @@ export default function JaasMeeting({
             })
                 .then((response) => {
                     if (response.status === 410) finishLeaving();
+                    if (response.ok && mountedRef.current) setReviewReady(true);
                 })
                 .catch(() => null);
 
@@ -254,6 +256,7 @@ export default function JaasMeeting({
                             variant="outline"
                             size="sm"
                             aria-expanded={reviewOpen}
+                            disabled={!reviewReady || leaving || ending}
                             aria-controls="meeting-review-panel"
                             className="order-last w-full sm:order-none sm:w-auto"
                             onClick={() => {
@@ -373,7 +376,10 @@ export default function JaasMeeting({
                         className="absolute inset-0 overflow-y-auto overscroll-contain bg-background p-4 text-foreground lg:static lg:w-[min(44rem,48vw)] lg:shrink-0 lg:border-s lg:p-6"
                     >
                         {reviewVisited && (
-                            <MeetingReviewPanel groupId={groupId} />
+                            <MeetingReviewPanel
+                                groupId={groupId}
+                                occurrence={occurrence}
+                            />
                         )}
                     </aside>
                 )}

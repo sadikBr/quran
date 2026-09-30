@@ -9,6 +9,7 @@ import {
     isJaasConfigured,
 } from "@/features/groups/server/create-jaas-token";
 import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
+import { getGroupForUser } from "@/features/groups/server/get-groups";
 import { calculateMeetingState } from "@/features/groups/server/meeting-schedule";
 import getPreferences from "@/features/settings/server/get-preferences";
 
@@ -21,9 +22,10 @@ export default async function GroupMeetingPage({
     if (!session) redirect("/sign-in");
 
     const { groupId } = await params;
-    const [meeting, preferences] = await Promise.all([
+    const [meeting, preferences, group] = await Promise.all([
         getGroupMeetingForUser(groupId, session.user.id),
         getPreferences(),
+        getGroupForUser(groupId, session.user.id),
     ]);
     if (!meeting) notFound();
     if (!isJaasConfigured() || !env.JAAS_APP_ID) {
@@ -68,7 +70,7 @@ export default async function GroupMeetingPage({
                 locale={preferences.language}
                 displayName={session.user.name}
                 email={session.user.email}
-                canReview={isHost}
+                canReview={group?.role === "supervisor"}
                 occurrence={state.activeStartsAt}
             />
         </main>

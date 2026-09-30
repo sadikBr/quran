@@ -270,7 +270,18 @@ export default async function WirdPage() {
                                                         )}
                                                     </Link>
                                                 </Button>
-                                                <CompleteWirdButton />
+                                                <CompleteWirdButton
+                                                    portion={{
+                                                        targetDate:
+                                                            wird.targetDate,
+                                                        start: wird.start
+                                                            .globalAyahNumber,
+                                                        end: wird.end
+                                                            .globalAyahNumber,
+                                                        revision:
+                                                            wird.revision ?? "",
+                                                    }}
+                                                />
                                             </div>
                                         </>
                                     )}

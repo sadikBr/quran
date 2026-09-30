@@ -9,9 +9,10 @@ import {
     MapPin,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import ConfirmationDialog from "@/components/ui/confirmation-dialog";
 import Ayah from "@/features/quran/components/ayah";
 import GuidedReader, {
     GuidedReaderSurah,
@@ -19,6 +20,7 @@ import GuidedReader, {
 } from "@/features/quran/components/guided-reader";
 import getAyahAudioStreams from "@/features/quran/helpers/get-ayah-audio-streams";
 import { cn } from "@/lib/utils";
+import { preparedAyahs } from "../preparation-progress";
 import type { PracticeReaderGroup } from "../reader-types";
 import submitPracticeAssignment from "../server/submit-practice-assignment";
 import updatePracticeProgress from "../server/update-practice-progress";
@@ -38,9 +40,12 @@ export default function PracticeReader({
 }) {
     const locale = useLocale();
     const t = useTranslations("Practice.reader");
+    const flow = useTranslations("Groups.flow");
+    const [confirmReady, setConfirmReady] = useState(false);
     const [progress, setProgress] = useState(assignment.progress);
     const [status, setStatus] = useState(assignment.status);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const mutationInFlight = useRef(false);
     const [savingReference, setSavingReference] =
         useState<QuranReference | null>(null);
     const [hideText, setHideText] = useState(assignment.kind === "revision");
@@ -64,14 +69,18 @@ export default function PracticeReader({
                   ayah.numberInSurah === progress.ayahNumber,
           )
         : -1;
-    const completedAyahs = progressIndex + 1;
+    const completedAyahs = preparedAyahs(
+        status,
+        ayahs.length,
+        progressIndex + 1,
+    );
     const percentage = ayahs.length
         ? Math.round((completedAyahs / ayahs.length) * 100)
         : 0;
     const reachedEnd =
         progress?.surahNumber === assignment.end.surahNumber &&
         progress?.ayahNumber === assignment.end.ayahNumber;
-    const next = ayahs[Math.min(completedAyahs, ayahs.length - 1)];
+    const next = ayahs[Math.min(progressIndex + 1, ayahs.length - 1)];
     const audioQueue = useMemo(
         () =>
             ayahs
@@ -97,35 +106,52 @@ export default function PracticeReader({
     }, [next]);
 
     async function saveProgress(reference: QuranReference) {
+        if (mutationInFlight.current) return;
+        mutationInFlight.current = true;
         setSavingReference(reference);
-        const result = await updatePracticeProgress({
-            assignmentId: assignment.id,
-            ...reference,
-        });
-        setSavingReference(null);
+        try {
+            const result = await updatePracticeProgress({
+                assignmentId: assignment.id,
+                ...reference,
+            });
 
-        if (!result.success) {
+            if (!result.success) {
+                toast.error(t("saveError"));
+                return;
+            }
+
+            setProgress(reference);
+            toast.success(t(result.completed ? "rangeReached" : "saved"));
+        } catch {
             toast.error(t("saveError"));
-            return;
+        } finally {
+            setSavingReference(null);
+            mutationInFlight.current = false;
         }
-
-        setProgress(reference);
-        if (status === "submitted") setStatus("in_progress");
-        toast.success(t(result.completed ? "rangeReached" : "saved"));
     }
 
     async function submitForReview() {
+        if (mutationInFlight.current) return;
+        mutationInFlight.current = true;
         setIsSubmitting(true);
-        const result = await submitPracticeAssignment({
-            assignmentId: assignment.id,
-        });
-        setIsSubmitting(false);
-        if (!result.success) {
+        try {
+            const result = await submitPracticeAssignment({
+                assignmentId: assignment.id,
+                confirmed: true,
+            });
+            if (!result.success) {
+                toast.error(t("submitError"));
+                return;
+            }
+            setStatus("submitted");
+            setConfirmReady(false);
+            toast.success(t("submitted"));
+        } catch {
             toast.error(t("submitError"));
-            return;
+        } finally {
+            setIsSubmitting(false);
+            mutationInFlight.current = false;
         }
-        setStatus("submitted");
-        toast.success(t("submitted"));
     }
 
     function toggleReveal(key: string) {
@@ -192,32 +218,44 @@ export default function PracticeReader({
                 </section>
             )}
 
-            {assignment.source === "group" && reachedEnd && (
+            <ConfirmationDialog
+                open={confirmReady}
+                onOpenChange={setConfirmReady}
+                title={flow("readyTitle")}
+                description={flow("readyDescription")}
+                confirmLabel={flow("confirm")}
+                cancelLabel={flow("cancel")}
+                pending={isSubmitting}
+                onConfirm={submitForReview}
+            />
+            {assignment.source === "group" && (
                 <section className="mt-6 rounded-2xl bg-primary/[0.08] p-5 text-center ring-1 ring-primary/15 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:text-start">
                     <div>
                         <div className="flex items-center justify-center gap-2 text-sm font-semibold text-primary sm:justify-start">
                             <CheckCircle2 className="size-4" />
-                            {t("assignmentReached")}
+                            {status === "submitted"
+                                ? flow("awaiting")
+                                : reachedEnd
+                                  ? t("assignmentReached")
+                                  : flow("ready")}
                         </div>
                         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                            {t(
-                                status === "submitted"
-                                    ? "awaitingReview"
-                                    : "submitDescription",
-                            )}
+                            {status === "submitted"
+                                ? t("awaitingReview")
+                                : flow("readyHint")}
                         </p>
                     </div>
                     {status !== "submitted" && (
                         <Button
                             type="button"
-                            disabled={isSubmitting}
-                            onClick={submitForReview}
+                            disabled={isSubmitting || savingReference !== null}
+                            onClick={() => setConfirmReady(true)}
                             className="mt-4 w-full rounded-xl sm:mt-0 sm:w-auto sm:shrink-0"
                         >
                             {isSubmitting && (
                                 <LoaderCircle className="size-4 animate-spin" />
                             )}
-                            {t(isSubmitting ? "submitting" : "submitForReview")}
+                            {isSubmitting ? t("submitting") : flow("ready")}
                         </Button>
                     )}
                 </section>
@@ -354,10 +392,8 @@ export default function PracticeReader({
                                                             : "outline"
                                                     }
                                                     disabled={
-                                                        savingReference?.surahNumber ===
-                                                            reference.surahNumber &&
-                                                        savingReference?.ayahNumber ===
-                                                            reference.ayahNumber
+                                                        savingReference !==
+                                                            null || isSubmitting
                                                     }
                                                     onClick={() =>
                                                         saveProgress(reference)

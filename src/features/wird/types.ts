@@ -26,6 +26,7 @@ export interface WirdLocation {
 }
 
 export interface DailyWird {
+    revision?: string;
     progressVerse?: {
         riwayah: "hafs" | "warsh";
         surahNumber: number;

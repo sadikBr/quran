@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { eq, getTableColumns, sql } from "drizzle-orm";
 import db from "@/drizzle/db";
 import { userKhatmahPlan, userWird } from "@/drizzle/schema";
 import { buildAdaptiveKhatmahTarget } from "@/features/khatmah/server/calculate-khatmah";
@@ -29,17 +29,19 @@ export default async function getDailyWird(
     userId: string,
     arabicEdition: string,
 ): Promise<DailyWird | null> {
-    let record: typeof userWird.$inferSelect | undefined;
+    const columns = {
+        ...getTableColumns(userWird),
+        revision: sql<string>`${userWird.updatedAt}::text`,
+    };
+    let record:
+        | (typeof userWird.$inferSelect & { revision: string })
+        | undefined;
 
-    try {
-        [record] = await db
-            .select()
-            .from(userWird)
-            .where(eq(userWird.userId, userId))
-            .limit(1);
-    } catch {
-        return null;
-    }
+    [record] = await db
+        .select(columns)
+        .from(userWird)
+        .where(eq(userWird.userId, userId))
+        .limit(1);
 
     if (!record) return null;
 
@@ -114,7 +116,7 @@ export default async function getDailyWird(
                     completedAt: null,
                 })
                 .where(eq(userWird.userId, userId))
-                .returning();
+                .returning(columns);
         }
     }
 
@@ -125,6 +127,7 @@ export default async function getDailyWird(
 
     return {
         unit: record.unit as WirdUnit,
+        revision: record.revision,
         amount: record.amount,
         targetDate: record.targetDate,
         completed: record.completedAt !== null,

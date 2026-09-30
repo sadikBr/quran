@@ -1,5 +1,6 @@
 import "server-only";
 
+import { preparedAyahs } from "@/features/practice/preparation-progress";
 import { getAssignedPracticeAssignments } from "@/features/practice/server/get-practice-assignment";
 import type {
     PracticeAssignment,
@@ -45,7 +46,7 @@ function progressForAssignment(
     const start = referencePosition(assignment.start, counts);
     const end = referencePosition(assignment.end, counts);
     const totalAyahs = Math.max(1, end - start + 1);
-    const completedAyahs = assignment.progress
+    const savedCount = assignment.progress
         ? Math.min(
               totalAyahs,
               Math.max(
@@ -54,6 +55,11 @@ function progressForAssignment(
               ),
           )
         : 0;
+    const completedAyahs = preparedAyahs(
+        assignment.status,
+        totalAyahs,
+        savedCount,
+    );
 
     return {
         completedAyahs,

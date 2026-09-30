@@ -1,7 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import db from "@/drizzle/db";
@@ -16,10 +16,15 @@ import {
     countCalendarDays,
     shiftDate,
 } from "@/features/khatmah/server/calculate-khatmah";
+import { wirdCompletionSchema } from "../completion";
 import { TOTAL_QURAN_AYAHS } from "./build-wird-target";
 import getWirdDate from "./wird-date";
 
-export default async function completeDailyWird() {
+export default async function completeDailyWird(input: unknown) {
+    const parsed = wirdCompletionSchema.safeParse(input);
+    if (!parsed.success)
+        return { success: false as const, message: "Invalid portion." };
+    const expected = parsed.data;
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
         return { success: false as const, message: "Sign in required." };
@@ -35,9 +40,14 @@ export default async function completeDailyWird() {
                     and(
                         eq(userWird.userId, session.user.id),
                         isNull(userWird.completedAt),
+                        eq(userWird.targetDate, expected.targetDate),
+                        eq(userWird.targetStartGlobalAyah, expected.start),
+                        eq(userWird.targetEndGlobalAyah, expected.end),
+                        sql`${userWird.updatedAt} = ${expected.revision}::timestamptz`,
                     ),
                 )
-                .limit(1);
+                .limit(1)
+                .for("update");
             if (!record) return false;
             if (record.targetDate > getWirdDate()) return false;
 
@@ -157,10 +167,15 @@ export default async function completeDailyWird() {
     }
 
     if (!completed) {
-        return { success: false as const, message: "No active Wird." };
+        return {
+            success: false as const,
+            conflict: true,
+            message: "This portion has changed. Reload it before completing.",
+        };
     }
 
     revalidatePath("/wird");
+    revalidatePath("/wird/read");
     revalidatePath("/dashboard");
     return { success: true as const };
 }

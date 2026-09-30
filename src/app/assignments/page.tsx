@@ -18,6 +18,7 @@ import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
+import AssignmentReadyButton from "@/features/groups/components/assignment-ready-button";
 import DeleteAssignmentButton from "@/features/groups/components/delete-assignment-button";
 import MemberAssignmentForm from "@/features/groups/components/member-assignment-form";
 import { canReviewAssignment } from "@/features/groups/review-eligibility";
@@ -400,7 +401,7 @@ export default async function AssignmentsPage({
                         href={`/practice/${assignment.id}/read`}
                     >
                         {assignment.status === "submitted"
-                            ? t("card.reviewPending")
+                            ? groupsT("flow.continue")
                             : assignment.progress
                               ? t("card.continue")
                               : t("card.start")}
@@ -409,6 +410,9 @@ export default async function AssignmentsPage({
                         />
                     </Link>
                 </Button>
+                {["in_progress", "needs_revision", "not_completed"].includes(
+                    assignment.status,
+                ) && <AssignmentReadyButton assignmentId={assignment.id} />}
             </article>
         );
     }
@@ -890,14 +894,11 @@ export default async function AssignmentsPage({
                                                 className="w-full sm:ms-auto sm:w-auto"
                                             >
                                                 <Link
-                                                    href={`/groups/${selectedAdminGroup.id}/review/${reviewQueue[0].id}`}
+                                                    href={`/groups/${selectedAdminGroup.id}#meeting-overview`}
                                                 >
                                                     <ClipboardCheck className="size-4" />
                                                     {groupsT(
-                                                        "review.startQueue",
-                                                        {
-                                                            count: reviewQueue.length,
-                                                        },
+                                                        "flow.viewMeeting",
                                                     )}
                                                 </Link>
                                             </Button>
@@ -951,10 +952,7 @@ export default async function AssignmentsPage({
                                                         >
                                                             <ClipboardCheck className="size-4" />
                                                             {groupsT(
-                                                                assignment.status ===
-                                                                    "submitted"
-                                                                    ? "assignments.reviewNow"
-                                                                    : "assignments.notCompletedAction",
+                                                                "review.details",
                                                             )}
                                                         </Link>
                                                     </Button>
@@ -1050,7 +1048,7 @@ export default async function AssignmentsPage({
                                                                         href={`/groups/${selectedAdminGroup.id}/review/${assignment.id}`}
                                                                     >
                                                                         {groupsT(
-                                                                            "assignments.reviewNow",
+                                                                            "review.details",
                                                                         )}
                                                                     </Link>
                                                                 </Button>

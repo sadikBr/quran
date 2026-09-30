@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
+import { safeReturnTo } from "@/features/auth/return-to";
 
 export async function proxy(request: NextRequest) {
     const session = await auth.api.getSession({
@@ -14,7 +15,14 @@ export async function proxy(request: NextRequest) {
 
     if (session && isAuthPage) {
         return NextResponse.redirect(
-            new URL(isAdmin ? "/admin" : "/", request.url),
+            new URL(
+                isAdmin
+                    ? "/admin"
+                    : safeReturnTo(
+                          request.nextUrl.searchParams.get("returnTo"),
+                      ),
+                request.url,
+            ),
         );
     }
     if (
@@ -31,7 +39,12 @@ export async function proxy(request: NextRequest) {
     }
 
     if (!session && isProtected) {
-        return NextResponse.redirect(new URL("/sign-in", request.url));
+        const signIn = new URL("/sign-in", request.url);
+        signIn.searchParams.set(
+            "returnTo",
+            `${pathname}${request.nextUrl.search}`,
+        );
+        return NextResponse.redirect(signIn);
     }
 
     return NextResponse.next();
@@ -45,6 +58,7 @@ export const config = {
         "/practice/:path*",
         "/memorization/:path*",
         "/dashboard",
+        "/guide",
         "/bookmarks",
         "/profile",
         "/settings",

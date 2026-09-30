@@ -87,6 +87,13 @@
             "carriedOver": "Completed after being carried over"
         },
         "reader": {
+            "saveStatusLabel": "Reading position save status",
+            "saveConflict": "Your saved portion or position changed elsewhere. This tab has not overwritten it.",
+            "pendingPosition": "Unsaved position: surah {surah}, ayah {ayah}.",
+            "draftRetained": "Kept on this device for retry. It is not yet confirmed saved to your account.",
+            "draftMemoryOnly": "This attempt is kept only in this tab. Keep it open to retry.",
+            "retrySave": "Retry saving",
+            "useLatest": "Discard this attempt and load saved progress",
             "title": "Today’s Wird",
             "back": "Back to Wird overview",
             "progress": "Reading progress",

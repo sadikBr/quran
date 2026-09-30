@@ -2,30 +2,72 @@
 
 import { CheckCircle2, LoaderCircle, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import getRevisionAvailability from "../server/get-revision-availability";
+import { getMeetingDisplayTimezone } from "../server/meeting-schedule";
 import reviewMemberAssignment from "../server/review-member-assignment";
 
 export default function ReviewDecisionForm({
     groupId,
     assignmentId,
+    occurrence,
     pendingCount,
     submitted = true,
     onSaved,
     onStale,
+    onBusyChange,
 }: {
     groupId: string;
     assignmentId: string;
+    occurrence: string;
     pendingCount: number;
     submitted?: boolean;
     onSaved?: (nextAssignmentId: string | null) => Promise<void>;
     onStale?: () => void;
+    onBusyChange?: (busy: boolean) => void;
 }) {
     const t = useTranslations("Groups.review");
+    const flow = useTranslations("Groups.flow");
+    const locale = useLocale();
+    const [schedule, setSchedule] = useState<Awaited<
+        ReturnType<typeof getRevisionAvailability>
+    > | null>(null);
+    const [checking, setChecking] = useState(true);
+    const [scheduleError, setScheduleError] = useState(false);
+    const requestId = useRef(0);
+    const checkSchedule = useCallback(async () => {
+        const request = ++requestId.current;
+        setChecking(true);
+        setScheduleError(false);
+        try {
+            const result = await getRevisionAvailability(
+                groupId,
+                assignmentId,
+                occurrence,
+            );
+            if (request === requestId.current) setSchedule(result);
+        } catch {
+            if (request === requestId.current) setScheduleError(true);
+        } finally {
+            if (request === requestId.current) setChecking(false);
+        }
+    }, [groupId, assignmentId, occurrence]);
+    useEffect(() => {
+        void checkSchedule();
+        const refresh = () => {
+            void checkSchedule();
+        };
+        window.addEventListener("focus", refresh);
+        return () => {
+            requestId.current++;
+            window.removeEventListener("focus", refresh);
+        };
+    }, [checkSchedule]);
     const router = useRouter();
     const [note, setNote] = useState("");
     const [decision, setDecision] = useState<
@@ -33,27 +75,39 @@ export default function ReviewDecisionForm({
     >(submitted ? "completed" : "not_completed");
     const [pending, setPending] = useState(false);
     const savingRef = useRef(false);
+    const needsSchedule = decision !== "completed";
+    const blocked =
+        needsSchedule && (checking || scheduleError || !schedule?.next);
 
     async function save(reviewNext: boolean) {
-        if (savingRef.current) return;
+        if (savingRef.current || blocked) return;
         savingRef.current = true;
         setPending(true);
+        onBusyChange?.(true);
         try {
             const result = await reviewMemberAssignment({
                 groupId,
                 assignmentId,
+                occurrence,
                 decision,
                 note,
                 reviewNext,
             });
 
             if (!result.success) {
+                if (result.reason === "no_next_meeting")
+                    setSchedule({
+                        next: null,
+                        timezone: schedule?.timezone ?? "UTC",
+                    });
                 savingRef.current = false;
                 toast.error(
                     t(
-                        result.reason === "no_next_meeting"
-                            ? "noNextMeeting"
-                            : "error",
+                        result.reason === "meeting_required"
+                            ? "meetingRequired"
+                            : result.reason === "no_next_meeting"
+                              ? "noNextMeeting"
+                              : "error",
                     ),
                 );
                 if (result.reason === "not_submitted") {
@@ -91,6 +145,7 @@ export default function ReviewDecisionForm({
             savingRef.current = false;
             setPending(false);
         } finally {
+            onBusyChange?.(false);
             // Failed validations leave the feedback in place for retry.
             if (!savingRef.current) setPending(false);
         }
@@ -158,9 +213,64 @@ export default function ReviewDecisionForm({
                 />
             </div>
             <div className="mt-5 grid gap-2">
+                {needsSchedule && (
+                    <div
+                        aria-live="polite"
+                        className="rounded-xl border border-border/60 bg-background/60 p-3 text-sm leading-6"
+                    >
+                        <p>
+                            {checking
+                                ? flow("checkingSchedule")
+                                : scheduleError
+                                  ? flow("scheduleError")
+                                  : !schedule?.next
+                                    ? flow("needsSchedule")
+                                    : flow("nextReview", {
+                                          date: new Intl.DateTimeFormat(
+                                              locale,
+                                              {
+                                                  dateStyle: "medium",
+                                                  timeStyle: "short",
+                                                  timeZone:
+                                                      getMeetingDisplayTimezone(
+                                                          schedule.timezone,
+                                                          new Date(
+                                                              schedule.next,
+                                                          ),
+                                                      ),
+                                              },
+                                          ).format(new Date(schedule.next)),
+                                      })}
+                        </p>
+                        {!checking && (scheduleError || !schedule?.next) && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    className="h-auto min-h-11 whitespace-normal"
+                                >
+                                    <a
+                                        href={`/groups/${groupId}#meeting-schedule`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {flow("openSchedule")}
+                                    </a>
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => void checkSchedule()}
+                                >
+                                    {flow("checkSchedule")}
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                )}
                 <Button
                     type="button"
-                    disabled={pending}
+                    disabled={pending || blocked}
                     onClick={() => save(true)}
                     className="min-h-12 rounded-xl whitespace-normal"
                 >
@@ -180,7 +290,7 @@ export default function ReviewDecisionForm({
                 <Button
                     type="button"
                     variant="outline"
-                    disabled={pending}
+                    disabled={pending || blocked}
                     onClick={() => save(false)}
                     className="h-auto min-h-12 rounded-xl whitespace-normal px-3 py-3 text-center"
                 >

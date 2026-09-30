@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 import AppLogo from "@/components/app-logo";
 import AppPrimaryNav from "@/components/app-primary-nav";
 import PageBackground from "@/components/page-background";
@@ -24,7 +24,7 @@ export default async function AuthLayout({
                     <AppLogo />
                 </div>
             </StickyAppHeader>
-            {children}
+            <Suspense>{children}</Suspense>
         </div>
     );
 }

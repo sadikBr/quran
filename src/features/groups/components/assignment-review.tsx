@@ -13,6 +13,8 @@ export default function AssignmentReview({
     compact = false,
     onSaved,
     onStale,
+    onBusyChange,
+    occurrence,
 }: {
     review: AssignmentReviewData;
     readerGroups: PracticeReaderGroup[];
@@ -20,6 +22,8 @@ export default function AssignmentReview({
     compact?: boolean;
     onSaved?: (nextAssignmentId: string | null) => Promise<void>;
     onStale?: () => void;
+    onBusyChange?: (busy: boolean) => void;
+    occurrence?: string;
 }) {
     const t = useTranslations("Groups.review");
     const practiceT = useTranslations("Practice");
@@ -77,7 +81,9 @@ export default function AssignmentReview({
                 className={
                     compact
                         ? "space-y-6"
-                        : "grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
+                        : occurrence
+                          ? "grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start"
+                          : "space-y-6"
                 }
             >
                 <section>
@@ -87,17 +93,32 @@ export default function AssignmentReview({
                         riwayah={assignment.riwayah}
                     />
                 </section>
-                <div className={compact ? "" : "lg:sticky lg:top-24"}>
-                    <ReviewDecisionForm
-                        key={assignment.id}
-                        groupId={assignment.groupId}
-                        assignmentId={assignment.id}
-                        submitted={assignment.status === "submitted"}
-                        pendingCount={pendingCount}
-                        onSaved={onSaved}
-                        onStale={onStale}
-                    />
-                </div>
+                {occurrence ? (
+                    <div className={compact ? "" : "lg:sticky lg:top-24"}>
+                        <ReviewDecisionForm
+                            key={assignment.id}
+                            groupId={assignment.groupId}
+                            assignmentId={assignment.id}
+                            occurrence={occurrence}
+                            submitted={assignment.status === "submitted"}
+                            pendingCount={pendingCount}
+                            onSaved={onSaved}
+                            onStale={onStale}
+                            onBusyChange={onBusyChange}
+                        />
+                    </div>
+                ) : (
+                    <section className="rounded-xl border bg-muted/20 p-4">
+                        <p className="text-sm text-muted-foreground">
+                            {t("feedback")}
+                        </p>
+                        {assignment.reviewNote && (
+                            <p className="mt-3 whitespace-pre-wrap text-sm">
+                                {assignment.reviewNote}
+                            </p>
+                        )}
+                    </section>
+                )}
             </div>
         </div>
     );

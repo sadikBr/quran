@@ -29,9 +29,13 @@ async function getContext(groupId: string) {
     };
 }
 
-function presenceResponse(hostPresent: boolean, status = 200) {
+function presenceResponse(
+    hostPresent: boolean,
+    status = 200,
+    state?: "active" | "closed",
+) {
     return NextResponse.json(
-        { hostPresent },
+        { hostPresent, ...(state ? { state } : {}) },
         {
             status,
             headers: { "Cache-Control": "no-store" },
@@ -81,6 +85,13 @@ async function recordAttendance(
             .limit(1)
             .for("update");
         if (!meetingSession || meetingSession.finalizedAt) return null;
+        // Only the designated host can start a session. Other attendees may
+        // join after that start has been recorded, never just from the clock.
+        if (
+            !meetingSession.startedAt &&
+            context.meeting.hostUserId !== context.userId
+        )
+            return null;
 
         const [attendance] = await transaction
             .select({
@@ -205,8 +216,10 @@ export async function GET(
     { params }: { params: Promise<{ groupId: string }> },
 ) {
     const { groupId } = await params;
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) return presenceResponse(false, 401);
     const context = await getContext(groupId);
-    if (!context) return presenceResponse(false, 401);
+    if (!context) return presenceResponse(false, 403);
 
     const hostPresent =
         context.state.status === "active" &&
@@ -215,7 +228,11 @@ export async function GET(
                 context.meeting.hostActiveUntil.getTime() > Date.now(),
         );
 
-    return presenceResponse(hostPresent);
+    return presenceResponse(
+        hostPresent,
+        200,
+        context.state.status === "active" ? "active" : "closed",
+    );
 }
 
 export async function POST(

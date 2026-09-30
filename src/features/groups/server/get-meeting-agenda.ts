@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq, inArray, or } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, lt, or } from "drizzle-orm";
 import db from "@/drizzle/db";
 import {
     groupMeeting,
@@ -14,6 +14,7 @@ import type { PracticeKind } from "@/features/practice/types";
 
 export interface MeetingAgendaAssignment {
     id: string;
+    carriedForward: boolean;
     kind: PracticeKind;
     status:
         | "in_progress"
@@ -91,6 +92,7 @@ export default async function getMeetingAgenda({
             assigneeId: practiceAssignment.assigneeId,
             kind: practiceAssignment.kind,
             status: practiceAssignment.status,
+            dueAt: practiceAssignment.dueAt,
             reviewedForDueAt: practiceAssignment.reviewedForDueAt,
             startSurahNumber: practiceAssignment.startSurahNumber,
             startAyahNumber: practiceAssignment.startAyahNumber,
@@ -104,6 +106,14 @@ export default async function getMeetingAgenda({
                 or(
                     eq(practiceAssignment.dueAt, occurrenceStartsAt),
                     eq(practiceAssignment.reviewedForDueAt, occurrenceStartsAt),
+                    // Readiness survives an absence; keep the original deadline.
+                    and(
+                        eq(practiceAssignment.status, "submitted"),
+                        or(
+                            lt(practiceAssignment.dueAt, occurrenceStartsAt),
+                            isNull(practiceAssignment.dueAt),
+                        ),
+                    ),
                 ),
                 inArray(practiceAssignment.status, [
                     "in_progress",
@@ -148,6 +158,11 @@ export default async function getMeetingAgenda({
             .map(
                 (assignment): MeetingAgendaAssignment => ({
                     id: assignment.id,
+                    carriedForward:
+                        assignment.status === "submitted" &&
+                        assignment.dueAt !== null &&
+                        assignment.dueAt.getTime() <
+                            occurrenceStartsAt.getTime(),
                     kind: assignment.kind as PracticeKind,
                     status: assignment.status as MeetingAgendaAssignment["status"],
                     startSurahNumber: assignment.startSurahNumber,

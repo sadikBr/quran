@@ -15,6 +15,8 @@ import StickyAppHeader from "@/components/sticky-app-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
+import AbsenceExcuse from "@/features/groups/components/absence-excuse";
+import CircleNextStep from "@/features/groups/components/circle-next-step";
 import {
     GroupDangerActions,
     MemberActions,
@@ -31,6 +33,7 @@ import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeti
 import { getGroupForUser } from "@/features/groups/server/get-groups";
 import getMeetingAgenda from "@/features/groups/server/get-meeting-agenda";
 import getMeetingHistory from "@/features/groups/server/get-meeting-history";
+import getPendingAbsence from "@/features/groups/server/get-pending-absence";
 import { calculateMeetingState } from "@/features/groups/server/meeting-schedule";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -80,6 +83,8 @@ export default async function GroupPage({
             getGroupActivity(group.id, session.user.id, isAdmin),
             getSurahsMeta(),
         ]);
+    // History finalizes ended meetings first, including when cron is unavailable.
+    const pendingAbsence = await getPendingAbsence(group.id, currentUserId);
     const meetingState = meeting ? calculateMeetingState(meeting) : null;
     const agendaStartsAt = meetingState
         ? new Date(
@@ -111,6 +116,15 @@ export default async function GroupPage({
     const completedCount = assignments.filter(
         (assignment) => assignment.status === "completed",
     ).length;
+    const latestFeedback = !isAdmin
+        ? assignments
+              .filter((item) => item.reviewedAt)
+              .sort(
+                  (a, b) =>
+                      (b.reviewedAt?.getTime() ?? 0) -
+                      (a.reviewedAt?.getTime() ?? 0),
+              )[0]
+        : null;
     const assignedMemberCount = new Set(
         assignments
             .filter((assignment) => assignment.status !== "completed")
@@ -159,8 +173,95 @@ export default async function GroupPage({
                         </div>
                     </div>
 
+                    <CircleNextStep
+                        groupId={group.id}
+                        supervisor={isAdmin}
+                        live={
+                            meetingState?.status === "active" &&
+                            isJaasConfigured()
+                        }
+                        scheduled={Boolean(
+                            meeting?.enabled && meeting.schedule.length,
+                        )}
+                        memberCount={group.memberCount}
+                        assignments={assignments}
+                        nextStartsAt={meetingState?.nextStartsAt}
+                        pendingAbsence={Boolean(pendingAbsence)}
+                    />
                     <div className="mt-6 grid items-start gap-6 sm:mt-8 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-8">
                         <div className="min-w-0 space-y-6 [&>section]:mt-0">
+                            {pendingAbsence && (
+                                <section
+                                    id="absence-excuse"
+                                    className="scroll-mt-24 rounded-xl border border-primary/15 bg-card p-4"
+                                >
+                                    <h2 className="mb-3 text-sm font-semibold text-primary">
+                                        {t("flow.provideExcuse")} ·{" "}
+                                        {new Intl.DateTimeFormat(
+                                            preferences.language,
+                                            {
+                                                dateStyle: "medium",
+                                                timeZone:
+                                                    meeting?.timezone ??
+                                                    "Africa/Casablanca",
+                                            },
+                                        ).format(pendingAbsence.startsAt)}
+                                    </h2>
+                                    <AbsenceExcuse
+                                        key={pendingAbsence.id}
+                                        groupId={group.id}
+                                        attendanceId={pendingAbsence.id}
+                                        excuse={null}
+                                        pending
+                                    />
+                                </section>
+                            )}
+                            {latestFeedback && (
+                                <section
+                                    id="your-feedback"
+                                    className="scroll-mt-24 rounded-xl border border-primary/15 bg-card p-4"
+                                >
+                                    <h2 className="text-sm font-semibold text-primary">
+                                        {t("flow.results")}
+                                    </h2>
+                                    <p className="mt-2 text-sm">
+                                        {
+                                            surahs.find(
+                                                (surah) =>
+                                                    surah.number ===
+                                                    latestFeedback.startSurahNumber,
+                                            )?.[
+                                                isArabic
+                                                    ? "name"
+                                                    : "englishName"
+                                            ]
+                                        }{" "}
+                                        · {latestFeedback.startAyahNumber} —{" "}
+                                        {
+                                            surahs.find(
+                                                (surah) =>
+                                                    surah.number ===
+                                                    latestFeedback.endSurahNumber,
+                                            )?.[
+                                                isArabic
+                                                    ? "name"
+                                                    : "englishName"
+                                            ]
+                                        }{" "}
+                                        · {latestFeedback.endAyahNumber}
+                                    </p>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        {t(
+                                            `assignments.statuses.${latestFeedback.status}`,
+                                        )}
+                                    </p>
+                                    {latestFeedback.reviewNote && (
+                                        <p className="mt-2 whitespace-pre-wrap text-sm leading-6">
+                                            {latestFeedback.reviewNote}
+                                        </p>
+                                    )}
+                                </section>
+                            )}
                             <GroupMeetingPanel
                                 groupId={group.id}
                                 meeting={meeting}
@@ -169,6 +270,15 @@ export default async function GroupPage({
                                 isHost={meeting?.hostUserId === session.user.id}
                                 locale={preferences.language}
                                 providerConfigured={isJaasConfigured()}
+                                supervisors={group.members
+                                    .filter(
+                                        (member) =>
+                                            member.role === "supervisor",
+                                    )
+                                    .map((member) => ({
+                                        id: member.userId,
+                                        name: member.name,
+                                    }))}
                             >
                                 {meeting && meetingAgenda && (
                                     <MeetingAgenda
@@ -398,7 +508,11 @@ export default async function GroupPage({
                                 </details>
 
                                 {isAdmin && (
-                                    <details className="group/invite mt-3 overflow-hidden rounded-2xl border border-primary/15 bg-primary/[0.045] shadow-sm">
+                                    <details
+                                        id="invite-members"
+                                        className="group/invite mt-3 scroll-mt-24 overflow-hidden rounded-2xl border border-primary/15 bg-primary/[0.045] shadow-sm"
+                                        open={group.memberCount < 2}
+                                    >
                                         <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-primary/[0.055] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">
                                             <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                                 <CirclePlus

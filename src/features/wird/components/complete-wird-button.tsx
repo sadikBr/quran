@@ -7,21 +7,39 @@ import { AlertDialog } from "radix-ui";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import type { WirdCompletion } from "../completion";
 import completeDailyWird from "../server/complete-daily-wird";
 
-export default function CompleteWirdButton() {
+export default function CompleteWirdButton({
+    disabled = false,
+    portion,
+}: {
+    disabled?: boolean;
+    portion: WirdCompletion;
+}) {
     const router = useRouter();
     const t = useTranslations("Wird.today");
     const [isCompleting, setIsCompleting] = useState(false);
     const [open, setOpen] = useState(false);
+    const [conflict, setConflict] = useState(false);
     const locale = useLocale();
 
     async function complete() {
         if (isCompleting) return;
         setIsCompleting(true);
         try {
-            const result = await completeDailyWird();
+            const result = await completeDailyWird(portion);
             if (!result.success) {
+                if ("conflict" in result && result.conflict) {
+                    toast.error(
+                        locale === "ar"
+                            ? "تغيّر هذا الورد. راجع الورد المحدّث قبل إتمامه."
+                            : "This portion changed. Review the updated portion before completing it.",
+                    );
+                    setOpen(false);
+                    setConflict(true);
+                    return;
+                }
                 toast.error(t("completeError"));
                 return;
             }
@@ -35,6 +53,13 @@ export default function CompleteWirdButton() {
         }
     }
 
+    if (conflict)
+        return (
+            <Button variant="outline" onClick={() => window.location.reload()}>
+                {locale === "ar" ? "تحميل الورد المحدّث" : "Load latest portion"}
+            </Button>
+        );
+
     return (
         <AlertDialog.Root
             open={open}
@@ -46,7 +71,7 @@ export default function CompleteWirdButton() {
                 <Button
                     type="button"
                     variant="outline"
-                    disabled={isCompleting}
+                    disabled={isCompleting || disabled}
                     className="min-h-11 gap-2"
                 >
                     <Check aria-hidden="true" className="size-4" />

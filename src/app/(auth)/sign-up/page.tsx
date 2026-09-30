@@ -3,6 +3,7 @@
 import { useForm } from "@tanstack/react-form";
 import { ArrowRight, BookOpen, LoaderCircle } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -24,8 +25,10 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/features/auth/auth-client";
+import { safeReturnTo } from "@/features/auth/return-to";
 
 export default function SignUpPage() {
+    const returnTo = safeReturnTo(useSearchParams().get("returnTo"));
     const [loading, setLoading] = useState(false);
     const locale = useLocale();
     const t = useTranslations("Auth");
@@ -63,7 +66,7 @@ export default function SignUpPage() {
                         setLoading(true);
                     },
                     onSuccess: (_ctx) => {
-                        window.location.assign("/dashboard");
+                        window.location.assign(returnTo);
                     },
                     onError: (_ctx) => {
                         setLoading(false);
@@ -323,7 +326,7 @@ export default function SignUpPage() {
                     <p className="text-center text-sm text-muted-foreground">
                         {t("signUp.prompt")}{" "}
                         <Link
-                            href="/sign-in"
+                            href={`/sign-in?returnTo=${encodeURIComponent(returnTo)}`}
                             className="font-medium text-primary underline-offset-4 hover:underline"
                         >
                             {t("signUp.promptAction")}

@@ -13,6 +13,7 @@ import GuidedReader, {
 import getAyahAudioStreams from "@/features/quran/helpers/get-ayah-audio-streams";
 import { cn } from "@/lib/utils";
 import { wirdProgress } from "../progress";
+import { type ProgressSave, readProgressDraft } from "../progress-save";
 import type { WirdReaderGroup } from "../reader-types";
 import updateWirdProgress from "../server/update-wird-progress";
 import type { DailyWird } from "../types";
@@ -24,6 +25,9 @@ export default function WirdReader({
     endGlobalAyah,
     initialProgress,
     initialPosition,
+    initialRevision,
+    targetDate,
+    draftKey,
     riwayah,
     showTranslation,
     continuousRecitation,
@@ -33,6 +37,9 @@ export default function WirdReader({
     endGlobalAyah: number;
     initialProgress: number | null;
     initialPosition: DailyWird["progressVerse"];
+    initialRevision: string;
+    targetDate: string;
+    draftKey: string;
     riwayah: "hafs" | "warsh";
     showTranslation: boolean;
     continuousRecitation: boolean;
@@ -47,6 +54,45 @@ export default function WirdReader({
     const t = useTranslations("Wird.reader");
     const [progress, setProgress] = useState(initialProgress);
     const [position, setPosition] = useState(initialPosition);
+    const revision = useRef(initialRevision);
+    const [pending, setPending] = useState<ProgressSave | null>(null);
+    const [saveStatus, setSaveStatus] = useState<
+        "idle" | "saving" | "saved" | "error" | "conflict"
+    >("idle");
+    const [retained, setRetained] = useState(false);
+    const discardRequested = useRef(false);
+    useEffect(() => {
+        try {
+            const draft = readProgressDraft(
+                localStorage.getItem(draftKey),
+                startGlobalAyah,
+                endGlobalAyah,
+                riwayah,
+            );
+            if (draft) {
+                setPending(draft);
+                setRetained(true);
+                setSaveStatus(
+                    draft.expectedRevision === initialRevision
+                        ? "error"
+                        : "conflict",
+                );
+            }
+        } catch {
+            /* Storage may be unavailable; in-memory retry still works. */
+        }
+    }, [draftKey, startGlobalAyah, endGlobalAyah, riwayah, initialRevision]);
+    useEffect(() => {
+        if (!pending) return;
+        const warn = (event: BeforeUnloadEvent) => {
+            if (!discardRequested.current) {
+                event.preventDefault();
+                event.returnValue = "";
+            }
+        };
+        window.addEventListener("beforeunload", warn);
+        return () => window.removeEventListener("beforeunload", warn);
+    }, [pending]);
     const [savingAyah, setSavingAyah] = useState<number | null>(null);
     const saveInFlight = useRef(false);
     const summary = wirdProgress(groups, progress, position, riwayah);
@@ -88,26 +134,71 @@ export default function WirdReader({
         surahNumber: number,
         ayahNumber: number,
     ) {
+        if (saveInFlight.current || pending) return;
+        const draft: ProgressSave = {
+            globalAyahNumber,
+            surahNumber,
+            ayahNumber,
+            start: startGlobalAyah,
+            end: endGlobalAyah,
+            expectedRevision: revision.current,
+            riwayah,
+        };
+        setPending(draft);
+        try {
+            const existing = readProgressDraft(
+                localStorage.getItem(draftKey),
+                startGlobalAyah,
+                endGlobalAyah,
+                riwayah,
+            );
+            if (
+                existing &&
+                JSON.stringify(existing) !== JSON.stringify(draft)
+            ) {
+                // Do not replace another tab's unsaved attempt.
+                setRetained(false);
+            } else {
+                localStorage.setItem(draftKey, JSON.stringify(draft));
+                setRetained(true);
+            }
+        } catch {
+            setRetained(false);
+        }
+        await attemptSave(draft);
+    }
+
+    async function attemptSave(draft: ProgressSave) {
         if (saveInFlight.current) return;
         saveInFlight.current = true;
-        setSavingAyah(globalAyahNumber);
+        setSavingAyah(draft.globalAyahNumber);
+        setSaveStatus("saving");
         try {
-            const result = await updateWirdProgress({
-                globalAyahNumber,
-                surahNumber,
-                ayahNumber,
-                start: startGlobalAyah,
-                end: endGlobalAyah,
-            });
+            const result = await updateWirdProgress(draft);
             if (!result.success) {
-                toast.error(t("saveError"));
+                setSaveStatus(
+                    result.message === "conflict" ? "conflict" : "error",
+                );
                 return;
             }
-            setProgress(globalAyahNumber);
-            setPosition({ riwayah, surahNumber, ayahNumber });
-            toast.success(t("saved"));
+            revision.current = result.revision;
+            setProgress(draft.globalAyahNumber);
+            setPosition({
+                riwayah,
+                surahNumber: draft.surahNumber,
+                ayahNumber: draft.ayahNumber,
+            });
+            setPending(null);
+            setSaveStatus("saved");
+            toast.success(t("saved"), { id: "wird-progress-saved" });
+            try {
+                if (localStorage.getItem(draftKey) === JSON.stringify(draft))
+                    localStorage.removeItem(draftKey);
+            } catch {
+                /* A leftover draft will be checked against the server revision. */
+            }
         } catch {
-            toast.error(t("saveError"));
+            setSaveStatus("error");
         } finally {
             saveInFlight.current = false;
             setSavingAyah(null);
@@ -135,6 +226,70 @@ export default function WirdReader({
             continuousRecitation={continuousRecitation}
             scope="wird"
         >
+            {saveStatus !== "idle" && saveStatus !== "saved" && (
+                <section
+                    className="sticky top-36 z-20 mt-4 rounded-xl border border-border bg-card p-3 text-sm shadow-sm"
+                    aria-label={t("saveStatusLabel")}
+                >
+                    <output className="block" aria-live="polite">
+                        {t(
+                            saveStatus === "saving"
+                                ? "saving"
+                                : saveStatus === "conflict"
+                                  ? "saveConflict"
+                                  : "saveError",
+                        )}
+                    </output>
+                    {pending && saveStatus !== "saving" && (
+                        <>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                {t("pendingPosition", {
+                                    surah: String(pending.surahNumber),
+                                    ayah: String(pending.ayahNumber),
+                                })}{" "}
+                                {t(
+                                    retained
+                                        ? "draftRetained"
+                                        : "draftMemoryOnly",
+                                )}
+                            </p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                                {saveStatus === "error" && (
+                                    <Button
+                                        size="sm"
+                                        onClick={() => attemptSave(pending)}
+                                    >
+                                        {t("retrySave")}
+                                    </Button>
+                                )}
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        discardRequested.current = true;
+                                        try {
+                                            if (
+                                                localStorage.getItem(
+                                                    draftKey,
+                                                ) === JSON.stringify(pending)
+                                            )
+                                                localStorage.removeItem(
+                                                    draftKey,
+                                                );
+                                        } catch {
+                                            /* No storage access. */
+                                        }
+                                        setPending(null);
+                                        window.location.reload();
+                                    }}
+                                >
+                                    {t("useLatest")}
+                                </Button>
+                            </div>
+                        </>
+                    )}
+                </section>
+            )}
             <div className="mt-7 space-y-12">
                 {groups.map((group) => {
                     const translationByAyah = new Map(
@@ -217,7 +372,8 @@ export default function WirdReader({
                                                             : "outline"
                                                     }
                                                     disabled={
-                                                        savingAyah !== null
+                                                        savingAyah !== null ||
+                                                        pending !== null
                                                     }
                                                     onClick={() =>
                                                         saveProgress(
@@ -270,7 +426,15 @@ export default function WirdReader({
                     {t("finishDescription")}
                 </p>
                 <div className="mt-5">
-                    <CompleteWirdButton />
+                    <CompleteWirdButton
+                        disabled={pending !== null}
+                        portion={{
+                            targetDate,
+                            start: startGlobalAyah,
+                            end: endGlobalAyah,
+                            revision: revision.current,
+                        }}
+                    />
                 </div>
             </section>
         </GuidedReader>

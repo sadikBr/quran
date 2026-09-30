@@ -71,7 +71,7 @@
             },
             "statuses": {
                 "in_progress": "In progress",
-                "submitted": "Waiting for review",
+                "submitted": "Awaiting recitation",
                 "not_completed": "Not completed",
                 "needs_revision": "Needs more work",
                 "completed": "Completed"
@@ -90,7 +90,7 @@
             "description": "Manage every circle’s meeting plan and review queue from one place.",
             "selectedGroup": "Selected circle",
             "groupSummary": "{members, plural, one {# member} other {# members}} · {planned, plural, one {# learner with active work} other {# learners with active work}} · {review, plural, =0 {nothing awaiting review} one {# awaiting review} other {# awaiting review}}",
-            "planMeeting": "Plan a meeting",
+            "planMeeting": "Prepare next meeting",
             "openGroup": "Open circle",
             "active": "Active",
             "learners": "Learners",

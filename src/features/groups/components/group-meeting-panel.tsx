@@ -24,6 +24,7 @@ import type {
 import { getMeetingDisplayTimezone } from "../server/meeting-schedule";
 import saveGroupMeeting from "../server/save-group-meeting";
 import CancelMeetingButton from "./cancel-meeting-button";
+import MeetingHostControl from "./meeting-host-control";
 import MeetingScheduleFields from "./meeting-schedule-fields";
 
 function formatOccurrence(value: string, locale: string, timezone: string) {
@@ -57,6 +58,7 @@ export default function GroupMeetingPanel({
     locale,
     providerConfigured,
     children,
+    supervisors = [],
 }: {
     groupId: string;
     meeting: GroupMeetingDetails | null;
@@ -66,12 +68,23 @@ export default function GroupMeetingPanel({
     locale: string;
     providerConfigured: boolean;
     children?: ReactNode;
+    supervisors?: { id: string; name: string }[];
 }) {
     const t = useTranslations("Groups.meeting");
+    const flow = useTranslations("Groups.flow");
     const router = useRouter();
     const [now, setNow] = useState(Date.now());
     const [isSaving, setIsSaving] = useState(false);
-    const [scheduleOpen, setScheduleOpen] = useState(false);
+    const [scheduleOpen, setScheduleOpen] = useState(!meeting);
+    useEffect(() => {
+        function openSchedule() {
+            if (window.location.hash === "#meeting-schedule")
+                setScheduleOpen(true);
+        }
+        openSchedule();
+        window.addEventListener("hashchange", openSchedule);
+        return () => window.removeEventListener("hashchange", openSchedule);
+    }, []);
     const [schedule, setSchedule] = useState<MeetingScheduleSlot[]>(
         meeting?.schedule ?? [{ weekday: 1, localTime: "20:00" }],
     );
@@ -106,15 +119,25 @@ export default function GroupMeetingPanel({
     }, [now, state]);
 
     async function save() {
+        if (isSaving) return;
         setIsSaving(true);
-        const result = await saveGroupMeeting({ groupId, schedule, timezone });
-        setIsSaving(false);
-        if (!result.success) {
+        try {
+            const result = await saveGroupMeeting({
+                groupId,
+                schedule,
+                timezone,
+            });
+            if (!result.success) {
+                toast.error(t("saveError"));
+                return;
+            }
+            toast.success(t("saved"));
+            router.refresh();
+        } catch {
             toast.error(t("saveError"));
-            return;
+        } finally {
+            setIsSaving(false);
         }
-        toast.success(t("saved"));
-        router.refresh();
     }
 
     const active = state?.status === "active";
@@ -125,7 +148,10 @@ export default function GroupMeetingPanel({
             : null;
 
     return (
-        <section className="relative mt-8 overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-sm">
+        <section
+            id="meeting-overview"
+            className="relative mt-8 scroll-mt-24 overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-sm"
+        >
             <div
                 className={cn(
                     "relative grid gap-5 border-t-4 border-primary/70 bg-primary/[0.035] px-4 py-5 sm:px-6 sm:py-6",
@@ -227,17 +253,37 @@ export default function GroupMeetingPanel({
 
             {children}
 
+            {meeting && (
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/50 px-4 py-3 text-sm sm:px-6">
+                    <p className="text-muted-foreground">
+                        {flow("host", { name: meeting.hostName })}
+                    </p>
+                    {isAdmin && (
+                        <Button
+                            asChild
+                            variant="outline"
+                            className="min-h-11 rounded-xl"
+                        >
+                            <Link href={`/groups/${groupId}/plan`}>
+                                {flow("plan")}
+                            </Link>
+                        </Button>
+                    )}
+                </div>
+            )}
+
             {isAdmin && (
                 <details
+                    id="meeting-schedule"
                     open={scheduleOpen}
                     onToggle={(event) =>
                         setScheduleOpen(event.currentTarget.open)
                     }
-                    className="group relative bg-background/35"
+                    className="group relative scroll-mt-24 bg-background/35"
                 >
                     <summary className="flex cursor-pointer list-none items-center gap-2 border-primary/10 border-t px-4 py-4 text-sm font-semibold text-muted-foreground outline-none transition-colors hover:bg-background/35 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
                         <Settings2 className="size-4 text-primary" />
-                        {meeting ? t("editSchedule") : t("configure")}
+                        {flow("schedule")}
                         <ChevronDown className="ms-auto size-4 transition-transform group-open:rotate-180" />
                     </summary>
                     <div className="grid gap-6 px-4 pb-6 pt-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-end">
@@ -271,6 +317,14 @@ export default function GroupMeetingPanel({
                                 )}
                                 {t(isSaving ? "saving" : "save")}
                             </Button>
+                            {meeting && (
+                                <MeetingHostControl
+                                    key={meeting.hostUserId}
+                                    groupId={groupId}
+                                    hostUserId={meeting.hostUserId}
+                                    supervisors={supervisors}
+                                />
+                            )}
                         </div>
                     </div>
                 </details>
