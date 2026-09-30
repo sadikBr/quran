@@ -49,6 +49,24 @@ export default async function AdhkarPage() {
                         </span>
                     </Link>
                 </header>
+                <Link
+                    href="/azkar/tasbih"
+                    className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-primary/20 bg-primary/5 px-4 py-4 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                    <div>
+                        <h2 className="font-semibold text-primary">
+                            {ar ? "المسبحة" : "Tasbih counter"}
+                        </h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            {ar
+                                ? "عداد مستقل لذكرك الشخصي، دون عدد محدد."
+                                : "A separate counter for personal dhikr, without a target."}
+                        </p>
+                    </div>
+                    <span className="shrink-0 text-sm font-medium text-primary">
+                        {ar ? "ابدأ العدّ" : "Start counting"}
+                    </span>
+                </Link>
                 <AdhkarCollections collections={data.collections} ar={ar} />
             </div>
         </main>
