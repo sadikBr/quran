@@ -650,14 +650,6 @@ export default function SettingsForm({
                                 />
                             </div>
                         </SettingField>
-                        <p className="text-xs leading-5 text-muted-foreground">
-                            {values.riwayah === "warsh" &&
-                            values.readingMode === "page"
-                                ? t("reciter.warshPageHint")
-                                : values.readingMode === "surah"
-                                  ? t("reciter.surahHint")
-                                  : t("reciter.pageHint")}
-                        </p>
                     </PreferenceCard>
 
                     <PreferenceCard

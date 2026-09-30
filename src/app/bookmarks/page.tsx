@@ -4,7 +4,7 @@ import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { auth } from "@/features/auth/auth";
-import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
+import QuranAudioProvider from "@/features/quran/components/quran-audio-shell";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import { getWarshChapters } from "@/features/quran/server/get-warsh-mushaf";

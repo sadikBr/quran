@@ -160,7 +160,7 @@
             "empty": "No matching reciters found.",
             "wholeSurah": "Whole-surah reciters",
             "ayahByAyah": "Ayah-by-ayah reciters",
-            "warshPageHint": "Warsh page mode supports full-page recitation only; individual ayah playback and highlighting are hidden because recording boundaries vary by source.",
+            "warshPageHint": "In Warsh page mode, you can listen to individual ayahs or play the page’s ayahs in sequence, depending on the recordings available for your selected reciter.",
             "surahHint": "Surah mode supports ayah-by-ayah and whole-surah reciters.",
             "pageHint": "Page mode uses reciters with audio for each ayah."
         },

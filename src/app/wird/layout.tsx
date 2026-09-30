@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import QuranAudioProvider from "@/features/quran/components/quran-audio-provider";
+import QuranAudioProvider from "@/features/quran/components/quran-audio-shell";
 
 export default function WirdLayout({
     children,

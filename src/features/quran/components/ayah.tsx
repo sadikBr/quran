@@ -88,6 +88,8 @@ export default function Ayah({
                 id={`ayah-${ayah.number}`}
                 data-hafs-ayah={ayah.hafsGlobalNumber ?? ayah.number}
                 data-ayah-number={ayah.numberInSurah}
+                data-audio-ayah={playbackAyahNumber}
+                tabIndex={-1}
                 className={cn(
                     "ayah quran-reader-text group/ayah me-[0.35em] inline scroll-mt-6 rounded-md leading-[inherit] text-foreground transition-[background-color,color,box-shadow] duration-500 ease-out",
                     isActiveAyah &&

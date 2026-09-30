@@ -47,13 +47,14 @@ export default async function QuranPage({ page }: { page: number }) {
     const audioQueue = pageData.data.ayahs
         .map((ayah) => ({
             ayahNumber: ayah.audioNumber ?? ayah.number,
-            streams: reciter
-                ? getRecitationStreams(reciter, {
-                      surahNumber: ayah.surah.number,
-                      ayahNumber: ayah.numberInSurah,
-                      globalAyahNumber: ayah.number,
-                  })
-                : [],
+            streams:
+                reciter?.scope === "ayah"
+                    ? getRecitationStreams(reciter, {
+                          surahNumber: ayah.surah.number,
+                          ayahNumber: ayah.numberInSurah,
+                          globalAyahNumber: ayah.number,
+                      })
+                    : [],
         }))
         .filter((ayah) => ayah.streams.length > 0);
     const pageJuzs = [...new Set(pageData.data.ayahs.map((ayah) => ayah.juz))];
@@ -114,13 +115,14 @@ export default async function QuranPage({ page }: { page: number }) {
                 const ayahs = pageData.data.ayahs
                     .filter((ayah) => ayah.surah.number === surah.number)
                     .map((ayah) => {
-                        const streams = reciter
-                            ? getRecitationStreams(reciter, {
-                                  surahNumber: ayah.surah.number,
-                                  ayahNumber: ayah.numberInSurah,
-                                  globalAyahNumber: ayah.number,
-                              })
-                            : [];
+                        const streams =
+                            reciter?.scope === "ayah"
+                                ? getRecitationStreams(reciter, {
+                                      surahNumber: ayah.surah.number,
+                                      ayahNumber: ayah.numberInSurah,
+                                      globalAyahNumber: ayah.number,
+                                  })
+                                : [];
                         return {
                             ...ayah,
                             audio: streams[0],

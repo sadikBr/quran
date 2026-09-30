@@ -11,8 +11,10 @@ import { getPlainQuranText } from "../components/tajweed-text";
 import { stripBasmalaPrefix } from "../helpers/basmala";
 import getRecitationStreams from "../helpers/get-recitation-streams";
 import {
+    getNativeWarshPlaybackNumber,
     getWarshAudioAyahNumbers,
     getWarshHafsAnchor,
+    getWarshPlaybackNumber,
     usesNativeWarshAyahNumbering,
 } from "../helpers/map-warsh-ayahs";
 import getAvailableReciters from "./get-available-reciter";
@@ -135,6 +137,11 @@ export default async function getAyahActionsData(
                   })
                 : [],
         globalAyahNumber: ayah.number,
+        audioNumber: warshVerse
+            ? nativeWarshAudio
+                ? getNativeWarshPlaybackNumber(warshVerse, surahNumber)
+                : getWarshPlaybackNumber(warshVerse, surahNumber)
+            : ayah.number,
         surahNumber,
         tafsirEditions,
         canChooseTafsir: Boolean(session),

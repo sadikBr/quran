@@ -720,6 +720,16 @@ body.focus-mode .quran-focus-chrome {
     --quran-basmala-font-size: 4.25rem;
 }
 
+/* Keep the final ayahs reachable above the compact floating player. */
+body[data-audio-player="visible"]:not(:has([data-quran-scroll-container])) {
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+}
+
+body[data-audio-player="visible"] [data-quran-scroll-container] {
+    padding-bottom: calc(13rem + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(13rem + env(safe-area-inset-bottom));
+}
+
 .quran-reader-text {
     font-size: var(--quran-reader-font-size);
 }

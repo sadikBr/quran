@@ -123,14 +123,15 @@ export default async function WarshQuranPage({ page }: { page: number }) {
 
                 return {
                     ayahNumber: ayah.audioNumber ?? ayah.number,
-                    streams: reciter
-                        ? getRecitationStreams(reciter, {
-                              surahNumber,
-                              ayahNumber,
-                              globalAyahNumber:
-                                  ayah.hafsGlobalNumber ?? ayah.number,
-                          })
-                        : [],
+                    streams:
+                        reciter?.scope === "ayah"
+                            ? getRecitationStreams(reciter, {
+                                  surahNumber,
+                                  ayahNumber,
+                                  globalAyahNumber:
+                                      ayah.hafsGlobalNumber ?? ayah.number,
+                              })
+                            : [],
                 };
             }),
         )

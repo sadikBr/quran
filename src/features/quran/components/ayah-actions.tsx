@@ -167,6 +167,7 @@ export type AyahActionsProps = {
     tafsirEditionIdentifier: string;
     tafsirDirection: string;
     audioStreams: string[];
+    audioNumber?: number;
     globalAyahNumber: number;
     surahNumber: number;
     tafsirEditions: Edition[];
@@ -260,6 +261,7 @@ export default function AyahActions({
     tafsirEditionIdentifier,
     tafsirDirection,
     audioStreams,
+    audioNumber,
     globalAyahNumber,
     surahNumber,
     tafsirEditions,
@@ -326,7 +328,8 @@ export default function AyahActions({
         retryAudio,
         toggleAudio,
     } = useQuranAudio();
-    const isCurrentAyah = activeAyahNumber === globalAyahNumber;
+    const playbackAyahNumber = audioNumber ?? globalAyahNumber;
+    const isCurrentAyah = activeAyahNumber === playbackAyahNumber;
     const isPlayingThisAyah = isCurrentAyah && isPlaying;
     const isLoadingThisAyah = isCurrentAyah && playbackStatus === "loading";
     const hasPlaybackError = isCurrentAyah && playbackStatus === "error";
@@ -891,7 +894,7 @@ export default function AyahActions({
                         onClick={() =>
                             hasPlaybackError
                                 ? retryAudio()
-                                : toggleAudio(globalAyahNumber, audioStreams)
+                                : toggleAudio(playbackAyahNumber, audioStreams)
                         }
                         className="w-full min-w-0 overflow-hidden rounded-xl border border-primary/20 bg-primary/5 p-4 text-start text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait"
                     >
