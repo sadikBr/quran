@@ -1,6 +1,25 @@
 import type { QuranReference } from "@/features/practice/types";
 import type { QuranNavigationMeta } from "@/features/quran/navigation-types";
 
+export function surahEdgeStarts(
+    pool: QuranReference[],
+    surahs: { number: number; numberOfAyahs: number }[],
+    count: number,
+    mode: "opening" | "ending",
+) {
+    const allowed = new Set(
+        pool.map((point) => `${point.surahNumber}:${point.ayahNumber}`),
+    );
+    return surahs.flatMap((surah) => {
+        const length = Math.min(count, surah.numberOfAyahs);
+        const start = mode === "opening" ? 1 : surah.numberOfAyahs - length + 1;
+        for (let ayah = start; ayah < start + length; ayah++) {
+            if (!allowed.has(`${surah.number}:${ayah}`)) return [];
+        }
+        return [{ surahNumber: surah.number, ayahNumber: start }];
+    });
+}
+
 export function availableStarts<T extends QuranReference>(
     pool: T[],
     seen: QuranReference[],

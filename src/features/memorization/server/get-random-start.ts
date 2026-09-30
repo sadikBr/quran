@@ -17,10 +17,13 @@ import {
     availableStarts,
     continuationReferences,
     randomStartPool,
+    surahEdgeStarts,
 } from "../random-start";
 import getMemorizationProgress from "./get-memorization-progress";
 
 const schema = z.object({
+    mode: z.enum(["random", "opening", "ending"]).optional().default("random"),
+    selectedSurah: z.number().int().min(1).max(114).optional(),
     continuationCount: z.number().int().min(1).max(30).optional().default(5),
     spanSurahs: z.boolean().optional().default(true),
     range: z
@@ -51,7 +54,20 @@ export default async function getRandomStart(input: z.input<typeof schema>) {
                 chapters?.find((chapter) => chapter.id === surah.number)?.verses
                     .length ?? surah.numberOfAyahs,
         }));
-        const { range, previous } = parsed.data;
+        const { previous, mode } = parsed.data;
+        const selected = surahs.find(
+            (surah) => surah.number === parsed.data.selectedSurah,
+        );
+        const range =
+            mode !== "random" && selected
+                ? {
+                      start: { surahNumber: selected.number, ayahNumber: 1 },
+                      end: {
+                          surahNumber: selected.number,
+                          ayahNumber: selected.numberOfAyahs,
+                      },
+                  }
+                : parsed.data.range;
         if (
             range &&
             [range.start, range.end].some(
@@ -71,14 +87,24 @@ export default async function getRandomStart(input: z.input<typeof schema>) {
                       ? ("error" as const)
                       : ("empty" as const),
             };
+        const candidates =
+            mode === "random"
+                ? pool
+                : surahEdgeStarts(
+                      pool,
+                      surahs,
+                      parsed.data.continuationCount,
+                      mode,
+                  );
+        if (!candidates.length) return { error: "noEdges" as const };
         const choices = parsed.data.retry
-            ? pool.filter(
+            ? candidates.filter(
                   (point) =>
                       point.surahNumber === parsed.data.retry?.surahNumber &&
                       point.ayahNumber === parsed.data.retry.ayahNumber,
               )
             : availableStarts(
-                  pool,
+                  candidates,
                   [...parsed.data.seen, ...(previous ? [previous] : [])],
                   0,
                   surahs,
@@ -93,9 +119,11 @@ export default async function getRandomStart(input: z.input<typeof schema>) {
         const references = continuationReferences(
             pool,
             start,
-            parsed.data.continuationCount,
+            mode === "random"
+                ? parsed.data.continuationCount
+                : parsed.data.continuationCount - 1,
             surahs,
-            parsed.data.spanSurahs,
+            mode === "random" && parsed.data.spanSurahs,
         );
         const surah = surahs.find((item) => item.number === start.surahNumber);
         if (!surah) return { error: "error" as const };
@@ -147,6 +175,7 @@ export default async function getRandomStart(input: z.input<typeof schema>) {
             return { error: "error" as const };
         return {
             result: {
+                mode,
                 riwayah: preferences.riwayah,
                 start,
                 name:

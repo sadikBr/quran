@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import QuranRangeSelector, {
+    SurahCombobox,
     type SurahOption,
 } from "@/features/practice/components/quran-range-selector";
 import type { QuranReference } from "@/features/practice/types";
@@ -13,12 +14,16 @@ import { getArabicNumber } from "@/lib/arabic-numbers";
 import getRandomStart from "../server/get-random-start";
 
 type DifficultStart = {
+    mode?: "random" | "opening" | "ending";
+    count?: number;
     start: QuranReference;
     end: QuranReference;
     name: string;
 };
 const referenceKey = (point: QuranReference) =>
     `${point.surahNumber}:${point.ayahNumber}`;
+const difficultKey = (item: { start: QuranReference; mode?: string }) =>
+    `${item.mode ?? "random"}:${referenceKey(item.start)}`;
 
 export default function RandomStartTest({
     surahs,
@@ -35,6 +40,9 @@ export default function RandomStartTest({
 }) {
     const t = useTranslations("Memorization.test");
     const [custom, setCustom] = useState(false);
+    const [settingsOpen, setSettingsOpen] = useState(true);
+    const [mode, setMode] = useState<"random" | "opening" | "ending">("random");
+    const [selectedSurah, setSelectedSurah] = useState(1);
     const [continuationCount, setContinuationCount] = useState(5);
     const [spanSurahs, setSpanSurahs] = useState(true);
     const [range, setRange] = useState({
@@ -53,6 +61,8 @@ export default function RandomStartTest({
             const saved = JSON.parse(
                 localStorage.getItem(storageKey) ?? "null",
             );
+            if (["random", "opening", "ending"].includes(saved?.mode))
+                setMode(saved.mode);
             if (typeof saved?.spanSurahs === "boolean")
                 setSpanSurahs(saved.spanSurahs);
             if (
@@ -77,7 +87,11 @@ export default function RandomStartTest({
                                 item &&
                                 valid(item.start) &&
                                 valid(item.end) &&
-                                typeof item.name === "string",
+                                typeof item.name === "string" &&
+                                (item.mode === undefined ||
+                                    ["random", "opening", "ending"].includes(
+                                        item.mode,
+                                    )),
                         )
                         .slice(0, 7000),
                 );
@@ -95,12 +109,13 @@ export default function RandomStartTest({
                     count: continuationCount,
                     difficult,
                     spanSurahs,
+                    mode,
                 }),
             );
         } catch {
             setStorageError(true);
         }
-    }, [storageKey, ready, continuationCount, difficult, spanSurahs]);
+    }, [storageKey, ready, continuationCount, difficult, spanSurahs, mode]);
     const [pending, setPending] = useState(false);
     const [error, setError] = useState("");
     const busy = useRef(false);
@@ -115,9 +130,17 @@ export default function RandomStartTest({
         busy.current = true;
         setPending(true);
         setError("");
+        setResult(undefined);
         setVisibleCount(1);
         try {
             const response = await getRandomStart({
+                mode: retry?.mode ?? (retry ? "random" : mode),
+                selectedSurah:
+                    retry?.mode && retry.mode !== "random"
+                        ? retry.start.surahNumber
+                        : !retry && mode !== "random" && custom
+                          ? selectedSurah
+                          : undefined,
                 range: retry
                     ? { start: retry.start, end: retry.end }
                     : custom
@@ -125,14 +148,17 @@ export default function RandomStartTest({
                       : undefined,
                 seen: restart ? [] : seen,
                 retry: retry?.start,
-                continuationCount,
+                continuationCount: retry?.count ?? continuationCount,
                 spanSurahs,
             });
             if (response.error) {
+                setSettingsOpen(true);
                 setError(t(response.error));
                 setResult(undefined);
             } else {
                 setResult(response.result);
+                setSettingsOpen(false);
+                setVisibleCount(response.result.mode === "random" ? 1 : 0);
                 if (!retry)
                     setSeen((current) => [
                         ...(restart ? [] : current),
@@ -140,6 +166,7 @@ export default function RandomStartTest({
                     ]);
             }
         } catch {
+            setSettingsOpen(true);
             setError(t("error"));
         } finally {
             busy.current = false;
@@ -149,159 +176,249 @@ export default function RandomStartTest({
     return (
         <div className="mt-6 space-y-5">
             <section className="rounded-2xl border border-border bg-card/70 p-4 sm:p-6">
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 className="text-sm font-semibold">
+                            {t("testSettings")}
+                        </h2>
+                        {!settingsOpen && (
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                {t(`modes.${mode}`)} ·{" "}
+                                {t("settingsCount", {
+                                    count: continuationCount,
+                                })}
+                            </p>
+                        )}
+                    </div>
                     <Button
-                        variant={!custom ? "default" : "outline"}
-                        aria-pressed={!custom}
-                        disabled={pending}
-                        onClick={() => {
-                            setCustom(false);
-                            setResult(undefined);
-                            setError("");
-                        }}
+                        type="button"
+                        variant="ghost"
+                        className="min-h-11 rounded-xl"
+                        aria-expanded={settingsOpen}
+                        aria-controls="test-settings-panel"
+                        onClick={() => setSettingsOpen((value) => !value)}
                     >
-                        {t("memorized")}
-                    </Button>
-                    <Button
-                        variant={custom ? "default" : "outline"}
-                        aria-pressed={custom}
-                        disabled={pending}
-                        onClick={() => {
-                            setCustom(true);
-                            setResult(undefined);
-                            setError("");
-                        }}
-                    >
-                        {t("custom")}
+                        {t(settingsOpen ? "collapseSettings" : "editSettings")}
                     </Button>
                 </div>
-                <p className="my-4 text-sm leading-6 text-muted-foreground">
-                    {custom
-                        ? t("customHint")
-                        : t("marked", { count: completedCount })}
-                </p>
-                {custom && (
-                    <fieldset disabled={pending} className="mb-5">
-                        <QuranRangeSelector
-                            surahs={surahs}
-                            navigation={navigation}
-                            locale={locale}
-                            start={range.start}
-                            end={range.end}
-                            onChange={(value) => {
-                                setRange(value);
+                <div
+                    id="test-settings-panel"
+                    hidden={!settingsOpen}
+                    className="mt-4"
+                >
+                    <div className="mb-5 grid grid-cols-3 gap-2 rounded-2xl bg-muted/40 p-1.5">
+                        {(["random", "opening", "ending"] as const).map(
+                            (value) => (
+                                <Button
+                                    key={value}
+                                    variant={
+                                        mode === value ? "default" : "ghost"
+                                    }
+                                    disabled={pending}
+                                    className="min-h-11 whitespace-normal px-2"
+                                    aria-pressed={mode === value}
+                                    onClick={() => {
+                                        setMode(value);
+                                        setResult(undefined);
+                                        setSeen([]);
+                                        setError("");
+                                    }}
+                                >
+                                    {t(`modes.${value}`)}
+                                </Button>
+                            ),
+                        )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            variant={!custom ? "default" : "outline"}
+                            aria-pressed={!custom}
+                            disabled={pending}
+                            onClick={() => {
+                                setCustom(false);
                                 setResult(undefined);
                                 setError("");
                             }}
-                        />
-                    </fieldset>
-                )}
-                <div className="grid gap-5 border-t border-border/50 pt-5 md:grid-cols-2 md:gap-8">
-                    <fieldset disabled={pending} className="min-w-0">
-                        <legend className="text-sm font-medium">
-                            {t("continuationCount")}
-                        </legend>
-                        <div
-                            dir="ltr"
-                            className="mt-3 flex items-center gap-3 rounded-2xl border border-border/60 bg-background/60 p-2"
                         >
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                className="size-11 shrink-0 rounded-xl"
-                                disabled={pending || continuationCount <= 1}
-                                aria-label={t("decreaseCount")}
-                                onClick={() =>
-                                    changeCount(continuationCount - 1)
-                                }
-                            >
-                                <Minus className="size-4" />
-                            </Button>
-                            <output
-                                className="min-w-0 flex-1 text-center text-2xl font-semibold tabular-nums text-primary"
-                                aria-live="polite"
-                                aria-label={t("continuationCount")}
-                            >
-                                {continuationCount}
-                            </output>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                className="size-11 shrink-0 rounded-xl"
-                                disabled={pending || continuationCount >= 30}
-                                aria-label={t("increaseCount")}
-                                onClick={() =>
-                                    changeCount(continuationCount + 1)
-                                }
-                            >
-                                <Plus className="size-4" />
-                            </Button>
-                        </div>
-                        <div dir="ltr" className="mt-2 grid grid-cols-5 gap-2">
-                            {[1, 5, 10, 20, 30].map((count) => (
-                                <Button
-                                    key={count}
-                                    type="button"
-                                    variant={
-                                        continuationCount === count
-                                            ? "secondary"
-                                            : "ghost"
-                                    }
-                                    className="min-h-11 min-w-0 rounded-xl px-1 tabular-nums"
-                                    aria-pressed={continuationCount === count}
-                                    onClick={() => changeCount(count)}
-                                >
-                                    {count}
-                                </Button>
-                            ))}
-                        </div>
-                        <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                            {t("continuationHint")}
-                        </p>
-                    </fieldset>
-                    <div className="flex items-center justify-between gap-4 self-start rounded-2xl border border-border/60 bg-background/40 p-4 sm:p-5 md:mt-6">
-                        <div>
-                            <label
-                                htmlFor="span-surahs"
-                                className="cursor-pointer text-sm font-medium"
-                            >
-                                {t("spanSurahs")}
-                            </label>
-                            <p
-                                id="span-surahs-hint"
-                                className="mt-1 text-xs leading-5 text-muted-foreground"
-                            >
-                                {t("spanSurahsHint")}
-                            </p>
-                        </div>
-                        <button
-                            id="span-surahs"
-                            type="button"
-                            role="switch"
-                            aria-checked={spanSurahs}
-                            aria-describedby="span-surahs-hint"
-                            disabled={!ready || pending}
-                            onClick={() => setSpanSurahs((value) => !value)}
-                            className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                            {t("memorized")}
+                        </Button>
+                        <Button
+                            variant={custom ? "default" : "outline"}
+                            aria-pressed={custom}
+                            disabled={pending}
+                            onClick={() => {
+                                setCustom(true);
+                                setResult(undefined);
+                                setError("");
+                            }}
                         >
-                            <span
-                                dir="ltr"
-                                className={`flex h-6 w-11 items-center rounded-full p-0.5 transition-colors ${spanSurahs ? "bg-primary" : "bg-muted-foreground/30"}`}
-                            >
-                                <span
-                                    className={`size-5 rounded-full bg-background shadow-sm transition-transform ${spanSurahs ? "translate-x-5" : "translate-x-0"}`}
-                                />
-                            </span>
-                        </button>
+                            {t(mode === "random" ? "custom" : "chooseSurah")}
+                        </Button>
                     </div>
-                </div>
-                {!custom && completedCount === 0 && (
-                    <p className="mb-4 text-sm text-muted-foreground">
-                        {t("empty")}
+                    <p className="my-4 text-sm leading-6 text-muted-foreground">
+                        {mode !== "random"
+                            ? t("edgeHint")
+                            : custom
+                              ? t("customHint")
+                              : t("marked", { count: completedCount })}
                     </p>
-                )}
+                    {custom && mode !== "random" && (
+                        <div className="mb-5 max-w-lg">
+                            <SurahCombobox
+                                options={surahs}
+                                value={selectedSurah}
+                                locale={locale}
+                                onValueChange={(value) => {
+                                    if (pending) return;
+                                    setSelectedSurah(value);
+                                    setResult(undefined);
+                                    setError("");
+                                }}
+                            />
+                        </div>
+                    )}
+                    {custom && mode === "random" && (
+                        <fieldset disabled={pending} className="mb-5">
+                            <QuranRangeSelector
+                                surahs={surahs}
+                                navigation={navigation}
+                                locale={locale}
+                                start={range.start}
+                                end={range.end}
+                                onChange={(value) => {
+                                    setRange(value);
+                                    setResult(undefined);
+                                    setError("");
+                                }}
+                            />
+                        </fieldset>
+                    )}
+                    <div className="grid gap-5 border-t border-border/50 pt-5 md:grid-cols-2 md:gap-8">
+                        <fieldset disabled={pending} className="min-w-0">
+                            <legend className="text-sm font-medium">
+                                {t(
+                                    mode === "random"
+                                        ? "continuationCount"
+                                        : "edgeCount",
+                                )}
+                            </legend>
+                            <div
+                                dir="ltr"
+                                className="mt-3 flex items-center gap-3 rounded-2xl border border-border/60 bg-background/60 p-2"
+                            >
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    className="size-11 shrink-0 rounded-xl"
+                                    disabled={pending || continuationCount <= 1}
+                                    aria-label={t("decreaseCount")}
+                                    onClick={() =>
+                                        changeCount(continuationCount - 1)
+                                    }
+                                >
+                                    <Minus className="size-4" />
+                                </Button>
+                                <output
+                                    className="min-w-0 flex-1 text-center text-2xl font-semibold tabular-nums text-primary"
+                                    aria-live="polite"
+                                    aria-label={t("continuationCount")}
+                                >
+                                    {continuationCount}
+                                </output>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    className="size-11 shrink-0 rounded-xl"
+                                    disabled={
+                                        pending || continuationCount >= 30
+                                    }
+                                    aria-label={t("increaseCount")}
+                                    onClick={() =>
+                                        changeCount(continuationCount + 1)
+                                    }
+                                >
+                                    <Plus className="size-4" />
+                                </Button>
+                            </div>
+                            <div
+                                dir="ltr"
+                                className="mt-2 grid grid-cols-5 gap-2"
+                            >
+                                {[1, 5, 10, 20, 30].map((count) => (
+                                    <Button
+                                        key={count}
+                                        type="button"
+                                        variant={
+                                            continuationCount === count
+                                                ? "secondary"
+                                                : "ghost"
+                                        }
+                                        className="min-h-11 min-w-0 rounded-xl px-1 tabular-nums"
+                                        aria-pressed={
+                                            continuationCount === count
+                                        }
+                                        onClick={() => changeCount(count)}
+                                    >
+                                        {count}
+                                    </Button>
+                                ))}
+                            </div>
+                            <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                                {t(
+                                    mode === "random"
+                                        ? "continuationHint"
+                                        : "edgeCountHint",
+                                )}
+                            </p>
+                        </fieldset>
+                        {mode === "random" && (
+                            <div className="flex items-center justify-between gap-4 self-start rounded-2xl border border-border/60 bg-background/40 p-4 sm:p-5 md:mt-6">
+                                <div>
+                                    <label
+                                        htmlFor="span-surahs"
+                                        className="cursor-pointer text-sm font-medium"
+                                    >
+                                        {t("spanSurahs")}
+                                    </label>
+                                    <p
+                                        id="span-surahs-hint"
+                                        className="mt-1 text-xs leading-5 text-muted-foreground"
+                                    >
+                                        {t("spanSurahsHint")}
+                                    </p>
+                                </div>
+                                <button
+                                    id="span-surahs"
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={spanSurahs}
+                                    aria-describedby="span-surahs-hint"
+                                    disabled={!ready || pending}
+                                    onClick={() =>
+                                        setSpanSurahs((value) => !value)
+                                    }
+                                    className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                                >
+                                    <span
+                                        dir="ltr"
+                                        className={`flex h-6 w-11 items-center rounded-full p-0.5 transition-colors ${spanSurahs ? "bg-primary" : "bg-muted-foreground/30"}`}
+                                    >
+                                        <span
+                                            className={`size-5 rounded-full bg-background shadow-sm transition-transform ${spanSurahs ? "translate-x-5" : "translate-x-0"}`}
+                                        />
+                                    </span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                    {!custom && completedCount === 0 && (
+                        <p className="mb-4 text-sm text-muted-foreground">
+                            {t("empty")}
+                        </p>
+                    )}
+                </div>
                 <div className="mt-5 flex flex-col gap-4 border-t border-border/50 pt-5 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0 space-y-1">
                         <p className="text-sm font-medium">
@@ -325,7 +442,19 @@ export default function RandomStartTest({
                         ) : (
                             <Shuffle className="size-4" />
                         )}
-                        {t(result ? "another" : "start")}
+                        {t(
+                            mode === "random"
+                                ? result
+                                    ? "another"
+                                    : "start"
+                                : mode === "opening"
+                                  ? result
+                                      ? "anotherOpening"
+                                      : "startOpening"
+                                  : result
+                                    ? "anotherEnding"
+                                    : "startEnding",
+                        )}
                     </Button>
                 </div>
                 {error && (
@@ -352,10 +481,13 @@ export default function RandomStartTest({
                     <div className="mt-3 max-h-64 space-y-2 overflow-y-auto">
                         {difficult.map((item) => (
                             <div
-                                key={referenceKey(item.start)}
+                                key={difficultKey(item)}
                                 className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-background/60 p-3"
                             >
                                 <span className="text-sm">
+                                    <span className="mb-1 block w-fit rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                                        {t(`modes.${item.mode ?? "random"}`)}
+                                    </span>
                                     {item.name} ·{" "}
                                     {t("ayah", {
                                         number: item.start.ayahNumber,
@@ -376,12 +508,8 @@ export default function RandomStartTest({
                                             setDifficult((items) =>
                                                 items.filter(
                                                     (entry) =>
-                                                        referenceKey(
-                                                            entry.start,
-                                                        ) !==
-                                                        referenceKey(
-                                                            item.start,
-                                                        ),
+                                                        difficultKey(entry) !==
+                                                        difficultKey(item),
                                                 ),
                                             )
                                         }
@@ -405,10 +533,18 @@ export default function RandomStartTest({
                     >
                         <h2 className="font-semibold text-primary">
                             {result.name} ·{" "}
-                            {t("ayah", { number: result.start.ayahNumber })}
+                            {result.mode === "random"
+                                ? t("ayah", { number: result.start.ayahNumber })
+                                : t(`modes.${result.mode}`)}
                         </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            {t("recite")}
+                            {t(
+                                result.mode === "random"
+                                    ? "recite"
+                                    : result.mode === "opening"
+                                      ? "reciteOpening"
+                                      : "reciteEnding",
+                            )}
                         </p>
                     </div>
                     <div
@@ -422,6 +558,19 @@ export default function RandomStartTest({
                                     : "Amiri, serif",
                         }}
                     >
+                        {visibleCount === 0 && (
+                            <div className="py-5">
+                                <span
+                                    aria-hidden="true"
+                                    className="surah-name block text-5xl leading-none text-primary"
+                                >
+                                    {getArabicNumber(result.start.surahNumber)}
+                                </span>
+                                <p className="mt-5 font-sans text-sm leading-6 text-muted-foreground">
+                                    {t("hiddenPrompt")}
+                                </p>
+                            </div>
+                        )}
                         <p>
                             {result.verses
                                 .slice(0, visibleCount)
@@ -465,20 +614,34 @@ export default function RandomStartTest({
                     <div className="flex flex-col gap-3 border-t border-primary/10 bg-primary/[0.025] p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                         <p className="text-xs leading-5 text-muted-foreground">
                             <span className="mb-1 block font-medium text-foreground">
-                                {t("actualCount", {
-                                    count: result.verses.length - 1,
-                                    requested: result.requestedCount,
-                                })}
+                                {t(
+                                    result.mode === "random"
+                                        ? "actualCount"
+                                        : "edgeActualCount",
+                                    {
+                                        count:
+                                            result.verses.length -
+                                            (result.mode === "random" ? 1 : 0),
+                                        requested: result.requestedCount,
+                                    },
+                                )}
                             </span>
-                            {result.verses.length - 1 <
+                            {result.verses.length -
+                                (result.mode === "random" ? 1 : 0) <
                                 result.requestedCount && (
                                 <span className="mb-1 block">
                                     {t("rangeEnd")}
                                 </span>
                             )}
-                            {t(result.verses.length > 1 ? "checkHint" : "end")}
+                            {t(
+                                result.mode !== "random" ||
+                                    result.verses.length > 1
+                                    ? "checkHint"
+                                    : "end",
+                            )}
                         </p>
-                        {result.verses.length > 1 && (
+                        {(result.mode !== "random" ||
+                            result.verses.length > 1) && (
                             <div className="flex flex-wrap gap-2">
                                 <Button
                                     variant="outline"
@@ -506,7 +669,9 @@ export default function RandomStartTest({
                                         setVisibleCount(
                                             visibleCount ===
                                                 result.verses.length
-                                                ? 1
+                                                ? result.mode === "random"
+                                                    ? 1
+                                                    : 0
                                                 : result.verses.length,
                                         )
                                     }
@@ -529,8 +694,8 @@ export default function RandomStartTest({
                                 pending ||
                                 difficult.some(
                                     (item) =>
-                                        referenceKey(item.start) ===
-                                        referenceKey(result.start),
+                                        difficultKey(item) ===
+                                        difficultKey(result),
                                 )
                             }
                             onClick={() => {
@@ -545,6 +710,8 @@ export default function RandomStartTest({
                                             ayahNumber: last.number,
                                         },
                                         name: result.name,
+                                        mode: result.mode,
+                                        count: result.requestedCount,
                                     },
                                 ]);
                             }}
@@ -552,8 +719,8 @@ export default function RandomStartTest({
                             {t(
                                 difficult.some(
                                     (item) =>
-                                        referenceKey(item.start) ===
-                                        referenceKey(result.start),
+                                        difficultKey(item) ===
+                                        difficultKey(result),
                                 )
                                     ? "savedDifficult"
                                     : "needsRevision",
@@ -561,8 +728,7 @@ export default function RandomStartTest({
                         </Button>
                         {difficult.some(
                             (item) =>
-                                referenceKey(item.start) ===
-                                referenceKey(result.start),
+                                difficultKey(item) === difficultKey(result),
                         ) && (
                             <Button
                                 variant="ghost"
@@ -571,8 +737,8 @@ export default function RandomStartTest({
                                     setDifficult((items) =>
                                         items.filter(
                                             (item) =>
-                                                referenceKey(item.start) !==
-                                                referenceKey(result.start),
+                                                difficultKey(item) !==
+                                                difficultKey(result),
                                         ),
                                     )
                                 }

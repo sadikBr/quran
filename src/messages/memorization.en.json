@@ -1,6 +1,28 @@
 {
     "Memorization": {
         "test": {
+            "testSettings": "Test settings",
+            "collapseSettings": "Collapse settings",
+            "editSettings": "Edit settings",
+            "settingsCount": "Ayah count: {count}",
+            "startOpening": "Test surah openings",
+            "anotherOpening": "Another opening test",
+            "startEnding": "Test surah endings",
+            "anotherEnding": "Another ending test",
+            "modes": {
+                "random": "Random start",
+                "opening": "Surah openings",
+                "ending": "Surah endings"
+            },
+            "chooseSurah": "Choose a surah",
+            "edgeHint": "Choose a surah, or draw from your memorized hizbs. Random tests only include passages entirely within your marked hizbs.",
+            "edgeCount": "Ayahs to recite",
+            "edgeCountHint": "Choose how many opening or ending ayahs to test. Short surahs use all their ayahs.",
+            "noEdges": "No complete opening or ending of this length is within your marked hizbs. Choose a surah or reduce the count.",
+            "reciteOpening": "Recite the opening ayahs from memory, then reveal them to check.",
+            "reciteEnding": "Recite the final ayahs from memory, then reveal them to check.",
+            "hiddenPrompt": "Recall the passage yourself. Reveal one ayah if you need a hint.",
+            "edgeActualCount": "Test length: {count} of {requested} ayahs",
             "spanSurahs": "Continue into the next surah",
             "spanSurahsHint": "On: continue across surahs within your selected or memorized range. Off: stop at the end of the starting surah, even if fewer ayahs remain. Applies to the next test.",
             "hint": "Reveal one ayah",
