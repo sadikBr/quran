@@ -140,6 +140,7 @@ export default async function MeetingPlanPage({
                             warsh: warshNavigation,
                         }}
                         locale={preferences.language}
+                        riwayah={preferences.riwayah}
                     />
                 </section>
             </div>

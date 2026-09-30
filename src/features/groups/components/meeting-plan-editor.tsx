@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import ConfirmationDialog from "@/components/ui/confirmation-dialog";
 import { Label } from "@/components/ui/label";
 import {
     Select,
@@ -76,6 +77,7 @@ export default function MeetingPlanEditor({
     meetingOptions,
     navigationByRiwayah,
     locale,
+    riwayah,
 }: {
     groupId: string;
     members: GroupMemberDetails[];
@@ -84,6 +86,7 @@ export default function MeetingPlanEditor({
     meetingOptions: AssignmentMeetingOption[];
     navigationByRiwayah: Record<"hafs" | "warsh", QuranNavigationMeta>;
     locale: string;
+    riwayah: "hafs" | "warsh";
 }) {
     const t = useTranslations("Groups.planner");
     const assignmentsT = useTranslations("Groups.assignments");
@@ -139,7 +142,78 @@ export default function MeetingPlanEditor({
         null,
     );
     const selectedCount = entries.filter((entry) => entry.enabled).length;
+    const [copySource, setCopySource] = useState<EditableAssignment | null>(
+        null,
+    );
     const missingCount = members.length - selectedCount;
+    const [bulkOpen, setBulkOpen] = useState(false);
+    const initialBulk: EditableAssignment = {
+        enabled: true,
+        assigneeId: "",
+        kind: "memorization",
+        riwayah,
+        start: { surahNumber: 1, ayahNumber: 1 },
+        end: { surahNumber: 1, ayahNumber: 7 },
+        instructions: "",
+    };
+    const [bulkPlans, setBulkPlans] = useState<
+        Record<string, EditableAssignment>
+    >({});
+    const bulk = bulkPlans[dueMeetingStartsAt] ?? initialBulk;
+    function updateBulk(update: Partial<EditableAssignment>) {
+        setBulkPlans((current) => ({
+            ...current,
+            [dueMeetingStartsAt]: {
+                ...(current[dueMeetingStartsAt] ?? initialBulk),
+                ...update,
+            },
+        }));
+    }
+
+    function applyToAll() {
+        if (!copySource || pendingMode) return;
+        if (
+            copySource.start.surahNumber > copySource.end.surahNumber ||
+            (copySource.start.surahNumber === copySource.end.surahNumber &&
+                copySource.start.ayahNumber > copySource.end.ayahNumber)
+        ) {
+            toast.error(t("applyAllInvalid"));
+            setCopySource(null);
+            return;
+        }
+        const valid = members.every((member) =>
+            [copySource.start, copySource.end].every((point) => {
+                const surah = surahs.find(
+                    (item) => item.number === point.surahNumber,
+                );
+                const count =
+                    member.riwayah === "warsh"
+                        ? surah?.warshAyahCount
+                        : surah?.hafsAyahCount;
+                return (
+                    count && point.ayahNumber >= 1 && point.ayahNumber <= count
+                );
+            }),
+        );
+        if (!valid) {
+            toast.error(t("applyAllInvalid"));
+            setCopySource(null);
+            return;
+        }
+        setPlansByMeeting((current) => ({
+            ...current,
+            [dueMeetingStartsAt]: members.map((member) => ({
+                ...emptyAssignment(member),
+                enabled: true,
+                kind: copySource.kind,
+                start: { ...copySource.start },
+                end: { ...copySource.end },
+                instructions: copySource.instructions,
+            })),
+        }));
+        setCopySource(null);
+        toast.success(t("appliedAll"));
+    }
 
     function updateEntry(
         assigneeId: string,
@@ -234,6 +308,18 @@ export default function MeetingPlanEditor({
 
     return (
         <div className="mt-8">
+            <ConfirmationDialog
+                open={copySource !== null}
+                onOpenChange={(open) => {
+                    if (!open) setCopySource(null);
+                }}
+                title={t("applyAll")}
+                description={t("applyAllConfirm", { count: members.length })}
+                confirmLabel={t("applyAll")}
+                pending={pendingMode !== null}
+                cancelLabel={t("cancelApplyAll")}
+                onConfirm={applyToAll}
+            />
             <section className="rounded-3xl bg-primary/[0.055] p-5 ring-1 ring-primary/12 sm:p-6">
                 <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
                     <div className="max-w-xl">
@@ -243,6 +329,7 @@ export default function MeetingPlanEditor({
                         <Select
                             value={dueMeetingStartsAt}
                             onValueChange={(value) => {
+                                setCopySource(null);
                                 setDueMeetingStartsAt(value);
                                 setEditingMemberId(
                                     (plansByMeeting[value] ?? []).find(
@@ -324,6 +411,127 @@ export default function MeetingPlanEditor({
                             : t("everyoneReady")}
                     </span>
                 </div>
+                {members.length > 0 && (
+                    <div className="mt-5 border-t border-primary/15 pt-5">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="min-h-11 w-full justify-between rounded-xl sm:w-auto sm:gap-8"
+                            aria-expanded={bulkOpen}
+                            aria-controls="shared-assignment-form"
+                            onClick={() => setBulkOpen((open) => !open)}
+                        >
+                            <span className="flex items-center gap-2">
+                                <Copy className="size-4" />
+                                {t("sharedAssignment")}
+                            </span>
+                            <ChevronDown
+                                className={cn(
+                                    "size-4 transition-transform",
+                                    bulkOpen && "rotate-180",
+                                )}
+                            />
+                        </Button>
+                        <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                            {t("sharedAssignmentHint")}
+                        </p>
+                        {bulkOpen && (
+                            <div
+                                id="shared-assignment-form"
+                                className="mt-5 space-y-5 rounded-2xl border border-border/60 bg-background/50 p-4 sm:p-5"
+                            >
+                                <fieldset
+                                    disabled={pendingMode !== null}
+                                    className="space-y-5"
+                                >
+                                    <legend className="sr-only">
+                                        {t("sharedAssignment")}
+                                    </legend>
+                                    <div className="grid gap-5 sm:grid-cols-2">
+                                        <div>
+                                            <Label>
+                                                {assignmentsT("kind")}
+                                            </Label>
+                                            <div className="mt-2 grid grid-cols-2 gap-2">
+                                                {(
+                                                    [
+                                                        "memorization",
+                                                        "revision",
+                                                    ] as const
+                                                ).map((kind) => (
+                                                    <Button
+                                                        key={kind}
+                                                        type="button"
+                                                        variant={
+                                                            bulk.kind === kind
+                                                                ? "default"
+                                                                : "outline"
+                                                        }
+                                                        aria-pressed={
+                                                            bulk.kind === kind
+                                                        }
+                                                        onClick={() =>
+                                                            updateBulk({ kind })
+                                                        }
+                                                    >
+                                                        {assignmentsT(
+                                                            `kinds.${kind}`,
+                                                        )}
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <QuranRangeSelector
+                                        surahs={surahs.map((surah) => ({
+                                            ...surah,
+                                            numberOfAyahs:
+                                                bulk.riwayah === "warsh"
+                                                    ? surah.warshAyahCount
+                                                    : surah.hafsAyahCount,
+                                        }))}
+                                        navigation={
+                                            navigationByRiwayah[bulk.riwayah]
+                                        }
+                                        locale={locale}
+                                        start={bulk.start}
+                                        end={bulk.end}
+                                        onChange={updateBulk}
+                                    />
+                                    <div>
+                                        <Label htmlFor="bulk-instructions">
+                                            {assignmentsT("instructions")}
+                                        </Label>
+                                        <Textarea
+                                            id="bulk-instructions"
+                                            className="mt-2"
+                                            maxLength={500}
+                                            value={bulk.instructions}
+                                            onChange={(event) =>
+                                                updateBulk({
+                                                    instructions:
+                                                        event.target.value,
+                                                })
+                                            }
+                                        />
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        className="w-full sm:w-auto"
+                                        disabled={
+                                            !dueMeetingStartsAt ||
+                                            pendingMode !== null
+                                        }
+                                        onClick={() => setCopySource(bulk)}
+                                    >
+                                        <Copy className="size-4" />
+                                        {t("applyAll")}
+                                    </Button>
+                                </fieldset>
+                            </div>
+                        )}
+                    </div>
+                )}
             </section>
 
             <section className="mt-6 divide-y divide-border/55 overflow-hidden rounded-3xl bg-muted/30 ring-1 ring-border/50">

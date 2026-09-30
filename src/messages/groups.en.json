@@ -158,6 +158,15 @@
             }
         },
         "planner": {
+            "sharedAssignment": "Assignment for everyone",
+            "sharedAssignmentHint": "Set the assignment once and apply it to all members. You can then adjust any member’s assignment before publishing.",
+            "rangeRiwayah": "Riwayah for selecting the range",
+            "applyAll": "Apply this assignment to everyone",
+            "applyAllHint": "Moving at the same pace? Apply this assignment to everyone, then adjust individual members as needed.",
+            "applyAllConfirm": "Copy the assignment type, range and instructions to all {count} members for this meeting, replacing their current edits in this plan. Each member keeps their riwayah; review verse numbers if riwayahs differ. Nothing is published until you choose Publish.",
+            "cancelApplyAll": "Cancel",
+            "appliedAll": "Assignment applied to everyone. You can adjust individual members before publishing.",
+            "applyAllInvalid": "These verse numbers are not valid for every member’s riwayah. Adjust the range or assign members individually.",
             "eyebrow": "MEETING PLAN",
             "title": "Prepare the next meeting’s assignments",
             "description": "Choose a meeting, prepare a focused range for every member, and publish the assignments together when the plan is ready.",
