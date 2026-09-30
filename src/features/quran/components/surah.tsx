@@ -11,7 +11,13 @@ import Ayah from "./ayah";
 import SurahBasmala from "./surah-basmala";
 import TranslationAyah from "./translation-ayah";
 
-function SurahDetail({ label, value }: { label: string; value: number }) {
+export function SurahDetail({
+    label,
+    value,
+}: {
+    label: string;
+    value: number;
+}) {
     return (
         <span className="relative flex size-10 shrink-0 items-center justify-center sm:size-12">
             <span

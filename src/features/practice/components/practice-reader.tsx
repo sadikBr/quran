@@ -241,6 +241,7 @@ export default function PracticeReader({
                             key={group.surah.number}
                             number={group.surah.number}
                             name={surahName}
+                            ayahCount={group.surah.numberOfAyahs}
                         >
                             <div className="space-y-4">
                                 {group.ayahs.map((ayah) => {

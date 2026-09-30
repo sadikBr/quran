@@ -1,9 +1,11 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import type { ComponentProps, ReactNode } from "react";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
 import QuranAudioQueue from "./quran-audio-queue";
+import { SurahDetail } from "./surah";
 
 /** Shared presentation; callers own progress persistence and completion rules. */
 export default function GuidedReader({
@@ -85,26 +87,49 @@ export default function GuidedReader({
 export function GuidedReaderSurah({
     number,
     name,
+    ayahCount,
     children,
 }: {
     number: number;
     name: string;
+    ayahCount: number;
     children: ReactNode;
 }) {
+    const locale = useLocale();
+    const t = useTranslations("Reader.surah");
     return (
         <section>
-            <div className="mb-6 flex items-center gap-4">
-                <span className="h-px flex-1 bg-primary/20" />
+            <div
+                dir="rtl"
+                className="mx-auto mt-2 mb-5 flex w-fit max-w-full items-center justify-center gap-2 sm:gap-3"
+            >
+                <SurahDetail label={t("number")} value={number} />
+                <span
+                    aria-hidden="true"
+                    className="h-px w-6 shrink bg-gradient-to-r from-transparent to-primary/25 sm:w-9"
+                />
                 <div className="text-center">
                     <p
                         aria-hidden="true"
-                        className="surah-name text-3xl leading-none text-primary"
+                        className="surah-name quran-surah-heading leading-none text-primary"
                     >
                         {getArabicNumber(number)}
                     </p>
-                    <h2 className="mt-1 text-sm font-semibold">{name}</h2>
+                    <h2
+                        className={
+                            locale === "ar"
+                                ? "sr-only"
+                                : "mt-1 text-xs font-medium text-muted-foreground"
+                        }
+                    >
+                        {name}
+                    </h2>
                 </div>
-                <span className="h-px flex-1 bg-primary/20" />
+                <span
+                    aria-hidden="true"
+                    className="h-px w-6 shrink bg-gradient-to-l from-transparent to-primary/25 sm:w-9"
+                />
+                <SurahDetail label={t("ayahCount")} value={ayahCount} />
             </div>
             {children}
         </section>
