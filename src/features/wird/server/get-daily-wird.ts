@@ -59,7 +59,7 @@ export default async function getDailyWird(
                 .limit(1),
         ]);
         const plan = activePlans[0];
-        if (!plan?.completedAt) {
+        if (!plan?.completedAt || record.nextGoal) {
             const nextCursor = Math.min(
                 record.targetEndGlobalAyah + 1,
                 TOTAL_QURAN_AYAHS,
@@ -87,8 +87,8 @@ export default async function getDailyWird(
             const nextTarget =
                 adaptive ??
                 buildWirdTarget(
-                    record.unit as WirdUnit,
-                    record.amount,
+                    (record.nextGoal?.unit ?? record.unit) as WirdUnit,
+                    record.nextGoal?.amount ?? record.amount,
                     record.targetEndGlobalAyah >= TOTAL_QURAN_AYAHS
                         ? 1
                         : nextCursor,
@@ -99,11 +99,17 @@ export default async function getDailyWird(
             [record] = await db
                 .update(userWird)
                 .set({
-                    unit: plan?.isActive ? plan.measurement : record.unit,
-                    amount: adaptive?.amount ?? record.amount,
+                    unit: plan?.isActive
+                        ? plan.measurement
+                        : (record.nextGoal?.unit ?? record.unit),
+                    amount:
+                        adaptive?.amount ??
+                        record.nextGoal?.amount ??
+                        record.amount,
                     targetStartGlobalAyah: nextTarget.startGlobalAyah,
                     targetEndGlobalAyah: nextTarget.endGlobalAyah,
                     progressGlobalAyah: null,
+                    progressVerse: null,
                     targetDate: adaptive?.scheduledDate ?? currentDate,
                     completedAt: null,
                 })
@@ -127,6 +133,8 @@ export default async function getDailyWird(
         scheduledForFuture:
             record.completedAt === null && record.targetDate > currentDate,
         progressGlobalAyah: record.progressGlobalAyah,
+        progressVerse: record.progressVerse,
+        nextGoal: record.nextGoal,
         start,
         end,
     };

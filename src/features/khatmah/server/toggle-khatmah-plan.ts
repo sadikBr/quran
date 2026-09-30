@@ -68,6 +68,8 @@ export default async function toggleKhatmahPlan(isActive: boolean) {
                         targetStartGlobalAyah: adaptive.startGlobalAyah,
                         targetEndGlobalAyah: adaptive.endGlobalAyah,
                         progressGlobalAyah: null,
+                        progressVerse: null,
+                        nextGoal: null,
                         targetDate: adaptive.scheduledDate,
                         completedAt: null,
                     })
@@ -79,6 +81,8 @@ export default async function toggleKhatmahPlan(isActive: boolean) {
                             targetStartGlobalAyah: adaptive.startGlobalAyah,
                             targetEndGlobalAyah: adaptive.endGlobalAyah,
                             progressGlobalAyah: null,
+                            progressVerse: null,
+                            nextGoal: null,
                             targetDate: adaptive.scheduledDate,
                             completedAt: null,
                         },

@@ -26,6 +26,12 @@ export interface WirdLocation {
 }
 
 export interface DailyWird {
+    progressVerse?: {
+        riwayah: "hafs" | "warsh";
+        surahNumber: number;
+        ayahNumber: number;
+    } | null;
+    nextGoal?: { unit: string; amount: number } | null;
     unit: WirdUnit;
     amount: number;
     targetDate: string;

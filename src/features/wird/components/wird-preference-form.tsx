@@ -23,10 +23,12 @@ export default function WirdPreferenceForm({
     initialUnit = "ayah",
     initialAmount = 10,
     compact = false,
+    managedByPlan = false,
 }: {
     initialUnit?: WirdUnit;
     initialAmount?: number;
     compact?: boolean;
+    managedByPlan?: boolean;
 }) {
     const router = useRouter();
     const t = useTranslations("Wird");
@@ -36,17 +38,29 @@ export default function WirdPreferenceForm({
     const unitOptions: WirdUnit[] = ["ayah", "quarter", "hizb", "surah"];
 
     async function save() {
+        if (isSaving || managedByPlan) return;
         setIsSaving(true);
-        const result = await updateWirdPreference({ unit, amount });
-        setIsSaving(false);
+        try {
+            const result = await updateWirdPreference({ unit, amount });
 
-        if (!result.success) {
+            if (!result.success) {
+                toast.error(
+                    t(
+                        result.message === "planManaged"
+                            ? "setup.planManaged"
+                            : "setup.error",
+                    ),
+                );
+                return;
+            }
+
+            toast.success(t("setup.success"));
+            router.refresh();
+        } catch {
             toast.error(t("setup.error"));
-            return;
+        } finally {
+            setIsSaving(false);
         }
-
-        toast.success(t("setup.success"));
-        router.refresh();
     }
 
     return (
@@ -57,6 +71,15 @@ export default function WirdPreferenceForm({
                 save();
             }}
         >
+            {compact && (
+                <p className="text-sm leading-6 text-muted-foreground">
+                    {t(
+                        managedByPlan
+                            ? "setup.planManaged"
+                            : "setup.nextPortion",
+                    )}
+                </p>
+            )}
             <div>
                 <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
                     {t("setup.unitLabel")}
@@ -129,7 +152,11 @@ export default function WirdPreferenceForm({
             </div>
 
             <div className="flex justify-end">
-                <Button type="submit" disabled={isSaving} className="min-w-40">
+                <Button
+                    type="submit"
+                    disabled={isSaving || managedByPlan}
+                    className="min-w-40"
+                >
                     {isSaving
                         ? t("setup.saving")
                         : initialUnit === "ayah" &&

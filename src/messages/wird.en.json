@@ -8,6 +8,8 @@
             "reader": "Preparing today’s reading"
         },
         "setup": {
+            "nextPortion": "Changes apply to your next portion. Today’s reading, saved position and completed history stay unchanged.",
+            "planManaged": "Your khatmah plan controls this goal. Adjust it in the khatmah planner below; your plan and reading progress will not be removed here.",
             "title": "Set your daily Wird",
             "description": "Begin at the start of the Quran and continue in order without losing your place.",
             "unitLabel": "Measure my Wird by",
@@ -30,6 +32,12 @@
             "surah": "Surahs"
         },
         "today": {
+            "resumeSummary": "Continue from {surah}, ayah {ayah} · {remaining} ayahs remaining",
+            "readyToComplete": "You have reached the end. Mark this portion complete when you are ready.",
+            "confirmTitle": "Complete this portion?",
+            "confirmDescription": "Confirm that you have read the entire assigned portion, here or outside the app. This records its completion and advances your plan.",
+            "cancel": "Keep reading",
+            "confirmComplete": "Yes, I finished",
             "eyebrow": "TODAY’S PORTION",
             "goal": "{amount, number} {unit}",
             "sameSurah": "{surah}, ayahs {start, number}–{end, number}",

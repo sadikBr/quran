@@ -12,8 +12,10 @@ import GuidedReader, {
 } from "@/features/quran/components/guided-reader";
 import getAyahAudioStreams from "@/features/quran/helpers/get-ayah-audio-streams";
 import { cn } from "@/lib/utils";
+import { wirdProgress } from "../progress";
 import type { WirdReaderGroup } from "../reader-types";
 import updateWirdProgress from "../server/update-wird-progress";
+import type { DailyWird } from "../types";
 import CompleteWirdButton from "./complete-wird-button";
 
 export default function WirdReader({
@@ -21,6 +23,8 @@ export default function WirdReader({
     startGlobalAyah,
     endGlobalAyah,
     initialProgress,
+    initialPosition,
+    riwayah,
     showTranslation,
     continuousRecitation,
 }: {
@@ -28,30 +32,33 @@ export default function WirdReader({
     startGlobalAyah: number;
     endGlobalAyah: number;
     initialProgress: number | null;
+    initialPosition: DailyWird["progressVerse"];
+    riwayah: "hafs" | "warsh";
     showTranslation: boolean;
     continuousRecitation: boolean;
 }) {
     function progressNumber(ayah: WirdReaderGroup["ayahs"][number]) {
-        return ayah.hafsGlobalNumber ?? ayah.number;
+        return Math.min(
+            endGlobalAyah,
+            Math.max(...(ayah.hafsGlobalNumbers ?? [ayah.number])),
+        );
     }
     const locale = useLocale();
     const t = useTranslations("Wird.reader");
     const [progress, setProgress] = useState(initialProgress);
+    const [position, setPosition] = useState(initialPosition);
     const [savingAyah, setSavingAyah] = useState<number | null>(null);
     const saveInFlight = useRef(false);
-    const totalAyahs = endGlobalAyah - startGlobalAyah + 1;
-    const completedAyahs = progress
-        ? Math.max(0, progress - startGlobalAyah + 1)
-        : 0;
+    const summary = wirdProgress(groups, progress, position, riwayah);
+    const totalAyahs = summary.total;
+    const completedAyahs = summary.completed;
     const percentage = Math.min(
         100,
-        Math.round((completedAyahs / totalAyahs) * 100),
+        Math.round((completedAyahs / Math.max(1, totalAyahs)) * 100),
     );
-    const nextAyah = Math.min(
-        (progress ?? startGlobalAyah - 1) + 1,
-        endGlobalAyah,
+    const [initialScrollTarget] = useState(
+        Math.min(summary.completed, Math.max(0, summary.total - 1)),
     );
-    const [initialScrollTarget] = useState(nextAyah);
     const audioQueue = useMemo(
         () =>
             groups
@@ -76,17 +83,28 @@ export default function WirdReader({
         return () => window.cancelAnimationFrame(frame);
     }, []);
 
-    async function saveProgress(globalAyahNumber: number) {
+    async function saveProgress(
+        globalAyahNumber: number,
+        surahNumber: number,
+        ayahNumber: number,
+    ) {
         if (saveInFlight.current) return;
         saveInFlight.current = true;
         setSavingAyah(globalAyahNumber);
         try {
-            const result = await updateWirdProgress({ globalAyahNumber });
+            const result = await updateWirdProgress({
+                globalAyahNumber,
+                surahNumber,
+                ayahNumber,
+                start: startGlobalAyah,
+                end: endGlobalAyah,
+            });
             if (!result.success) {
                 toast.error(t("saveError"));
                 return;
             }
             setProgress(globalAyahNumber);
+            setPosition({ riwayah, surahNumber, ayahNumber });
             toast.success(t("saved"));
         } catch {
             toast.error(t("saveError"));
@@ -141,16 +159,13 @@ export default function WirdReader({
                                 {group.ayahs.map((ayah) => {
                                     const ayahProgressNumber =
                                         progressNumber(ayah);
-                                    const isReached =
-                                        progress !== null &&
-                                        ayahProgressNumber <= progress;
+                                    const index = summary.verses.findIndex(
+                                        (item) => item.ayah === ayah,
+                                    );
+                                    const isReached = index < completedAyahs;
                                     const isSavedPosition =
-                                        progress === ayahProgressNumber;
-                                    const isNext = (
-                                        ayah.hafsGlobalNumbers ?? [
-                                            ayahProgressNumber,
-                                        ]
-                                    ).includes(nextAyah);
+                                        index === completedAyahs - 1;
+                                    const isNext = index === completedAyahs;
                                     const translation = (
                                         ayah.hafsGlobalNumbers ?? [
                                             ayahProgressNumber,
@@ -167,13 +182,8 @@ export default function WirdReader({
                                             active={isNext}
                                             data-wird-ayah={ayahProgressNumber}
                                             data-wird-resume={
-                                                (
-                                                    ayah.hafsGlobalNumbers ?? [
-                                                        ayahProgressNumber,
-                                                    ]
-                                                ).includes(
-                                                    initialScrollTarget,
-                                                ) || undefined
+                                                index === initialScrollTarget ||
+                                                undefined
                                             }
                                             key={`${group.surah.number}-${ayah.numberInSurah}-${ayah.audioNumber ?? ayah.number}`}
                                         >
@@ -212,6 +222,8 @@ export default function WirdReader({
                                                     onClick={() =>
                                                         saveProgress(
                                                             ayahProgressNumber,
+                                                            group.surah.number,
+                                                            ayah.numberInSurah,
                                                         )
                                                     }
                                                     aria-pressed={

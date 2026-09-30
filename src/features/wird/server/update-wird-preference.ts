@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import db from "@/drizzle/db";
-import { userKhatmahPlan, userWird, userWirdHistory } from "@/drizzle/schema";
+import { userKhatmahPlan, userWird } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
@@ -52,24 +52,18 @@ export default async function updateWirdPreference(input: unknown) {
         );
         const targetDate = getWirdDate();
 
-        await db.transaction(async (transaction) => {
-            await transaction
-                .delete(userKhatmahPlan)
-                .where(eq(userKhatmahPlan.userId, session.user.id));
-            if (existing) {
-                await transaction
-                    .delete(userWirdHistory)
-                    .where(
-                        and(
-                            eq(userWirdHistory.userId, session.user.id),
-                            eq(userWirdHistory.targetDate, existing.targetDate),
-                            eq(
-                                userWirdHistory.targetStartGlobalAyah,
-                                existing.targetStartGlobalAyah,
-                            ),
-                        ),
-                    );
-            }
+        const saved = await db.transaction(async (transaction) => {
+            const [plan] = await transaction
+                .select()
+                .from(userKhatmahPlan)
+                .where(
+                    and(
+                        eq(userKhatmahPlan.userId, session.user.id),
+                        eq(userKhatmahPlan.isActive, true),
+                    ),
+                )
+                .for("update");
+            if (plan) return false;
 
             await transaction
                 .insert(userWird)
@@ -86,16 +80,12 @@ export default async function updateWirdPreference(input: unknown) {
                 .onConflictDoUpdate({
                     target: userWird.userId,
                     set: {
-                        unit: parsed.data.unit,
-                        amount: parsed.data.amount,
-                        targetStartGlobalAyah: target.startGlobalAyah,
-                        targetEndGlobalAyah: target.endGlobalAyah,
-                        progressGlobalAyah: null,
-                        targetDate,
-                        completedAt: null,
+                        nextGoal: parsed.data,
                     },
                 });
+            return true;
         });
+        if (!saved) return { success: false as const, message: "planManaged" };
     } catch {
         return { success: false as const, message: "Could not save Wird." };
     }

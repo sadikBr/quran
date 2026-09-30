@@ -53,6 +53,8 @@ export default async function WirdReaderPage() {
                     startGlobalAyah={wird.start.globalAyahNumber}
                     endGlobalAyah={wird.end.globalAyahNumber}
                     initialProgress={wird.progressGlobalAyah}
+                    initialPosition={wird.progressVerse}
+                    riwayah={preferences.riwayah}
                     showTranslation={preferences.showTranslation}
                     continuousRecitation={preferences.continuousRecitation}
                 />

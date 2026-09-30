@@ -22,8 +22,11 @@ import getPreferences from "@/features/settings/server/get-preferences";
 import CompleteWirdButton from "@/features/wird/components/complete-wird-button";
 import WirdHistory from "@/features/wird/components/wird-history";
 import WirdPreferenceForm from "@/features/wird/components/wird-preference-form";
+import { wirdProgress } from "@/features/wird/progress";
 import getDailyWird from "@/features/wird/server/get-daily-wird";
 import getWirdHistory from "@/features/wird/server/get-wird-history";
+import getWirdReaderData from "@/features/wird/server/get-wird-reader-data";
+import type { WirdUnit } from "@/features/wird/types";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
@@ -75,6 +78,19 @@ export default async function WirdPage() {
               })
         : "";
     const startReadingHref = "/wird/read";
+    const progressSummary =
+        wird && !wird.completed && !wird.scheduledForFuture
+            ? await getWirdReaderData(wird, preferences)
+                  .then((groups) =>
+                      wirdProgress(
+                          groups,
+                          wird.progressGlobalAyah,
+                          wird.progressVerse,
+                          preferences.riwayah,
+                      ),
+                  )
+                  .catch(() => null)
+            : null;
     let initialStartSurah = 1;
     if (khatmahPlan) {
         let cursor = 1;
@@ -200,28 +216,63 @@ export default async function WirdPage() {
                                 </p>
                                 {!wird.completed &&
                                     !wird.scheduledForFuture && (
-                                        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                                            <Button
-                                                asChild
-                                                className="min-h-11"
-                                            >
-                                                <Link
-                                                    data-tour="wird-read"
-                                                    href={startReadingHref}
+                                        <>
+                                            {progressSummary && (
+                                                <p className="mt-4 text-sm font-medium text-primary">
+                                                    {progressSummary.next
+                                                        ? t(
+                                                              "today.resumeSummary",
+                                                              {
+                                                                  surah: isArabic
+                                                                      ? progressSummary
+                                                                            .next
+                                                                            .surah
+                                                                            .name
+                                                                      : progressSummary
+                                                                            .next
+                                                                            .surah
+                                                                            .englishName,
+                                                                  ayah: String(
+                                                                      progressSummary
+                                                                          .next
+                                                                          .ayah
+                                                                          .numberInSurah,
+                                                                  ),
+                                                                  remaining:
+                                                                      String(
+                                                                          progressSummary.total -
+                                                                              progressSummary.completed,
+                                                                      ),
+                                                              },
+                                                          )
+                                                        : t(
+                                                              "today.readyToComplete",
+                                                          )}
+                                                </p>
+                                            )}
+                                            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                                                <Button
+                                                    asChild
+                                                    className="min-h-11"
                                                 >
-                                                    <BookOpen
-                                                        aria-hidden="true"
-                                                        className="size-4"
-                                                    />
-                                                    {t(
-                                                        wird.progressGlobalAyah
-                                                            ? "today.continueReading"
-                                                            : "today.startReading",
-                                                    )}
-                                                </Link>
-                                            </Button>
-                                            <CompleteWirdButton />
-                                        </div>
+                                                    <Link
+                                                        data-tour="wird-read"
+                                                        href={startReadingHref}
+                                                    >
+                                                        <BookOpen
+                                                            aria-hidden="true"
+                                                            className="size-4"
+                                                        />
+                                                        {t(
+                                                            wird.progressGlobalAyah
+                                                                ? "today.continueReading"
+                                                                : "today.startReading",
+                                                        )}
+                                                    </Link>
+                                                </Button>
+                                                <CompleteWirdButton />
+                                            </div>
+                                        </>
                                     )}
                             </section>
 
@@ -236,8 +287,16 @@ export default async function WirdPage() {
                                 <div className="border-t border-border/60 px-4 pb-5 sm:px-6">
                                     <WirdPreferenceForm
                                         compact
-                                        initialUnit={wird.unit}
-                                        initialAmount={wird.amount}
+                                        managedByPlan={Boolean(
+                                            khatmahPlan?.isActive,
+                                        )}
+                                        initialUnit={
+                                            (wird.nextGoal?.unit as WirdUnit) ??
+                                            wird.unit
+                                        }
+                                        initialAmount={
+                                            wird.nextGoal?.amount ?? wird.amount
+                                        }
                                     />
                                 </div>
                             </details>
