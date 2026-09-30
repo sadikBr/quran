@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
@@ -55,6 +56,17 @@ export default async function MemorizationPage() {
                         </p>
                     </div>
 
+                    <Link
+                        href="/memorization/test"
+                        className="mt-6 block rounded-2xl border border-primary/20 bg-primary/5 p-5 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                        <h2 className="font-semibold text-primary">
+                            {t("test.title")} ←
+                        </h2>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                            {t("test.description")}
+                        </p>
+                    </Link>
                     <MemorizationProgressMap
                         initialCompletedHizbs={completedHizbs}
                     />
