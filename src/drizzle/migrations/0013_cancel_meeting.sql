@@ -1,0 +1,1 @@
+ALTER TABLE "group_meeting_session" ADD COLUMN "cancelled_at" timestamp with time zone;

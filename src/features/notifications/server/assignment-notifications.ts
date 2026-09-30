@@ -17,7 +17,8 @@ export type AssignmentNotificationKind =
     | "published"
     | "due_soon"
     | "review_completed"
-    | "review_needs_revision";
+    | "review_needs_revision"
+    | "review_not_completed";
 
 function shortenedFeedback(note: string | null) {
     if (!note) return null;
@@ -40,6 +41,18 @@ function notificationCopy({
     reviewNote: string | null;
 }) {
     const feedback = shortenedFeedback(reviewNote);
+    if (kind === "review_not_completed")
+        return {
+            title:
+                language === "ar"
+                    ? "سُجّل تكليفك على أنه لم يُنجز"
+                    : "Your assignment was marked not completed",
+            body:
+                feedback ??
+                (language === "ar"
+                    ? "افتح التكليف للاطلاع على النتيجة ومتابعة التدريب."
+                    : "Open your assignment to view the result and continue practicing."),
+        };
 
     if (language === "ar") {
         if (kind === "review_completed") {
@@ -169,8 +182,13 @@ export async function sendAssignmentNotification(
 
     const reviewCompleted = kind === "review_completed";
     const reviewNeedsRevision = kind === "review_needs_revision";
-    const reviewKind = reviewCompleted || reviewNeedsRevision;
+    const reviewKind =
+        reviewCompleted ||
+        reviewNeedsRevision ||
+        kind === "review_not_completed";
     const statusMatchesReview =
+        (kind === "review_not_completed" &&
+            assignment?.status === "not_completed") ||
         (reviewCompleted && assignment?.status === "completed") ||
         (reviewNeedsRevision && assignment?.status === "needs_revision");
 

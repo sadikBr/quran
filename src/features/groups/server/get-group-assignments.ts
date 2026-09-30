@@ -16,7 +16,12 @@ export interface GroupAssignmentSummary {
     startAyahNumber: number;
     endSurahNumber: number;
     endAyahNumber: number;
-    status: "in_progress" | "submitted" | "completed" | "needs_revision";
+    status:
+        | "in_progress"
+        | "submitted"
+        | "completed"
+        | "needs_revision"
+        | "not_completed";
     dueAt: Date | null;
     instructions: string | null;
     reviewNote: string | null;
@@ -33,6 +38,7 @@ export default async function getGroupAssignments(
         "in_progress",
         "submitted",
         "needs_revision",
+        "not_completed",
         "completed",
     ];
     const conditions = [

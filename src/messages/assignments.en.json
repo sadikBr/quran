@@ -19,6 +19,13 @@
             "progress": "Overall progress"
         },
         "meeting": {
+            "active": "Meeting is open now",
+            "closed": "Meeting ended",
+            "activeUnsubmitted": "The meeting is still open. You can continue practicing and submit your assignment for review before it ends.",
+            "activeSubmitted": "Your assignments are submitted. Follow the meeting to see when it is your turn.",
+            "closedSubmitted": "Your assignments are still awaiting the supervisor’s review.",
+            "closedUnsubmitted": "The meeting has ended. Unsubmitted assignments are marked as not completed and moved to the next meeting when the end-of-meeting update runs.",
+            "openMeeting": "View meeting",
             "next": "Next meeting",
             "later": "Later meeting",
             "overdue": "Meeting has passed",
@@ -65,6 +72,7 @@
             "statuses": {
                 "in_progress": "In progress",
                 "submitted": "Waiting for review",
+                "not_completed": "Not completed",
                 "needs_revision": "Needs more work",
                 "completed": "Completed"
             }

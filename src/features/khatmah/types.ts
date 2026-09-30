@@ -8,7 +8,10 @@ export const khatmahPlanSchema = z.object({
     repeatable: z.boolean(),
     startSurah: z.number().int().min(1).max(114),
     measurement: z.enum(KHATMAH_MEASUREMENTS),
-    restDays: z.array(z.number().int().min(0).max(6)).max(6),
+    restDays: z
+        .array(z.number().int().min(0).max(6))
+        .default([])
+        .transform(() => [] as number[]),
 });
 
 export interface KhatmahPlan {

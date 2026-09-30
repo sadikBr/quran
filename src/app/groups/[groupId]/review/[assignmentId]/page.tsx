@@ -8,6 +8,7 @@ import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
 import AssignmentReview from "@/features/groups/components/assignment-review";
+import { canReviewAssignment } from "@/features/groups/review-eligibility";
 import getAssignmentReview from "@/features/groups/server/get-assignment-review";
 import getReviewQueue from "@/features/groups/server/get-review-queue";
 import getPracticeReaderData from "@/features/practice/server/get-practice-reader-data";
@@ -39,7 +40,7 @@ export default async function AssignmentReviewPage({
     });
     const isArabic = preferences.language === "ar";
     const assignment = review.assignment;
-    const isReady = assignment.status === "submitted";
+    const isReady = canReviewAssignment(assignment.status, assignment.dueAt);
     const readerGroups = isReady
         ? await getPracticeReaderData(assignment, {
               ...preferences,

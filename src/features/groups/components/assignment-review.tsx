@@ -92,6 +92,7 @@ export default function AssignmentReview({
                         key={assignment.id}
                         groupId={assignment.groupId}
                         assignmentId={assignment.id}
+                        submitted={assignment.status === "submitted"}
                         pendingCount={pendingCount}
                         onSaved={onSaved}
                         onStale={onStale}

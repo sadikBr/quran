@@ -31,7 +31,11 @@ export default async function GroupMeetingPage({
     }
 
     const state = calculateMeetingState(meeting);
-    if (state.status !== "active" || !state.activeEndsAt) {
+    if (
+        state.status !== "active" ||
+        !state.activeEndsAt ||
+        !state.activeStartsAt
+    ) {
         redirect(`/groups/${groupId}?meeting=closed`);
     }
 
@@ -65,6 +69,7 @@ export default async function GroupMeetingPage({
                 displayName={session.user.name}
                 email={session.user.email}
                 canReview={isHost}
+                occurrence={state.activeStartsAt}
             />
         </main>
     );

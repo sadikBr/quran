@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, lte, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { after } from "next/server";
@@ -16,7 +16,7 @@ import { getRevisionMeetingDate } from "./revision-meeting";
 const inputSchema = z.object({
     groupId: z.string().min(1),
     assignmentId: z.string().min(1),
-    decision: z.enum(["completed", "needs_revision"]),
+    decision: z.enum(["completed", "needs_revision", "not_completed"]),
     note: z.string().trim().max(1000).optional(),
     reviewNext: z.boolean().optional(),
 });
@@ -42,8 +42,21 @@ export default async function reviewMemberAssignment(input: unknown) {
     if (!admin) return { success: false as const, reason: "unauthorized" };
 
     const needsMoreWork = parsed.data.decision === "needs_revision";
+    const reschedule =
+        needsMoreWork || parsed.data.decision === "not_completed";
+    const eligibleStatuses =
+        parsed.data.decision === "not_completed"
+            ? ["in_progress", "submitted", "needs_revision"]
+            : ["submitted"];
+    const reviewable = and(
+        inArray(practiceAssignment.status, eligibleStatuses),
+        or(
+            eq(practiceAssignment.status, "submitted"),
+            lte(practiceAssignment.dueAt, new Date()),
+        ),
+    );
     let revisedDueAt: Date | undefined;
-    if (needsMoreWork) {
+    if (reschedule) {
         const [assignment] = await db
             .select({ dueAt: practiceAssignment.dueAt })
             .from(practiceAssignment)
@@ -51,7 +64,7 @@ export default async function reviewMemberAssignment(input: unknown) {
                 and(
                     eq(practiceAssignment.id, parsed.data.assignmentId),
                     eq(practiceAssignment.groupId, parsed.data.groupId),
-                    eq(practiceAssignment.status, "submitted"),
+                    reviewable,
                 ),
             )
             .limit(1);
@@ -70,19 +83,21 @@ export default async function reviewMemberAssignment(input: unknown) {
         .update(practiceAssignment)
         .set({
             status: parsed.data.decision,
+            kind: needsMoreWork ? "revision" : undefined,
             dueAt: revisedDueAt,
             reviewNote: parsed.data.note || null,
+            reviewedForDueAt: sql`${practiceAssignment.dueAt}`,
             reviewedAt: new Date(),
-            submittedAt: needsMoreWork ? null : undefined,
-            progressSurahNumber: needsMoreWork ? null : undefined,
-            progressAyahNumber: needsMoreWork ? null : undefined,
+            submittedAt: reschedule ? null : undefined,
+            progressSurahNumber: reschedule ? null : undefined,
+            progressAyahNumber: reschedule ? null : undefined,
             updatedAt: new Date(),
         })
         .where(
             and(
                 eq(practiceAssignment.id, parsed.data.assignmentId),
                 eq(practiceAssignment.groupId, parsed.data.groupId),
-                eq(practiceAssignment.status, "submitted"),
+                reviewable,
             ),
         )
         .returning({ id: practiceAssignment.id });
@@ -97,7 +112,9 @@ export default async function reviewMemberAssignment(input: unknown) {
                 parsed.data.assignmentId,
                 parsed.data.decision === "completed"
                     ? "review_completed"
-                    : "review_needs_revision",
+                    : parsed.data.decision === "not_completed"
+                      ? "review_not_completed"
+                      : "review_needs_revision",
             ),
         ]);
     });

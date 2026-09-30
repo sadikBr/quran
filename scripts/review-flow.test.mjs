@@ -112,6 +112,39 @@ function mount(action, overrides = {}) {
     return { render, calls };
 }
 
+test("unsubmitted work only offers not completed", async () => {
+    const form = mount(() => ({ success: true, nextAssignmentId: null }), {
+        submitted: false,
+    });
+    assert.deepEqual(
+        form.render().choices.map((choice) => choice.value),
+        ["not_completed"],
+    );
+    await form.render().buttons[1].onClick();
+    assert.equal(
+        form.calls.find(([name]) => name === "save")[1].decision,
+        "not_completed",
+    );
+});
+
+test("submitted work can be marked not completed", async () => {
+    const form = mount(() => ({ success: true, nextAssignmentId: null }));
+    form.render()
+        .choices.find((choice) => choice.value === "not_completed")
+        .onChange();
+    await form.render().buttons[1].onClick();
+    assert.equal(
+        form.calls.find(([name]) => name === "save")[1].decision,
+        "not_completed",
+    );
+    assert.ok(
+        form.calls.some(
+            ([name, message]) =>
+                name === "success" && message === "notCompletedSuccess",
+        ),
+    );
+});
+
 test("Save and next advances to the fresh server-selected assignment", async () => {
     const form = mount(() => ({ success: true, nextAssignmentId: "two" }));
     form.render().note.onChange({ target: { value: "Review this verse" } });

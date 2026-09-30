@@ -8,6 +8,7 @@ import {
     groupMember,
     memorizationGroup,
 } from "@/drizzle/schema";
+import { getGroupMeetingForUser } from "./get-group-meeting";
 import { calculateMeetingState } from "./meeting-schedule";
 
 export interface NextGroupMeeting {
@@ -78,7 +79,12 @@ export async function getNextGroupMeetingForUser(
     const visibleMeetings: NextGroupMeeting[] = [];
 
     for (const meeting of meetings.values()) {
-        const state = calculateMeetingState({ ...meeting, now });
+        const details = await getGroupMeetingForUser(meeting.groupId, userId);
+        const state = calculateMeetingState({
+            ...meeting,
+            closedOccurrences: details?.closedOccurrences,
+            now,
+        });
         const startsAt =
             state.status === "active"
                 ? state.activeStartsAt

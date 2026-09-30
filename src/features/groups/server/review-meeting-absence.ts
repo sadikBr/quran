@@ -1,6 +1,6 @@
 "use server";
 
-import { and, desc, eq, gte, isNotNull } from "drizzle-orm";
+import { and, desc, eq, gte, isNotNull, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -72,6 +72,7 @@ export default async function reviewMeetingAbsence(input: unknown) {
                     eq(groupMeetingAttendance.id, parsed.data.attendanceId),
                     eq(groupMeeting.groupId, parsed.data.groupId),
                     isNotNull(groupMeetingSession.finalizedAt),
+                    isNull(groupMeetingSession.cancelledAt),
                 ),
             )
             .limit(1)
@@ -105,6 +106,7 @@ export default async function reviewMeetingAbsence(input: unknown) {
                     eq(groupMeeting.groupId, parsed.data.groupId),
                     eq(groupMeetingAttendance.userId, absence.userId),
                     isNotNull(groupMeetingSession.finalizedAt),
+                    isNull(groupMeetingSession.cancelledAt),
                     ...(absence.membershipStartedAt
                         ? [
                               gte(

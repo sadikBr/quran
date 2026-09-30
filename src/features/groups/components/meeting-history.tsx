@@ -285,6 +285,11 @@ export default function MeetingHistory({
                                 <div className="min-w-0 flex-1">
                                     <p className="text-sm font-semibold leading-6 sm:text-base">
                                         {formatDate(session.scheduledStartsAt)}
+                                        {session.cancelledAt && (
+                                            <span className="ms-2 inline-flex rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground ring-1 ring-border">
+                                                {t("cancelled")}
+                                            </span>
+                                        )}
                                     </p>
                                     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                                         <span className="inline-flex items-center gap-1.5">
@@ -318,7 +323,11 @@ export default function MeetingHistory({
                             </summary>
 
                             <div className="border-border/50 border-t px-4 py-3 sm:px-5">
-                                {session.attendance.length > 0 ? (
+                                {session.cancelledAt ? (
+                                    <p className="py-2 text-sm leading-6 text-muted-foreground">
+                                        {t("cancelledDescription")}
+                                    </p>
+                                ) : session.attendance.length > 0 ? (
                                     <div className="divide-y divide-border/50">
                                         {session.attendance.map(
                                             (attendance) => (

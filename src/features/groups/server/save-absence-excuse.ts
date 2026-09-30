@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, isNotNull } from "drizzle-orm";
+import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -49,6 +49,7 @@ export default async function saveAbsenceExcuse(input: unknown) {
                 eq(groupMeetingAttendance.userId, session.user.id),
                 eq(groupMeeting.groupId, groupId),
                 isNotNull(groupMeetingSession.finalizedAt),
+                isNull(groupMeetingSession.cancelledAt),
             ),
         )
         .limit(1);

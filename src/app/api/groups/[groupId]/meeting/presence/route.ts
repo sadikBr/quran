@@ -66,6 +66,7 @@ async function recordAttendance(
             .select({
                 id: groupMeetingSession.id,
                 startedAt: groupMeetingSession.startedAt,
+                finalizedAt: groupMeetingSession.finalizedAt,
             })
             .from(groupMeetingSession)
             .where(
@@ -77,8 +78,9 @@ async function recordAttendance(
                     ),
                 ),
             )
-            .limit(1);
-        if (!meetingSession) return null;
+            .limit(1)
+            .for("update");
+        if (!meetingSession || meetingSession.finalizedAt) return null;
 
         const [attendance] = await transaction
             .select({
@@ -222,11 +224,11 @@ export async function POST(
 ) {
     const { groupId } = await params;
     const context = await getContext(groupId);
-    if (!context || context.state.status !== "active") {
-        return presenceResponse(false, 403);
-    }
+    if (!context) return presenceResponse(false, 403);
+    if (context.state.status !== "active") return presenceResponse(false, 410);
 
     const meetingSessionId = await recordAttendance(context);
+    if (!meetingSessionId) return presenceResponse(false, 410);
 
     if (context.meeting.hostUserId === context.userId) {
         const hostActiveUntil = new Date(Date.now() + HOST_PRESENCE_TTL_MS);

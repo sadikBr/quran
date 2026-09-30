@@ -1,10 +1,11 @@
 import "server-only";
 
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, gte, isNotNull } from "drizzle-orm";
 import db from "@/drizzle/db";
 import {
     groupMeeting,
     groupMeetingSchedule,
+    groupMeetingSession,
     groupMember,
     user,
 } from "@/drizzle/schema";
@@ -52,5 +53,23 @@ export async function getGroupMeetingForUser(
             asc(groupMeetingSchedule.localTime),
         );
 
-    return { ...meeting, hostUserId: meeting.hostUserId, schedule };
+    const closed = await db
+        .select({ startsAt: groupMeetingSession.scheduledStartsAt })
+        .from(groupMeetingSession)
+        .where(
+            and(
+                eq(groupMeetingSession.meetingId, meeting.id),
+                isNotNull(groupMeetingSession.finalizedAt),
+                gte(
+                    groupMeetingSession.scheduledStartsAt,
+                    new Date(Date.now() - 7 * 86400000),
+                ),
+            ),
+        );
+    return {
+        ...meeting,
+        hostUserId: meeting.hostUserId,
+        schedule,
+        closedOccurrences: closed.map((row) => row.startsAt.toISOString()),
+    };
 }

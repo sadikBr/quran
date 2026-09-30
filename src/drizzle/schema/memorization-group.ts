@@ -129,6 +129,7 @@ export const groupMeetingSession = pgTable(
         }).notNull(),
         startedAt: timestamp("started_at", { withTimezone: true }),
         endedAt: timestamp("ended_at", { withTimezone: true }),
+        cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
         finalizedAt: timestamp("finalized_at", { withTimezone: true }),
         createdAt,
         updatedAt,

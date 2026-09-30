@@ -23,6 +23,7 @@ import type {
 } from "../meeting-types";
 import { getMeetingDisplayTimezone } from "../server/meeting-schedule";
 import saveGroupMeeting from "../server/save-group-meeting";
+import CancelMeetingButton from "./cancel-meeting-button";
 import MeetingScheduleFields from "./meeting-schedule-fields";
 
 function formatOccurrence(value: string, locale: string, timezone: string) {
@@ -128,7 +129,7 @@ export default function GroupMeetingPanel({
             <div
                 className={cn(
                     "relative grid gap-5 border-t-4 border-primary/70 bg-primary/[0.035] px-4 py-5 sm:px-6 sm:py-6",
-                    canJoin &&
+                    (canJoin || (active && isAdmin)) &&
                         "lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center",
                 )}
             >
@@ -200,18 +201,26 @@ export default function GroupMeetingPanel({
                     </div>
                 </div>
 
-                {canJoin && (
+                {(canJoin || (active && isAdmin)) && (
                     <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                        <Button
-                            asChild
-                            size="lg"
-                            className="min-h-11 w-full rounded-xl px-6 lg:w-auto"
-                        >
-                            <Link href={`/groups/${groupId}/meeting`}>
-                                <Video className="size-4.5" />
-                                {t(isHost ? "start" : "join")}
-                            </Link>
-                        </Button>
+                        {canJoin && (
+                            <Button
+                                asChild
+                                size="lg"
+                                className="min-h-11 w-full rounded-xl px-6 lg:w-auto"
+                            >
+                                <Link href={`/groups/${groupId}/meeting`}>
+                                    <Video className="size-4.5" />
+                                    {t(isHost ? "start" : "join")}
+                                </Link>
+                            </Button>
+                        )}
+                        {active && isAdmin && state?.activeStartsAt && (
+                            <CancelMeetingButton
+                                groupId={groupId}
+                                occurrence={state.activeStartsAt}
+                            />
+                        )}
                     </div>
                 )}
             </div>

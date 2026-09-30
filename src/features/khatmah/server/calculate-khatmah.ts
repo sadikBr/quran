@@ -89,10 +89,10 @@ export function buildAdaptiveKhatmahTarget(
         plan.targetDate < currentDate
             ? shiftDate(currentDate, plan.durationWeeks * 7)
             : plan.targetDate;
-    const scheduledDate = nextReadingDate(currentDate, plan.restDays);
+    const scheduledDate = currentDate;
     const readingDays = Math.max(
         1,
-        countReadingDays(scheduledDate, targetDate, plan.restDays),
+        countCalendarDays(scheduledDate, targetDate),
     );
     const amount = Math.max(
         1,

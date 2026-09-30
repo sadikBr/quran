@@ -1,0 +1,1 @@
+ALTER TABLE "practice_assignment" ADD COLUMN "reviewed_for_due_at" timestamp with time zone;

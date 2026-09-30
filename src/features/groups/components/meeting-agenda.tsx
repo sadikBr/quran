@@ -19,6 +19,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { canReviewAssignment } from "@/features/groups/review-eligibility";
 import type {
     MeetingAgendaAssignment,
     MeetingAgendaData,
@@ -234,7 +235,7 @@ export default function MeetingAgenda({
                                 {agenda.active && (
                                     <span
                                         className={cn(
-                                            "hidden items-center gap-1.5 text-xs sm:inline-flex",
+                                            "inline-flex max-w-48 items-center gap-1.5 text-xs text-end",
                                             member.attendance === "present"
                                                 ? "text-emerald-700 dark:text-emerald-400"
                                                 : "text-muted-foreground",
@@ -245,11 +246,31 @@ export default function MeetingAgenda({
                                         ) : (
                                             <Clock3 className="size-3.5" />
                                         )}
-                                        {t(
-                                            member.attendance === "present"
-                                                ? "attendance.present"
-                                                : "attendance.waiting",
-                                        )}
+                                        <span>
+                                            {t(
+                                                `attendance.${member.attendance === "not_started" ? "waiting" : member.attendance}`,
+                                            )}
+                                            {member.reviewState !== "none" && (
+                                                <>
+                                                    {" "}
+                                                    ·{" "}
+                                                    {t(
+                                                        `attendance.review_${member.reviewState}`,
+                                                    )}
+                                                </>
+                                            )}
+                                            {member.reviewState === "none" &&
+                                                member.queuePosition !==
+                                                    null && (
+                                                    <>
+                                                        {" "}
+                                                        ·{" "}
+                                                        {t(
+                                                            "attendance.awaitingReview",
+                                                        )}
+                                                    </>
+                                                )}
+                                        </span>
                                     </span>
                                 )}
                                 <ChevronDown
@@ -307,8 +328,10 @@ export default function MeetingAgenda({
                                                     </div>
 
                                                     {isAdmin &&
-                                                        assignment.status ===
-                                                            "submitted" && (
+                                                        canReviewAssignment(
+                                                            assignment.status,
+                                                            agenda.occurrenceStartsAt,
+                                                        ) && (
                                                             <Button
                                                                 asChild
                                                                 size="sm"
@@ -318,9 +341,14 @@ export default function MeetingAgenda({
                                                                     href={`/groups/${groupId}/review/${assignment.id}`}
                                                                 >
                                                                     <ClipboardCheck className="size-4" />
-                                                                    {t(
-                                                                        "review",
-                                                                    )}
+                                                                    {assignment.status ===
+                                                                    "submitted"
+                                                                        ? t(
+                                                                              "review",
+                                                                          )
+                                                                        : assignmentsT(
+                                                                              "notCompletedAction",
+                                                                          )}
                                                                 </Link>
                                                             </Button>
                                                         )}

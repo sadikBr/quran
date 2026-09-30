@@ -14,6 +14,7 @@ export interface GroupMeetingDetails {
     hostActiveUntil: Date | null;
     enabled: boolean;
     schedule: MeetingScheduleSlot[];
+    closedOccurrences?: string[];
 }
 
 export interface MeetingOccurrenceState {

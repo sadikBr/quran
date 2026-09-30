@@ -26,6 +26,7 @@ export interface MeetingAttendanceHistory {
 
 export interface MeetingHistoryEntry {
     id: string;
+    cancelledAt: Date | null;
     scheduledStartsAt: Date;
     startedAt: Date | null;
     endedAt: Date | null;
@@ -66,6 +67,7 @@ export default async function getMeetingHistory(
             scheduledEndsAt: groupMeetingSession.scheduledEndsAt,
             startedAt: groupMeetingSession.startedAt,
             endedAt: groupMeetingSession.endedAt,
+            cancelledAt: groupMeetingSession.cancelledAt,
         })
         .from(groupMeetingSession)
         .innerJoin(
@@ -165,6 +167,7 @@ export default async function getMeetingHistory(
 
         return {
             id: session.id,
+            cancelledAt: session.cancelledAt,
             scheduledStartsAt: session.scheduledStartsAt,
             startedAt: session.startedAt,
             endedAt,

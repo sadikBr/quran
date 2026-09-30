@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, or } from "drizzle-orm";
 import db from "@/drizzle/db";
 import {
     groupMeeting,
@@ -15,7 +15,12 @@ import type { PracticeKind } from "@/features/practice/types";
 export interface MeetingAgendaAssignment {
     id: string;
     kind: PracticeKind;
-    status: "in_progress" | "submitted" | "completed" | "needs_revision";
+    status:
+        | "in_progress"
+        | "submitted"
+        | "completed"
+        | "needs_revision"
+        | "not_completed";
     startSurahNumber: number;
     startAyahNumber: number;
     endSurahNumber: number;
@@ -27,7 +32,8 @@ export interface MeetingAgendaMember {
     name: string;
     image: string | null;
     role: "supervisor" | "member";
-    attendance: "present" | "waiting" | "not_started";
+    attendance: "present" | "left" | "waiting" | "not_started";
+    reviewState: "none" | "partial" | "done";
     queuePosition: number | null;
     assignments: MeetingAgendaAssignment[];
 }
@@ -85,6 +91,7 @@ export default async function getMeetingAgenda({
             assigneeId: practiceAssignment.assigneeId,
             kind: practiceAssignment.kind,
             status: practiceAssignment.status,
+            reviewedForDueAt: practiceAssignment.reviewedForDueAt,
             startSurahNumber: practiceAssignment.startSurahNumber,
             startAyahNumber: practiceAssignment.startAyahNumber,
             endSurahNumber: practiceAssignment.endSurahNumber,
@@ -94,12 +101,16 @@ export default async function getMeetingAgenda({
         .where(
             and(
                 eq(practiceAssignment.groupId, groupId),
-                eq(practiceAssignment.dueAt, occurrenceStartsAt),
+                or(
+                    eq(practiceAssignment.dueAt, occurrenceStartsAt),
+                    eq(practiceAssignment.reviewedForDueAt, occurrenceStartsAt),
+                ),
                 inArray(practiceAssignment.status, [
                     "in_progress",
                     "submitted",
                     "completed",
                     "needs_revision",
+                    "not_completed",
                 ]),
             ),
         );
@@ -123,6 +134,9 @@ export default async function getMeetingAgenda({
               .select({
                   userId: groupMeetingAttendance.userId,
                   status: groupMeetingAttendance.status,
+                  joinedAt: groupMeetingAttendance.joinedAt,
+                  activeJoinedAt: groupMeetingAttendance.activeJoinedAt,
+                  lastSeenAt: groupMeetingAttendance.lastSeenAt,
               })
               .from(groupMeetingAttendance)
               .where(eq(groupMeetingAttendance.sessionId, meetingSession.id))
@@ -142,9 +156,22 @@ export default async function getMeetingAgenda({
                     endAyahNumber: assignment.endAyahNumber,
                 }),
             );
-        const attendanceStatus = attendance.find(
+        const attendanceRecord = attendance.find(
             (entry) => entry.userId === member.userId,
-        )?.status;
+        );
+        const reviewedCount = assignments.filter(
+            (item) =>
+                item.assigneeId === member.userId &&
+                item.reviewedForDueAt?.getTime() ===
+                    occurrenceStartsAt.getTime(),
+        ).length;
+        const connected =
+            active &&
+            Boolean(
+                attendanceRecord?.activeJoinedAt &&
+                    attendanceRecord.lastSeenAt &&
+                    attendanceRecord.lastSeenAt.getTime() > Date.now() - 75000,
+            );
 
         return {
             userId: member.userId,
@@ -153,9 +180,17 @@ export default async function getMeetingAgenda({
             role: member.role as MeetingAgendaMember["role"],
             attendance: !active
                 ? ("not_started" as const)
-                : attendanceStatus === "present"
+                : connected
                   ? ("present" as const)
-                  : ("waiting" as const),
+                  : attendanceRecord?.joinedAt
+                    ? ("left" as const)
+                    : ("waiting" as const),
+            reviewState:
+                reviewedCount === 0
+                    ? "none"
+                    : reviewedCount === memberAssignments.length
+                      ? "done"
+                      : "partial",
             queuePosition: null as number | null,
             assignments: memberAssignments,
         };

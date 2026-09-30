@@ -47,23 +47,14 @@ export default function KhatmahPlanner({
     const [measurement, setMeasurement] = useState<KhatmahMeasurement>(
         plan?.measurement ?? "page",
     );
-    const [restDays, setRestDays] = useState<number[]>(plan?.restDays ?? []);
     const [saving, setSaving] = useState(false);
     const measurements: KhatmahMeasurement[] = ["page", "hizb", "juz"];
-    const weekdayFormatter = new Intl.DateTimeFormat(locale, {
-        weekday: "short",
-        timeZone: "UTC",
-    });
     const dateFormatter = new Intl.DateTimeFormat(locale, {
         day: "numeric",
         month: "long",
         year: "numeric",
         timeZone: "UTC",
     });
-    const weekdays = Array.from({ length: 7 }, (_, day) => ({
-        day,
-        label: weekdayFormatter.format(new Date(Date.UTC(2026, 0, 4 + day))),
-    }));
 
     async function save() {
         setSaving(true);
@@ -72,7 +63,7 @@ export default function KhatmahPlanner({
             repeatable,
             startSurah,
             measurement,
-            restDays,
+            restDays: [],
         });
         setSaving(false);
         if (!result.success) {
@@ -332,51 +323,6 @@ export default function KhatmahPlanner({
                                     />
                                 </span>
                             </button>
-
-                            <div>
-                                <div className="flex items-center justify-between gap-3">
-                                    <p className="text-sm font-medium">
-                                        {t("form.restDays")}
-                                    </p>
-                                    <span className="text-xs text-muted-foreground">
-                                        {t("form.optional")}
-                                    </span>
-                                </div>
-                                <div
-                                    dir="ltr"
-                                    className="mt-3 flex flex-wrap gap-2"
-                                >
-                                    {weekdays.map(({ day, label }) => {
-                                        const selected = restDays.includes(day);
-                                        return (
-                                            <button
-                                                key={day}
-                                                type="button"
-                                                aria-pressed={selected}
-                                                onClick={() =>
-                                                    setRestDays((current) =>
-                                                        selected
-                                                            ? current.filter(
-                                                                  (value) =>
-                                                                      value !==
-                                                                      day,
-                                                              )
-                                                            : [...current, day],
-                                                    )
-                                                }
-                                                className={cn(
-                                                    "min-w-11 cursor-pointer rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
-                                                    selected
-                                                        ? "border-primary bg-primary text-primary-foreground"
-                                                        : "border-border bg-background text-muted-foreground hover:border-primary/50",
-                                                )}
-                                            >
-                                                {label}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
 
                             <div className="flex flex-wrap justify-end gap-3">
                                 {plan && (

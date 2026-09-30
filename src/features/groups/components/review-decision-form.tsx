@@ -14,21 +14,23 @@ export default function ReviewDecisionForm({
     groupId,
     assignmentId,
     pendingCount,
+    submitted = true,
     onSaved,
     onStale,
 }: {
     groupId: string;
     assignmentId: string;
     pendingCount: number;
+    submitted?: boolean;
     onSaved?: (nextAssignmentId: string | null) => Promise<void>;
     onStale?: () => void;
 }) {
     const t = useTranslations("Groups.review");
     const router = useRouter();
     const [note, setNote] = useState("");
-    const [decision, setDecision] = useState<"completed" | "needs_revision">(
-        "completed",
-    );
+    const [decision, setDecision] = useState<
+        "completed" | "needs_revision" | "not_completed"
+    >(submitted ? "completed" : "not_completed");
     const [pending, setPending] = useState(false);
     const savingRef = useRef(false);
 
@@ -65,7 +67,9 @@ export default function ReviewDecisionForm({
                 t(
                     decision === "completed"
                         ? "completedSuccess"
-                        : "revisionSuccess",
+                        : decision === "not_completed"
+                          ? "notCompletedSuccess"
+                          : "revisionSuccess",
                 ),
             );
             if (onSaved) {
@@ -103,7 +107,14 @@ export default function ReviewDecisionForm({
             </p>
             <fieldset disabled={pending} className="mt-5 grid gap-2">
                 <legend className="sr-only">{t("decisionTitle")}</legend>
-                {(["completed", "needs_revision"] as const).map((value) => {
+                {(submitted
+                    ? ([
+                          "completed",
+                          "needs_revision",
+                          "not_completed",
+                      ] as const)
+                    : (["not_completed"] as const)
+                ).map((value) => {
                     const Icon =
                         value === "completed" ? CheckCircle2 : RotateCcw;
                     return (
@@ -124,7 +135,9 @@ export default function ReviewDecisionForm({
                                 {t(
                                     value === "completed"
                                         ? "complete"
-                                        : "needsRevision",
+                                        : value === "not_completed"
+                                          ? "notCompleted"
+                                          : "needsRevision",
                                 )}
                             </span>
                         </label>
@@ -174,9 +187,13 @@ export default function ReviewDecisionForm({
                     {t(onSaved ? "saveAndReturnToQueue" : "saveAndReturn")}
                 </Button>
             </div>
-            {decision === "needs_revision" && (
+            {decision !== "completed" && (
                 <p className="mt-4 text-xs leading-5 text-muted-foreground">
-                    {t("revisionHint")}
+                    {t(
+                        decision === "not_completed"
+                            ? "notCompletedHint"
+                            : "revisionHint",
+                    )}
                 </p>
             )}
         </section>

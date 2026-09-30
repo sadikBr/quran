@@ -1,6 +1,15 @@
 import "server-only";
 
-import { and, count, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
+import {
+    and,
+    count,
+    desc,
+    eq,
+    inArray,
+    isNotNull,
+    isNull,
+    sql,
+} from "drizzle-orm";
 import db from "@/drizzle/db";
 import {
     groupMeeting,
@@ -92,6 +101,7 @@ export default async function getGroupActivity(
                 and(
                     eq(groupMeeting.groupId, groupId),
                     isNotNull(groupMeetingSession.finalizedAt),
+                    isNull(groupMeetingSession.cancelledAt),
                 ),
             )
             .orderBy(desc(groupMeetingSession.finalizedAt))

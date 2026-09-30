@@ -69,7 +69,12 @@
             "description": "Give each learner their own memorization or revision range. Ranges may continue across surahs.",
             "hubTitle": "Assignments at a glance",
             "hubDescriptionAdmin": "Planning, individual assignments, and reviews now live in one focused workspace.",
-            "hubDescriptionMember": "See your work for this circle alongside all your other meeting assignments.",
+            "hubDescriptionMember": "Track what you’re practicing, what you’ve submitted, and what you’ve completed in this circle.",
+            "memberHubTitle": "My assignments in this circle",
+            "openMyAssignments": "View my assignments",
+            "memberPracticing": "Practicing",
+            "memberAwaitingReview": "Awaiting review",
+            "memberCompleted": "Completed",
             "openHub": "Open assignments",
             "hubActive": "Active",
             "hubMembers": "Learners",
@@ -113,6 +118,7 @@
                 "warsh": "Warsh"
             },
             "open": "Open practice",
+            "notCompletedAction": "Mark not completed",
             "reviewNow": "Review now",
             "feedback": "Supervisor feedback",
             "currentCount": "{count, plural, =0 {No current assignments} one {# current assignment} other {# current assignments}}",
@@ -146,6 +152,7 @@
             "statuses": {
                 "in_progress": "In progress",
                 "submitted": "Ready for review",
+                "not_completed": "Not completed",
                 "needs_revision": "Needs more work",
                 "completed": "Completed"
             }
@@ -208,9 +215,12 @@
             "decisionDescription": "Your decision determines what the learner sees next.",
             "note": "Feedback (optional)",
             "notePlaceholder": "Add a short, practical note for the learner…",
+            "notCompleted": "Not completed",
+            "notCompletedSuccess": "The assignment was marked not completed and moved to the next circle meeting.",
+            "notCompletedHint": "The deadline will move to the next scheduled meeting after the original deadline and today. Feedback is kept, practice progress is reset, and the learner must practice and submit again.",
             "needsRevision": "Needs more work",
             "complete": "Mark completed",
-            "revisionHint": "The assignment will move to the following scheduled meeting, with feedback saved and practice progress reset. If that meeting has passed, the next upcoming meeting is used.",
+            "revisionHint": "The assignment will become a revision task and move to the following scheduled meeting, with feedback saved and practice progress reset. If that meeting has passed, the next upcoming meeting is used.",
             "noNextMeeting": "Schedule an upcoming meeting for this circle before returning the assignment. Your review has not been saved.",
             "completedSuccess": "The assignment has been completed.",
             "revisionSuccess": "The assignment was returned for more work.",
@@ -280,6 +290,8 @@
             "saved": "The meeting schedule has been saved.",
             "saveError": "We couldn’t save this schedule. Check the times and timezone.",
             "history": {
+                "cancelled": "Cancelled",
+                "cancelledDescription": "This meeting was cancelled. No absences are counted against members, and assignments are preserved for the next meeting.",
                 "title": "Meeting history",
                 "descriptionAdmin": "Review attendance and decide whether each absence is accepted. Three consecutive unaccepted absences remove an ordinary member.",
                 "descriptionMember": "Review your attendance and absence decisions from previous circle meetings.",
@@ -350,7 +362,11 @@
                 "review": "Start review",
                 "openPractice": "Open practice",
                 "attendance": {
-                    "present": "Present",
+                    "present": "Connected",
+                    "left": "Left the meeting",
+                    "review_done": "Review finished",
+                    "review_partial": "Partially reviewed",
+                    "awaitingReview": "Awaiting review",
                     "waiting": "Not joined yet"
                 }
             },
@@ -364,6 +380,15 @@
                 "7": "Sunday"
             },
             "room": {
+                "cancelMeeting": "Cancel and postpone assignments",
+                "cancelMeetingConfirm": "Cancel this meeting for everyone? All its assignments will move to the next meeting, keeping their status, progress and feedback. Members will not be marked absent.",
+                "cancelNoNext": "Schedule a future meeting before cancelling. The meeting has not been cancelled.",
+                "cancelEnd": "Back to meeting",
+                "end": "End meeting for everyone",
+                "ending": "Ending meeting…",
+                "endConfirm": "End this meeting for everyone? Attendance will close, and unsubmitted assignments will be marked not completed and moved to the next meeting. Submitted work will remain awaiting review.",
+                "endError": "Could not end the meeting. Refresh and try again.",
+                "endRetry": "Meeting ended. Some assignment processing will retry automatically.",
                 "loading": "Preparing your private meeting room…",
                 "loadError": "The meeting room couldn’t be loaded.",
                 "retry": "Try again",

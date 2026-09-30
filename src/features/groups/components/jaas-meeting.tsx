@@ -5,9 +5,12 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import AppLogo from "@/components/app-logo";
 import AppPrimaryNav from "@/components/app-primary-nav";
 import { Button } from "@/components/ui/button";
+import ConfirmationDialog from "@/components/ui/confirmation-dialog";
+import endGroupMeeting from "../server/end-group-meeting";
 import MeetingReviewPanel from "./meeting-review-panel";
 
 type MeetingApi = {
@@ -45,6 +48,7 @@ export default function JaasMeeting({
     displayName,
     email,
     canReview = false,
+    occurrence,
 }: {
     appId: string;
     roomName: string;
@@ -54,9 +58,14 @@ export default function JaasMeeting({
     displayName: string;
     email: string;
     canReview?: boolean;
+    occurrence: string;
 }) {
     const t = useTranslations("Groups.meeting.room");
     const [sdkReady, setSdkReady] = useState(false);
+    const [ending, setEnding] = useState(false);
+    const [closeMode, setCloseMode] = useState<"end" | "cancel">("end");
+    const [endConfirmOpen, setEndConfirmOpen] = useState(false);
+    const endingRef = useRef(false);
     const [leaving, setLeaving] = useState(false);
     const [reviewOpen, setReviewOpen] = useState(false);
     const [reviewVisited, setReviewVisited] = useState(false);
@@ -144,11 +153,15 @@ export default function JaasMeeting({
             fetch(`/api/groups/${groupId}/meeting/presence`, {
                 method: "POST",
                 keepalive: true,
-            }).catch(() => null);
+            })
+                .then((response) => {
+                    if (response.status === 410) finishLeaving();
+                })
+                .catch(() => null);
 
         void updatePresence();
         heartbeatRef.current = window.setInterval(updatePresence, 25_000);
-    }, [groupId]);
+    }, [groupId, finishLeaving]);
 
     useEffect(() => {
         mountedRef.current = true;
@@ -183,6 +196,56 @@ export default function JaasMeeting({
 
     return (
         <div className="flex h-dvh min-h-[34rem] flex-col overflow-hidden bg-[#11100f]">
+            <ConfirmationDialog
+                open={endConfirmOpen}
+                onOpenChange={setEndConfirmOpen}
+                title={t(closeMode === "cancel" ? "cancelMeeting" : "end")}
+                description={t(
+                    closeMode === "cancel"
+                        ? "cancelMeetingConfirm"
+                        : "endConfirm",
+                )}
+                confirmLabel={t(
+                    ending
+                        ? "ending"
+                        : closeMode === "cancel"
+                          ? "cancelMeeting"
+                          : "end",
+                )}
+                cancelLabel={t("cancelEnd")}
+                pending={ending}
+                destructive
+                onConfirm={async () => {
+                    if (endingRef.current) return;
+                    endingRef.current = true;
+                    setEnding(true);
+                    try {
+                        const result = await endGroupMeeting(
+                            groupId,
+                            occurrence,
+                            closeMode,
+                        );
+                        if (!result.success) {
+                            toast.error(
+                                t(
+                                    result.reason === "no_next_meeting"
+                                        ? "cancelNoNext"
+                                        : "endError",
+                                ),
+                            );
+                            return;
+                        }
+                        if (result.failed) toast.error(t("endRetry"));
+                        setEndConfirmOpen(false);
+                        leaveMeeting();
+                    } catch {
+                        toast.error(t("endError"));
+                    } finally {
+                        endingRef.current = false;
+                        setEnding(false);
+                    }
+                }}
+            />
             <header className="shrink-0 border-b border-border/60 bg-background">
                 <div className="app-container flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-2 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] text-foreground sm:min-h-20 sm:flex-nowrap">
                     <AppPrimaryNav />
@@ -201,6 +264,32 @@ export default function JaasMeeting({
                             {reviewT(
                                 reviewOpen ? "backToMeeting" : "openInMeeting",
                             )}
+                        </Button>
+                    )}
+                    {canReview && (
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={ending || leaving}
+                            onClick={() => {
+                                setCloseMode("end");
+                                setEndConfirmOpen(true);
+                            }}
+                        >
+                            {ending ? t("ending") : t("end")}
+                        </Button>
+                    )}
+                    {canReview && (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={ending || leaving}
+                            onClick={() => {
+                                setCloseMode("cancel");
+                                setEndConfirmOpen(true);
+                            }}
+                        >
+                            {t("cancelMeeting")}
                         </Button>
                     )}
                     <Button

@@ -53,6 +53,10 @@ function mount() {
             Video: "Video",
         },
         "@/components/app-primary-nav": "Nav",
+        "@/components/app-logo": "Logo",
+        "@/components/ui/confirmation-dialog": "ConfirmationDialog",
+        sonner: { toast: { error: () => {} } },
+        "../server/end-group-meeting": async () => ({ success: true }),
         "@/components/ui/button": { Button: "Button" },
         "./meeting-review-panel": "ReviewPanel",
     };
@@ -69,7 +73,7 @@ function mount() {
         clearTimeout: (id) => timers.delete(id),
         fetch: (_url, options) => {
             calls.push([options.method]);
-            return Promise.resolve();
+            return Promise.resolve({ status: 200 });
         },
         window: {
             localStorage: { setItem() {} },

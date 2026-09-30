@@ -99,12 +99,14 @@ export function calculateMeetingState({
     schedule,
     timezone,
     activeWindowMinutes,
+    closedOccurrences = [],
     enabled,
     now = new Date(),
 }: {
     schedule: MeetingScheduleSlot[];
     timezone: string;
     activeWindowMinutes: number;
+    closedOccurrences?: string[];
     enabled: boolean;
     now?: Date;
 }): MeetingOccurrenceState {
@@ -134,7 +136,14 @@ export function calculateMeetingState({
     const active = candidates
         .filter((candidate) => {
             const endsAt = candidate.plus({ minutes: activeWindowMinutes });
-            return candidate <= zonedNow && zonedNow < endsAt;
+            return (
+                candidate <= zonedNow &&
+                zonedNow < endsAt &&
+                !closedOccurrences.some(
+                    (value) =>
+                        new Date(value).getTime() === candidate.toMillis(),
+                )
+            );
         })
         .sort((a, b) => b.toMillis() - a.toMillis())[0];
 

@@ -11,9 +11,17 @@ import {
 import type { Riwayah } from "@/features/settings/preferences";
 import type { PracticeAssignment, PracticeKind } from "../types";
 
-const activeStatuses = ["in_progress", "submitted", "needs_revision"];
+const activeStatuses = [
+    "in_progress",
+    "submitted",
+    "needs_revision",
+    "not_completed",
+];
 
-type AssignmentRow = typeof practiceAssignment.$inferSelect & {
+type AssignmentRow = Omit<
+    typeof practiceAssignment.$inferSelect,
+    "reviewedForDueAt"
+> & {
     groupName: string | null;
     meetingTimezone: string | null;
     assignedByName: string | null;

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { env } from "@/data/env/server";
 import db from "@/drizzle/db";
 import { practiceAssignment } from "@/drizzle/schema";
+import { expireUnsubmittedAssignments } from "@/features/groups/server/expire-unsubmitted-assignments";
 import { sendAssignmentNotification } from "@/features/notifications/server/assignment-notifications";
 
 export const runtime = "nodejs";
@@ -19,6 +20,7 @@ export async function GET(request: Request) {
     }
 
     const now = new Date();
+    const expiration = await expireUnsubmittedAssignments(now);
     const reminderCutoff = new Date(
         now.getTime() + REMINDER_WINDOW_HOURS * 60 * 60 * 1000,
     );
@@ -30,6 +32,7 @@ export async function GET(request: Request) {
                 inArray(practiceAssignment.status, [
                     "in_progress",
                     "needs_revision",
+                    "not_completed",
                 ]),
                 gt(practiceAssignment.dueAt, now),
                 lte(practiceAssignment.dueAt, reminderCutoff),
@@ -56,6 +59,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
         success: true,
         assignments: assignments.length,
+        expiration,
         ...totals,
     });
 }

@@ -29,6 +29,9 @@ export const practiceAssignment = pgTable(
         dueAt: timestamp("due_at", { withTimezone: true }),
         reviewNote: text("review_note"),
         submittedAt: timestamp("submitted_at", { withTimezone: true }),
+        reviewedForDueAt: timestamp("reviewed_for_due_at", {
+            withTimezone: true,
+        }),
         reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
         createdAt,
         updatedAt,

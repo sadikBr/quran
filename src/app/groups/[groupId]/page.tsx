@@ -103,6 +103,14 @@ export default async function GroupPage({
     const awaitingReviewCount = assignments.filter(
         (assignment) => assignment.status === "submitted",
     ).length;
+    const practicingCount = assignments.filter((assignment) =>
+        ["in_progress", "needs_revision", "not_completed"].includes(
+            assignment.status,
+        ),
+    ).length;
+    const completedCount = assignments.filter(
+        (assignment) => assignment.status === "completed",
+    ).length;
     const assignedMemberCount = new Set(
         assignments
             .filter((assignment) => assignment.status !== "completed")
@@ -189,7 +197,11 @@ export default async function GroupPage({
                                             {t("assignments.eyebrow")}
                                         </p>
                                         <h2 className="mt-2 text-xl font-semibold tracking-tight">
-                                            {t("assignments.hubTitle")}
+                                            {t(
+                                                isAdmin
+                                                    ? "assignments.hubTitle"
+                                                    : "assignments.memberHubTitle",
+                                            )}
                                         </h2>
                                         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                                             {t(
@@ -211,33 +223,55 @@ export default async function GroupPage({
                                             }
                                         >
                                             <CalendarRange className="size-4" />
-                                            {t("assignments.openHub")}
+                                            {t(
+                                                isAdmin
+                                                    ? "assignments.openHub"
+                                                    : "assignments.openMyAssignments",
+                                            )}
                                         </Link>
                                     </Button>
                                 </div>
                                 <div className="grid grid-cols-3 border-border/50 border-t">
                                     <div className="p-3 text-center sm:p-4">
                                         <strong className="text-2xl text-primary tabular-nums">
-                                            {activeAssignmentCount}
+                                            {isAdmin
+                                                ? activeAssignmentCount
+                                                : practicingCount}
                                         </strong>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            {t("assignments.hubActive")}
+                                            {t(
+                                                isAdmin
+                                                    ? "assignments.hubActive"
+                                                    : "assignments.memberPracticing",
+                                            )}
                                         </p>
                                     </div>
                                     <div className="border-border/50 border-x p-3 text-center sm:p-4">
                                         <strong className="text-2xl text-primary tabular-nums">
-                                            {assignedMemberCount}
+                                            {isAdmin
+                                                ? assignedMemberCount
+                                                : awaitingReviewCount}
                                         </strong>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            {t("assignments.hubMembers")}
+                                            {t(
+                                                isAdmin
+                                                    ? "assignments.hubMembers"
+                                                    : "assignments.memberAwaitingReview",
+                                            )}
                                         </p>
                                     </div>
                                     <div className="p-3 text-center sm:p-4">
                                         <strong className="text-2xl text-primary tabular-nums">
-                                            {awaitingReviewCount}
+                                            {isAdmin
+                                                ? awaitingReviewCount
+                                                : completedCount}
                                         </strong>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            {t("assignments.hubReview")}
+                                            {t(
+                                                isAdmin
+                                                    ? "assignments.hubReview"
+                                                    : "assignments.memberCompleted",
+                                            )}
                                         </p>
                                     </div>
                                 </div>

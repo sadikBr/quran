@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
 import DeleteAssignmentButton from "@/features/groups/components/delete-assignment-button";
 import MemberAssignmentForm from "@/features/groups/components/member-assignment-form";
+import { canReviewAssignment } from "@/features/groups/review-eligibility";
 import getGroupAssignments from "@/features/groups/server/get-group-assignments";
 import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
 import {
@@ -30,6 +31,7 @@ import getMemberAssignments, {
     type MemberAssignment,
 } from "@/features/groups/server/get-member-assignments";
 import {
+    calculateMeetingState,
     getMeetingDisplayTimezone,
     getUpcomingMeetingOccurrences,
 } from "@/features/groups/server/meeting-schedule";
@@ -116,6 +118,28 @@ export default async function AssignmentsPage({
     });
     const isArabic = preferences.language === "ar";
     const now = new Date();
+    const memberMeetingStates = new Map(
+        await Promise.all(
+            [
+                ...new Set(
+                    filteredAssignments.map((assignment) => assignment.groupId),
+                ),
+            ]
+                .filter((id): id is string => Boolean(id))
+                .map(async (id) => {
+                    const meeting = await getGroupMeetingForUser(
+                        id,
+                        session.user.id,
+                    );
+                    return [
+                        id,
+                        meeting
+                            ? calculateMeetingState({ ...meeting, now })
+                            : null,
+                    ] as const;
+                }),
+        ),
+    );
     const totalAyahs = filteredAssignments.reduce(
         (total, assignment) => total + assignment.totalAyahs,
         0,
@@ -528,8 +552,21 @@ export default async function AssignmentsPage({
                         (filteredAssignments.length > 0 ? (
                             <section className="mt-9 space-y-3 sm:mt-12">
                                 {meetingGroups.map((group, index) => {
+                                    const meetingState = group.groupId
+                                        ? memberMeetingStates.get(group.groupId)
+                                        : null;
+                                    const isActive = Boolean(
+                                        group.dueAt &&
+                                            meetingState?.activeStartsAt &&
+                                            group.dueAt.getTime() ===
+                                                new Date(
+                                                    meetingState.activeStartsAt,
+                                                ).getTime(),
+                                    );
                                     const isOverdue = Boolean(
-                                        group.dueAt && group.dueAt < now,
+                                        group.dueAt &&
+                                            group.dueAt < now &&
+                                            !isActive,
                                     );
                                     const ready = group.assignments.filter(
                                         (assignment) =>
@@ -584,12 +621,14 @@ export default async function AssignmentsPage({
                                                         >
                                                             {t(
                                                                 group.dueAt
-                                                                    ? isOverdue
-                                                                        ? "meeting.overdue"
-                                                                        : group.key ===
-                                                                            nextMeetingKey
-                                                                          ? "meeting.next"
-                                                                          : "meeting.later"
+                                                                    ? isActive
+                                                                        ? "meeting.active"
+                                                                        : isOverdue
+                                                                          ? "meeting.closed"
+                                                                          : group.key ===
+                                                                              nextMeetingKey
+                                                                            ? "meeting.next"
+                                                                            : "meeting.later"
                                                                     : "meeting.unscheduledLabel",
                                                             )}
                                                         </span>
@@ -644,6 +683,43 @@ export default async function AssignmentsPage({
                                                 </div>
                                                 <ChevronDown className="absolute end-4 top-7 size-4 text-muted-foreground transition-transform group-open/meeting:rotate-180 sm:static" />
                                             </summary>
+                                            {(isActive || isOverdue) && (
+                                                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/50 bg-muted/20 px-4 py-3 sm:px-5">
+                                                    <p className="text-sm leading-6 text-muted-foreground">
+                                                        {t(
+                                                            isActive
+                                                                ? ready <
+                                                                  group
+                                                                      .assignments
+                                                                      .length
+                                                                    ? "meeting.activeUnsubmitted"
+                                                                    : "meeting.activeSubmitted"
+                                                                : ready ===
+                                                                    group
+                                                                        .assignments
+                                                                        .length
+                                                                  ? "meeting.closedSubmitted"
+                                                                  : "meeting.closedUnsubmitted",
+                                                        )}
+                                                    </p>
+                                                    {isActive &&
+                                                        group.groupId && (
+                                                            <Button
+                                                                asChild
+                                                                variant="outline"
+                                                                size="sm"
+                                                            >
+                                                                <Link
+                                                                    href={`/groups/${group.groupId}`}
+                                                                >
+                                                                    {t(
+                                                                        "meeting.openMeeting",
+                                                                    )}
+                                                                </Link>
+                                                            </Button>
+                                                        )}
+                                                </div>
+                                            )}
                                             <div className="grid gap-3 border-border/50 border-t p-3 sm:grid-cols-2 sm:p-5">
                                                 {group.assignments.map(
                                                     assignmentCard,
@@ -871,7 +947,10 @@ export default async function AssignmentsPage({
                                                         >
                                                             <ClipboardCheck className="size-4" />
                                                             {groupsT(
-                                                                "assignments.reviewNow",
+                                                                assignment.status ===
+                                                                    "submitted"
+                                                                    ? "assignments.reviewNow"
+                                                                    : "assignments.notCompletedAction",
                                                             )}
                                                         </Link>
                                                     </Button>
@@ -954,8 +1033,10 @@ export default async function AssignmentsPage({
                                                             </p>
                                                         </div>
                                                         <div className="flex items-center gap-1.5">
-                                                            {assignment.status ===
-                                                                "submitted" && (
+                                                            {canReviewAssignment(
+                                                                assignment.status,
+                                                                assignment.dueAt,
+                                                            ) && (
                                                                 <Button
                                                                     asChild
                                                                     size="sm"

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import db from "@/drizzle/db";
 import {
     groupMeeting,
@@ -72,6 +72,7 @@ export default async function getMemberProgressSummaries(
                         "in_progress",
                         "submitted",
                         "needs_revision",
+                        "not_completed",
                         "completed",
                     ]),
                 ),
@@ -95,6 +96,7 @@ export default async function getMemberProgressSummaries(
                 and(
                     eq(groupMeeting.groupId, groupId),
                     isNotNull(groupMeetingSession.finalizedAt),
+                    isNull(groupMeetingSession.cancelledAt),
                     inArray(groupMeetingAttendance.userId, userIds),
                 ),
             )

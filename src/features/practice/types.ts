@@ -24,7 +24,12 @@ export interface PracticeAssignment {
     start: QuranReference;
     end: QuranReference;
     progress: QuranReference | null;
-    status: "in_progress" | "submitted" | "completed" | "needs_revision";
+    status:
+        | "in_progress"
+        | "submitted"
+        | "completed"
+        | "needs_revision"
+        | "not_completed";
     source: "personal" | "group";
     groupId: string | null;
     groupName: string | null;
