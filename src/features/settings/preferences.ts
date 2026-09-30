@@ -30,6 +30,8 @@ export type Riwayah = (typeof RIWAYAHS)[number];
 export type ArabicTextSize = (typeof ARABIC_TEXT_SIZES)[number];
 
 export interface Preferences {
+    keepScreenAwake: boolean;
+    vibration: "off" | "gentle" | "strong";
     morningAdhkarTime: string | null;
     eveningAdhkarTime: string | null;
     sleepAdhkarTime: string | null;
@@ -51,6 +53,8 @@ export interface Preferences {
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
+    keepScreenAwake: false,
+    vibration: "off",
     morningAdhkarTime: null,
     eveningAdhkarTime: null,
     sleepAdhkarTime: null,
@@ -72,6 +76,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
 };
 
 export const preferencesZodSchema = z.object({
+    keepScreenAwake: z.boolean().default(false),
+    vibration: z.enum(["off", "gentle", "strong"]).default("off"),
     morningAdhkarTime: z
         .string()
         .regex(/^([01]\d|2[0-3]):[0-5]\d$/)

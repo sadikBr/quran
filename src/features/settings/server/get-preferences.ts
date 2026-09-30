@@ -30,6 +30,8 @@ export default async function getPreferences(): Promise<Preferences> {
     }
 
     const preferences: Preferences = {
+        keepScreenAwake: settings.keepScreenAwake,
+        vibration: settings.vibration,
         morningAdhkarTime: settings.morningAdhkarTime,
         eveningAdhkarTime: settings.eveningAdhkarTime,
         sleepAdhkarTime: settings.sleepAdhkarTime,

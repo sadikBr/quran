@@ -10,7 +10,7 @@ import {
     useMemo,
     useState,
 } from "react";
-
+import ScreenAwake from "./components/screen-awake";
 import { DEFAULT_PREFERENCES, type Preferences } from "./preferences";
 
 type SettingsContextValue = Preferences & {
@@ -38,6 +38,7 @@ export function SettingsProvider({
 
     return (
         <SettingsContext.Provider value={value}>
+            <ScreenAwake enabled={values.keepScreenAwake} />
             {children}
         </SettingsContext.Provider>
     );

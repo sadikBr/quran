@@ -13,8 +13,11 @@ export const Theme = pgEnum("theme", THEMES);
 export const Language = pgEnum("language", LANGUAGES);
 export const ReadingMode = pgEnum("reading_mode", READING_MODES);
 export const Riwayah = pgEnum("riwayah", RIWAYAHS);
+export const Vibration = pgEnum("vibration", ["off", "gentle", "strong"]);
 
 export const userSettings = pgTable("user_settings", {
+    keepScreenAwake: boolean("keep_screen_awake").notNull().default(false),
+    vibration: Vibration("vibration").notNull().default("off"),
     morningAdhkarTime: text("morning_adhkar_time"),
     eveningAdhkarTime: text("evening_adhkar_time"),
     sleepAdhkarTime: text("sleep_adhkar_time"),

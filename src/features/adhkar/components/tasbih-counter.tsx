@@ -1,12 +1,14 @@
 "use client";
 
 import { Minus, RotateCcw } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import ConfirmationDialog from "@/components/ui/confirmation-dialog";
+import { vibrate } from "@/features/settings/device-feedback";
+import { useSettings } from "@/features/settings/settings-provider";
 
 const storageKey = "quran:personal-tasbih:v1";
-const vibrationKey = "quran:personal-tasbih:vibration:v1";
 
 export default function TasbihCounter({ ar }: { ar: boolean }) {
     const [count, setCount] = useState(0);
@@ -14,16 +16,9 @@ export default function TasbihCounter({ ar }: { ar: boolean }) {
     const [ready, setReady] = useState(false);
     const [storageAvailable, setStorageAvailable] = useState(true);
     const [resetOpen, setResetOpen] = useState(false);
-    const [vibration, setVibration] = useState(false);
-    const [supportsVibration, setSupportsVibration] = useState(false);
+    const { vibration } = useSettings();
 
     useEffect(() => {
-        setSupportsVibration(typeof navigator.vibrate === "function");
-        try {
-            setVibration(localStorage.getItem(vibrationKey) === "true");
-        } catch {
-            // The toggle still works for this visit if storage is unavailable.
-        }
         try {
             const saved = Number(localStorage.getItem(storageKey) ?? 0);
             current.current =
@@ -63,13 +58,7 @@ export default function TasbihCounter({ ar }: { ar: boolean }) {
                 onClick={() => {
                     if (current.current >= Number.MAX_SAFE_INTEGER) return;
                     update(current.current + 1);
-                    if (vibration && supportsVibration) {
-                        try {
-                            navigator.vibrate(15);
-                        } catch {
-                            // Haptics must never interrupt counting.
-                        }
-                    }
+                    vibrate(vibration);
                 }}
                 aria-label={ar ? "إضافة تسبيحة" : "Add one dhikr"}
                 className="my-8 flex aspect-square w-full max-w-72 touch-manipulation select-none flex-col items-center justify-center gap-5 rounded-full border border-primary/25 bg-primary/5 p-5 text-primary shadow-[inset_0_0_0_10px_var(--background)] transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background active:bg-primary/20 disabled:opacity-50 motion-safe:active:scale-[0.98]"
@@ -106,36 +95,14 @@ export default function TasbihCounter({ ar }: { ar: boolean }) {
                     {ar ? "تصفير" : "Reset"}
                 </Button>
             </div>
-            <label className="mt-6 flex min-h-11 w-full max-w-72 items-center gap-3 rounded-xl border border-border/60 px-3 text-sm text-muted-foreground">
-                <input
-                    type="checkbox"
-                    className="size-4 accent-primary"
-                    checked={vibration}
-                    disabled={!ready || !supportsVibration}
-                    onChange={(event) => {
-                        const enabled = event.target.checked;
-                        setVibration(enabled);
-                        try {
-                            localStorage.setItem(vibrationKey, String(enabled));
-                        } catch {
-                            setStorageAvailable(false);
-                        }
-                    }}
-                />
-                <span>{ar ? "الاهتزاز" : "Vibration"}</span>
-                {ready && !supportsVibration && (
-                    <span
-                        className="ms-auto rounded-full bg-muted px-2 py-1 text-[10px]"
-                        title={
-                            ar
-                                ? "الاهتزاز غير متاح في هذا المتصفح"
-                                : "Vibration is unavailable in this browser"
-                        }
-                    >
-                        {ar ? "غير متاح" : "Unavailable"}
-                    </span>
-                )}
-            </label>
+            <Link
+                href="/settings#device-feedback"
+                className="mt-5 inline-flex min-h-11 items-center text-xs text-muted-foreground underline underline-offset-4 hover:text-primary"
+            >
+                {ar
+                    ? "إعدادات الشاشة والاهتزاز"
+                    : "Screen & vibration settings"}
+            </Link>
             <p
                 className="mt-3 max-w-72 text-xs leading-6 text-muted-foreground"
                 aria-live="polite"

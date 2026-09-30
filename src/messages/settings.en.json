@@ -1,5 +1,14 @@
 {
     "Settings": {
+        "device": {
+            "awakeTitle": "Keep screen awake",
+            "awakeDescription": "Prevent automatic sleep while this app is visible. Stops when you switch apps or tabs. Requires browser support; battery-saving policies may override it.",
+            "vibrationTitle": "Vibration feedback",
+            "vibrationDescription": "Choose a shorter or longer pulse for counting. Tap an option to preview. Requires a compatible device and browser.",
+            "off": "Off",
+            "gentle": "Gentle",
+            "strong": "Longer"
+        },
         "page": {
             "eyebrow": "READER PREFERENCES",
             "title": "Shape your reading space.",

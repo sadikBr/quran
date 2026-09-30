@@ -24,6 +24,7 @@ import type { Edition, Reciter } from "@/features/quran/types";
 import ThemeSelector from "@/features/settings/components/theme-selector";
 import { useSettings } from "@/features/settings/settings-provider";
 import { cn } from "@/lib/utils";
+import { vibrate } from "../device-feedback";
 import {
     isArabicTextEditionCompatible,
     isReciterCompatible,
@@ -457,6 +458,59 @@ export default function SettingsForm({
                             </div>
                         </PreferenceCard>
 
+                        <PreferenceCard
+                            title={t("device.awakeTitle")}
+                            description={t("device.awakeDescription")}
+                        >
+                            <label
+                                htmlFor="keep-screen-awake"
+                                className="flex min-h-11 items-center justify-between gap-4 text-sm"
+                            >
+                                {t("device.awakeTitle")}
+                                <Checkbox
+                                    id="keep-screen-awake"
+                                    checked={values.keepScreenAwake}
+                                    onCheckedChange={(checked) =>
+                                        updateValue(
+                                            "keepScreenAwake",
+                                            checked === true,
+                                        )
+                                    }
+                                />
+                            </label>
+                        </PreferenceCard>
+                        <PreferenceCard
+                            title={t("device.vibrationTitle")}
+                            description={t("device.vibrationDescription")}
+                        >
+                            <div
+                                id="device-feedback"
+                                className="grid grid-cols-3 gap-2"
+                            >
+                                {(["off", "gentle", "strong"] as const).map(
+                                    (mode) => (
+                                        <Button
+                                            key={mode}
+                                            type="button"
+                                            variant={
+                                                values.vibration === mode
+                                                    ? "default"
+                                                    : "outline"
+                                            }
+                                            aria-pressed={
+                                                values.vibration === mode
+                                            }
+                                            onClick={() => {
+                                                updateValue("vibration", mode);
+                                                vibrate(mode);
+                                            }}
+                                        >
+                                            {t(`device.${mode}`)}
+                                        </Button>
+                                    ),
+                                )}
+                            </div>
+                        </PreferenceCard>
                         <PreferenceCard
                             title={t("continuousRecitation.title")}
                             description={t("continuousRecitation.description")}
