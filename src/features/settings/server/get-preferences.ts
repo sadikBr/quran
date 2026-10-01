@@ -40,6 +40,7 @@ export default async function getPreferences(): Promise<Preferences> {
         language: settings.language,
         riwayah: settings.riwayah,
         arabicEdition: settings.arabicEdition,
+        warshTajweed: settings.warshTajweed,
         reciter: settings.reciter,
         translationEdition: settings.translationEdition,
         tafsirEdition: settings.tafsirEdition,

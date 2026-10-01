@@ -76,6 +76,8 @@ export interface WarshChapter {
 }
 
 export interface WarshVerse {
+    tajweed?: TajweedSegment[];
+    tajweedUnavailable?: boolean;
     id: number;
     number: number;
     surah: string;

@@ -34,7 +34,7 @@ export default function Ayah({
     const ayahRef = useRef<HTMLSpanElement>(null);
     const t = useTranslations("Reader");
     const locale = useLocale();
-    const { arabicEdition } = useSettings();
+    const { arabicEdition, warshTajweed } = useSettings();
     const { activeAyahNumber, playbackStatus } = useQuranAudio();
     const playbackAyahNumber = ayah.audioNumber ?? ayah.number;
     const isActiveAyah =
@@ -111,7 +111,11 @@ export default function Ayah({
                 )}
                 <QuranText
                     text={displayedText}
-                    tajweed={riwayah === "hafs" ? ayah.tajweed : undefined}
+                    tajweed={
+                        riwayah === "hafs" || warshTajweed
+                            ? ayah.tajweed
+                            : undefined
+                    }
                 />
             </span>{" "}
             <AyahPlayer ayah={ayah} />

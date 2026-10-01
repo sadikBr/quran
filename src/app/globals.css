@@ -1398,26 +1398,41 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
 }
 
 /* Responsive presentations retain the live verse elements and their actions. */
+/* Keep centred ayahs together as a reading column, with room for long verses. */
 .quran-reading-surface[data-presentation="verses"] {
-    max-width: 56rem;
-    margin: 1rem auto;
-    --quran-reading-line-height: 2.6;
+    width: 100%;
+    max-width: 44rem;
+    margin: 0.5rem auto;
+    --quran-reading-line-height: 1.85;
+}
+
+.quran-reading-surface[data-presentation="verses"] .quran-reading-flow {
+    padding-block: 0.25rem;
 }
 
 .quran-reading-surface[data-presentation="verses"] .quran-reading-flow > .ayah {
     display: block;
-    margin-inline: 0;
-    padding: 0.65em 0.4em;
-    border-bottom: 1px solid
-        color-mix(in oklab, var(--primary) 15%, transparent);
+    margin: 0;
+    padding: 0.1em 0.25rem;
     text-align: center;
     text-align-last: center;
+    text-wrap: balance;
 }
 
-.quran-reading-surface[data-presentation="verses"]
-    .quran-reading-flow
-    > .ayah:last-child {
-    border-bottom: 0;
+.quran-reading-surface[data-presentation="verses"] > .ayah {
+    margin-block: 0.65rem 0.35rem;
+}
+
+@media (max-width: 639px) {
+    .quran-reading-surface[data-presentation="verses"] {
+        --quran-reading-line-height: 2;
+    }
+
+    .quran-reading-surface[data-presentation="verses"]
+        .quran-reading-flow
+        > .ayah {
+        padding-block: 0.1em;
+    }
 }
 
 .ayah[data-arabic-edition="quranpedia.mushaf.2"],
@@ -1427,35 +1442,54 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
     font-family: "Uthmanic Hafs", Amiri, Ayah, serif;
 }
 
-/* Colours are applied only to Quranpedia's validated rule annotations. */
+/* Hafs source annotations and experimental Warsh annotations share rule families. */
 [data-tajweed] {
     --tajweed-color: #697580;
     color: var(--tajweed-color);
 }
-[data-tajweed="ghunnah"] {
+[data-tajweed="ghunnah"],
+[data-tajweed="warsh-ghunnah_mushaddadah"] {
     --tajweed-color: #a64a00;
 }
-[data-tajweed="qalaqah"] {
+[data-tajweed="qalaqah"],
+[data-tajweed^="warsh-qalqala"] {
     --tajweed-color: #167ca3;
 }
-[data-tajweed^="idgham"] {
+[data-tajweed^="idgham"],
+[data-tajweed^="warsh-idgham"] {
     --tajweed-color: #207b38;
 }
-[data-tajweed^="ikhafa"] {
+[data-tajweed^="ikhafa"],
+[data-tajweed^="warsh-ikhfaa"] {
     --tajweed-color: #98439c;
 }
-[data-tajweed="iqlab"] {
+[data-tajweed="iqlab"],
+[data-tajweed="warsh-iqlab"] {
     --tajweed-color: #196cad;
 }
-[data-tajweed^="madda"] {
+[data-tajweed^="madda"],
+[data-tajweed^="warsh-madd"] {
     --tajweed-color: #bd2837;
 }
-[data-tajweed="madda-normal"] {
+[data-tajweed="madda-normal"],
+[data-tajweed="warsh-madd_tabii"] {
     --tajweed-color: #9b493e;
 }
-[data-tajweed="madda-necessary"] {
+[data-tajweed="madda-necessary"],
+[data-tajweed="warsh-madd_lazim"] {
     --tajweed-color: #8c2672;
 }
 .dark [data-tajweed] {
     color: color-mix(in srgb, var(--tajweed-color) 55%, white);
+}
+
+[data-tajweed="warsh-taqlil"],
+[data-tajweed="warsh-imala"] {
+    --tajweed-color: #98439c;
+}
+[data-tajweed="warsh-naql"],
+[data-tajweed="warsh-ibdal_hamza"],
+[data-tajweed="warsh-tashil"],
+[data-tajweed="warsh-ishmam"] {
+    --tajweed-color: #167ca3;
 }

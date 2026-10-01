@@ -61,7 +61,7 @@ export default function Surah({
     riwayah?: Riwayah;
 }) {
     const t = useTranslations("Reader");
-    const { arabicEdition } = useSettings();
+    const { arabicEdition, warshTajweed } = useSettings();
     const presentation =
         riwayah === "warsh"
             ? undefined
@@ -95,8 +95,9 @@ export default function Surah({
 
     return (
         <>
-            {riwayah === "hafs" &&
-                arabicEdition === "quranpedia.mushaf.11" &&
+            {(riwayah === "warsh"
+                ? warshTajweed
+                : arabicEdition === "quranpedia.mushaf.11") &&
                 ayahs.some((ayah) => ayah.tajweedUnavailable) && (
                     <TajweedUnavailable />
                 )}

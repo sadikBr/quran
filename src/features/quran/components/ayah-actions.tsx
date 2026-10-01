@@ -80,12 +80,14 @@ function TafsirReadingPane({
 }
 
 function QuranAyahPreview({
+    riwayah,
     tajweed,
     text,
     ayahNumber,
 }: {
     text: string;
     tajweed?: TajweedSegment[];
+    riwayah: "hafs" | "warsh";
     ayahNumber: number;
 }) {
     const t = useTranslations("Reader");
@@ -121,7 +123,11 @@ function QuranAyahPreview({
                 <p
                     ref={textRef}
                     data-arabic-edition={
-                        tajweed ? "quranpedia.mushaf.11" : undefined
+                        riwayah === "warsh"
+                            ? "quranpedia.mushaf.4"
+                            : tajweed
+                              ? "quranpedia.mushaf.11"
+                              : undefined
                     }
                     dir="rtl"
                     lang="ar"
@@ -729,6 +735,7 @@ export default function AyahActions({
                 </header>
 
                 <QuranAyahPreview
+                    riwayah={riwayah}
                     text={arabicText}
                     tajweed={arabicTajweed}
                     ayahNumber={ayahNumber}
@@ -834,6 +841,7 @@ export default function AyahActions({
                     </div>
                 </header>
                 <QuranAyahPreview
+                    riwayah={riwayah}
                     text={arabicText}
                     tajweed={arabicTajweed}
                     ayahNumber={ayahNumber}

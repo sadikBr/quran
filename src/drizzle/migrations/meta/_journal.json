@@ -169,6 +169,13 @@
             "when": 1790868124312,
             "tag": "0023_quranpedia_editions",
             "breakpoints": true
+        },
+        {
+            "idx": 24,
+            "version": "7",
+            "when": 1790872067471,
+            "tag": "0024_warsh_tajweed",
+            "breakpoints": true
         }
     ]
 }

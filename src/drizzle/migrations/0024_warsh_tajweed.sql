@@ -1,0 +1,1 @@
+ALTER TABLE "user_settings" ADD COLUMN "warsh_tajweed" boolean DEFAULT false NOT NULL;

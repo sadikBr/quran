@@ -34,6 +34,7 @@ export const userSettings = pgTable("user_settings", {
     arabicEdition: text("arabic_edition")
         .notNull()
         .default("quranpedia.mushaf.1"),
+    warshTajweed: boolean("warsh_tajweed").notNull().default(false),
     reciter: text("reciter").notNull().default("quranpedia/255"),
     translationEdition: text("translation_edition")
         .notNull()

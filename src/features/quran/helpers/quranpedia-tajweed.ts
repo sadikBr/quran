@@ -1,4 +1,7 @@
+import warshRules from "../data/warsh-tajweed/rules.json";
+
 export const TAJWEED_RULES = {
+    ...warshRules,
     ghunnah: ["غنة", "Ghunnah"],
     qalaqah: ["قلقلة", "Qalqalah"],
     "idgham-with-ghunnah": ["إدغام بغنة", "Idgham with ghunnah"],
@@ -17,7 +20,11 @@ export const TAJWEED_RULES = {
     "hamza-wasl": ["همزة وصل", "Hamzat al-wasl"],
 } as const;
 export type TajweedRule = keyof typeof TAJWEED_RULES;
-export type TajweedSegment = { text: string; rule?: TajweedRule };
+export type TajweedSegment = {
+    text: string;
+    rule?: TajweedRule;
+    rules?: TajweedRule[];
+};
 
 export function parseTajweedVerse(markup: string): TajweedSegment[] {
     const segments: TajweedSegment[] = [];
@@ -30,7 +37,12 @@ export function parseTajweedVerse(markup: string): TajweedSegment[] {
                 const match = token.match(
                     /^<tajweed\s+class="[\w-]+"\s+data-type="([\w-]+)">$/u,
                 );
-                if (!match || rule || !Object.hasOwn(TAJWEED_RULES, match[1]))
+                if (
+                    !match ||
+                    rule ||
+                    match[1].startsWith("warsh-") ||
+                    !Object.hasOwn(TAJWEED_RULES, match[1])
+                )
                     throw new Error("Unsupported Quranpedia Tajweed markup.");
                 rule = match[1] as TajweedRule;
             }

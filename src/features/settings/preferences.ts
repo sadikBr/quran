@@ -40,6 +40,7 @@ export interface Preferences {
     language: Language;
     riwayah: Riwayah;
     arabicEdition: string;
+    warshTajweed: boolean;
     reciter: string;
     translationEdition: string;
     tafsirEdition: string;
@@ -63,6 +64,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
     language: "ar",
     riwayah: "hafs",
     arabicEdition: "quranpedia.mushaf.1",
+    warshTajweed: false,
     reciter: "quranpedia/255",
     translationEdition: "quranpedia.translation.13638",
     tafsirEdition: "quranpedia.tafsir.2012",
@@ -109,6 +111,7 @@ export const preferencesZodSchema = z.object({
     language: z.enum(LANGUAGES),
     riwayah: z.enum(RIWAYAHS),
     arabicEdition: z.string().min(1),
+    warshTajweed: z.boolean().default(false),
     reciter: z.string().min(1),
     translationEdition: z.string().min(1),
     tafsirEdition: z.string().min(1),

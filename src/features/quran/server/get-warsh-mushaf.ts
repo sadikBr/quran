@@ -4,6 +4,7 @@ import type { QuranNavigationMeta } from "../navigation-types";
 import type { WarshChapter, WarshMushaf, WarshVerse } from "../types";
 import { createQuranpediaCache } from "./fetch-quranpedia";
 import getQuranpediaMushaf from "./get-quranpedia-mushaf";
+import { getWarshTajweed } from "./warsh-tajweed";
 
 const PRINTED_DIVISION_MARKER = "۞";
 const cached = createQuranpediaCache<WarshMushaf>(1);
@@ -24,7 +25,20 @@ function normalizeDivisionMetadata(mushaf: WarshMushaf): WarshMushaf {
                 if (ayah.ruku > 0) ruku = ayah.ruku;
                 if (ayah.manzil > 0) manzil = ayah.manzil;
 
-                return { ...ayah, juz, hizb, ruku, manzil };
+                const tajweed = getWarshTajweed(
+                    surah.id,
+                    ayah.number,
+                    ayah.text,
+                );
+                return {
+                    ...ayah,
+                    juz,
+                    hizb,
+                    ruku,
+                    manzil,
+                    tajweed,
+                    tajweedUnavailable: !tajweed,
+                };
             }),
         })),
     };

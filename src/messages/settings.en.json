@@ -149,11 +149,13 @@
             "mushafPreview": "Preview · flowing text, with responsive line breaks",
             "versePreview": "Preview · centered ayahs in the Uthmani Hafs font",
             "tajweedPreview": "Preview · Quranpedia’s colour Tajweed annotations for Hafs",
-            "warshDescription": "The available Warsh edition is the King Fahd Complex mushaf.",
+            "warshDescription": "Choose plain Warsh or experimental colour Tajweed (al-Azraq). Colours assume stopping at each ayah. Hover or tap coloured letters to see the rule. Your Hafs choice is kept separately.",
             "label": "Edition",
             "placeholder": "Search text editions…",
             "empty": "No matching text editions found.",
-            "badge": "Text"
+            "badge": "Text",
+            "warshPreview": "Preview · Warsh in the Uthmani font",
+            "warshTajweedPreview": "Preview · experimental Warsh Tajweed — tap a coloured letter to see its rule"
         },
         "reciter": {
             "title": "Reciter",

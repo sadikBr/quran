@@ -1,0 +1,108 @@
+[
+    {
+        "text": "اِ۬لْحَمْدُ لِلهِ رَبِّ اِ۬لْعَٰلَمِينَ",
+        "tajweed": [
+            {
+                "text": "اِ۬لْحَمْدُ لِ"
+            },
+            {
+                "text": "ل",
+                "rule": "warsh-madd_tabii",
+                "rules": [
+                    "warsh-madd_tabii"
+                ]
+            },
+            {
+                "text": "هِ رَبِّ "
+            },
+            {
+                "text": "اِ۬",
+                "rule": "warsh-hamza_wasl_silent",
+                "rules": [
+                    "warsh-hamza_wasl_silent"
+                ]
+            },
+            {
+                "text": "لْ"
+            },
+            {
+                "text": "عَٰ",
+                "rule": "warsh-madd_tabii",
+                "rules": [
+                    "warsh-madd_tabii"
+                ]
+            },
+            {
+                "text": "لَمِ"
+            },
+            {
+                "text": "ي",
+                "rule": "warsh-madd_arid_lissukun",
+                "rules": [
+                    "warsh-madd_arid_lissukun"
+                ]
+            },
+            {
+                "text": "نَ"
+            }
+        ]
+    },
+    {
+        "text": "اَ۬لرَّحْمَٰنِ اِ۬لرَّحِيمِ",
+        "tajweed": [
+            {
+                "text": "اَ۬ل"
+            },
+            {
+                "text": "رَّ",
+                "rule": "warsh-lam_shamsiyyah",
+                "rules": [
+                    "warsh-lam_shamsiyyah"
+                ]
+            },
+            {
+                "text": "حْ"
+            },
+            {
+                "text": "مَٰ",
+                "rule": "warsh-madd_tabii",
+                "rules": [
+                    "warsh-madd_tabii"
+                ]
+            },
+            {
+                "text": "نِ "
+            },
+            {
+                "text": "اِ۬",
+                "rule": "warsh-hamza_wasl_silent",
+                "rules": [
+                    "warsh-hamza_wasl_silent"
+                ]
+            },
+            {
+                "text": "ل"
+            },
+            {
+                "text": "رَّ",
+                "rule": "warsh-lam_shamsiyyah",
+                "rules": [
+                    "warsh-lam_shamsiyyah"
+                ]
+            },
+            {
+                "text": "حِ"
+            },
+            {
+                "text": "ي",
+                "rule": "warsh-madd_arid_lissukun",
+                "rules": [
+                    "warsh-madd_arid_lissukun"
+                ]
+            },
+            {
+                "text": "مِ"
+            }
+        ]
+    }
+]

@@ -1,6 +1,6 @@
 # Quranpedia data layer
 
-Quranpedia is the application's only Quran content provider. All content requests use `fetch-quranpedia.ts`.
+Quranpedia supplies the application's Quran text, commentary, translations and audio catalogue. Experimental Warsh Tajweed adds locally generated annotations from Quranic Phonemizer; it does not replace the Quranpedia text.
 
 ## Data and identity
 
@@ -44,3 +44,11 @@ Validate mushaf IDs, surah and verse order, verse counts, source fields and Hafs
 Response fixtures in `scripts/fixtures/quranpedia.json` come from [Quranpedia](https://quranpedia.net), with source versions recorded in the fixture. Tests synthesize full-size corpora around these samples; production uses upstream content.
 
 Tajweed fixtures and settings preview annotations are from Quranpedia, retrieved 2026-10-01: https://quranpedia.net/surah/1/1/tajweed. Run `bun test scripts/quranpedia-tajweed.test.mjs scripts/quranpedia-reader.test.mjs` for annotation validation, safe parsing, canonical identity and fallback coverage.
+
+## Experimental Warsh Tajweed
+
+`warsh-tajweed.ts` applies the pinned al-Azraq annotations documented in [the data README](../data/warsh-tajweed/README.md). Exact per-verse text hashes gate every annotation; absent or revised verses stay plain. All Warsh readers share the annotated corpus, and `map-warsh-ayahs.ts` replaces Hafs annotations rather than copying them. Basmala presentation sentinels remain plain. The independent `warshTajweed` preference defaults off; migration `0024_warsh_tajweed.sql` adds the column. Selecting the experimental Warsh presentation enables it without changing the saved Hafs choice.
+
+Both Hafs and Warsh show rule names on hover, tap, or keyboard focus. The single per-verse popover preserves inline Arabic joining and the existing verse action/audio controls; copy/share continues to use plain text. The settings colour legend has been removed.
+
+Run `bun test scripts/warsh-tajweed.test.mjs` for corpus coverage, offset integrity, changed-text fallback, mapping and preference checks.

@@ -64,6 +64,13 @@ const WARSH_EDITION: Edition = {
     direction: "rtl",
 };
 
+const WARSH_TAJWEED_EDITION: Edition = {
+    ...WARSH_EDITION,
+    identifier: "warsh.tajweed.experimental",
+    name: "ورش — تجويد ملوّن (تجريبي)",
+    englishName: "Warsh — Colour Tajweed (experimental)",
+};
+
 export default function SettingsForm({
     surahs = [],
     preferences,
@@ -646,16 +653,27 @@ export default function SettingsForm({
                                     id="arabic-edition"
                                     editions={
                                         values.riwayah === "warsh"
-                                            ? [WARSH_EDITION]
+                                            ? [
+                                                  WARSH_EDITION,
+                                                  WARSH_TAJWEED_EDITION,
+                                              ]
                                             : availableArabicEditions
                                     }
                                     value={
                                         values.riwayah === "warsh"
-                                            ? WARSH_EDITION.identifier
+                                            ? values.warshTajweed
+                                                ? WARSH_TAJWEED_EDITION.identifier
+                                                : WARSH_EDITION.identifier
                                             : values.arabicEdition
                                     }
                                     onValueChange={(value) => {
-                                        if (values.riwayah !== "warsh") {
+                                        if (values.riwayah === "warsh") {
+                                            updateValue(
+                                                "warshTajweed",
+                                                value ===
+                                                    WARSH_TAJWEED_EDITION.identifier,
+                                            );
+                                        } else {
                                             updateValue("arabicEdition", value);
                                         }
                                     }}
@@ -664,20 +682,24 @@ export default function SettingsForm({
                                     emptyMessage={t("arabicEdition.empty")}
                                     getBadge={() => t("arabicEdition.badge")}
                                 />
-                                {values.riwayah === "hafs" && (
-                                    <HafsPresentationPreview
-                                        edition={values.arabicEdition}
-                                        label={t(
-                                            values.arabicEdition ===
+                                <HafsPresentationPreview
+                                    edition={values.arabicEdition}
+                                    warsh={values.riwayah === "warsh"}
+                                    warshTajweed={values.warshTajweed}
+                                    label={t(
+                                        values.riwayah === "warsh"
+                                            ? values.warshTajweed
+                                                ? "arabicEdition.warshTajweedPreview"
+                                                : "arabicEdition.warshPreview"
+                                            : values.arabicEdition ===
                                                 "quranpedia.mushaf.11"
-                                                ? "arabicEdition.tajweedPreview"
-                                                : values.arabicEdition ===
-                                                    "quranpedia.mushaf.2"
-                                                  ? "arabicEdition.versePreview"
-                                                  : "arabicEdition.mushafPreview",
-                                        )}
-                                    />
-                                )}
+                                              ? "arabicEdition.tajweedPreview"
+                                              : values.arabicEdition ===
+                                                  "quranpedia.mushaf.2"
+                                                ? "arabicEdition.versePreview"
+                                                : "arabicEdition.mushafPreview",
+                                    )}
+                                />
                             </SettingField>
                         </PreferenceCard>
 
