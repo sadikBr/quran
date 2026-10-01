@@ -11,6 +11,7 @@ export * from "./schema/onboarding";
 export * from "./schema/practice-assignment";
 export * from "./schema/push-subscription";
 export * from "./schema/reading-progress";
+export * from "./schema/revision-plan";
 export * from "./schema/saved-ayah";
 export * from "./schema/settings";
 export * from "./schema/wird";

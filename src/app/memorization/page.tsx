@@ -1,8 +1,7 @@
-import { Shuffle, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
-import ActionCard from "@/components/action-card";
 import PageBackground from "@/components/page-background";
 import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
@@ -40,7 +39,7 @@ export default async function MemorizationPage() {
             )}
         >
             <PageBackground />
-            <div className="app-container ">
+            <div className="app-container">
                 <StickyAppHeader
                     navigation
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
@@ -53,13 +52,6 @@ export default async function MemorizationPage() {
                         icon={<Sparkles />}
                     />
 
-                    <ActionCard
-                        href="/memorization/test"
-                        className="mt-6"
-                        icon={<Shuffle />}
-                        title={t("test.title")}
-                        description={t("test.description")}
-                    />
                     <MemorizationProgressMap record={record} />
                 </section>
             </div>

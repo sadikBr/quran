@@ -133,6 +133,36 @@ Wird and sends a notification that opens `/wird/read`. Two once-daily UTC cron
 entries cover Morocco's seasonal UTC offset; the endpoint sends only during the
 local 11 PM hour and records each delivery to prevent duplicates.
 
+## Weekly memorization revision
+
+After locking their starting memorization record, members can opt in at
+`/memorization/revision`, choose their revision days and daily amount (a quarter,
+half, or full hizb), and preview the ranges before enabling the plan. Only fully
+memorized hizbs are eligible. The schedule uses native Hafs/Warsh quarter boundaries,
+rotates through older passages, and reserves part of the workload for difficult or
+missed passages. Each quarter appears at most once per week; small memorization
+records leave extra days free.
+
+The current week is saved as a snapshot. Schedule changes apply the following week;
+pausing retains all results. New weeks are created on the next visit or reminder run,
+starting with the remaining selected days. Missed weeks do not create a backlog.
+Confirmed circle reviews in the same local week count toward matching ayahs, and
+personal review results are stored in the existing memorization history. Difficult
+reviews flag passages for more practice without removing memorization.
+
+Apply migration `0028_weekly_revision` with `bun run db:migrate`. Optional reminders
+also require device notifications, VAPID configuration, and `CRON_SECRET`. The
+`/api/cron/revision-reminder` endpoint accepts authenticated GET requests using
+`Authorization: Bearer <CRON_SECRET>`. `vercel.json` schedules it every five minutes;
+the hosting plan must support that frequency (or use an external scheduler). Each
+device receives at most one reminder per local day, only for outstanding sessions
+within 30 minutes of its chosen time. Reminder changes apply immediately using the
+current week's timezone. Reminders are disabled by default.
+
+Run scheduler tests with `bun test scripts/weekly-revision.test.mjs`. Database tests
+use `REVISION_TEST_DATABASE_URL` pointing to an empty disposable PostgreSQL database
+whose name ends in `_revision_tests`; they migrate and populate that database only.
+
 ## Offline Quran
 
 The installed app automatically downloads a compact, versioned copy of the

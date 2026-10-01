@@ -3,6 +3,7 @@ import type { QuranReference } from "@/features/practice/types";
 export type Riwayah = "hafs" | "warsh";
 export type MemoryVerse = QuranReference & {
     hizb: number;
+    quarter: number;
     atoms: string[];
     page: number;
 };

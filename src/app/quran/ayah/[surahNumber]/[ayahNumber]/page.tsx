@@ -6,10 +6,13 @@ import QuranInfo from "@/lib/quran-info";
 
 export default async function AyahActionsPage({
     params,
+    searchParams,
 }: {
     params: Promise<{ surahNumber: string; ayahNumber: string }>;
+    searchParams: Promise<{ riwayah?: string }>;
 }) {
     const { surahNumber, ayahNumber } = await params;
+    const { riwayah } = await searchParams;
     const surah = Number(surahNumber);
     const ayah = Number(ayahNumber);
 
@@ -27,7 +30,15 @@ export default async function AyahActionsPage({
         <main className="mx-auto flex h-full min-h-0 w-full max-w-2xl items-start overflow-y-auto px-3 py-4 sm:items-center sm:px-4">
             <section className="app-card w-full min-w-0 p-4 sm:p-5">
                 <Suspense fallback={<AyahActionsLoading />}>
-                    <AyahActionsContent surahNumber={surah} ayahNumber={ayah} />
+                    <AyahActionsContent
+                        surahNumber={surah}
+                        ayahNumber={ayah}
+                        riwayah={
+                            riwayah === "warsh" || riwayah === "hafs"
+                                ? riwayah
+                                : undefined
+                        }
+                    />
                 </Suspense>
             </section>
         </main>

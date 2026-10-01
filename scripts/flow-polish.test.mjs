@@ -98,9 +98,9 @@ test("practice mutations are serialized and always release busy state", () => {
     const reader = source("features/practice/components/practice-reader.tsx");
     expect(
         reader.match(/if \(mutationInFlight.current[^\n]*return/g),
-    ).toHaveLength(3);
-    expect(reader.match(/mutationInFlight.current = false/g)).toHaveLength(3);
-    expect(reader.match(/finally/g)).toHaveLength(3);
+    ).toHaveLength(4);
+    expect(reader.match(/mutationInFlight.current = false/g)).toHaveLength(4);
+    expect(reader.match(/finally/g)).toHaveLength(4);
     expect(reader).toContain("isSubmitting || savingReference !== null");
 });
 test("onboarding continuation uses the settings save, with atomic completion", () => {

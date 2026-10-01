@@ -1,13 +1,6 @@
 "use client";
 
-import {
-    BookOpen,
-    Check,
-    LockKeyhole,
-    Pencil,
-    Sparkles,
-    X,
-} from "lucide-react";
+import { BookOpen, Check, Clock3, LockKeyhole, Pencil, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -23,6 +16,7 @@ import {
     askMemorizationCorrection,
     saveMemorizationBaseline,
 } from "../server/record-actions";
+import MemorizationOverview from "./memorization-overview";
 
 export default function MemorizationProgressMap({
     record,
@@ -162,34 +156,10 @@ export default function MemorizationProgressMap({
     }
     return (
         <div className="mt-6 space-y-6">
-            <section className="app-card p-5 sm:p-6">
-                <div className="flex flex-wrap items-center gap-4">
-                    <Sparkles
-                        aria-hidden="true"
-                        className="size-9 text-primary"
-                    />
-                    <div className="flex-1">
-                        <p className="text-xs text-muted-foreground">
-                            {t("progressEyebrow")}
-                        </p>
-                        <h2 className="mt-1 text-xl font-semibold">
-                            {t("dashboard.title", { completed: count })}
-                        </h2>
-                    </div>
-                    <p className="text-2xl font-bold text-primary">
-                        {Math.round((count / 60) * 100)}%
-                    </p>
-                </div>
-                <progress
-                    max={60}
-                    value={count}
-                    aria-label={t("mapTitle")}
-                    className="mt-4 h-2 w-full overflow-hidden rounded-full accent-primary"
-                />
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                    {t("record.automatic")}
-                </p>
-            </section>
+            <MemorizationOverview
+                completed={count}
+                setup={Boolean(record.setupAt)}
+            />
 
             {(!record.setupAt || editing) && (
                 <section className="app-card space-y-4 border-primary/30 p-5">
@@ -244,71 +214,105 @@ export default function MemorizationProgressMap({
                 </section>
             )}
             {record.setupAt && !editing && (
-                <section className="app-card space-y-3 p-5">
-                    <p className="flex items-center gap-2 font-medium">
-                        <LockKeyhole aria-hidden="true" className="size-4" />
-                        {t("record.locked")}
-                    </p>
-                    {initialAvailable && (
-                        <p className="text-sm text-muted-foreground">
-                            {t("record.window", {
-                                hours: Math.floor(minutes / 60),
-                                minutes: minutes % 60,
-                            })}
-                        </p>
-                    )}
-                    {grant && (
-                        <p className="text-sm text-primary">
-                            {t("record.approved")}
-                        </p>
-                    )}
-                    {record.request?.status === "pending" && (
-                        <output className="block text-sm text-primary">
-                            {t("record.pending")}
-                        </output>
-                    )}
-                    {record.request?.status === "declined" && (
-                        <p className="text-sm text-muted-foreground">
-                            {t("record.declined")}
-                        </p>
-                    )}
-                    {record.request?.note && (
-                        <p className="whitespace-pre-line text-sm leading-7">
-                            {record.request.note}
-                        </p>
-                    )}
-                    {canCorrect ? (
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                setSelected(record.baselineHizbs);
-                                setEditSnapshot({
-                                    revision: record.revision,
-                                    setup: false,
-                                    baseline: record.baselineHizbs,
-                                });
-                                setEditing(true);
-                            }}
-                        >
-                            {t("record.correct")}
-                        </Button>
-                    ) : (
-                        record.request?.status !== "pending" && (
+                <section
+                    aria-label={t("record.locked")}
+                    className="border-b border-border/45 px-1 pb-5"
+                >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                        <div className="flex min-w-0 items-start gap-2.5">
+                            <LockKeyhole
+                                aria-hidden="true"
+                                className="mt-1 size-4 shrink-0 text-muted-foreground"
+                            />
+                            <div className="min-w-0 space-y-1.5">
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                                    <p className="text-sm font-medium">
+                                        {t("record.locked")}
+                                    </p>
+                                    {initialAvailable && (
+                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/[0.07] px-2 py-0.5 text-xs text-primary tabular-nums">
+                                            <Clock3
+                                                aria-hidden="true"
+                                                className="size-3"
+                                            />
+                                            {t("record.timeLeft", {
+                                                hours: Math.floor(minutes / 60),
+                                                minutes: minutes % 60,
+                                            })}
+                                        </span>
+                                    )}
+                                </div>
+                                {initialAvailable && (
+                                    <p className="text-xs leading-6 text-muted-foreground">
+                                        {t("record.correctionHint")}
+                                    </p>
+                                )}
+                                {grant && (
+                                    <p className="text-xs leading-6 text-primary">
+                                        {t("record.approved")}
+                                    </p>
+                                )}
+                                {record.request?.status === "pending" && (
+                                    <output className="block text-xs leading-6 text-primary">
+                                        {t("record.pending")}
+                                    </output>
+                                )}
+                                {record.request?.status === "declined" && (
+                                    <p className="text-xs leading-6 text-muted-foreground">
+                                        {t("record.declined")}
+                                    </p>
+                                )}
+                                {record.request?.note && (
+                                    <p className="whitespace-pre-line text-sm leading-7">
+                                        {record.request.note}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        {canCorrect ? (
                             <Button
-                                variant="outline"
-                                onClick={() =>
-                                    setRequestOpen((value) => !value)
-                                }
+                                variant="ghost"
+                                disabled={pending}
+                                className="min-h-11 shrink-0 self-start text-primary hover:bg-primary/10 hover:text-primary sm:self-center"
+                                onClick={() => {
+                                    setSelected(record.baselineHizbs);
+                                    setEditSnapshot({
+                                        revision: record.revision,
+                                        setup: false,
+                                        baseline: record.baselineHizbs,
+                                    });
+                                    setEditing(true);
+                                }}
                             >
-                                {t("record.ask")}
+                                <Pencil
+                                    aria-hidden="true"
+                                    className="size-3.5"
+                                />
+                                {t("record.correct")}
                             </Button>
-                        )
-                    )}
+                        ) : (
+                            record.request?.status !== "pending" && (
+                                <Button
+                                    variant="ghost"
+                                    disabled={pending}
+                                    aria-expanded={requestOpen}
+                                    aria-controls="correction-request"
+                                    className="min-h-11 shrink-0 self-start text-muted-foreground sm:self-center"
+                                    onClick={() =>
+                                        setRequestOpen((value) => !value)
+                                    }
+                                >
+                                    {t("record.ask")}
+                                </Button>
+                            )
+                        )}
+                    </div>
                     {requestOpen &&
                         !canCorrect &&
                         record.request?.status !== "pending" && (
                             <form
-                                className="space-y-3"
+                                id="correction-request"
+                                className="mt-4 space-y-3 rounded-xl border border-border/40 bg-card/40 p-4"
                                 onSubmit={(event) => {
                                     event.preventDefault();
                                     void request();

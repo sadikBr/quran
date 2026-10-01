@@ -35,6 +35,7 @@ export default function getMemoryCatalogue() {
                     surahNumber: surah.id,
                     ayahNumber: verse.number,
                     hizb: Math.ceil(verse.hizb / 4),
+                    quarter: verse.hizb,
                     page: verse.page_number,
                     atoms,
                 };
@@ -47,6 +48,7 @@ export default function getMemoryCatalogue() {
                     surahNumber: verse.surah.number,
                     ayahNumber: verse.numberInSurah,
                     hizb: Math.ceil(verse.hizbQuarter / 4),
+                    quarter: verse.hizbQuarter,
                     page: verse.page,
                     atoms: [...(hafsAtoms.get(key) ?? [key])],
                 };

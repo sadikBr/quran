@@ -7,6 +7,10 @@
         {
             "path": "/api/cron/wird-reminder",
             "schedule": "0 23 * * *"
+        },
+        {
+            "path": "/api/cron/revision-reminder",
+            "schedule": "*/5 * * * *"
         }
     ]
 }

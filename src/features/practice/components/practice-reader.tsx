@@ -22,6 +22,10 @@ import GuidedReader, {
     GuidedReaderVerse,
 } from "@/features/quran/components/guided-reader";
 import getAyahAudioStreams from "@/features/quran/helpers/get-ayah-audio-streams";
+import {
+    finishWeeklyRevision,
+    saveWeeklyRevisionProgress,
+} from "@/features/revision/server/actions";
 import { cn } from "@/lib/utils";
 import { preparedAyahs } from "../preparation-progress";
 import type { PracticeReaderGroup } from "../reader-types";
@@ -35,15 +39,22 @@ export default function PracticeReader({
     groups,
     showTranslation,
     continuousRecitation,
+    weeklyOutcome,
 }: {
     assignment: PracticeAssignment;
     groups: PracticeReaderGroup[];
     showTranslation: boolean;
     continuousRecitation: boolean;
+    weeklyOutcome?: "comfortable" | "difficult" | null;
 }) {
     const locale = useLocale();
     const t = useTranslations("Practice.reader");
     const flow = useTranslations("Groups.flow");
+    const weeklyT = useTranslations("Memorization.weekly");
+    const [weeklyConfirm, setWeeklyConfirm] = useState<
+        "comfortable" | "difficult" | null
+    >(null);
+    const [savedOutcome, setSavedOutcome] = useState(weeklyOutcome);
     const memoryT = useTranslations("Memorization.personal");
     const [confirmMemory, setConfirmMemory] = useState(false);
     const [confirmReady, setConfirmReady] = useState(false);
@@ -68,11 +79,19 @@ export default function PracticeReader({
         [groups],
     );
     const progressIndex = progress
-        ? ayahs.findIndex(
-              ({ ayah, surahNumber }) =>
-                  surahNumber === progress.surahNumber &&
-                  ayah.numberInSurah === progress.ayahNumber,
-          )
+        ? assignment.source === "weekly"
+            ? ayahs.findLastIndex(
+                  ({ ayah, surahNumber }) =>
+                      referenceOrder({
+                          surahNumber,
+                          ayahNumber: ayah.numberInSurah,
+                      }) <= referenceOrder(progress),
+              )
+            : ayahs.findIndex(
+                  ({ ayah, surahNumber }) =>
+                      surahNumber === progress.surahNumber &&
+                      ayah.numberInSurah === progress.ayahNumber,
+              )
         : -1;
     const completedAyahs = preparedAyahs(
         status,
@@ -82,9 +101,12 @@ export default function PracticeReader({
     const percentage = ayahs.length
         ? Math.round((completedAyahs / ayahs.length) * 100)
         : 0;
-    const reachedEnd =
-        progress?.surahNumber === assignment.end.surahNumber &&
-        progress?.ayahNumber === assignment.end.ayahNumber;
+    const reachedEnd = Boolean(
+        progress &&
+            (assignment.source === "weekly"
+                ? referenceOrder(progress) >= referenceOrder(assignment.end)
+                : referenceOrder(progress) === referenceOrder(assignment.end)),
+    );
     const next = ayahs[Math.min(progressIndex + 1, ayahs.length - 1)];
     const audioQueue = useMemo(
         () =>
@@ -115,7 +137,9 @@ export default function PracticeReader({
         mutationInFlight.current = true;
         setSavingReference(reference);
         try {
-            const result = await updatePracticeProgress({
+            const result = await (assignment.source === "weekly"
+                ? saveWeeklyRevisionProgress
+                : updatePracticeProgress)({
                 assignmentId: assignment.id,
                 ...reference,
             });
@@ -182,6 +206,33 @@ export default function PracticeReader({
             toast.success(memoryT("saved"));
         } catch {
             toast.error(memoryT("failed"));
+        } finally {
+            mutationInFlight.current = false;
+            setIsSubmitting(false);
+        }
+    }
+
+    async function confirmWeekly() {
+        if (mutationInFlight.current) return;
+        if (!weeklyConfirm) return;
+        mutationInFlight.current = true;
+        setIsSubmitting(true);
+        try {
+            const result = await finishWeeklyRevision({
+                sessionId: assignment.id,
+                outcome: weeklyConfirm,
+                confirmed: true,
+            });
+            if (!result.success) {
+                toast.error(weeklyT("readerFailed"));
+                return;
+            }
+            setSavedOutcome(weeklyConfirm);
+            setStatus("completed");
+            setWeeklyConfirm(null);
+            toast.success(weeklyT("recorded"));
+        } catch {
+            toast.error(weeklyT("readerFailed"));
         } finally {
             mutationInFlight.current = false;
             setIsSubmitting(false);
@@ -386,7 +437,12 @@ export default function PracticeReader({
                                                         surahNumber={
                                                             group.surah.number
                                                         }
-                                                        actionsHref={`/quran/ayah/${group.surah.number}/${ayah.numberInSurah}?practice=${assignment.id}`}
+                                                        actionsHref={
+                                                            assignment.source ===
+                                                            "weekly"
+                                                                ? `/quran/ayah/${group.surah.number}/${ayah.numberInSurah}?riwayah=${assignment.riwayah}`
+                                                                : `/quran/ayah/${group.surah.number}/${ayah.numberInSurah}?practice=${assignment.id}`
+                                                        }
                                                     />
                                                 </div>
                                                 {!isRevealed && (
@@ -508,6 +564,72 @@ export default function PracticeReader({
                     >
                         {memoryT("map")}
                     </Link>
+                </section>
+            )}
+            {assignment.source === "weekly" && (
+                <section className="mt-6 space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-5">
+                    <h2 className="font-semibold">
+                        {weeklyT(
+                            status === "completed" ? "recorded" : "readerTitle",
+                        )}
+                    </h2>
+                    <p className="text-sm leading-7 text-muted-foreground">
+                        {weeklyT(
+                            status === "completed"
+                                ? savedOutcome === "difficult"
+                                    ? "difficultSaved"
+                                    : savedOutcome === "comfortable"
+                                      ? "comfortableSaved"
+                                      : "peerDone"
+                                : "readerHint",
+                        )}
+                    </p>
+                    {status !== "completed" && (
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                disabled={
+                                    !reachedEnd ||
+                                    isSubmitting ||
+                                    savingReference !== null
+                                }
+                                onClick={() => setWeeklyConfirm("comfortable")}
+                            >
+                                {weeklyT("comfortable")}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                disabled={
+                                    !reachedEnd ||
+                                    isSubmitting ||
+                                    savingReference !== null
+                                }
+                                onClick={() => setWeeklyConfirm("difficult")}
+                            >
+                                {weeklyT("difficult")}
+                            </Button>
+                        </div>
+                    )}
+                    <Button asChild variant="ghost">
+                        <Link href="/memorization/revision">
+                            {weeklyT("backToWeek")}
+                        </Link>
+                    </Button>
+                    <ConfirmationDialog
+                        open={weeklyConfirm !== null}
+                        onOpenChange={(open) => {
+                            if (!open) setWeeklyConfirm(null);
+                        }}
+                        title={weeklyT("recordedConfirm")}
+                        description={weeklyT(
+                            weeklyConfirm === "difficult"
+                                ? "confirmDifficult"
+                                : "confirmComfortable",
+                        )}
+                        confirmLabel={weeklyT("confirm")}
+                        cancelLabel={weeklyT("cancel")}
+                        pending={isSubmitting}
+                        onConfirm={confirmWeekly}
+                    />
                 </section>
             )}
         </GuidedReader>

@@ -30,7 +30,7 @@ export interface PracticeAssignment {
         | "completed"
         | "needs_revision"
         | "not_completed";
-    source: "personal" | "group";
+    source: "personal" | "group" | "weekly";
     groupId: string | null;
     groupName: string | null;
     meetingTimezone: string | null;
