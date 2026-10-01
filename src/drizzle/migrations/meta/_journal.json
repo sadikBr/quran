@@ -155,6 +155,13 @@
       "when": 1790853989275,
       "tag": "0021_supervisor_reviewer_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1790865072919,
+      "tag": "0022_arabic_default_language",
+      "breakpoints": true
     }
   ]
 }

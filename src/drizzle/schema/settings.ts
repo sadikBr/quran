@@ -29,7 +29,7 @@ export const userSettings = pgTable("user_settings", {
         .references(() => user.id, { onDelete: "cascade" }),
 
     theme: Theme("theme").notNull().default("system"),
-    language: Language("language").notNull().default("en"),
+    language: Language("language").notNull().default("ar"),
     riwayah: Riwayah("riwayah").notNull().default("hafs"),
     arabicEdition: text("arabic_edition").notNull().default("quran-simple"),
     reciter: text("reciter").notNull().default("quranpedia/255"),

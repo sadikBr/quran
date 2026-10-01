@@ -60,7 +60,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
     sleepAdhkarTime: null,
     adhkarTimezone: "Africa/Casablanca",
     theme: "light",
-    language: "en",
+    language: "ar",
     riwayah: "hafs",
     arabicEdition: "quran-simple",
     reciter: "quranpedia/255",
