@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { PageData } from "../types";
+import addTajweed from "./add-tajweed";
 import getQuranCorpus from "./get-quran-corpus";
 
 export default async function getQuranPageData(
@@ -15,7 +16,7 @@ export default async function getQuranPageData(
     );
     return {
         number,
-        ayahs,
+        ayahs: await addTajweed(ayahs, edition),
         edition: corpus.edition,
         surahs: Object.fromEntries(
             ayahs.map((ayah) => [ayah.surah.number, ayah.surah]),

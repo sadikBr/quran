@@ -122,6 +122,7 @@ export default async function getAyahActionsData(
         riwayah,
         ayahNumber,
         arabicText,
+        arabicTajweed: riwayah === "hafs" ? ayah.tajweed : undefined,
         translationText,
         translationEditionName:
             translationSurah.edition.englishName ||

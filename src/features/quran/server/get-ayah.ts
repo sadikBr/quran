@@ -5,6 +5,7 @@ import getPreferences from "@/features/settings/server/get-preferences";
 import { quranpediaPlainText } from "../helpers/quranpedia-data";
 import { getQuranpediaEdition, TAFSIR_EDITIONS } from "../quranpedia-editions";
 import type { AyahData } from "../types";
+import addTajweed from "./add-tajweed";
 import fetchQuranpedia from "./fetch-quranpedia";
 import getQuranCorpus from "./get-quran-corpus";
 
@@ -36,7 +37,10 @@ export default async function getAyah(
         .flatMap((surah) => surah.ayahs)
         .find((item) => item.number === globalAyahNumber);
     if (!ayah) throw new Error("Quran verse not found.");
-    if (edition.type !== "tafsir") return { ...ayah, edition };
+    if (edition.type !== "tafsir") {
+        const [displayedAyah] = await addTajweed([ayah], edition.identifier);
+        return { ...displayedAyah, edition };
+    }
     const book = TAFSIR_EDITIONS[edition.identifier];
     const response = tafsirSchema.parse(
         await fetchQuranpedia(

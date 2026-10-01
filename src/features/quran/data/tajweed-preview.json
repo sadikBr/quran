@@ -1,0 +1,70 @@
+[
+    [
+        {
+            "text": "ٱ",
+            "rule": "hamza-wasl"
+        },
+        {
+            "text": "لۡحَمۡدُ لِلَّهِ رَبِّ "
+        },
+        {
+            "text": "ٱ",
+            "rule": "hamza-wasl"
+        },
+        {
+            "text": "لۡعَ"
+        },
+        {
+            "text": "ٰ",
+            "rule": "madda-normal"
+        },
+        {
+            "text": "لَمِ"
+        },
+        {
+            "text": "ي",
+            "rule": "madda-normal"
+        },
+        {
+            "text": "نَ"
+        }
+    ],
+    [
+        {
+            "text": "ٱ",
+            "rule": "hamza-wasl"
+        },
+        {
+            "text": "ل",
+            "rule": "laam-shamsiyah"
+        },
+        {
+            "text": "رَّحۡمَ"
+        },
+        {
+            "text": "ٰ",
+            "rule": "madda-normal"
+        },
+        {
+            "text": "نِ "
+        },
+        {
+            "text": "ٱ",
+            "rule": "hamza-wasl"
+        },
+        {
+            "text": "ل",
+            "rule": "laam-shamsiyah"
+        },
+        {
+            "text": "رَّحِ"
+        },
+        {
+            "text": "ي",
+            "rule": "madda-normal"
+        },
+        {
+            "text": "مِ"
+        }
+    ]
+]

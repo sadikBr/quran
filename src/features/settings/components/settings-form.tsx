@@ -669,9 +669,12 @@ export default function SettingsForm({
                                         edition={values.arabicEdition}
                                         label={t(
                                             values.arabicEdition ===
-                                                "quranpedia.mushaf.2"
-                                                ? "arabicEdition.versePreview"
-                                                : "arabicEdition.mushafPreview",
+                                                "quranpedia.mushaf.11"
+                                                ? "arabicEdition.tajweedPreview"
+                                                : values.arabicEdition ===
+                                                    "quranpedia.mushaf.2"
+                                                  ? "arabicEdition.versePreview"
+                                                  : "arabicEdition.mushafPreview",
                                         )}
                                     />
                                 )}

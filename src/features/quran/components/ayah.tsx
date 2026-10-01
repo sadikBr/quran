@@ -109,7 +109,10 @@ export default function Ayah({
                         riwayah={riwayah}
                     />
                 )}
-                <QuranText text={displayedText} />
+                <QuranText
+                    text={displayedText}
+                    tajweed={riwayah === "hafs" ? ayah.tajweed : undefined}
+                />
             </span>{" "}
             <AyahPlayer ayah={ayah} />
             <span className="relative inline-block align-[0.08em]">

@@ -10,6 +10,7 @@ import type { QuranDivisionMarker as QuranDivisionMarkerType } from "../navigati
 import type { AyahType, Edition, SurahType } from "../types";
 import Ayah from "./ayah";
 import SurahBasmala from "./surah-basmala";
+import { TajweedUnavailable } from "./tajweed-key";
 import TranslationAyah from "./translation-ayah";
 
 export function SurahDetail({
@@ -94,6 +95,12 @@ export default function Surah({
 
     return (
         <>
+            {riwayah === "hafs" &&
+                arabicEdition === "quranpedia.mushaf.11" &&
+                ayahs.some((ayah) => ayah.tajweedUnavailable) && (
+                    <TajweedUnavailable />
+                )}
+
             <div
                 className="rtl quran-reading-surface"
                 data-riwayah={riwayah}

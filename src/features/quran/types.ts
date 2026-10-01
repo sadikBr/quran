@@ -1,3 +1,5 @@
+import type { TajweedSegment } from "./helpers/quranpedia-tajweed";
+
 export interface PageData {
     number: number;
     ayahs: AyahType[];
@@ -16,6 +18,8 @@ export interface AyahType {
     audio?: string;
     audioSecondary?: string[];
     text: string;
+    tajweed?: TajweedSegment[];
+    tajweedUnavailable?: boolean;
     surah: SurahType;
     numberInSurah: number;
     juz: number;

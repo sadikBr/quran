@@ -1,5 +1,6 @@
 import "server-only";
 
+import addTajweed from "./add-tajweed";
 import getQuranCorpus from "./get-quran-corpus";
 
 export default async function getSurahData(
@@ -11,7 +12,7 @@ export default async function getSurahData(
     if (!surah) throw new Error("Invalid Quran surah.");
     const { ayahs, ...surahMeta } = surah;
     return {
-        ayahs,
+        ayahs: await addTajweed(ayahs, edition),
         edition: corpus.edition,
         surahMeta,
         audio: undefined,

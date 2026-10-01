@@ -4,6 +4,7 @@ import type { Edition } from "./types";
 export const MUSHAF_EDITIONS: Record<string, number> = {
     "quranpedia.mushaf.1": 1,
     "quranpedia.mushaf.2": 2,
+    "quranpedia.mushaf.11": 11,
 };
 
 export const TRANSLATION_EDITIONS: Record<string, number> = {
@@ -46,6 +47,12 @@ function edition(
 }
 
 export const QURANPEDIA_EDITIONS: Edition[] = [
+    edition(
+        "quranpedia.mushaf.11",
+        "مصحف التجويد الملوّن — حفص",
+        "Hafs — Colour Tajweed",
+        "quran",
+    ),
     edition(
         "quranpedia.mushaf.1",
         "حفص — عرض المصحف",

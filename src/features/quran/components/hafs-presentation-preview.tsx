@@ -1,3 +1,8 @@
+import sample from "../data/tajweed-preview.json";
+import type { TajweedSegment } from "../helpers/quranpedia-tajweed";
+import QuranText from "./quran-text";
+import TajweedKey from "./tajweed-key";
+
 export default function HafsPresentationPreview({
     edition,
     label,
@@ -6,9 +11,11 @@ export default function HafsPresentationPreview({
     label: string;
 }) {
     const isVerseView = edition === "quranpedia.mushaf.2";
-    const verses = isVerseView
-        ? ["ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ", "ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ"]
-        : ["الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ", "الرَّحْمَٰنِ الرَّحِيمِ"];
+    const isTajweed = edition === "quranpedia.mushaf.11";
+    const verses =
+        isVerseView || isTajweed
+            ? ["ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ", "ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ"]
+            : ["الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ", "الرَّحْمَٰنِ الرَّحِيمِ"];
 
     return (
         <figure className="mt-4 min-w-0">
@@ -28,7 +35,14 @@ export default function HafsPresentationPreview({
                             data-arabic-edition={edition}
                             key={text}
                         >
-                            {text}{" "}
+                            <QuranText
+                                text={text}
+                                tajweed={
+                                    isTajweed
+                                        ? (sample[index] as TajweedSegment[])
+                                        : undefined
+                                }
+                            />{" "}
                             <span className="frame text-primary">
                                 {index === 0 ? "٢" : "٣"}
                             </span>{" "}
@@ -36,6 +50,7 @@ export default function HafsPresentationPreview({
                     ))}
                 </div>
             </div>
+            {isTajweed && <TajweedKey />}
         </figure>
     );
 }

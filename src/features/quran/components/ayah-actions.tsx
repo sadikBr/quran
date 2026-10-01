@@ -38,6 +38,7 @@ import type {
 } from "@/features/saved-ayahs/types";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
+import type { TajweedSegment } from "../helpers/quranpedia-tajweed";
 import getTafsirAyah from "../server/get-tafsir-ayah";
 import type { Edition } from "../types";
 import AyahShareCard from "./ayah-share-card";
@@ -79,10 +80,12 @@ function TafsirReadingPane({
 }
 
 function QuranAyahPreview({
+    tajweed,
     text,
     ayahNumber,
 }: {
     text: string;
+    tajweed?: TajweedSegment[];
     ayahNumber: number;
 }) {
     const t = useTranslations("Reader");
@@ -117,6 +120,9 @@ function QuranAyahPreview({
             <div className="relative">
                 <p
                     ref={textRef}
+                    data-arabic-edition={
+                        tajweed ? "quranpedia.mushaf.11" : undefined
+                    }
                     dir="rtl"
                     lang="ar"
                     style={
@@ -131,7 +137,7 @@ function QuranAyahPreview({
                         isExpanded ? "" : "max-h-36 overflow-hidden sm:max-h-40"
                     }`}
                 >
-                    <QuranText text={text} />
+                    <QuranText text={text} tajweed={tajweed} />
                 </p>
             </div>
             {isCollapsible && (
@@ -160,6 +166,7 @@ export type AyahActionsProps = {
     riwayah: "hafs" | "warsh";
     ayahNumber: number;
     arabicText: string;
+    arabicTajweed?: TajweedSegment[];
     translationText: string;
     translationEditionName: string;
     tafsirText: string;
@@ -254,6 +261,7 @@ export default function AyahActions({
     riwayah,
     ayahNumber,
     arabicText,
+    arabicTajweed,
     translationText,
     translationEditionName,
     tafsirText,
@@ -720,7 +728,11 @@ export default function AyahActions({
                     </p>
                 </header>
 
-                <QuranAyahPreview text={arabicText} ayahNumber={ayahNumber} />
+                <QuranAyahPreview
+                    text={arabicText}
+                    tajweed={arabicTajweed}
+                    ayahNumber={ayahNumber}
+                />
 
                 <label
                     htmlFor="ayah-reflection"
@@ -821,7 +833,11 @@ export default function AyahActions({
                         </span>
                     </div>
                 </header>
-                <QuranAyahPreview text={arabicText} ayahNumber={ayahNumber} />
+                <QuranAyahPreview
+                    text={arabicText}
+                    tajweed={arabicTajweed}
+                    ayahNumber={ayahNumber}
+                />
                 <div className="mt-5 space-y-3">
                     <p className="text-[0.65rem] font-semibold tracking-[0.18em] text-primary uppercase">
                         {t("actions.commentary")}

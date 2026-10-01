@@ -22,6 +22,13 @@ export default function getQuranCorpus(
     const edition = getQuranpediaEdition(identifier);
     return cached(edition.identifier, async () => {
         const mushafId = MUSHAF_EDITIONS[edition.identifier];
+        // Quranpedia's live Tajweed reader annotates its Uthmani text (mushaf 2).
+        // Mushaf 11's dump has no colour annotations; load those per chapter.
+        if (mushafId === 11)
+            return {
+                ...(await getQuranCorpus("quranpedia.mushaf.2")),
+                edition,
+            };
         if (mushafId === 1 || mushafId === 2)
             return normalizeHafsMushaf(
                 await getQuranpediaMushaf(mushafId),

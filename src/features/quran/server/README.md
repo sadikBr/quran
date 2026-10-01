@@ -17,7 +17,7 @@ Quranpedia is the application's only Quran content provider. All content request
 
 Identifiers use Quranpedia resource types and IDs: `quranpedia.mushaf.1`, `quranpedia.translation.13638`, `quranpedia.tafsir.2012`. Readers reject unknown identifiers. The settings form validates choices against `../quranpedia-editions.ts`; there are no provider-alias mappings. Reciters use `quranpedia/{id}` and surah/ayah audio addressing.
 
-The catalogue offers two Hafs scripts, eight English translations and seven Arabic tafsirs. Quranpedia's mushaf 11 currently has plain text without color annotations, so colored Tajweed is not offered and no annotation parser is retained.
+The catalogue offers two Hafs presentations, colour Tajweed for Hafs, eight English translations and seven Arabic tafsirs. Tajweed uses `quranpedia.mushaf.11`. Its JSON dump has no colour annotations; Quranpedia's live Tajweed reader instead annotates mushaf 2's Uthmani text. `add-tajweed.ts` retrieves only requested chapters from `https://quranpedia.net/surah/1/{surah}/tajweed`, with a bounded daily cache and a one-day stale grace period. The strict parser accepts only known rule tags, checks every verse against the Uthmani corpus (ignoring whitespace, BOM, division markers and decorative tatweel), and passes text segments to React without injecting HTML. Unknown or mismatched markup falls back to plain text with a reader notice. This presentation depends on Quranpedia's site markup as well as its API; changes to that markup must pass the parser tests before support is updated. Offline downloads retain their existing plain-text datasets.
 
 The main Hafs reader presents mushaf 1 in the original responsive flowing layout, and mushaf 2 as separate, centered verse rows using Quranpedia's UthmanicHafs_V22 font through `/api/quran/hafs-font`. These are responsive text layouts, not facsimiles or fixed printed line breaks. Both retain the same interactive verse components, translations and audio. Settings include an immediate preview of each presentation. Warsh keeps its own typography and layout.
 
@@ -42,3 +42,5 @@ Validate mushaf IDs, surah and verse order, verse counts, source fields and Hafs
 - `bunx tsc --noEmit`
 
 Response fixtures in `scripts/fixtures/quranpedia.json` come from [Quranpedia](https://quranpedia.net), with source versions recorded in the fixture. Tests synthesize full-size corpora around these samples; production uses upstream content.
+
+Tajweed fixtures and settings preview annotations are from Quranpedia, retrieved 2026-10-01: https://quranpedia.net/surah/1/1/tajweed. Run `bun test scripts/quranpedia-tajweed.test.mjs scripts/quranpedia-reader.test.mjs` for annotation validation, safe parsing, canonical identity and fallback coverage.

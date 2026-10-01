@@ -148,6 +148,7 @@
             "description": "Choose flowing text or separate, centered ayahs in the Uthmani font. Both layouts adjust to your screen and keep verse actions available.",
             "mushafPreview": "Preview · flowing text, with responsive line breaks",
             "versePreview": "Preview · centered ayahs in the Uthmani Hafs font",
+            "tajweedPreview": "Preview · Quranpedia’s colour Tajweed annotations for Hafs",
             "warshDescription": "The available Warsh edition is the King Fahd Complex mushaf.",
             "label": "Edition",
             "placeholder": "Search text editions…",

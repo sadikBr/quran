@@ -1421,6 +1421,41 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
 }
 
 .ayah[data-arabic-edition="quranpedia.mushaf.2"],
+.ayah[data-arabic-edition="quranpedia.mushaf.11"],
+.arabic-ui .ayah[data-arabic-edition="quranpedia.mushaf.11"],
 .arabic-ui .ayah[data-arabic-edition="quranpedia.mushaf.2"] {
     font-family: "Uthmanic Hafs", Amiri, Ayah, serif;
+}
+
+/* Colours are applied only to Quranpedia's validated rule annotations. */
+[data-tajweed] {
+    --tajweed-color: #697580;
+    color: var(--tajweed-color);
+}
+[data-tajweed="ghunnah"] {
+    --tajweed-color: #a64a00;
+}
+[data-tajweed="qalaqah"] {
+    --tajweed-color: #167ca3;
+}
+[data-tajweed^="idgham"] {
+    --tajweed-color: #207b38;
+}
+[data-tajweed^="ikhafa"] {
+    --tajweed-color: #98439c;
+}
+[data-tajweed="iqlab"] {
+    --tajweed-color: #196cad;
+}
+[data-tajweed^="madda"] {
+    --tajweed-color: #bd2837;
+}
+[data-tajweed="madda-normal"] {
+    --tajweed-color: #9b493e;
+}
+[data-tajweed="madda-necessary"] {
+    --tajweed-color: #8c2672;
+}
+.dark [data-tajweed] {
+    color: color-mix(in srgb, var(--tajweed-color) 55%, white);
 }

@@ -14,6 +14,15 @@ mock.module("../src/features/settings/server/get-preferences", () => ({
 
 const originalFetch = globalThis.fetch;
 const requests = [];
+const tajweedHtml = readFileSync(
+    new URL("./fixtures/quranpedia-tajweed.html", import.meta.url),
+    "utf8",
+);
+const tajweedTexts = [
+    ...tajweedHtml.matchAll(
+        /<a\s+class="ayah"[^>]*>([\s\S]*?)<span class="marker">/g,
+    ),
+].map((m) => m[1].replace(/<[^>]+>/g, "").trim());
 const hafsSurahs = parseQuranpediaSurahs(sample.surahs);
 const hafsGlobalNumber = createHafsReference(hafsSurahs);
 const surahs = hafsSurahs.map((surah) => ({
@@ -37,6 +46,12 @@ const surahs = hafsSurahs.map((surah) => ({
 }));
 globalThis.fetch = async (input) => {
     const url = new URL(input);
+    if (url.origin === "https://quranpedia.net") {
+        requests.push(url.pathname);
+        return url.pathname === "/surah/1/1/tajweed"
+            ? new Response(tajweedHtml)
+            : new Response("Unavailable", { status: 503 });
+    }
     expect(url.origin).toBe("https://api.quranpedia.net");
     requests.push(url.pathname);
     if (url.pathname === "/v1/surahs") return Response.json(sample.surahs);
@@ -59,8 +74,12 @@ globalThis.fetch = async (input) => {
             chapters[0] = sample.warshFatiha;
             chapters[1].ayahs[0].number_in_hafs = [1, 2];
             chapters[1].ayahs[1].number_in_hafs = [3, 4];
-        } else if (id === 2)
+        } else if (id === 2) {
             for (const s of chapters) for (const a of s.ayahs) a.id += 62250;
+            chapters[0].ayahs.forEach((a, i) => {
+                a.text = tajweedTexts[i];
+            });
+        }
         return new Response(
             gzipSync(
                 JSON.stringify({
@@ -149,6 +168,22 @@ test("page, surah, translation and Uthmani readers share stable references", asy
     expect(
         requests.filter((p) => p === "/dumps/mushafs-1.json.gz"),
     ).toHaveLength(1);
+});
+
+test("Tajweed surah and page readers retain references and coalesce annotation requests", async () => {
+    const [chapter, page] = await Promise.all([
+        getSurah("1", "quranpedia.mushaf.11"),
+        getPage(1, "quranpedia.mushaf.11"),
+    ]);
+    expect(chapter.ayahs[0].number).toBe(1);
+    expect(
+        chapter.ayahs[6].tajweed.some((s) => s.rule === "madda-necessary"),
+    ).toBe(true);
+    expect(page.ayahs[0].tajweed).toEqual(chapter.ayahs[0].tajweed);
+    expect(requests.filter((p) => p === "/surah/1/1/tajweed")).toHaveLength(1);
+    const unavailable = await getSurah("2", "quranpedia.mushaf.11");
+    expect(unavailable.ayahs[0].tajweedUnavailable).toBe(true);
+    expect(unavailable.ayahs[0].text).toBeTruthy();
 });
 
 test("navigation retains every page and division", async () => {
