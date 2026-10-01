@@ -17,15 +17,16 @@ import {
     getWarshPlaybackNumber,
     usesNativeWarshAyahNumbering,
 } from "../helpers/map-warsh-ayahs";
+import { TAFSIR_EDITIONS } from "../quranpedia-editions";
+import { STUDY_SECTIONS } from "../study-types";
 import getAvailableReciters from "./get-available-reciter";
-import getAvailableQuranEditions from "./get-quran-edition";
-import getReaderTafsir from "./get-reader-tafsir";
+import getReaderReferences from "./get-reader-references";
 import getSurahData from "./get-surah";
 import getWarshChapter from "./get-warsh-chapter";
 
 export type AyahActionsData = Omit<
     AyahActionsProps,
-    "closeOnCopy" | "onSavedAyahChange"
+    "closeOnCopy" | "onSavedAyahChangeAction"
 >;
 
 export default async function getAyahActionsData(
@@ -50,6 +51,7 @@ export default async function getAyahActionsData(
     const warshVerse = warshChapter?.verses.find(
         (verse) => verse.number === ayahNumber,
     );
+    if (riwayah === "warsh" && !warshVerse) return null;
     const reciter = reciters.find((item) => item.id === preferences.reciter);
     const nativeWarshAudio = usesNativeWarshAyahNumbering(reciter);
     const hafsAyahNumber = warshVerse
@@ -62,9 +64,12 @@ export default async function getAyahActionsData(
         : ayahNumber;
     const ayah = ayahs.find((item) => item.numberInSurah === hafsAyahNumber);
     if (!ayah) return null;
-    const translationAyahNumbers = warshVerse
-        ? warshVerse.number_in_hafs
-        : [ayah.numberInSurah];
+    const studyAyahs = await getReaderReferences(
+        surahNumber,
+        ayahNumber,
+        riwayah,
+    );
+    const translationAyahNumbers = studyAyahs.map((item) => item.numberInSurah);
     const translationText = translationSurah.ayahs
         .filter((item) => translationAyahNumbers.includes(item.numberInSurah))
         .map((item) => item.text)
@@ -83,22 +88,10 @@ export default async function getAyahActionsData(
             ? stripBasmalaPrefix(ayah.text)
             : ayah.text;
 
-    const [tafsirAyah, tafsirEditions, savedAyah, bookmarkCollections] =
-        await Promise.all([
-            getReaderTafsir(
-                surahNumber,
-                ayahNumber,
-                riwayah,
-                preferences.tafsirEdition,
-            ),
-            session
-                ? getAvailableQuranEditions().then((editions) =>
-                      editions.filter((edition) => edition.type === "tafsir"),
-                  )
-                : [],
-            session ? getSavedAyah(session.user.id, ayah.number) : null,
-            session ? getBookmarkCollections(session.user.id) : [],
-        ]);
+    const [savedAyah, bookmarkCollections] = await Promise.all([
+        session ? getSavedAyah(session.user.id, ayah.number) : null,
+        session ? getBookmarkCollections(session.user.id) : [],
+    ]);
     const savedWarshVerse =
         savedAyah && warshChapter
             ? warshChapter.verses.find(
@@ -132,13 +125,11 @@ export default async function getAyahActionsData(
         translationEditionName:
             translationSurah.edition.englishName ||
             translationSurah.edition.name,
-        tafsirText: tafsirAyah.text,
-        tafsirEditionName:
-            preferences.language === "ar"
-                ? tafsirAyah.edition.name || tafsirAyah.edition.englishName
-                : tafsirAyah.edition.englishName || tafsirAyah.edition.name,
-        tafsirEditionIdentifier: tafsirAyah.edition.identifier,
-        tafsirDirection: tafsirAyah.edition.direction,
+        studySections: STUDY_SECTIONS.filter((section) =>
+            studyAyahs.some((item) => item.studyOptions?.includes(section)),
+        ),
+        studyReferences: translationAyahNumbers,
+        preferredTafsirBook: TAFSIR_EDITIONS[preferences.tafsirEdition] ?? 2012,
         audioStreams:
             reciter?.scope === "ayah"
                 ? getRecitationStreams(reciter, {
@@ -154,8 +145,6 @@ export default async function getAyahActionsData(
                 : getWarshPlaybackNumber(warshVerse, surahNumber)
             : ayah.number,
         surahNumber,
-        tafsirEditions,
-        canChooseTafsir: Boolean(session),
         canSaveAyah: Boolean(session),
         initialBookmarked: resolvedSavedAyah?.isBookmarked ?? false,
         initialReflection: resolvedSavedAyah?.reflection ?? "",

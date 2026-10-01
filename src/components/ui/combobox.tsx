@@ -115,7 +115,7 @@ function ComboboxContent({
     >) {
     const portalContainer = React.useContext(ComboboxPortalContainerContext);
     return (
-        <ComboboxPrimitive.Portal container={portalContainer}>
+        <ComboboxPrimitive.Portal container={portalContainer ?? undefined}>
             <ComboboxPrimitive.Positioner
                 side={side}
                 sideOffset={sideOffset}

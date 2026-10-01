@@ -21,6 +21,24 @@ The catalogue offers two Hafs presentations, colour Tajweed for Hafs, eight Engl
 
 The main Hafs reader presents mushaf 1 in the original responsive flowing layout, and mushaf 2 as separate, centered verse rows using Quranpedia's UthmanicHafs_V22 font through `/api/quran/hafs-font`. These are responsive text layouts, not facsimiles or fixed printed line breaks. Both retain the same interactive verse components, translations and audio. Settings include an immediate preview of each presentation. Warsh keeps its own typography and layout.
 
+## Ayah study actions
+
+The ayah panel groups quick actions, study content, and personal bookmarks/notes. It retains the corpus's per-ayah `options` and shows only supported sections: tafsir, word meanings, translation comparison, revelation context, and similar verses. Study content loads when a section opens; an unavailable study service does not prevent copying, sharing, or saving the ayah. Public study sources are available without signing in.
+
+`get-reader-references.ts` supplies the same full Hafs correspondence to tafsir and every study section, including the Warsh Al-Fatiha basmala exception. Mapped reference numbers remain visible; repeated commentary is deduplicated with provenance retained. Translations retain each mapped verse separately. Similar wording uses the canonical Hafs text and numbering; reader links target canonical anchors, which also resolve in Warsh.
+
+`get-ayah-study.ts` discovers per-verse tafsir and revelation-context books from the official `embed?fragment=1` catalogue, then retrieves structured passages through `/v1/ayah/{surah}/{ayah}/book/{id}`. Word meanings use the official fragment's definition table because the corresponding book endpoint can return empty content. Similar verses use the fragment's grouped references, joined to validated Quran text. The strict parser checks section and verse identity, accepts only known Quranpedia links, and extracts inert text rather than injecting upstream HTML. Changed markup shows a retry and source link. Fragments use bounded daily caching and the same one-day stale grace period as the corpus.
+
+Topics use the daily-cached `/v1/topics` catalogue: exact canonical references determine membership, parent topics supply breadcrumbs, and related ayahs come from the validated Hafs corpus. Only a topic linked to the requested ayah can be selected. Grammar uses the same validated book catalogue and structured passage endpoint as tafsir.
+
+Published reflections use the official `notes` fragment's articles. The parser reads balanced content containers, category and attribution independently; identical notes from multiple mapped verses retain all references. Text is rendered natively, long entries can be expanded, and attached media links back to Quranpedia. These entries are separate from a user's private reflection.
+
+Memorization practice reuses the existing audio player. A range starts at the selected recording and can extend through the current reader queue; a standalone ayah has single-ayah practice. Queue matching includes recording URLs so a different reciter cannot supply the range. Repeat count, pauses, hide/reveal and in-panel playback controls work without signing in. Saving uses the existing bookmark and Memorization collection actions and requires an account; it does not mark any memorization progress complete.
+
+Translation comparison uses the available-languages and per-verse translation JSON endpoints, with up to three books displayed together. Source titles, available authors, passage pages, and source links accompany the content. English and Arabic controls share the same views.
+
+Run `bun test scripts/quranpedia-study.test.mjs` for live-response fixture parsing, source validation, mapped passages, translation languages, and outage recovery. Both multiple-book choosers and single-book source footers are supported; Al-Fatiha's revelation context is covered for Hafs 1:2 and Warsh 1:1. Fixtures in `scripts/fixtures/quranpedia-study.json` are selected Quranpedia responses retrieved on 2026-10-01, with decorative SVG and unrelated entries omitted. The existing reader tests also cover the shared Hafs/Warsh reference resolver.
+
 Tafsir books are presented as general commentary, not certified riwayah-specific editions. Checked on 2026-10-01: Quranpedia's Warsh-labelled books 14052 and 20377 have PDF attachments but no `contents_url`; a verse request for book 14052 returned empty content. Do not add them to the verse reader or label other books Hafs-only/Warsh-only without verifying structured content and editorial scope. Mapping verse boundaries does not adapt a book's discussion of variant readings.
 
 ## Database and offline library

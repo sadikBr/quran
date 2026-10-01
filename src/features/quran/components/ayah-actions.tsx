@@ -1,6 +1,7 @@
 "use client";
 
 import {
+    BookA,
     Bookmark,
     BookOpenText,
     Check,
@@ -8,17 +9,24 @@ import {
     Copy,
     FolderHeart,
     FolderPlus,
+    History,
     ImageDown,
+    Languages,
+    Layers,
+    Lightbulb,
     LoaderCircle,
     NotebookPen,
     Pause,
     Play,
     RefreshCcw,
+    Repeat2,
+    Tags,
+    TextSearch,
     Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { type ReactNode, useEffect, useId, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,46 +46,13 @@ import type {
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
 import type { TajweedSegment } from "../helpers/quranpedia-tajweed";
-import getTafsirAyah from "../server/get-tafsir-ayah";
-import type { Edition } from "../types";
+import type { StudySection } from "../study-types";
 import AyahActionsToolbar from "./ayah-actions-toolbar";
+import AyahPracticePanel from "./ayah-practice-panel";
 import AyahShareCard from "./ayah-share-card";
-import EditionCombobox from "./edition-combobox";
+import AyahStudyPanel from "./ayah-study-panel";
 import { useQuranAudio } from "./quran-audio-provider";
 import QuranText, { getPlainQuranText } from "./quran-text";
-
-function TafsirReadingPane({
-    text,
-    isLoading,
-    direction,
-}: {
-    text: string;
-    isLoading: boolean;
-    direction: string;
-}) {
-    const t = useTranslations("Reader");
-    const isRightToLeft = direction === "rtl";
-    return (
-        <section
-            aria-label={t("actions.tafsirCommentary")}
-            className="app-card min-w-0 p-4 sm:p-5"
-        >
-            <p
-                dir={isRightToLeft ? "rtl" : "ltr"}
-                lang={isRightToLeft ? "ar" : undefined}
-                className={cn(
-                    "whitespace-pre-line text-start text-card-foreground [overflow-wrap:anywhere] transition-opacity",
-                    isRightToLeft
-                        ? "font-(family-name:--font-tafsir) text-xl leading-[2]"
-                        : "font-serif text-base leading-8 sm:text-lg",
-                    isLoading && "opacity-35",
-                )}
-            >
-                {text || t("actions.noTafsirCommentary")}
-            </p>
-        </section>
-    );
-}
 
 function QuranAyahPreview({
     riwayah,
@@ -177,16 +152,13 @@ export type AyahActionsProps = {
     arabicTajweed?: TajweedSegment[];
     translationText: string;
     translationEditionName: string;
-    tafsirText: string;
-    tafsirEditionName: string;
-    tafsirEditionIdentifier: string;
-    tafsirDirection: string;
+    studySections: StudySection[];
+    studyReferences: number[];
+    preferredTafsirBook: number;
     audioStreams: string[];
     audioNumber?: number;
     globalAyahNumber: number;
     surahNumber: number;
-    tafsirEditions: Edition[];
-    canChooseTafsir: boolean;
     canSaveAyah: boolean;
     initialBookmarked: boolean;
     initialReflection: string;
@@ -304,16 +276,13 @@ export default function AyahActions({
     arabicTajweed,
     translationText,
     translationEditionName,
-    tafsirText,
-    tafsirEditionName,
-    tafsirEditionIdentifier,
-    tafsirDirection,
+    studySections,
+    studyReferences,
+    preferredTafsirBook,
     audioStreams,
     audioNumber,
     globalAyahNumber,
     surahNumber,
-    tafsirEditions,
-    canChooseTafsir,
     canSaveAyah,
     initialBookmarked,
     initialReflection,
@@ -331,22 +300,14 @@ export default function AyahActions({
     const router = useRouter();
     const t = useTranslations("Reader");
     const commonT = useTranslations("Common");
+    const studyT = useTranslations("Reader.study");
     const locale = useLocale();
     const direction = locale === "ar" ? "rtl" : "ltr";
-    const tafsirSelectId = useId();
-    const [isTafsirVisible, setIsTafsirVisible] = useState(false);
-    const [selectedTafsirIdentifier, setSelectedTafsirIdentifier] = useState(
-        tafsirEditionIdentifier,
-    );
-    const [selectedTafsir, setSelectedTafsir] = useState({
-        text: tafsirText,
-        editionName: tafsirEditionName,
-        direction: tafsirDirection,
-    });
-    const [isChangingTafsir, setIsChangingTafsir] = useState(false);
+    const [studySection, setStudySection] = useState<StudySection | null>(null);
     const [isReflectionVisible, setIsReflectionVisible] = useState(false);
     const [isCollectionsVisible, setIsCollectionsVisible] = useState(false);
     const [isShareVisible, setIsShareVisible] = useState(false);
+    const [isPracticeVisible, setIsPracticeVisible] = useState(false);
     const previousView = useRef("actions");
     const currentView = isShareVisible
         ? "share"
@@ -354,9 +315,9 @@ export default function AyahActions({
           ? "collections"
           : isReflectionVisible
             ? "reflection"
-            : isTafsirVisible
-              ? "tafsir"
-              : "actions";
+            : isPracticeVisible
+              ? "practice"
+              : (studySection ?? "actions");
     useEffect(() => {
         if (previousView.current === currentView) return;
         previousView.current = currentView;
@@ -375,6 +336,7 @@ export default function AyahActions({
     const [isSavingReflection, setIsSavingReflection] = useState(false);
     const [isSavingCollections, setIsSavingCollections] = useState(false);
     const [isCreatingCollection, setIsCreatingCollection] = useState(false);
+    const [isSavingPractice, setIsSavingPractice] = useState(false);
     const {
         activeAyahNumber,
         isPlaying,
@@ -397,34 +359,6 @@ export default function AyahActions({
             }
         } catch {
             toast.error(t("actions.copyFailed"));
-        }
-    }
-
-    async function changeTafsirEdition(editionIdentifier: string) {
-        if (editionIdentifier === selectedTafsirIdentifier) return;
-
-        setIsChangingTafsir(true);
-
-        try {
-            const ayah = await getTafsirAyah(
-                surahNumber,
-                ayahNumber,
-                riwayah,
-                editionIdentifier,
-            );
-            setSelectedTafsirIdentifier(editionIdentifier);
-            setSelectedTafsir({
-                text: ayah.text,
-                editionName:
-                    locale === "ar"
-                        ? ayah.edition.name || ayah.edition.englishName
-                        : ayah.edition.englishName || ayah.edition.name,
-                direction: ayah.edition.direction,
-            });
-        } catch {
-            toast.error(t("actions.tafsirLoadFailed"));
-        } finally {
-            setIsChangingTafsir(false);
         }
     }
 
@@ -520,6 +454,35 @@ export default function AyahActions({
         setCollectionDraft("");
         toast.success(t("actions.collectionCreated"));
         onSavedAyahChangeAction?.();
+    }
+
+    async function saveForPractice() {
+        if (!canSaveAyah) {
+            toast.error(t("actions.signInBookmarks"));
+            return;
+        }
+        setIsSavingPractice(true);
+        try {
+            if (!isBookmarked) {
+                const result = await updateBookmark({
+                    ...savedAyahMetadata,
+                    isBookmarked: true,
+                });
+                if (!result.success) {
+                    toast.error(commonT("feedback.bookmarkUpdateFailed"));
+                    return;
+                }
+                setIsBookmarked(true);
+                onSavedAyahChangeAction?.();
+            }
+            await createCollection(
+                t("actions.collectionSuggestions.memorization"),
+            );
+        } catch {
+            toast.error(t("actions.collectionCreateFailed"));
+        } finally {
+            setIsSavingPractice(false);
+        }
     }
 
     function openReflection() {
@@ -807,12 +770,50 @@ export default function AyahActions({
         );
     }
 
-    if (isTafsirVisible) {
+    if (isPracticeVisible) {
         return (
-            <div dir={direction} className="pb-1">
+            <div dir={direction} className="min-w-0 pb-1">
                 <AyahActionsToolbar
-                    title={t("actions.tafsir")}
-                    onBack={() => setIsTafsirVisible(false)}
+                    title={t("practice.title")}
+                    onBack={() => setIsPracticeVisible(false)}
+                />
+                <VerseHeading
+                    locale={locale}
+                    surahNumber={surahNumber}
+                    surahName={surahName}
+                    ayahNumber={ayahNumber}
+                />
+                <AyahPracticePanel
+                    key={`${riwayah}:${playbackAyahNumber}:${audioStreams[0]}`}
+                    number={playbackAyahNumber}
+                    streams={audioStreams}
+                    onSave={saveForPractice}
+                    saving={isSavingPractice}
+                    saved={collections.some(
+                        (item) =>
+                            item.name ===
+                                t(
+                                    "actions.collectionSuggestions.memorization",
+                                ) && collectionIds.includes(item.id),
+                    )}
+                >
+                    <QuranAyahPreview
+                        text={arabicText}
+                        tajweed={arabicTajweed}
+                        riwayah={riwayah}
+                        ayahNumber={ayahNumber}
+                    />
+                </AyahPracticePanel>
+            </div>
+        );
+    }
+
+    if (studySection) {
+        return (
+            <div dir={direction} className="min-w-0 pb-1">
+                <AyahActionsToolbar
+                    title={studyT(studySection)}
+                    onBack={() => setStudySection(null)}
                 />
                 <VerseHeading
                     locale={locale}
@@ -821,58 +822,24 @@ export default function AyahActions({
                     ayahNumber={ayahNumber}
                 />
                 <QuranAyahPreview
-                    riwayah={riwayah}
                     text={arabicText}
                     tajweed={arabicTajweed}
+                    riwayah={riwayah}
                     ayahNumber={ayahNumber}
                 />
-                <div className="sticky top-0 z-10 space-y-2 border-b border-border/60 bg-background pt-2 pb-4">
-                    <label
-                        htmlFor={canChooseTafsir ? tafsirSelectId : undefined}
-                        className="block text-xs font-semibold text-muted-foreground"
-                    >
-                        {t("actions.commentary")}
-                    </label>
-                    <div className="min-w-0 max-w-full">
-                        {canChooseTafsir ? (
-                            <EditionCombobox
-                                id={tafsirSelectId}
-                                ariaLabel={t("actions.chooseTafsir")}
-                                editions={tafsirEditions}
-                                value={selectedTafsirIdentifier}
-                                onValueChange={changeTafsirEdition}
-                                disabled={isChangingTafsir}
-                                placeholder={t("actions.searchTafsir")}
-                                emptyMessage={t("actions.noTafsir")}
-                                className="h-11 w-full min-w-0 rounded-xl border-border bg-card text-sm shadow-sm dark:bg-card"
-                            />
-                        ) : (
-                            <span className="text-sm font-medium text-foreground">
-                                {selectedTafsir.editionName}
-                            </span>
-                        )}
-                    </div>
-                </div>
-                <article
-                    className="mt-4 min-w-0 transition-opacity"
-                    aria-busy={isChangingTafsir}
-                >
-                    {isChangingTafsir && (
-                        <output className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
-                            <LoaderCircle
-                                aria-hidden="true"
-                                className="size-3.5 animate-spin text-primary"
-                            />
-                            {t("actions.loadingTafsir")}
-                        </output>
-                    )}
-                    <TafsirReadingPane
-                        key={selectedTafsirIdentifier}
-                        text={selectedTafsir.text}
-                        isLoading={isChangingTafsir}
-                        direction={selectedTafsir.direction}
-                    />
-                </article>
+                <AyahStudyPanel
+                    key={`${surahNumber}:${ayahNumber}:${riwayah}:${studySection}`}
+                    section={studySection}
+                    surahNumber={surahNumber}
+                    ayahNumber={ayahNumber}
+                    riwayah={riwayah}
+                    references={studyReferences}
+                    preferredBookId={
+                        studySection === "tafsir"
+                            ? preferredTafsirBook
+                            : undefined
+                    }
+                />
             </div>
         );
     }
@@ -901,7 +868,16 @@ export default function AyahActions({
                 ayahNumber={ayahNumber}
             />
 
-            <div className="min-w-0 pt-4 pb-1">
+            <QuranAyahPreview
+                text={arabicText}
+                tajweed={arabicTajweed}
+                riwayah={riwayah}
+                ayahNumber={ayahNumber}
+            />
+            <div className="min-w-0 pt-1 pb-1">
+                <h2 className="mb-3 text-xs font-semibold text-muted-foreground">
+                    {studyT("quickActions")}
+                </h2>
                 {audioStreams.length > 0 && (
                     <button
                         type="button"
@@ -965,12 +941,6 @@ export default function AyahActions({
                 )}
                 <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
                     <ActionTile
-                        icon={<BookOpenText aria-hidden="true" />}
-                        title={t("actions.readTafsir")}
-                        description={t("actions.readTafsirDescription")}
-                        onClick={() => setIsTafsirVisible(true)}
-                    />
-                    <ActionTile
                         icon={<Copy aria-hidden="true" />}
                         title={t("actions.copyArabic")}
                         description={t("actions.copyArabicDescription")}
@@ -982,6 +952,52 @@ export default function AyahActions({
                         description={t("actions.shareAyahDescription")}
                         onClick={() => setIsShareVisible(true)}
                     />
+                </div>
+                {studySections.length > 0 && (
+                    <section className="mt-6 border-t border-border/60 pt-5">
+                        <h2 className="mb-3 text-xs font-semibold text-muted-foreground">
+                            {studyT("understandExplore")}
+                        </h2>
+                        <div className="grid gap-2.5 sm:grid-cols-2">
+                            {studySections.map((section) => {
+                                const Icon = {
+                                    tafsir: BookOpenText,
+                                    meanings: BookA,
+                                    translations: Languages,
+                                    asbab: History,
+                                    similar: Layers,
+                                    topics: Tags,
+                                    e3rab: TextSearch,
+                                    notes: Lightbulb,
+                                }[section];
+                                return (
+                                    <ActionTile
+                                        key={section}
+                                        icon={<Icon aria-hidden="true" />}
+                                        title={studyT(section)}
+                                        description={studyT(
+                                            `${section}Description`,
+                                        )}
+                                        onClick={() => setStudySection(section)}
+                                    />
+                                );
+                            })}
+                        </div>
+                    </section>
+                )}
+                <h2 className="mt-6 mb-3 border-t border-border/60 pt-5 text-xs font-semibold text-muted-foreground">
+                    {studyT("myCollection")}
+                </h2>
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                    {audioStreams.length > 0 && (
+                        <ActionTile
+                            icon={<Repeat2 aria-hidden="true" />}
+                            title={t("practice.title")}
+                            description={t("practice.tileDescription")}
+                            onClick={() => setIsPracticeVisible(true)}
+                            className="sm:col-span-2"
+                        />
+                    )}
                     <ActionTile
                         icon={
                             isSavingBookmark ? (
@@ -1039,7 +1055,7 @@ export default function AyahActions({
                                 : t("actions.writePrivateNote")
                         }
                         onClick={openReflection}
-                        className={!isBookmarked ? "sm:col-span-2" : undefined}
+                        className={isBookmarked ? "sm:col-span-2" : undefined}
                     />
                 </div>
             </div>

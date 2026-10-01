@@ -287,7 +287,17 @@ export default function NowPlaying({
                     aria-label={t("repeatMode")}
                     aria-expanded={expanded}
                     aria-controls="audio-repeat-options"
-                    onClick={() => setExpanded(!expanded)}
+                    onClick={() => {
+                        if (!expanded) {
+                            setCount(
+                                player.repeat.count > 1
+                                    ? player.repeat.count
+                                    : 3,
+                            );
+                            setGap(player.repeat.gap);
+                        }
+                        setExpanded(!expanded);
+                    }}
                 >
                     <Repeat2 className="size-4" />
                 </Button>

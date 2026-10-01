@@ -15,8 +15,13 @@ import {
     AudioPlayer,
     type PlayerState,
     type PlayerStatus,
+    type RepeatOptions,
 } from "../helpers/audio-player";
-import { type AudioTrack, queuesMatch } from "../helpers/audio-track";
+import {
+    type AudioTrack,
+    queuesMatch,
+    tracksMatch,
+} from "../helpers/audio-track";
 import NowPlaying from "./quran-now-playing";
 
 export type QuranAudioQueueItem = AudioTrack;
@@ -26,13 +31,20 @@ type ContextValue = {
     playbackStatus: PlayerStatus;
     progress: number;
     isPlaying: boolean;
+    repetition: number;
+    totalRepetitions: number;
     toggleAudio: (number: number, streams: string[]) => Promise<void>;
     retryAudio: () => Promise<void>;
+    stopAudio: () => void;
     setReaderQueue: (queue: AudioTrack[], continuous: boolean) => void;
     isQueuePlaying: (queue: AudioTrack[]) => boolean;
     getQueueStatus: (queue: AudioTrack[]) => PlayerStatus;
     restartQueue: (queue: AudioTrack[]) => void;
     toggleQueue: (queue: AudioTrack[]) => Promise<void>;
+    getPracticeTracks: (
+        track: AudioTrack,
+    ) => { track: AudioTrack; title: string }[];
+    startPractice: (queue: AudioTrack[], options: RepeatOptions) => void;
 };
 const Context = createContext<ContextValue | undefined>(undefined);
 const initial: PlayerState = {
@@ -205,8 +217,11 @@ export default function QuranAudioProvider({
                 progress: state.progress,
                 isPlaying:
                     state.status === "playing" || state.status === "waiting",
+                repetition: state.repetition,
+                totalRepetitions: player.repeat.count,
                 toggleAudio: player.toggleTrack,
                 retryAudio,
+                stopAudio: player.stop,
                 setReaderQueue: player.register,
                 isQueuePlaying: (queue) =>
                     (state.status === "playing" ||
@@ -216,6 +231,26 @@ export default function QuranAudioProvider({
                     queuesMatch(queue, state.queue) ? state.status : "idle",
                 restartQueue: player.start,
                 toggleQueue: player.toggleQueue,
+                getPracticeTracks: (track) => {
+                    const index = player.readerQueue.findIndex((item) =>
+                        tracksMatch(item, track),
+                    );
+                    return (
+                        index < 0 ? [track] : player.readerQueue.slice(index)
+                    )
+                        .filter(
+                            (item) =>
+                                item.ayahNumber !== null && item.streams.length,
+                        )
+                        .map((item) => ({
+                            track: item,
+                            title: labelTrack(item).title,
+                        }));
+                },
+                startPractice: (queue, options) => {
+                    player.configure(options);
+                    player.start(queue);
+                },
             }}
         >
             {children}

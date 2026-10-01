@@ -20,6 +20,7 @@ export interface AyahType {
     text: string;
     tajweed?: TajweedSegment[];
     tajweedUnavailable?: boolean;
+    studyOptions?: string[];
     surah: SurahType;
     numberInSurah: number;
     juz: number;

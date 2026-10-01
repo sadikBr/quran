@@ -115,6 +115,7 @@ export function normalizeHafsMushaf(
                         numberInSurah: verse.number,
                         surah,
                         text: verse.text.replace(/\uFEFF/g, ""),
+                        studyOptions: verse.options,
                         page: verse.page_number,
                         juz,
                         hizbQuarter,
@@ -145,7 +146,7 @@ export function quranpediaPlainText(value: string) {
         .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, "")
         .replace(/<!--[\s\S]*?-->/g, "")
         .replace(/<br\s*\/?>|<\/(?:p|div|li|h[1-6])\s*>/gi, "\n")
-        .replace(/<[^>]*>/g, "")
+        .replace(/<(?:"[^"]*"|'[^']*'|[^'">])*>/g, "")
         .replace(/&(#x[\da-f]+|#\d+|[a-z]+);/gi, (match, entity: string) => {
             if (entity[0] !== "#")
                 return entities[entity.toLowerCase()] ?? match;
