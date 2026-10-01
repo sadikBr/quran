@@ -16,7 +16,6 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import ConfirmationDialog from "@/components/ui/confirmation-dialog";
-import { cn } from "@/lib/utils";
 import type {
     GroupMeetingDetails,
     MeetingOccurrenceState,
@@ -25,6 +24,7 @@ import type {
 import { getMeetingDisplayTimezone } from "../server/meeting-schedule";
 import saveGroupMeeting from "../server/save-group-meeting";
 import CancelMeetingButton from "./cancel-meeting-button";
+import MeetingCountdown from "./meeting-countdown";
 import MeetingHostControl from "./meeting-host-control";
 import MeetingScheduleFields from "./meeting-schedule-fields";
 import RescheduleMeeting from "./reschedule-meeting";
@@ -173,13 +173,7 @@ export default function GroupMeetingPanel({
             id="meeting-overview"
             className="relative mt-8 scroll-mt-24 overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-sm"
         >
-            <div
-                className={cn(
-                    "relative grid gap-5 border-t-4 border-primary/70 bg-primary/[0.035] px-4 py-5 sm:px-6 sm:py-6",
-                    (canJoin || (active && isAdmin)) &&
-                        "lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center",
-                )}
-            >
+            <div className="relative space-y-5 border-t-4 border-primary/70 bg-primary/[0.035] px-4 py-5 sm:px-6 sm:py-6">
                 <div className="flex min-w-0 items-start gap-3">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         {active ? (
@@ -188,8 +182,8 @@ export default function GroupMeetingPanel({
                             <CalendarClock className="size-5.5" />
                         )}
                     </span>
-                    <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center justify-between gap-2.5">
                             <p className="text-xs font-bold tracking-[0.15em] text-primary uppercase">
                                 {active ? t("liveEyebrow") : t("eyebrow")}
                             </p>
@@ -237,19 +231,36 @@ export default function GroupMeetingPanel({
                                 ))}
                             </div>
                         )}
+                    </div>
+                </div>
+
+                {meeting && !active && (
+                    <div className="flex flex-col gap-4 border-t border-primary/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                        {meeting &&
+                            state?.status === "upcoming" &&
+                            state.nextStartsAt && (
+                                <MeetingCountdown
+                                    startsAt={state.nextStartsAt}
+                                />
+                            )}
                         {meeting && !canJoin && (
-                            <span className="mt-5 inline-flex w-fit items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-xs font-semibold text-primary ring-1 ring-primary/15">
-                                <CalendarClock className="size-4" />
+                            <span className="inline-flex w-fit items-start gap-2 rounded-lg bg-primary/10 px-3 py-2 text-xs font-semibold text-primary ring-1 ring-primary/15">
+                                <CalendarClock className="size-4 shrink-0" />
                                 {active
                                     ? t("providerUnavailable")
                                     : t("notOpen")}
                             </span>
                         )}
                     </div>
-                </div>
+                )}
+                {meeting && active && !canJoin && (
+                    <p className="text-sm text-muted-foreground">
+                        {t("providerUnavailable")}
+                    </p>
+                )}
 
                 {(canJoin || (active && isAdmin)) && (
-                    <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-primary/10 pt-5">
                         {canJoin && (
                             <Button
                                 asChild

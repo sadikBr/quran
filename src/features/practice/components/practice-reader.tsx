@@ -13,6 +13,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import ConfirmationDialog from "@/components/ui/confirmation-dialog";
+import ReviewMethodLabel from "@/features/groups/components/review-method-label";
 import Ayah from "@/features/quran/components/ayah";
 import GuidedReader, {
     GuidedReaderSurah,
@@ -207,6 +208,7 @@ export default function PracticeReader({
                 </Button>
             }
         >
+            <ReviewMethodLabel method={assignment.reviewMethod} />
             {assignment.source === "group" && assignment.reviewNote && (
                 <section className="mt-6 rounded-2xl bg-primary/[0.07] px-5 py-4 ring-1 ring-primary/15">
                     <p className="text-xs font-semibold text-primary">

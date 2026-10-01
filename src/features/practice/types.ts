@@ -40,6 +40,7 @@ export interface PracticeAssignment {
     reviewNote: string | null;
     submittedAt: Date | null;
     reviewedAt: Date | null;
+    reviewMethod?: "self" | "peer" | null;
 }
 
 export function referenceOrder(reference: QuranReference) {

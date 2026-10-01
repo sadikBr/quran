@@ -86,7 +86,9 @@ export default async function GroupsPage({
                                                     "supervisor" && (
                                                     <Shield className="size-3 text-primary" />
                                                 )}
-                                                {t(`role.${group.role}`)}
+                                                {t(
+                                                    `role.${group.role === "member" && group.isReviewer ? (group.reviewerScope === "supervisor" ? "supervisorReviewer" : "reviewer") : group.role}`,
+                                                )}
                                             </span>
                                         </div>
                                         {group.description && (

@@ -15,6 +15,7 @@ import type { PracticeKind } from "@/features/practice/types";
 export interface MeetingAgendaAssignment {
     id: string;
     carriedForward: boolean;
+    reviewMethod: "self" | "peer" | null;
     kind: PracticeKind;
     status:
         | "in_progress"
@@ -33,6 +34,7 @@ export interface MeetingAgendaMember {
     name: string;
     image: string | null;
     role: "supervisor" | "member";
+    canReview: boolean;
     attendance: "present" | "left" | "waiting" | "not_started";
     reviewState: "none" | "partial" | "done";
     queuePosition: number | null;
@@ -62,7 +64,12 @@ export default async function getMeetingAgenda({
     if (!occurrenceStartsAt) return null;
 
     const [requestingMembership] = await db
-        .select({ id: groupMember.id })
+        .select({
+            id: groupMember.id,
+            role: groupMember.role,
+            isReviewer: groupMember.isReviewer,
+            reviewerScope: groupMember.reviewerScope,
+        })
         .from(groupMember)
         .where(
             and(
@@ -73,7 +80,7 @@ export default async function getMeetingAgenda({
         .limit(1);
     if (!requestingMembership) return null;
 
-    const members = await db
+    const allMembers = await db
         .select({
             userId: groupMember.userId,
             name: user.name,
@@ -84,6 +91,16 @@ export default async function getMeetingAgenda({
         .innerJoin(user, eq(groupMember.userId, user.id))
         .where(eq(groupMember.groupId, groupId))
         .orderBy(asc(user.name));
+    const canReviewMember = (member: (typeof allMembers)[number]) =>
+        member.userId !== requestingUserId &&
+        (requestingMembership.role === "supervisor" ||
+            (requestingMembership.isReviewer &&
+                (requestingMembership.reviewerScope === "all" ||
+                    member.role === "supervisor")));
+    const members = allMembers.filter(
+        (member) =>
+            member.userId === requestingUserId || canReviewMember(member),
+    );
     if (members.length === 0) return null;
 
     const assignments = await db
@@ -94,6 +111,7 @@ export default async function getMeetingAgenda({
             status: practiceAssignment.status,
             dueAt: practiceAssignment.dueAt,
             reviewedForDueAt: practiceAssignment.reviewedForDueAt,
+            reviewMethod: practiceAssignment.reviewMethod,
             startSurahNumber: practiceAssignment.startSurahNumber,
             startAyahNumber: practiceAssignment.startAyahNumber,
             endSurahNumber: practiceAssignment.endSurahNumber,
@@ -103,6 +121,10 @@ export default async function getMeetingAgenda({
         .where(
             and(
                 eq(practiceAssignment.groupId, groupId),
+                inArray(
+                    practiceAssignment.assigneeId,
+                    members.map((member) => member.userId),
+                ),
                 or(
                     eq(practiceAssignment.dueAt, occurrenceStartsAt),
                     eq(practiceAssignment.reviewedForDueAt, occurrenceStartsAt),
@@ -158,6 +180,7 @@ export default async function getMeetingAgenda({
             .map(
                 (assignment): MeetingAgendaAssignment => ({
                     id: assignment.id,
+                    reviewMethod: assignment.reviewMethod,
                     carriedForward:
                         assignment.status === "submitted" &&
                         assignment.dueAt !== null &&
@@ -193,6 +216,7 @@ export default async function getMeetingAgenda({
             name: member.name,
             image: member.image,
             role: member.role as MeetingAgendaMember["role"],
+            canReview: canReviewMember(member),
             attendance: !active
                 ? ("not_started" as const)
                 : connected

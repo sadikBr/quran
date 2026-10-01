@@ -132,6 +132,8 @@ export async function expireUnsubmittedAssignments(
                     status: "not_completed",
                     dueAt: next ?? row.dueAt,
                     reviewedAt: now,
+                    reviewedById: null,
+                    reviewMethod: null,
                     submittedAt: null,
                     progressSurahNumber: null,
                     progressAyahNumber: null,

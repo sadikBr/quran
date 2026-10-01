@@ -10,25 +10,57 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { leaveGroup, removeGroupMember } from "../server/manage-group";
-import type { GroupRole } from "../types";
+import {
+    leaveGroup,
+    removeGroupMember,
+    setGroupReviewer,
+} from "../server/manage-group";
+import type { GroupRole, ReviewerRole, ReviewerScope } from "../types";
 
 export function MemberActions({
     groupId,
     membershipId,
     role,
+    isReviewer,
+    reviewerScope,
 }: {
     groupId: string;
     membershipId: string;
     role: GroupRole;
+    isReviewer: boolean;
+    reviewerScope: ReviewerScope;
 }) {
     const t = useTranslations("Groups.detail");
     const router = useRouter();
     const [pending, setPending] = useState(false);
     const [confirming, setConfirming] = useState(false);
     if (role === "supervisor") return null;
+    async function changeReviewer(reviewerRole: ReviewerRole) {
+        setPending(true);
+        try {
+            const result = await setGroupReviewer({
+                groupId,
+                membershipId,
+                reviewerRole,
+            });
+            if (!result.success) {
+                toast.error(t("failed"));
+                return;
+            }
+            toast.success(t("updated"));
+            router.refresh();
+        } catch {
+            toast.error(t("failed"));
+        } finally {
+            setPending(false);
+        }
+    }
     async function remove() {
         setPending(true);
         try {
@@ -58,6 +90,32 @@ export function MemberActions({
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{t("reviewRole")}</DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                    value={isReviewer ? reviewerScope : "none"}
+                    onValueChange={(value) => {
+                        if (
+                            value === "none" ||
+                            value === "all" ||
+                            value === "supervisor"
+                        )
+                            void changeReviewer(value);
+                    }}
+                >
+                    <DropdownMenuRadioItem value="none" disabled={pending}>
+                        {t("noReviewRole")}
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                        value="supervisor"
+                        disabled={pending}
+                    >
+                        {t("supervisorReviewer")}
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="all" disabled={pending}>
+                        {t("reviewer")}
+                    </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
                     variant="destructive"
                     disabled={pending}

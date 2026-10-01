@@ -3,12 +3,13 @@ import "server-only";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import db from "@/drizzle/db";
 import { groupMember, practiceAssignment, user } from "@/drizzle/schema";
+import { assignmentReviewPermission } from "./assignment-review-permission";
 import {
     attendedAssignment,
     getLiveReviewContext,
 } from "./live-review-context";
 
-// Keep the queue scoped to the authenticated supervisor's selected circle.
+// Keep the queue scoped to the authenticated member's permitted assignments in the selected circle.
 export default async function getReviewQueue(
     groupId: string,
     userId: string,
@@ -25,7 +26,7 @@ export default async function getReviewQueue(
             and(
                 eq(groupMember.groupId, practiceAssignment.groupId),
                 eq(groupMember.userId, userId),
-                eq(groupMember.role, "supervisor"),
+                assignmentReviewPermission(userId),
             ),
         )
         .where(

@@ -69,6 +69,7 @@ function setup(options = {}) {
         "@/drizzle/schema": {
             practiceAssignment: column,
             groupMeetingSession: column,
+            memorizationGroup: column,
         },
         "@/features/auth/auth": {
             auth: {
@@ -84,6 +85,9 @@ function setup(options = {}) {
             getGroupMeetingForUser: async () => ({ id: "meeting" }),
         },
         "./get-review-queue": async () => [],
+        "./assignment-review-permission": {
+            assignmentReviewPermission: () => "permitted",
+        },
         "./live-review-context": {
             getLiveReviewContext: async (...args) => {
                 calls.push(["context", ...args]);
@@ -165,7 +169,7 @@ test("meeting end or missing future schedule prevents a successful save", async 
     ).toBe("no_next_meeting");
     expect(calls.some(([name]) => name === "save")).toBe(false);
 });
-test("database guard requires start, role, supervisor presence, but not member connectivity", () => {
+test("database guard requires start, membership, reviewer presence, but not assignee connectivity", () => {
     const source = file("features/groups/server/live-review-context.ts");
     for (const guard of [
         "startedAt",
@@ -174,7 +178,7 @@ test("database guard requires start, role, supervisor presence, but not member c
         "cancelledAt",
         "scheduledEndsAt",
         "scheduledStartsAt",
-        '"supervisor"',
+        "groupMember.userId",
         "activeJoinedAt",
         "lastSeenAt",
         "75 seconds",
@@ -191,7 +195,7 @@ test("standalone inspection cannot render evaluation controls and submitted work
     expect(page).not.toContain("occurrence=");
     expect(page).not.toContain("ReviewDecisionForm");
     expect(file("features/groups/components/assignment-review.tsx")).toContain(
-        "occurrence ?",
+        "occurrence && review.canReview ?",
     );
     const expiry = file(
         "features/groups/server/expire-unsubmitted-assignments.ts",

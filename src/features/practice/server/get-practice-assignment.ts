@@ -20,7 +20,7 @@ const activeStatuses = [
 
 type AssignmentRow = Omit<
     typeof practiceAssignment.$inferSelect,
-    "reviewedForDueAt"
+    "reviewedForDueAt" | "reviewedById"
 > & {
     groupName: string | null;
     meetingTimezone: string | null;
@@ -58,6 +58,7 @@ function mapAssignment(result: AssignmentRow): PracticeAssignment {
         reviewNote: result.reviewNote,
         submittedAt: result.submittedAt,
         reviewedAt: result.reviewedAt,
+        reviewMethod: result.reviewMethod,
     };
 }
 
@@ -81,6 +82,7 @@ function assignmentSelection() {
         reviewNote: practiceAssignment.reviewNote,
         submittedAt: practiceAssignment.submittedAt,
         reviewedAt: practiceAssignment.reviewedAt,
+        reviewMethod: practiceAssignment.reviewMethod,
         createdAt: practiceAssignment.createdAt,
         updatedAt: practiceAssignment.updatedAt,
         groupName: memorizationGroup.name,

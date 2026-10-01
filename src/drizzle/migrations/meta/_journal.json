@@ -141,6 +141,20 @@
       "when": 1790813120050,
       "tag": "0019_nebulous_drax",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790852624952,
+      "tag": "0020_halqa_reviewers",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1790853989275,
+      "tag": "0021_supervisor_reviewer_scope",
+      "breakpoints": true
     }
   ]
 }

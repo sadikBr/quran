@@ -58,6 +58,8 @@ export default async function savePracticeAssignment(input: unknown) {
         status: "in_progress",
         submittedAt: null,
         reviewedAt: null,
+        reviewedById: null,
+        reviewMethod: null,
         reviewNote: null,
         updatedAt: new Date(),
     };

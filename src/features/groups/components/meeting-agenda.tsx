@@ -26,6 +26,7 @@ import type {
 } from "@/features/groups/server/get-meeting-agenda";
 import { getMeetingDisplayTimezone } from "@/features/groups/server/meeting-schedule";
 import { cn } from "@/lib/utils";
+import ReviewMethodLabel from "./review-method-label";
 
 function initials(name: string) {
     return name
@@ -41,7 +42,7 @@ export default function MeetingAgenda({
     groupId,
     agenda,
     currentUserId,
-    isAdmin,
+    canReviewOthers,
     locale,
     timezone,
     surahNames,
@@ -50,7 +51,7 @@ export default function MeetingAgenda({
     groupId: string;
     agenda: MeetingAgendaData;
     currentUserId: string;
-    isAdmin: boolean;
+    canReviewOthers: boolean;
     locale: string;
     timezone: string;
     surahNames: Record<number, string>;
@@ -61,7 +62,7 @@ export default function MeetingAgenda({
     const router = useRouter();
     const isArabic = locale === "ar";
     const DirectionArrow = isArabic ? ArrowLeft : ArrowRight;
-    const visibleMembers = isAdmin
+    const visibleMembers = canReviewOthers
         ? agenda.members
         : agenda.members.filter((member) => member.userId === currentUserId);
 
@@ -147,7 +148,7 @@ export default function MeetingAgenda({
                                 : "mt-2 text-xl sm:text-2xl",
                         )}
                     >
-                        {t(isAdmin ? "title" : "yourAssignments")}
+                        {t(canReviewOthers ? "title" : "yourAssignments")}
                     </h2>
                     {!embedded && (
                         <p className="mt-1.5 text-sm text-muted-foreground">
@@ -156,7 +157,7 @@ export default function MeetingAgenda({
                     )}
                 </div>
 
-                {isAdmin && (
+                {canReviewOthers && (
                     <div
                         className={cn(
                             "grid grid-cols-3 gap-2 text-center",
@@ -194,7 +195,7 @@ export default function MeetingAgenda({
                             key={member.userId}
                             className="group/member bg-background/15 open:bg-background/45"
                             open={
-                                !isAdmin ||
+                                !canReviewOthers ||
                                 (agenda.active &&
                                     (member.queuePosition === 1 ||
                                         (isCurrentUser &&
@@ -231,13 +232,14 @@ export default function MeetingAgenda({
                                     </p>
                                 </div>
 
-                                {isAdmin && member.queuePosition !== null && (
-                                    <span className="hidden rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary sm:inline-flex">
-                                        {t("queuePosition", {
-                                            position: member.queuePosition,
-                                        })}
-                                    </span>
-                                )}
+                                {canReviewOthers &&
+                                    member.queuePosition !== null && (
+                                        <span className="hidden rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary sm:inline-flex">
+                                            {t("queuePosition", {
+                                                position: member.queuePosition,
+                                            })}
+                                        </span>
+                                    )}
                                 {agenda.active && (
                                     <span
                                         className={cn(
@@ -325,6 +327,11 @@ export default function MeetingAgenda({
                                                                     `statuses.${assignment.status}`,
                                                                 )}
                                                             </span>
+                                                            <ReviewMethodLabel
+                                                                method={
+                                                                    assignment.reviewMethod
+                                                                }
+                                                            />
                                                             {assignment.carriedForward && (
                                                                 <span className="text-xs text-muted-foreground">
                                                                     {t(
@@ -340,7 +347,7 @@ export default function MeetingAgenda({
                                                         </p>
                                                     </div>
 
-                                                    {isAdmin &&
+                                                    {member.canReview &&
                                                         canReviewAssignment(
                                                             assignment.status,
                                                             agenda.occurrenceStartsAt,

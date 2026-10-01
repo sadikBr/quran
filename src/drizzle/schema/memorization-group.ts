@@ -45,6 +45,10 @@ export const groupMember = pgTable(
         role: text("role", { enum: ["supervisor", "member"] })
             .notNull()
             .default("member"),
+        isReviewer: boolean("is_reviewer").notNull().default(false),
+        reviewerScope: text("reviewer_scope", { enum: ["all", "supervisor"] })
+            .notNull()
+            .default("all"),
         createdAt,
         updatedAt,
     },
@@ -54,6 +58,10 @@ export const groupMember = pgTable(
             table.userId,
         ),
         index("group_member_user_idx").on(table.userId),
+        check(
+            "group_member_reviewer_scope_check",
+            sql`${table.reviewerScope} in ('all', 'supervisor')`,
+        ),
         check(
             "group_member_role_check",
             sql`${table.role} in ('supervisor', 'member')`,

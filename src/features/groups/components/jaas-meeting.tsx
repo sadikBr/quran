@@ -48,6 +48,7 @@ export default function JaasMeeting({
     displayName,
     email,
     canReview = false,
+    canManageMeeting = false,
     occurrence,
 }: {
     appId: string;
@@ -58,6 +59,7 @@ export default function JaasMeeting({
     displayName: string;
     email: string;
     canReview?: boolean;
+    canManageMeeting?: boolean;
     occurrence: string;
 }) {
     const t = useTranslations("Groups.meeting.room");
@@ -269,7 +271,7 @@ export default function JaasMeeting({
                             )}
                         </Button>
                     )}
-                    {canReview && (
+                    {canManageMeeting && (
                         <Button
                             variant="destructive"
                             size="sm"
@@ -282,7 +284,7 @@ export default function JaasMeeting({
                             {ending ? t("ending") : t("end")}
                         </Button>
                     )}
-                    {canReview && (
+                    {canManageMeeting && (
                         <Button
                             size="sm"
                             variant="outline"

@@ -18,7 +18,7 @@ export default async function getRevisionAvailability(
         assignmentId,
         session.user.id,
     );
-    if (!review) throw new Error("Unauthorized");
+    if (!review?.canReview) throw new Error("Unauthorized");
     const context = await getLiveReviewContext(
         groupId,
         session.user.id,

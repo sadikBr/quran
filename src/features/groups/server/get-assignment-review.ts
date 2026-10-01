@@ -13,9 +13,14 @@ import type {
     PracticeKind,
 } from "@/features/practice/types";
 import type { Riwayah } from "@/features/settings/preferences";
+import {
+    assignmentReadPermission,
+    assignmentReviewPermission,
+} from "./assignment-review-permission";
 
 export interface AssignmentReviewData {
     assignment: PracticeAssignment;
+    canReview: boolean;
     assignee: {
         id: string;
         name: string;
@@ -27,11 +32,12 @@ export interface AssignmentReviewData {
 export default async function getAssignmentReview(
     groupId: string,
     assignmentId: string,
-    adminUserId: string,
+    reviewerUserId: string,
 ): Promise<AssignmentReviewData | null> {
     const [row] = await db
         .select({
             id: practiceAssignment.id,
+            canReview: assignmentReviewPermission(reviewerUserId),
             groupId: practiceAssignment.groupId,
             groupName: memorizationGroup.name,
             kind: practiceAssignment.kind,
@@ -48,6 +54,7 @@ export default async function getAssignmentReview(
             reviewNote: practiceAssignment.reviewNote,
             submittedAt: practiceAssignment.submittedAt,
             reviewedAt: practiceAssignment.reviewedAt,
+            reviewMethod: practiceAssignment.reviewMethod,
             assigneeId: user.id,
             assigneeName: user.name,
             assigneeEmail: user.email,
@@ -63,8 +70,8 @@ export default async function getAssignmentReview(
             groupMember,
             and(
                 eq(groupMember.groupId, groupId),
-                eq(groupMember.userId, adminUserId),
-                eq(groupMember.role, "supervisor"),
+                eq(groupMember.userId, reviewerUserId),
+                assignmentReadPermission(reviewerUserId),
             ),
         )
         .where(
@@ -78,6 +85,7 @@ export default async function getAssignmentReview(
     if (!row) return null;
 
     return {
+        canReview: row.canReview,
         assignment: {
             id: row.id,
             kind: row.kind as PracticeKind,
@@ -108,6 +116,7 @@ export default async function getAssignmentReview(
             reviewNote: row.reviewNote,
             submittedAt: row.submittedAt,
             reviewedAt: row.reviewedAt,
+            reviewMethod: row.reviewMethod,
         },
         assignee: {
             id: row.assigneeId,

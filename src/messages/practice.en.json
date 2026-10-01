@@ -88,13 +88,13 @@
             "saved": "Your practice place has been saved.",
             "rangeReached": "You reached the end of this range.",
             "assignmentReached": "You reached the end of your assignment",
-            "submitDescription": "When you feel prepared, send this assignment to your admin for review.",
+            "submitDescription": "When you feel prepared, confirm that this assignment is ready for review.",
             "submitForReview": "Ready for review",
             "submitting": "Sending…",
             "submitted": "Your assignment is ready for review.",
-            "awaitingReview": "Your admin can now review this assignment with you.",
+            "awaitingReview": "This assignment is now ready for review.",
             "submitError": "We couldn’t submit this assignment. Please try again.",
-            "feedbackTitle": "Feedback from your admin",
+            "feedbackTitle": "Review feedback",
             "saveError": "We could not save your practice place."
         },
         "dashboard": {

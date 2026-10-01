@@ -59,8 +59,8 @@ function notificationCopy({
             return {
                 title: "اعتُمد إنجاز تكليفك",
                 body: feedback
-                    ? `اعتمد مشرف حلقة «${groupName}» إنجازك. ملاحظته: ${feedback}`
-                    : `أحسنت! اعتمد مشرف حلقة «${groupName}» إنجاز تكليفك.`,
+                    ? `اعتمد مراجع حلقة «${groupName}» إنجازك. ملاحظته: ${feedback}`
+                    : `أحسنت! اعتمد مراجع حلقة «${groupName}» إنجاز تكليفك.`,
             };
         }
 
@@ -68,8 +68,8 @@ function notificationCopy({
             return {
                 title: "يحتاج تكليفك إلى مزيد من المراجعة",
                 body: feedback
-                    ? `أعاد إليك مشرف حلقة «${groupName}» التكليف. ملاحظته: ${feedback}`
-                    : `طلب منك مشرف حلقة «${groupName}» مراجعة التكليف مرة أخرى.`,
+                    ? `أعاد إليك مراجع حلقة «${groupName}» التكليف. ملاحظته: ${feedback}`
+                    : `طلب منك مراجع حلقة «${groupName}» مراجعة التكليف مرة أخرى.`,
             };
         }
 
@@ -156,6 +156,7 @@ export async function sendAssignmentNotification(
             status: practiceAssignment.status,
             reviewNote: practiceAssignment.reviewNote,
             reviewedAt: practiceAssignment.reviewedAt,
+            reviewMethod: practiceAssignment.reviewMethod,
             groupName: memorizationGroup.name,
             language: userSettings.language,
             remindersEnabled: userSettings.assignmentRemindersEnabled,
@@ -195,7 +196,8 @@ export async function sendAssignmentNotification(
     if (
         !assignment ||
         !assignment.groupName ||
-        assignment.assigneeRole === "supervisor" ||
+        !assignment.assigneeRole ||
+        (reviewKind && assignment.reviewMethod === "self") ||
         assignment.remindersEnabled === false ||
         assignment.status === "draft" ||
         (reviewKind && !statusMatchesReview) ||

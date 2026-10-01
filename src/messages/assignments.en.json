@@ -23,7 +23,7 @@
             "closed": "Meeting ended",
             "activeUnsubmitted": "The meeting is still open. You can continue practicing and submit your assignment for review before it ends.",
             "activeSubmitted": "Your assignments are submitted. Follow the meeting to see when it is your turn.",
-            "closedSubmitted": "Your assignments are still awaiting the supervisor’s review.",
+            "closedSubmitted": "Your assignments are still awaiting review.",
             "closedUnsubmitted": "The meeting has ended. Unsubmitted assignments are marked as not completed and moved to the next meeting when the end-of-meeting update runs.",
             "openMeeting": "View meeting",
             "next": "Next meeting",
@@ -64,7 +64,7 @@
             "continue": "Continue practice",
             "start": "Start practice",
             "reviewPending": "Ready for review",
-            "feedback": "Supervisor feedback",
+            "feedback": "Review feedback",
             "kinds": {
                 "memorization": "New memorization",
                 "revision": "Revision"

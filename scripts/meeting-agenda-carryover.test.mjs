@@ -32,7 +32,14 @@ async function agendaFor(rows) {
             let predicate;
             const result = () =>
                 [
-                    [{ id: "membership" }],
+                    [
+                        {
+                            id: "membership",
+                            role: "supervisor",
+                            isReviewer: false,
+                            reviewerScope: "all",
+                        },
+                    ],
                     [
                         {
                             userId: "member",

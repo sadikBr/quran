@@ -11,15 +11,15 @@
             "waiting": "You’ve joined the circle. Your supervisor will assign your work here.",
             "prepare": "Prepare your next assignment",
             "feedback": "View feedback and prepare again",
-            "results": "View your supervisor’s feedback",
+            "results": "View your review feedback",
             "awaiting": "Awaiting recitation",
             "continue": "Continue practising",
             "ready": "I’m ready to recite",
             "readyTitle": "Ready to recite this assignment?",
-            "readyDescription": "Confirm that you have prepared the assigned passage, whether in the app or from your own mushaf. This tells your supervisor you are ready; it does not mark the assignment as approved.",
+            "readyDescription": "Confirm that you have prepared the assigned passage, whether in the app or from your own mushaf. This marks you ready for review; it does not mark the assignment as approved.",
             "confirm": "Confirm readiness",
             "cancel": "Cancel",
-            "readySaved": "Your supervisor can now review this assignment.",
+            "readySaved": "Your assignment is ready for review.",
             "error": "Could not save. Please try again.",
             "schedule": "Meeting schedule",
             "setup": "Set meeting times",
@@ -43,8 +43,8 @@
             "signIn": "Sign in",
             "back": "Back to the circle",
             "checkingSchedule": "Checking the next meeting…",
-            "needsSchedule": "Set an upcoming meeting before returning this work for revision. Your feedback stays here while you update the schedule.",
-            "openSchedule": "Set meeting times (opens a new tab)",
+            "needsSchedule": "An upcoming meeting is needed before returning the assignment. Ask the supervisor to update the schedule, then check again. Your notes will stay here.",
+            "openSchedule": "View schedule (new tab)",
             "checkSchedule": "Check schedule again",
             "nextReview": "Work will be assigned again for {date}.",
             "scheduleError": "Could not check the next meeting. Try again before saving.",
@@ -60,7 +60,9 @@
         "members": "{count, plural, one {# member} other {# members}}",
         "role": {
             "supervisor": "Supervisor",
-            "member": "Member"
+            "member": "Member",
+            "reviewer": "Reviewer",
+            "supervisorReviewer": "Supervisor reviewer"
         },
         "open": "Open group",
         "create": {
@@ -111,7 +113,14 @@
             "lastAdmin": "Choose another supervisor before removing or changing the final admin.",
             "meetingHost": "The platform admin must appoint a replacement before the supervisor can leave.",
             "updated": "Group membership updated.",
-            "failed": "We couldn’t update the group. Please try again."
+            "failed": "We couldn’t update the group. Please try again.",
+            "reviewerDescription": "Nobody can review their own assignment, including the supervisor. A supervisor reviewer can review only the current supervisor’s work. A reviewer can review any other member’s work. Only the supervisor assigns these roles.",
+            "reviewRole": "Review role",
+            "noReviewRole": "No review role",
+            "supervisorReviewer": "Supervisor reviewer",
+            "reviewer": "Reviewer",
+            "assignYourReviewer": "Your assignments need another person’s review. Appoint a supervisor reviewer or a reviewer from your members.",
+            "chooseReviewer": "Choose a reviewer"
         },
         "assignments": {
             "viewDetails": "View assignment",
@@ -256,7 +265,7 @@
             "chooseMember": "Choose a member’s assignment",
             "switchMemberConfirm": "Switch assignments? Any unsaved feedback for this member will be discarded.",
             "details": "View assignment",
-            "feedback": "Supervisor feedback",
+            "feedback": "Review feedback",
             "openInMeeting": "Review assignments",
             "reviewPaused": "Review saved. You can return to the call or check for more submissions.",
             "backToMeeting": "Back to meeting",
@@ -265,13 +274,13 @@
             "loadError": "Couldn’t load the review. Your call is still connected.",
             "refreshQueue": "Check pending reviews",
             "startQueue": "Review submissions ({count})",
-            "queueRemaining": "Awaiting review in this circle: {count}",
+            "queueRemaining": "Assignments you can review: {count}",
             "saveAndNext": "Save and review next",
             "saveAndFinish": "Save and finish",
             "saveAndReturn": "Save and return to assignments",
             "saving": "Saving review…",
-            "queueComplete": "All caught up! No submissions are awaiting review in this circle.",
-            "eyebrow": "ADMIN REVIEW",
+            "queueComplete": "No assignments are currently waiting for your review.",
+            "eyebrow": "ASSIGNMENT REVIEW",
             "title": "Review {name}’s assignment",
             "description": "Use the Quran text while listening, then record the outcome of this review.",
             "back": "Back to assignments",
@@ -290,13 +299,15 @@
             "needsRevision": "Needs more work",
             "complete": "Mark completed",
             "revisionHint": "The assignment will become a revision task and move to the following scheduled meeting, with feedback saved and practice progress reset. If that meeting has passed, the next upcoming meeting is used.",
-            "noNextMeeting": "Schedule an upcoming meeting for this circle before returning the assignment. Your review has not been saved.",
+            "noNextMeeting": "An upcoming meeting is needed before returning this assignment. Ask the supervisor to update the schedule. Your review has not been saved.",
             "completedSuccess": "The assignment has been completed.",
             "revisionSuccess": "The assignment was returned for more work.",
             "error": "We couldn’t save this review. The assignment may already have been reviewed.",
             "notReadyTitle": "This assignment is not waiting for review",
-            "notReadyDescription": "The learner may still be working on it, or another supervisor has already reviewed it.",
-            "returnToGroup": "Return to group"
+            "notReadyDescription": "The learner may still be working on it, or someone has already reviewed it.",
+            "returnToGroup": "Return to group",
+            "selfReviewed": "Self-reviewed",
+            "peerReviewed": "Reviewed by another member"
         },
         "dashboard": {
             "eyebrow": "Your Quran circles",
@@ -482,7 +493,13 @@
                 "waitingTitle": "The meeting will begin shortly",
                 "waitingDescription": "You’ll enter automatically as soon as {name} starts the meeting.",
                 "checkingHost": "Checking for the host…"
-            }
+            },
+            "countdownStartsIn": "Starts in {duration}",
+            "countdownNow": "The meeting time has arrived",
+            "countdownSoon": "Starts in less than a minute",
+            "countdownDays": "{count, plural, one {# day} other {# days}}",
+            "countdownHours": "{count, plural, one {# hour} other {# hours}}",
+            "countdownMinutes": "{count, plural, one {# minute} other {# minutes}}"
         },
         "loading": "Loading your groups…"
     }

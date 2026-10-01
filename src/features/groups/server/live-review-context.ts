@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, gt, isNotNull, isNull, lte, sql } from "drizzle-orm";
+import { and, eq, gt, isNotNull, isNull, lte, or, sql } from "drizzle-orm";
 import db from "@/drizzle/db";
 import {
     groupMeeting,
@@ -34,7 +34,10 @@ export async function getLiveReviewContext(
             and(
                 eq(groupMember.groupId, groupId),
                 eq(groupMember.userId, userId),
-                eq(groupMember.role, "supervisor"),
+                or(
+                    eq(groupMember.role, "supervisor"),
+                    eq(groupMember.isReviewer, true),
+                ),
             ),
         )
         .innerJoin(
@@ -68,7 +71,7 @@ export async function getLiveReviewContext(
         )
         .limit(1);
     const [context] = lock
-        ? await query.for("update", { of: groupMeetingSession })
+        ? await query.for("update", { of: [groupMeetingSession, groupMember] })
         : await query;
     return context ?? null;
 }

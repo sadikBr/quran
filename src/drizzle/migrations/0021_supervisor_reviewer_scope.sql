@@ -1,0 +1,2 @@
+ALTER TABLE "group_member" ADD COLUMN "reviewer_scope" text DEFAULT 'all' NOT NULL;--> statement-breakpoint
+ALTER TABLE "group_member" ADD CONSTRAINT "group_member_reviewer_scope_check" CHECK ("group_member"."reviewer_scope" in ('all', 'supervisor'));

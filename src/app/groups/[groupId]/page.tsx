@@ -26,6 +26,7 @@ import GroupInvite from "@/features/groups/components/group-invite";
 import GroupMeetingPanel from "@/features/groups/components/group-meeting-panel";
 import MeetingAgenda from "@/features/groups/components/meeting-agenda";
 import MeetingHistory from "@/features/groups/components/meeting-history";
+import ReviewMethodLabel from "@/features/groups/components/review-method-label";
 import { isJaasConfigured } from "@/features/groups/server/create-jaas-token";
 import getGroupActivity from "@/features/groups/server/get-group-activity";
 import getGroupAssignments from "@/features/groups/server/get-group-assignments";
@@ -75,9 +76,10 @@ export default async function GroupPage({
     const isArabic = preferences.language === "ar";
     const isAdmin = group.role === "supervisor";
     const canLeave = !isAdmin;
+    const canReviewOthers = isAdmin || group.isReviewer;
     const [assignments, meeting, meetingHistory, activity, surahs] =
         await Promise.all([
-            getGroupAssignments(group.id, session.user.id, isAdmin),
+            getGroupAssignments(group.id, session.user.id, canReviewOthers),
             getGroupMeetingForUser(group.id, session.user.id),
             getMeetingHistory(group.id, session.user.id, isAdmin, { limit: 2 }),
             getGroupActivity(group.id, session.user.id, isAdmin),
@@ -108,15 +110,12 @@ export default async function GroupPage({
                   active: meetingState?.status === "active",
               })
             : null;
-    const latestFeedback = !isAdmin
-        ? assignments
-              .filter((item) => item.reviewedAt)
-              .sort(
-                  (a, b) =>
-                      (b.reviewedAt?.getTime() ?? 0) -
-                      (a.reviewedAt?.getTime() ?? 0),
-              )[0]
-        : null;
+    const latestFeedback = assignments
+        .filter((item) => item.reviewedAt && item.assigneeId === currentUserId)
+        .sort(
+            (a, b) =>
+                (b.reviewedAt?.getTime() ?? 0) - (a.reviewedAt?.getTime() ?? 0),
+        )[0];
 
     return (
         <main
@@ -145,6 +144,15 @@ export default async function GroupPage({
                                         : "role.member",
                                 )}
                             </div>
+                            {group.isReviewer && !isAdmin && (
+                                <p className="mt-1 text-xs text-primary">
+                                    {t(
+                                        group.reviewerScope === "supervisor"
+                                            ? "role.supervisorReviewer"
+                                            : "role.reviewer",
+                                    )}
+                                </p>
+                            )}
                             <h1 className="mt-2 break-words text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">
                                 {group.name}
                             </h1>
@@ -160,6 +168,22 @@ export default async function GroupPage({
                         </div>
                     </div>
 
+                    {isAdmin &&
+                        !group.members.some(
+                            (member) =>
+                                member.userId !== currentUserId &&
+                                member.isReviewer,
+                        ) && (
+                            <p className="mt-4 rounded-xl border border-primary/15 bg-primary/5 p-4 text-sm leading-6">
+                                {t("detail.assignYourReviewer")}{" "}
+                                <a
+                                    href="#members"
+                                    className="font-medium text-primary underline"
+                                >
+                                    {t("detail.chooseReviewer")}
+                                </a>
+                            </p>
+                        )}
                     <CircleNextStep
                         groupId={group.id}
                         supervisor={isAdmin}
@@ -171,7 +195,14 @@ export default async function GroupPage({
                             meeting?.enabled && meeting.schedule.length,
                         )}
                         memberCount={group.memberCount}
-                        assignments={assignments}
+                        assignments={
+                            isAdmin
+                                ? assignments
+                                : assignments.filter(
+                                      (item) =>
+                                          item.assigneeId === currentUserId,
+                                  )
+                        }
                         nextStartsAt={meetingState?.nextStartsAt}
                         pendingAbsence={Boolean(pendingAbsence)}
                         pendingAbsenceReviews={pendingAbsenceReviews.length > 0}
@@ -243,6 +274,9 @@ export default async function GroupPage({
                                             `assignments.statuses.${latestFeedback.status}`,
                                         )}
                                     </p>
+                                    <ReviewMethodLabel
+                                        method={latestFeedback.reviewMethod}
+                                    />
                                     {latestFeedback.reviewNote && (
                                         <p className="mt-2 whitespace-pre-wrap text-sm leading-6">
                                             {latestFeedback.reviewNote}
@@ -273,7 +307,7 @@ export default async function GroupPage({
                                         groupId={group.id}
                                         agenda={meetingAgenda}
                                         currentUserId={session.user.id}
-                                        isAdmin={isAdmin}
+                                        canReviewOthers={canReviewOthers}
                                         locale={preferences.language}
                                         timezone={meeting.timezone}
                                         embedded
@@ -288,6 +322,19 @@ export default async function GroupPage({
                                     />
                                 )}
                             </GroupMeetingPanel>
+                            {isAdmin && (
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    className="min-h-11 w-full rounded-xl"
+                                >
+                                    <Link
+                                        href={`/assignments?group=${group.id}`}
+                                    >
+                                        {t("assignments.openMyAssignments")}
+                                    </Link>
+                                </Button>
+                            )}
                             <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-card/40 p-4">
                                 <h2 className="text-sm font-semibold">
                                     {t(
@@ -355,7 +402,10 @@ export default async function GroupPage({
                             />
 
                             <section className="mt-12 border-border/60 border-t pt-8 sm:mt-16 sm:pt-10">
-                                <details className="group/members overflow-hidden rounded-2xl border border-border/60 bg-card/45 shadow-sm">
+                                <details
+                                    id="members"
+                                    className="group/members scroll-mt-24 overflow-hidden rounded-2xl border border-border/60 bg-card/45 shadow-sm"
+                                >
                                     <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">
                                         <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                             <UsersRound
@@ -378,6 +428,9 @@ export default async function GroupPage({
                                             className="size-4 shrink-0 text-muted-foreground transition-transform group-open/members:rotate-180"
                                         />
                                     </summary>
+                                    <p className="border-t border-border/50 px-4 py-3 text-xs leading-6 text-muted-foreground">
+                                        {t("detail.reviewerDescription")}
+                                    </p>
                                     <div className="divide-y divide-border/50 border-border/50 border-t">
                                         {group.members.map((member) => {
                                             const isCurrentUser =
@@ -430,11 +483,29 @@ export default async function GroupPage({
                                                                 )}
                                                             </p>
                                                         )}
+                                                        {member.isReviewer &&
+                                                            member.role !==
+                                                                "supervisor" && (
+                                                                <p className="mt-0.5 text-xs text-primary">
+                                                                    {t(
+                                                                        member.reviewerScope ===
+                                                                            "supervisor"
+                                                                            ? "role.supervisorReviewer"
+                                                                            : "role.reviewer",
+                                                                    )}
+                                                                </p>
+                                                            )}
                                                     </div>
                                                     {isAdmin &&
                                                         !isCurrentUser && (
                                                             <div className="shrink-0">
                                                                 <MemberActions
+                                                                    reviewerScope={
+                                                                        member.reviewerScope
+                                                                    }
+                                                                    isReviewer={
+                                                                        member.isReviewer
+                                                                    }
                                                                     groupId={
                                                                         group.id
                                                                     }

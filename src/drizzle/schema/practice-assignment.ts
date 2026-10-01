@@ -28,6 +28,10 @@ export const practiceAssignment = pgTable(
         instructions: text("instructions"),
         dueAt: timestamp("due_at", { withTimezone: true }),
         reviewNote: text("review_note"),
+        reviewedById: text("reviewed_by_id").references(() => user.id, {
+            onDelete: "set null",
+        }),
+        reviewMethod: text("review_method", { enum: ["self", "peer"] }),
         submittedAt: timestamp("submitted_at", { withTimezone: true }),
         reviewedForDueAt: timestamp("reviewed_for_due_at", {
             withTimezone: true,

@@ -143,3 +143,17 @@ JaaS tokens. No external Jitsi account is required for family members.
 - User dashboard and progress summaries
 - Admin task assignment and points
 - Automated tests and production monitoring
+
+## Halqa participation and reviewers
+
+Every halqa member, including its supervisor, can receive assignments. **Nobody can review their own assignment.** The supervisor chooses each member’s review role from **Group → Members → member actions → Review role**:
+
+- **No review role:** participates and receives feedback.
+- **Supervisor reviewer:** reviews only the current supervisor’s assignments.
+- **Reviewer:** reviews any other member’s assignments, including the supervisor’s.
+
+The supervisor reviews other members, and appoints another member to review their own work. Review roles never grant scheduling, hosting, membership management, or absence-decision permissions. Reviews still require live attendance, and access is checked again when saving. Downgrading or removing access takes effect on the server even for an already-open review. Supervisor-only access follows the current supervisor after a handover.
+
+New reviews record the reviewer’s identity. Existing historical attribution is preserved; self-review is no longer available.
+
+Apply migrations with `bun run db:migrate` before running the updated app. Migration `0021_supervisor_reviewer_scope` preserves existing reviewers as general reviewers. Run the regression suite with `bun test scripts`. For the database integration test, set `REVIEWER_TEST_DATABASE_URL` to an **empty disposable PostgreSQL database whose name ends in `_reviewer_tests`**, then run `bun test scripts/halqa-reviewers.integration.test.mjs`. The test applies migrations and writes fixtures only to that database; it refuses nonempty databases.

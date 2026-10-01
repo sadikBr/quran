@@ -1,10 +1,14 @@
 export type GroupRole = "supervisor" | "member";
+export type ReviewerScope = "all" | "supervisor";
+export type ReviewerRole = ReviewerScope | "none";
 
 export interface GroupSummary {
     id: string;
     name: string;
     description: string | null;
     role: GroupRole;
+    isReviewer: boolean;
+    reviewerScope: ReviewerScope;
     memberCount: number;
 }
 
@@ -15,6 +19,8 @@ export interface GroupMemberDetails {
     email: string;
     image: string | null;
     role: GroupRole;
+    isReviewer: boolean;
+    reviewerScope: ReviewerScope;
     riwayah: "hafs" | "warsh";
     joinedAt: Date;
 }

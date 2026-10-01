@@ -70,7 +70,10 @@ export default async function GroupMeetingPage({
                 locale={preferences.language}
                 displayName={session.user.name}
                 email={session.user.email}
-                canReview={group?.role === "supervisor"}
+                canReview={
+                    group?.role === "supervisor" || Boolean(group?.isReviewer)
+                }
+                canManageMeeting={group?.role === "supervisor"}
                 occurrence={state.activeStartsAt}
             />
         </main>

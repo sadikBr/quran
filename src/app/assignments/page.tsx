@@ -21,6 +21,7 @@ import { auth } from "@/features/auth/auth";
 import AssignmentReadyButton from "@/features/groups/components/assignment-ready-button";
 import DeleteAssignmentButton from "@/features/groups/components/delete-assignment-button";
 import MemberAssignmentForm from "@/features/groups/components/member-assignment-form";
+import ReviewMethodLabel from "@/features/groups/components/review-method-label";
 import { canReviewAssignment } from "@/features/groups/review-eligibility";
 import getGroupAssignments from "@/features/groups/server/get-group-assignments";
 import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
@@ -346,6 +347,7 @@ export default async function AssignmentsPage({
                     </p>
                 )}
 
+                <ReviewMethodLabel method={assignment.reviewMethod} />
                 {assignment.reviewNote && (
                     <div className="mt-4 rounded-xl bg-primary/[0.07] px-4 py-3 ring-1 ring-primary/10">
                         <p className="text-xs font-semibold text-primary">
@@ -1116,6 +1118,11 @@ export default async function AssignmentsPage({
                                                                     },
                                                                 )}
                                                             </p>
+                                                            <ReviewMethodLabel
+                                                                method={
+                                                                    assignment.reviewMethod
+                                                                }
+                                                            />
                                                         </div>
                                                         {assignment.reviewedAt && (
                                                             <span className="text-xs text-muted-foreground">

@@ -5,6 +5,7 @@ import type { PracticeReaderGroup } from "@/features/practice/reader-types";
 import type { AssignmentReviewData } from "../server/get-assignment-review";
 import AssignmentReviewReader from "./assignment-review-reader";
 import ReviewDecisionForm from "./review-decision-form";
+import ReviewMethodLabel from "./review-method-label";
 
 export default function AssignmentReview({
     review,
@@ -56,6 +57,7 @@ export default function AssignmentReview({
                         endAyah: assignment.end.ayahNumber,
                     })}
                 </p>
+                <ReviewMethodLabel method={assignment.reviewMethod} />
                 {assignment.submittedAt && (
                     <p className="mt-2 text-xs text-muted-foreground">
                         {t("submitted", {
@@ -93,7 +95,7 @@ export default function AssignmentReview({
                         riwayah={assignment.riwayah}
                     />
                 </section>
-                {occurrence ? (
+                {occurrence && review.canReview ? (
                     <div className={compact ? "" : "lg:sticky lg:top-24"}>
                         <ReviewDecisionForm
                             key={assignment.id}

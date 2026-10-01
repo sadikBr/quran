@@ -6,9 +6,14 @@ import { headers } from "next/headers";
 import { after } from "next/server";
 import { z } from "zod";
 import db from "@/drizzle/db";
-import { groupMeetingSession, practiceAssignment } from "@/drizzle/schema";
+import {
+    groupMeetingSession,
+    memorizationGroup,
+    practiceAssignment,
+} from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
 import { sendAssignmentNotification } from "@/features/notifications/server/assignment-notifications";
+import { assignmentReviewPermission } from "./assignment-review-permission";
 import { getGroupMeetingForUser } from "./get-group-meeting";
 import getReviewQueue from "./get-review-queue";
 import {
@@ -35,6 +40,12 @@ export default async function reviewMemberAssignment(input: unknown) {
     const meeting = await getGroupMeetingForUser(data.groupId, session.user.id);
     const reschedule = data.decision !== "completed";
     const result = await db.transaction(async (tx) => {
+        // Keep reviewer scope and the current supervisor stable through the save.
+        await tx
+            .select({ id: memorizationGroup.id })
+            .from(memorizationGroup)
+            .where(eq(memorizationGroup.id, data.groupId))
+            .for("update");
         // Use the same session lock as meeting closure, preventing late reviews.
         const context = await getLiveReviewContext(
             data.groupId,
@@ -53,10 +64,14 @@ export default async function reviewMemberAssignment(input: unknown) {
             eq(practiceAssignment.id, data.assignmentId),
             eq(practiceAssignment.groupId, data.groupId),
             inArray(practiceAssignment.status, eligible),
+            assignmentReviewPermission(session.user.id),
             attendedAssignment(context.id, context.startsAt),
         );
         const [assignment] = await tx
-            .select({ dueAt: practiceAssignment.dueAt })
+            .select({
+                dueAt: practiceAssignment.dueAt,
+                assigneeId: practiceAssignment.assigneeId,
+            })
             .from(practiceAssignment)
             .where(conditions)
             .for("update");
@@ -76,6 +91,8 @@ export default async function reviewMemberAssignment(input: unknown) {
                     data.decision === "needs_revision" ? "revision" : undefined,
                 dueAt: next ?? undefined,
                 reviewNote: data.note || null,
+                reviewedById: session.user.id,
+                reviewMethod: "peer",
                 reviewedForDueAt: context.startsAt,
                 reviewedAt: new Date(),
                 submittedAt: reschedule ? null : undefined,

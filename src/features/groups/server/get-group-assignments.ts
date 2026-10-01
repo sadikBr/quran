@@ -5,6 +5,7 @@ import db from "@/drizzle/db";
 import { groupMember, practiceAssignment, user } from "@/drizzle/schema";
 import type { PracticeKind } from "@/features/practice/types";
 import type { Riwayah } from "@/features/settings/preferences";
+import { assignmentReadPermission } from "./assignment-review-permission";
 
 export interface GroupAssignmentSummary {
     id: string;
@@ -26,13 +27,14 @@ export interface GroupAssignmentSummary {
     instructions: string | null;
     reviewNote: string | null;
     reviewedAt: Date | null;
+    reviewMethod: "self" | "peer" | null;
     submittedAt: Date | null;
 }
 
 export default async function getGroupAssignments(
     groupId: string,
     requestingUserId: string,
-    isAdmin: boolean,
+    includeReviewable: boolean,
 ): Promise<GroupAssignmentSummary[]> {
     const visibleStatuses = [
         "in_progress",
@@ -44,8 +46,9 @@ export default async function getGroupAssignments(
     const conditions = [
         eq(practiceAssignment.groupId, groupId),
         inArray(practiceAssignment.status, visibleStatuses),
+        assignmentReadPermission(requestingUserId),
     ];
-    if (!isAdmin)
+    if (!includeReviewable)
         conditions.push(eq(practiceAssignment.assigneeId, requestingUserId));
 
     const rows = await db
@@ -64,6 +67,7 @@ export default async function getGroupAssignments(
             instructions: practiceAssignment.instructions,
             reviewNote: practiceAssignment.reviewNote,
             reviewedAt: practiceAssignment.reviewedAt,
+            reviewMethod: practiceAssignment.reviewMethod,
             submittedAt: practiceAssignment.submittedAt,
         })
         .from(practiceAssignment)

@@ -19,6 +19,8 @@ export async function getGroupsForUser(
             name: memorizationGroup.name,
             description: memorizationGroup.description,
             role: groupMember.role,
+            isReviewer: groupMember.isReviewer,
+            reviewerScope: groupMember.reviewerScope,
         })
         .from(groupMember)
         .innerJoin(
@@ -66,6 +68,8 @@ export async function getGroupForUser(
             inviteCode: memorizationGroup.inviteCode,
             createdById: memorizationGroup.createdById,
             role: groupMember.role,
+            isReviewer: groupMember.isReviewer,
+            reviewerScope: groupMember.reviewerScope,
         })
         .from(groupMember)
         .innerJoin(
@@ -89,6 +93,8 @@ export async function getGroupForUser(
             email: user.email,
             image: user.image,
             role: groupMember.role,
+            isReviewer: groupMember.isReviewer,
+            reviewerScope: groupMember.reviewerScope,
             riwayah: userSettings.riwayah,
             joinedAt: groupMember.createdAt,
         })
@@ -104,6 +110,8 @@ export async function getGroupForUser(
     return {
         ...membership,
         role: exactMembership.role as GroupRole,
+        isReviewer: exactMembership.isReviewer,
+        reviewerScope: exactMembership.reviewerScope,
         memberCount: members.length,
         members: members.map((member) => ({
             ...member,

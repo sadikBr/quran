@@ -24,7 +24,7 @@ export default async function loadMeetingReview(
 ) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) throw new Error("Unauthorized");
-    // Queue and assignment lookups both enforce circle supervisor membership.
+    // Queue and assignment lookups both enforce current review permissions.
     if (!(await getLiveReviewContext(groupId, session.user.id, occurrence)))
         throw new Error("Meeting review unavailable");
     const queue = await getReviewQueue(groupId, session.user.id, occurrence);
@@ -38,7 +38,7 @@ export default async function loadMeetingReview(
         selectedId,
         session.user.id,
     );
-    if (!review) return null;
+    if (!review?.canReview) return null;
     const preferences = await getPreferences();
     const readerGroups = await getPracticeReaderData(review.assignment, {
         ...preferences,

@@ -101,7 +101,7 @@ async function review({
     );
     const modules = {
         "drizzle-orm": Object.fromEntries(
-            ["and", "desc", "eq", "gte", "isNotNull"].map((name) => [
+            ["and", "desc", "eq", "gte", "isNotNull", "isNull"].map((name) => [
                 name,
                 (...args) => [name, ...args],
             ]),

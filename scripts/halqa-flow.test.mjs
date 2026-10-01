@@ -177,7 +177,7 @@ test("host handover checks both supervisor identities and current host under loc
     ])
         expect(action).toContain(check);
     expect(source("app/groups/[groupId]/meeting/page.tsx")).toContain(
-        'canReview={group?.role === "supervisor"}',
+        'canManageMeeting={group?.role === "supervisor"}',
     );
 });
 test("new flow labels exist in both languages", () => {
