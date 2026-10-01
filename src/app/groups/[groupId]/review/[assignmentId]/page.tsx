@@ -48,8 +48,8 @@ export default async function AssignmentReviewPage({
             <PageBackground />
             <div className="app-container">
                 <StickyAppHeader navigation className="-mx-4 px-4" />
-                <section className="py-8 sm:py-12">
-                    <div className="mb-6 flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+                <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
+                    <div className="app-card mb-6 flex flex-col gap-3 p-4 sm:p-5 sm:flex-row sm:items-center sm:justify-between">
                         <p className="text-sm text-muted-foreground">
                             {t("meetingOnly")}
                         </p>

@@ -44,7 +44,7 @@ export default function AdhkarCollections({
                             window.history.pushState(null, "", url);
                         }}
                         aria-current={category === key ? "page" : undefined}
-                        className={`flex min-h-12 items-center gap-2.5 rounded-xl border px-3 py-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-16 sm:px-4 ${category === key ? "border-primary/35 bg-primary/10 text-primary shadow-sm" : "border-border/60 bg-card/40 text-muted-foreground hover:border-primary/20 hover:bg-card hover:text-foreground"}`}
+                        className={`flex min-h-12 items-center gap-2.5 rounded-xl border px-3 py-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-16 sm:px-4 ${category === key ? "border-primary/35 bg-primary/10 text-primary shadow-sm" : "border-border/60 bg-card text-muted-foreground hover:border-primary/20 hover:bg-card hover:text-foreground"}`}
                     >
                         {key === "morning" ? (
                             <Sunrise className="size-4" aria-hidden="true" />

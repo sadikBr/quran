@@ -1,6 +1,7 @@
 import "server-only";
 
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import db from "@/drizzle/db";
 import { groupMember, practiceAssignment, user } from "@/drizzle/schema";
 import type { PracticeKind } from "@/features/practice/types";
@@ -28,6 +29,7 @@ export interface GroupAssignmentSummary {
     reviewNote: string | null;
     reviewedAt: Date | null;
     reviewMethod: "self" | "peer" | null;
+    reviewerName: string | null;
     submittedAt: Date | null;
 }
 
@@ -36,6 +38,7 @@ export default async function getGroupAssignments(
     requestingUserId: string,
     includeReviewable: boolean,
 ): Promise<GroupAssignmentSummary[]> {
+    const reviewer = alias(user, "assignment_reviewer");
     const visibleStatuses = [
         "in_progress",
         "submitted",
@@ -68,10 +71,12 @@ export default async function getGroupAssignments(
             reviewNote: practiceAssignment.reviewNote,
             reviewedAt: practiceAssignment.reviewedAt,
             reviewMethod: practiceAssignment.reviewMethod,
+            reviewerName: reviewer.name,
             submittedAt: practiceAssignment.submittedAt,
         })
         .from(practiceAssignment)
         .innerJoin(user, eq(practiceAssignment.assigneeId, user.id))
+        .leftJoin(reviewer, eq(practiceAssignment.reviewedById, reviewer.id))
         .innerJoin(
             groupMember,
             and(

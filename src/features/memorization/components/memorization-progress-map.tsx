@@ -1,9 +1,10 @@
 "use client";
 
-import { Check, LoaderCircle, Sparkles, Trophy } from "lucide-react";
+import { BookOpen, Check, LoaderCircle, Sparkles, Trophy } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import SectionHeading from "@/components/section-heading";
 import updateMemorizationProgress from "../server/update-memorization-progress";
 
 export default function MemorizationProgressMap({
@@ -64,7 +65,7 @@ export default function MemorizationProgressMap({
 
     return (
         <div className="mt-6">
-            <section className="rounded-2xl border border-primary/20 bg-card/80 p-4 shadow-sm sm:p-6">
+            <section className="app-card p-4 sm:p-5">
                 <div className="grid items-center gap-4 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-6">
                     <div
                         role="progressbar"
@@ -133,22 +134,12 @@ export default function MemorizationProgressMap({
             </section>
 
             <section className="mt-8" aria-labelledby="hizb-map-title">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                        <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                            {t("mapEyebrow")}
-                        </p>
-                        <h2
-                            id="hizb-map-title"
-                            className="mt-2 text-2xl font-semibold tracking-tight"
-                        >
-                            {t("mapTitle")}
-                        </h2>
-                    </div>
-                    <p className="max-w-md text-sm leading-6 text-muted-foreground sm:text-end">
-                        {t("mapDescription")}
-                    </p>
-                </div>
+                <SectionHeading
+                    id="hizb-map-title"
+                    title={t("mapTitle")}
+                    description={t("mapDescription")}
+                    icon={<BookOpen />}
+                />
 
                 <p className="mt-4 text-sm leading-6 text-muted-foreground">
                     {t("personalRecord")}
@@ -180,10 +171,10 @@ export default function MemorizationProgressMap({
                         return (
                             <article
                                 key={juzNumber}
-                                className={`rounded-2xl p-3 ring-1 transition-colors sm:p-4 ${
+                                className={`app-card p-3 transition-colors sm:p-4 ${
                                     juzCompleted
-                                        ? "bg-primary/[0.09] ring-primary/20"
-                                        : "bg-muted/30 ring-border/45"
+                                        ? "border-primary/25 bg-primary/[0.09]"
+                                        : ""
                                 }`}
                             >
                                 <div className="flex items-center justify-between gap-2">

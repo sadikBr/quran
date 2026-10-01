@@ -1,25 +1,46 @@
 export default function SettingsSection({
-    eyebrow,
+    id,
     title,
     children,
 }: {
-    eyebrow: string;
+    id: string;
     title: string;
     children: React.ReactNode;
 }) {
+    const Icon = icons[id as keyof typeof icons] ?? Settings2;
     return (
-        <section className="rounded-2xl border border-border/70 bg-card/70 p-4 shadow-sm sm:p-6">
-            <div className="border-b border-border/60 pb-4">
-                <p className="text-[0.68rem] font-semibold tracking-[0.2em] text-primary">
-                    {eyebrow}
-                </p>
-                <h2 className="mt-2 text-xl font-semibold tracking-tight">
-                    {title}
-                </h2>
-            </div>
-            <div className="divide-y divide-border/50 [&>*]:py-5 [&>*:last-child]:pb-0">
+        <section
+            id={id}
+            aria-labelledby={`${id}-title`}
+            className="app-card scroll-mt-28 overflow-hidden"
+        >
+            <SectionHeading
+                id={`${id}-title`}
+                title={title}
+                icon={<Icon />}
+                className="p-4 sm:p-5"
+            />
+            <div className="app-card-body divide-y divide-border/50 [&>*]:py-5 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0">
                 {children}
             </div>
         </section>
     );
 }
+
+import {
+    Bell,
+    BookOpen,
+    Download,
+    Headphones,
+    Palette,
+    Settings2,
+} from "lucide-react";
+import SectionHeading from "@/components/section-heading";
+
+const icons = {
+    "settings-appearance": Palette,
+    "settings-reading": BookOpen,
+    "settings-reminders": Bell,
+    "settings-offline": Download,
+    "settings-editions": Headphones,
+};

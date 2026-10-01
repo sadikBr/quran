@@ -2,8 +2,8 @@ import { SlidersHorizontal } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
-
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { env } from "@/data/env/server";
 import AdminPreferences from "@/features/admin/components/admin-preferences";
@@ -131,27 +131,19 @@ export default async function SettingsPage() {
                 />
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
-                    <div className="border-b border-border/60 pb-6">
-                        <span className="flex size-8 items-center justify-center text-primary">
-                            <SlidersHorizontal
-                                aria-hidden="true"
-                                className="size-5"
-                            />
-                        </span>
-                        <p className="mt-4 text-[0.68rem] font-semibold tracking-[0.22em] text-primary">
-                            {isAdmin ? adminT("account") : t("page.eyebrow")}
-                        </p>
-                        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                            {isAdmin
+                    <PageHeading
+                        icon={<SlidersHorizontal />}
+                        title={
+                            isAdmin
                                 ? homeT("account.settings")
-                                : t("page.title")}
-                        </h1>
-                        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-                            {isAdmin
+                                : t("page.title")
+                        }
+                        description={
+                            isAdmin
                                 ? adminT("preferencesDescription")
-                                : t("page.description")}
-                        </p>
-                    </div>
+                                : t("page.description")
+                        }
+                    />
 
                     {isAdmin ? (
                         <AdminPreferences preferences={preferences} />

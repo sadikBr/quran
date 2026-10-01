@@ -50,8 +50,8 @@ export default function SettingsNextStep({
             </h2>
             <p className="mt-2 text-sm leading-7 text-muted-foreground">
                 {ar
-                    ? "احفظ تفضيلاتك وابدأ الاستخدام، أو تابع إلى الدليل للتعرّف على التطبيق. يمكنك فتح الدليل من القائمة في أي وقت."
-                    : "Save your preferences and get started, or continue to the guide for a quick introduction. The guide is always available in the menu."}
+                    ? "احفظ تفضيلاتك وتابع إلى الدليل للتعرّف على التطبيق. يمكنك فتح الدليل من القائمة في أي وقت."
+                    : "For a quick introduction, save your preferences and take a tour. You can always find the guide in the menu."}
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
                 <Button
@@ -63,21 +63,6 @@ export default function SettingsNextStep({
                     {ar
                         ? "احفظ وانتقل إلى الدليل"
                         : "Save and explore the guide"}
-                </Button>
-                <Button
-                    variant="outline"
-                    type="button"
-                    className="min-h-11 rounded-xl"
-                    disabled={done || pending}
-                    onClick={() => onContinue(false)}
-                >
-                    {ar
-                        ? done
-                            ? "تم، أهلًا بك!"
-                            : "احفظ، لا أحتاج إلى جولة"
-                        : done
-                          ? "You’re all set!"
-                          : "Save, no tour needed"}
                 </Button>
             </div>
             {error && (

@@ -33,32 +33,24 @@ export default function GroupActivityFeed({
 
     return (
         <section className="mt-10">
-            <details className="group/activity overflow-hidden rounded-2xl border border-border/60 bg-card/45 shadow-sm">
+            <details className="group/activity overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
                 <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         <Activity aria-hidden="true" className="size-5" />
                     </span>
                     <div className="min-w-0 flex-1">
                         <h2 className="font-semibold">{t("title")}</h2>
-                        <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground sm:text-sm">
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
                             {t("description")}
                         </p>
                     </div>
-                    {activity.length > 0 && (
-                        <span
-                            aria-hidden="true"
-                            className="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-semibold tabular-nums text-primary"
-                        >
-                            {activity.length}
-                        </span>
-                    )}
                     <ChevronDown
                         aria-hidden="true"
                         className="size-4 shrink-0 text-muted-foreground transition-transform group-open/activity:rotate-180"
                     />
                 </summary>
 
-                <div className="border-border/50 border-t px-4 py-3 sm:px-5">
+                <div className="border-border/50 border-t bg-muted/20 px-4 py-3 sm:px-5">
                     {activity.length === 0 ? (
                         <p className="px-3 py-5 text-center text-sm text-muted-foreground">
                             {t("empty")}
@@ -127,7 +119,10 @@ export default function GroupActivityFeed({
                                                                 },
                                                             )}
                                                 </p>
-                                                <time className="mt-0.5 block text-xs text-muted-foreground">
+                                                <time
+                                                    dateTime={item.occurredAt.toISOString()}
+                                                    className="mt-0.5 block text-xs text-muted-foreground"
+                                                >
                                                     {formatTimestamp(
                                                         item.occurredAt,
                                                     )}

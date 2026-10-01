@@ -21,7 +21,9 @@
             "startWird": "Read today’s Wird",
             "continueWird": "Continue today’s Wird",
             "explore": "Explore the Quran",
-            "search": "Search the Quran"
+            "search": "Search the Quran",
+            "openDashboard": "Open dashboard",
+            "browseQuran": "Browse the Quran"
         },
         "progress": {
             "startingPlace": "Your starting place",
@@ -36,22 +38,25 @@
         },
         "tools": {
             "eyebrow": "From reading to mastery",
-            "title": "A clear path for your daily relationship with the Quran.",
-            "description": "Read at your pace, practise what you memorize, and keep up with your circle without letting the tools become noise.",
+            "title": "Make time for the Quran.",
+            "description": "Choose what you need today.",
             "rhythm": {
                 "eyebrow": "A Wird with clear boundaries",
-                "title": "Build a daily rhythm that fits your life.",
-                "description": "Choose your portion once, then return each day to a clear starting point and saved progress."
+                "title": "Daily Wird",
+                "description": "Choose your portion once, then return each day to a clear starting point and saved progress.",
+                "action": "Open daily Wird"
             },
             "practice": {
                 "eyebrow": "Practise with intention",
-                "title": "New memorization or revision.",
-                "description": "Choose an exact range, hide the text while reciting, and reveal it only when you need a prompt."
+                "title": "Personal practice",
+                "description": "Choose an exact range, hide the text while reciting, and reveal it only when you need a prompt.",
+                "action": "Choose a passage"
             },
             "groups": {
                 "eyebrow": "Community and accountability",
-                "title": "A clear plan for every circle meeting.",
-                "description": "Admins prepare an appropriate range for each learner, listen to their recitation, and decide what is complete or needs more revision."
+                "title": "Quran circles",
+                "description": "Prepare for your next meeting, recite with your circle, and follow your supervisor’s feedback.",
+                "action": "Open groups"
             },
             "place": {
                 "eyebrow": "Your place is remembered",

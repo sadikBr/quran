@@ -2,7 +2,7 @@
     "Dashboard": {
         "eyebrow": "YOUR DASHBOARD",
         "welcome": "Welcome back, {name}.",
-        "introduction": "Keep track of your assignments, circle meetings, and progress in reading and memorization.",
+        "introduction": "Your next steps, reading progress, and circle meetings.",
         "reading": {
             "eyebrow": "Your reading place",
             "page": "page",
@@ -19,7 +19,7 @@
         },
         "tools": {
             "eyebrow": "YOUR SPACE",
-            "title": "Continue what matters",
+            "title": "Your daily activities",
             "description": "Your meeting assignments, personal practice, circles, and daily Wird—organized in one quiet overview."
         },
         "upcoming": {

@@ -74,6 +74,7 @@ export default function MeetingPlanEditor({
     members,
     surahs,
     planner,
+    previousMeetingLabel,
     meetingOptions,
     navigationByRiwayah,
     locale,
@@ -83,6 +84,7 @@ export default function MeetingPlanEditor({
     members: GroupMemberDetails[];
     surahs: AssignmentSurah[];
     planner: MeetingPlannerData;
+    previousMeetingLabel: string | null;
     meetingOptions: AssignmentMeetingOption[];
     navigationByRiwayah: Record<"hafs" | "warsh", QuranNavigationMeta>;
     locale: string;
@@ -349,7 +351,7 @@ export default function MeetingPlanEditor({
                 cancelLabel={t("cancelApplyAll")}
                 onConfirm={applyToAll}
             />
-            <section className="rounded-3xl bg-primary/[0.055] p-5 ring-1 ring-primary/12 sm:p-6">
+            <section className="app-card p-4 sm:p-5">
                 <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
                     <div className="max-w-xl">
                         <Label htmlFor="meeting-plan-occurrence">
@@ -408,17 +410,12 @@ export default function MeetingPlanEditor({
                         variant="outline"
                         disabled={planner.previousAssignments.length === 0}
                         onClick={copyPreviousWeek}
-                        className="h-11 rounded-xl"
+                        className="min-h-11 h-auto whitespace-normal rounded-xl py-2 text-start"
                     >
                         <Copy className="size-4" />
-                        {planner.previousMeetingStartsAt
+                        {previousMeetingLabel
                             ? t("copyPreviousDated", {
-                                  date: new Intl.DateTimeFormat(locale, {
-                                      dateStyle: "medium",
-                                      timeStyle: "short",
-                                  }).format(
-                                      new Date(planner.previousMeetingStartsAt),
-                                  ),
+                                  date: previousMeetingLabel,
                               })
                             : t("copyPrevious")}
                     </Button>
@@ -563,7 +560,7 @@ export default function MeetingPlanEditor({
                 )}
             </section>
 
-            <section className="mt-6 divide-y divide-border/55 overflow-hidden rounded-3xl bg-muted/30 ring-1 ring-border/50">
+            <section className="app-card mt-6 divide-y divide-border/50 overflow-hidden">
                 {members.map((member) => {
                     if (covered.has(member.userId))
                         return (
@@ -809,7 +806,7 @@ export default function MeetingPlanEditor({
                 })}
             </section>
 
-            <div className="mt-6 flex flex-col-reverse gap-3 rounded-3xl bg-background/70 p-4 ring-1 ring-border/50 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+            <div className="app-card mt-6 flex flex-col-reverse gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
                 <p className="text-sm text-muted-foreground">
                     {missingCount > 0
                         ? t("publishHintMissing", { count: missingCount })

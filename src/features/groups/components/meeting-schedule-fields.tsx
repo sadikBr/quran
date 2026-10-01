@@ -1,8 +1,8 @@
 "use client";
 
-import { Clock3, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,14 +14,17 @@ export default function MeetingScheduleFields({
     timezone,
     setTimezone,
     disabled = false,
+    showHeading = true,
 }: {
     schedule: MeetingScheduleSlot[];
     setSchedule: (schedule: MeetingScheduleSlot[]) => void;
     timezone: string;
     setTimezone: (timezone: string) => void;
     disabled?: boolean;
+    showHeading?: boolean;
 }) {
     const t = useTranslations("Groups.meeting");
+    const fieldId = useId();
 
     useEffect(() => {
         if (timezone) return;
@@ -38,56 +41,60 @@ export default function MeetingScheduleFields({
 
     return (
         <fieldset disabled={disabled} className="space-y-5">
-            <div className="flex items-start gap-3">
-                <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
-                    <Clock3 aria-hidden="true" className="size-4.5" />
-                </span>
-                <div>
-                    <legend className="font-semibold">
-                        {t("scheduleTitle")}
-                    </legend>
-                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                        {t("scheduleDescription")}
-                    </p>
-                </div>
-            </div>
-
+            <legend className={showHeading ? "mb-2 font-semibold" : "sr-only"}>
+                {t("scheduleTitle")}
+            </legend>
+            {showHeading && (
+                <p className="text-sm leading-6 text-muted-foreground">
+                    {t("scheduleDescription")}
+                </p>
+            )}
             <div className="space-y-3">
                 {schedule.map((slot, index) => (
                     <div
                         key={`${index}-${slot.weekday}`}
-                        className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 min-[400px]:grid-cols-[minmax(0,1fr)_9rem_auto] sm:grid-cols-[minmax(12rem,1fr)_9rem_auto]"
+                        className="grid grid-cols-[minmax(0,1fr)_2.75rem] items-end gap-3 rounded-xl border border-border/60 bg-muted/20 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.75rem]"
                     >
-                        <select
-                            aria-label={t("day")}
-                            value={slot.weekday}
-                            onChange={(event) =>
-                                updateSlot(index, {
-                                    weekday: Number(event.target.value),
-                                })
-                            }
-                            className="col-span-2 h-11 min-w-0 rounded-xl border-0 bg-background/80 px-3 text-sm shadow-sm ring-1 ring-border/60 outline-none focus-visible:ring-2 focus-visible:ring-ring min-[400px]:col-span-1"
-                        >
-                            {[1, 2, 3, 4, 5, 6, 7].map((weekday) => (
-                                <option key={weekday} value={weekday}>
-                                    {t(`weekdays.${weekday}`)}
-                                </option>
-                            ))}
-                        </select>
-                        <Input
-                            type="time"
-                            lang="en-GB"
-                            dir="ltr"
-                            aria-label={t("time")}
-                            required
-                            value={slot.localTime}
-                            onChange={(event) =>
-                                updateSlot(index, {
-                                    localTime: event.target.value,
-                                })
-                            }
-                            className="h-11 rounded-xl border-0 bg-background/80 text-left shadow-sm ring-1 ring-border/60"
-                        />
+                        <div className="col-span-2 space-y-2 sm:col-span-1">
+                            <Label htmlFor={`${fieldId}-day-${index}`}>
+                                {t("day")}
+                            </Label>
+                            <select
+                                id={`${fieldId}-day-${index}`}
+                                value={slot.weekday}
+                                onChange={(event) =>
+                                    updateSlot(index, {
+                                        weekday: Number(event.target.value),
+                                    })
+                                }
+                                className="h-11 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                {[1, 2, 3, 4, 5, 6, 7].map((weekday) => (
+                                    <option key={weekday} value={weekday}>
+                                        {t(`weekdays.${weekday}`)}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="min-w-0 space-y-2">
+                            <Label htmlFor={`${fieldId}-time-${index}`}>
+                                {t("time")}
+                            </Label>
+                            <Input
+                                id={`${fieldId}-time-${index}`}
+                                type="time"
+                                lang="en-GB"
+                                dir="ltr"
+                                required
+                                value={slot.localTime}
+                                onChange={(event) =>
+                                    updateSlot(index, {
+                                        localTime: event.target.value,
+                                    })
+                                }
+                                className="bg-background text-left"
+                            />
+                        </div>
                         <Button
                             type="button"
                             size="icon"
@@ -101,7 +108,7 @@ export default function MeetingScheduleFields({
                                     ),
                                 )
                             }
-                            className="rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                            className="size-11 rounded-xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                         >
                             <Trash2 className="size-4" />
                         </Button>
@@ -120,21 +127,22 @@ export default function MeetingScheduleFields({
                         { weekday: 1, localTime: "20:00" },
                     ])
                 }
-                className="rounded-lg text-primary hover:text-primary"
+                className="min-h-11 rounded-xl text-primary hover:text-primary"
             >
                 <Plus className="size-4" />
                 {t("addSlot")}
             </Button>
 
             <div>
-                <Label htmlFor="meeting-timezone">{t("timezone")}</Label>
+                <Label htmlFor={`${fieldId}-timezone`}>{t("timezone")}</Label>
                 <Input
-                    id="meeting-timezone"
+                    id={`${fieldId}-timezone`}
                     required
                     value={timezone}
                     onChange={(event) => setTimezone(event.target.value)}
                     placeholder="Africa/Casablanca"
-                    className="mt-2 h-11 rounded-xl border-0 bg-background/80 shadow-sm ring-1 ring-border/60 ltr:text-left"
+                    dir="ltr"
+                    className="mt-2 bg-background text-left"
                 />
                 <p className="mt-2 text-xs leading-5 text-muted-foreground">
                     {t("timezoneHint")}

@@ -266,7 +266,7 @@ export default function MeetingHistory({
             )}
 
             {history.length === 0 ? (
-                <div className="mt-5 rounded-2xl bg-muted/30 px-5 py-7 text-center ring-1 ring-border/50">
+                <div className="app-card mt-5 px-5 py-7 text-center">
                     <CalendarDays className="mx-auto size-5 text-primary" />
                     <p className="mt-3 text-sm font-medium">{t("empty")}</p>
                 </div>
@@ -276,10 +276,10 @@ export default function MeetingHistory({
                         <details
                             key={session.id}
                             open={openFirst && index === 0}
-                            className="group overflow-hidden rounded-2xl bg-muted/30 ring-1 ring-border/50"
+                            className="app-card group overflow-hidden"
                         >
                             <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">
-                                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-background text-primary shadow-sm ring-1 ring-border/40">
+                                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                     <CalendarDays className="size-4" />
                                 </span>
                                 <div className="min-w-0 flex-1">
@@ -322,7 +322,7 @@ export default function MeetingHistory({
                                 <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
                             </summary>
 
-                            <div className="border-border/50 border-t px-4 py-3 sm:px-5">
+                            <div className="app-card-body py-3 sm:py-3">
                                 {session.cancelledAt ? (
                                     <p className="py-2 text-sm leading-6 text-muted-foreground">
                                         {t("cancelledDescription")}

@@ -1,14 +1,14 @@
 "use client";
 
-import { Minus, Plus } from "lucide-react";
+import { ArrowDown, Minus, Plus, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import updateWirdPreference from "../server/update-wird-preference";
-import type { WirdUnit } from "../types";
+import { WIRD_UNITS, type WirdUnit } from "../types";
 
 const MAX_AMOUNTS: Record<WirdUnit, number> = {
     ayah: 100,
@@ -35,7 +35,7 @@ export default function WirdPreferenceForm({
     const [unit, setUnit] = useState<WirdUnit>(initialUnit);
     const [amount, setAmount] = useState(initialAmount);
     const [isSaving, setIsSaving] = useState(false);
-    const unitOptions: WirdUnit[] = ["ayah", "quarter", "hizb", "surah"];
+    const unitGroupId = useId();
 
     async function save() {
         if (isSaving || managedByPlan) return;
@@ -63,99 +63,153 @@ export default function WirdPreferenceForm({
         }
     }
 
+    if (managedByPlan) {
+        return (
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-start gap-3">
+                    <Sparkles
+                        aria-hidden="true"
+                        className="mt-1 size-5 shrink-0 text-primary"
+                    />
+                    <div>
+                        <p className="text-sm font-semibold">
+                            {t("setup.managedTitle")}
+                        </p>
+                        <p className="mt-1 text-lg font-semibold text-primary">
+                            {t("setup.preview", {
+                                amount: initialAmount,
+                                unit: initialUnit,
+                            })}
+                        </p>
+                        <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                            {t("setup.planManaged")}
+                        </p>
+                    </div>
+                </div>
+                <Button
+                    asChild
+                    variant="outline"
+                    className="min-h-11 shrink-0 rounded-xl"
+                >
+                    <a href="#khatmah-plan">
+                        {t("setup.viewPlan")}
+                        <ArrowDown aria-hidden="true" className="size-4" />
+                    </a>
+                </Button>
+            </div>
+        );
+    }
+
     return (
         <form
-            className={compact ? "space-y-5" : "mt-8 space-y-6"}
+            className="space-y-5"
             onSubmit={(event) => {
                 event.preventDefault();
                 save();
             }}
         >
-            {compact && (
-                <p className="text-sm leading-6 text-muted-foreground">
-                    {t(
-                        managedByPlan
-                            ? "setup.planManaged"
-                            : "setup.nextPortion",
-                    )}
-                </p>
-            )}
-            <div>
-                <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-                    {t("setup.unitLabel")}
-                </p>
-                <div className="mt-3 grid grid-cols-2 gap-1 rounded-2xl bg-muted/45 p-1 sm:grid-cols-4">
-                    {unitOptions.map((option) => (
-                        <button
-                            key={option}
-                            type="button"
-                            aria-pressed={unit === option}
-                            onClick={() => {
-                                setUnit(option);
-                                setAmount((current) =>
-                                    Math.min(current, MAX_AMOUNTS[option]),
-                                );
-                            }}
-                            className={cn(
-                                "min-h-11 cursor-pointer rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition-[background-color,color,box-shadow]",
-                                unit === option &&
-                                    "bg-background text-foreground shadow-sm",
-                            )}
-                        >
-                            {t(`units.${option}`)}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <div className="flex flex-col gap-5 rounded-2xl bg-primary/[0.06] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <fieldset
+                disabled={isSaving}
+                className="grid gap-6 md:grid-cols-[minmax(0,1fr)_18rem] md:gap-8"
+            >
+                <fieldset>
+                    <legend className="text-sm font-semibold">
+                        {t("setup.unitLabel")}
+                    </legend>
+                    <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {WIRD_UNITS.map((option) => (
+                            <label
+                                key={option}
+                                className="relative cursor-pointer"
+                            >
+                                <input
+                                    type="radio"
+                                    name={unitGroupId}
+                                    value={option}
+                                    checked={unit === option}
+                                    onChange={() => {
+                                        setUnit(option);
+                                        setAmount((current) =>
+                                            Math.min(
+                                                current,
+                                                MAX_AMOUNTS[option],
+                                            ),
+                                        );
+                                    }}
+                                    className="peer sr-only"
+                                />
+                                <span
+                                    className={cn(
+                                        "flex min-h-11 items-center justify-center rounded-xl border border-border/70 bg-background px-3 py-2 text-center text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+                                        unit === option &&
+                                            "border-primary bg-primary/10 text-primary",
+                                    )}
+                                >
+                                    {t(`units.${option}`)}
+                                </span>
+                            </label>
+                        ))}
+                    </div>
+                </fieldset>
                 <div>
-                    <p className="text-xs font-semibold tracking-[0.12em] text-primary uppercase">
+                    <p className="text-sm font-semibold">
                         {t("setup.amountLabel")}
                     </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <div
+                        dir="ltr"
+                        className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background p-1"
+                    >
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() =>
+                                setAmount((value) => Math.max(1, value - 1))
+                            }
+                            disabled={amount <= 1}
+                            aria-label={t("setup.decrease")}
+                            className="size-11 rounded-lg text-muted-foreground"
+                        >
+                            <Minus aria-hidden="true" className="size-4" />
+                        </Button>
+                        <output
+                            className="min-w-12 text-center text-2xl font-semibold tabular-nums"
+                            aria-live="polite"
+                        >
+                            {amount}
+                        </output>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() =>
+                                setAmount((value) =>
+                                    Math.min(MAX_AMOUNTS[unit], value + 1),
+                                )
+                            }
+                            disabled={amount >= MAX_AMOUNTS[unit]}
+                            aria-label={t("setup.increase")}
+                            className="size-11 rounded-lg bg-primary/10 text-primary hover:bg-primary/15"
+                        >
+                            <Plus aria-hidden="true" className="size-4" />
+                        </Button>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">
                         {t("setup.preview", {
                             amount,
-                            unit: t(`units.${unit}`),
+                            unit,
                         })}
                     </p>
                 </div>
-                <div dir="ltr" className="flex items-center gap-4 self-center">
-                    <button
-                        type="button"
-                        onClick={() =>
-                            setAmount((value) => Math.max(1, value - 1))
-                        }
-                        disabled={amount <= 1}
-                        aria-label={t("setup.decrease")}
-                        className="flex size-10 cursor-pointer items-center justify-center rounded-full bg-background text-muted-foreground shadow-sm transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-35"
-                    >
-                        <Minus aria-hidden="true" className="size-4" />
-                    </button>
-                    <span className="min-w-10 text-center text-3xl font-semibold text-foreground tabular-nums">
-                        {amount}
-                    </span>
-                    <button
-                        type="button"
-                        onClick={() =>
-                            setAmount((value) =>
-                                Math.min(MAX_AMOUNTS[unit], value + 1),
-                            )
-                        }
-                        disabled={amount >= MAX_AMOUNTS[unit]}
-                        aria-label={t("setup.increase")}
-                        className="flex size-10 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-35"
-                    >
-                        <Plus aria-hidden="true" className="size-4" />
-                    </button>
-                </div>
-            </div>
-
-            <div className="flex justify-end">
+            </fieldset>
+            <div className="flex flex-col gap-4 border-t border-border/50 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                {compact && (
+                    <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+                        {t("setup.nextPortion")}
+                    </p>
+                )}
                 <Button
                     type="submit"
-                    disabled={isSaving || managedByPlan}
-                    className="min-w-40"
+                    disabled={isSaving}
+                    className="min-h-11 shrink-0 rounded-xl sm:ms-auto sm:min-w-40"
                 >
                     {isSaving
                         ? t("setup.saving")

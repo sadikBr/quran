@@ -3,7 +3,7 @@
 import { LoaderCircle, Pause, Play, Repeat2, Square } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { AudioPlayer, PlayerState } from "../helpers/audio-player";
 import type { AudioTrack } from "../helpers/audio-track";
@@ -25,12 +25,41 @@ export default function NowPlaying({
     const locale = useLocale();
     const pathname = usePathname();
     const hasPageNavigation = /^\/quran\/(page|surah|ayah)\//.test(pathname);
+    const bottomOffset = hasPageNavigation ? "5rem" : "0.5rem";
+    const playerRef = useRef<HTMLElement>(null);
     const [expanded, setExpanded] = useState(false);
     const [mode, setMode] = useState("ayah");
     const [count, setCount] = useState(3);
     const [gap, setGap] = useState(0);
     const [from, setFrom] = useState(0);
     const [to, setTo] = useState(0);
+
+    useLayoutEffect(() => {
+        const element = playerRef.current;
+        if (!element) return;
+
+        // The reader toolbar is portaled to body; share the player's actual
+        // height so expanding repeat settings or wrapping text cannot cover it.
+        function updateClearance() {
+            if (!element) return;
+            const height = Math.ceil(element.getBoundingClientRect().height);
+            document.body.style.setProperty(
+                "--quran-audio-player-clearance",
+                `calc(${bottomOffset} + env(safe-area-inset-bottom) + ${height}px + 0.75rem)`,
+            );
+        }
+
+        updateClearance();
+        const observer = new ResizeObserver(updateClearance);
+        observer.observe(element);
+        return () => {
+            observer.disconnect();
+            document.body.style.removeProperty(
+                "--quran-audio-player-clearance",
+            );
+        };
+    }, [bottomOffset]);
+
     const queue = player.readerQueue.filter(
         (track) => track.ayahNumber !== null,
     );
@@ -55,16 +84,19 @@ export default function NowPlaying({
         "mt-1 h-11 w-full min-w-0 rounded-lg border border-border bg-background px-2 text-base text-foreground sm:text-sm";
     return (
         <section
+            ref={playerRef}
+            data-quran-audio-player
             dir={locale === "ar" ? "rtl" : "ltr"}
             aria-label={t("nowPlaying")}
-            className="fixed inset-x-2 z-40 mx-auto max-w-lg overflow-hidden rounded-xl border border-border bg-background/95 shadow-lg backdrop-blur sm:inset-x-3 sm:rounded-2xl"
+            className="fixed inset-x-2 z-40 mx-auto flex max-w-lg flex-col overflow-x-hidden overflow-y-auto overscroll-contain rounded-xl border border-border bg-background/95 shadow-lg backdrop-blur sm:inset-x-3 sm:rounded-2xl"
             style={{
-                bottom: `calc(${hasPageNavigation ? "5rem" : "0.5rem"} + env(safe-area-inset-bottom))`,
+                bottom: `calc(${bottomOffset} + env(safe-area-inset-bottom))`,
+                maxHeight: `calc(100dvh - ${bottomOffset} - env(safe-area-inset-bottom) - env(safe-area-inset-top) - 5rem)`,
             }}
         >
             {expanded && (
                 <div
-                    className="max-h-[min(60dvh,24rem)] overflow-y-auto overscroll-contain border-b border-border p-3"
+                    className="min-h-32 max-h-[min(60dvh,24rem)] overflow-y-auto overscroll-contain border-b border-border p-3"
                     id="audio-repeat-options"
                 >
                     <div className="grid grid-cols-2 gap-3">
@@ -189,7 +221,7 @@ export default function NowPlaying({
                     </Button>
                 </div>
             )}
-            <div className="flex items-center gap-0.5 p-1.5 sm:gap-1 sm:p-2">
+            <div className="flex shrink-0 items-center gap-0.5 p-1.5 sm:gap-1 sm:p-2">
                 <div className="min-w-0 flex-1 px-1.5 sm:px-2">
                     <button
                         type="button"
@@ -296,7 +328,7 @@ export default function NowPlaying({
             {state.status === "error" && (
                 <div
                     role="alert"
-                    className="flex flex-wrap items-center gap-2 border-t border-border px-3 py-2 text-xs"
+                    className="flex shrink-0 flex-wrap items-center gap-2 border-t border-border px-3 py-2 text-xs"
                 >
                     <span className="flex-1 text-muted-foreground">
                         {t("unableToPlay")}
@@ -311,7 +343,7 @@ export default function NowPlaying({
                     )}
                 </div>
             )}
-            <div aria-hidden="true" className="h-0.5 bg-muted">
+            <div aria-hidden="true" className="h-0.5 shrink-0 bg-muted">
                 <div
                     className="h-full bg-primary transition-[width]"
                     style={{

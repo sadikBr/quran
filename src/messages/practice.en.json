@@ -1,12 +1,12 @@
 {
     "Practice": {
         "header": "Quran practice",
-        "personalTitle": "Personal practice",
+        "personalTitle": "Your practice ranges",
         "personalDescription": "Ranges you chose for memorization and revision, separate from your circle assignments.",
         "back": "Back to dashboard",
         "eyebrow": "YOUR PRACTICE RANGE",
-        "title": "Prepare what you need to memorize.",
-        "description": "Choose an exact range for memorization or revision. The range may begin and end in different surahs.",
+        "title": "Personal practice",
+        "description": "Choose a passage to memorize or revise, and return to your saved place.",
         "kinds": {
             "memorization": "Memorization",
             "revision": "Revision"
@@ -107,6 +107,10 @@
         "loading": {
             "overview": "Preparing your practice range",
             "reader": "Preparing the practice reader"
+        },
+        "assignedWork": {
+            "title": "Circle assignments ({count, number})",
+            "description": "View your assigned passages, meeting dates, and review feedback."
         }
     }
 }

@@ -15,6 +15,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
@@ -294,7 +295,7 @@ export default async function AssignmentsPage({
         return (
             <article
                 key={assignment.id}
-                className="min-w-0 rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-5"
+                className="min-w-0 app-card p-4 sm:p-5"
             >
                 <div className="flex items-start justify-between gap-3">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -438,21 +439,15 @@ export default async function AssignmentsPage({
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
                     <div>
-                        <div className="border-b border-border/60 pb-6 sm:pb-8">
-                            <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-                                {t(isManageView ? "admin.eyebrow" : "eyebrow")}
-                            </p>
-                            <h1 className="mt-2 text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">
-                                {t(isManageView ? "admin.title" : "title")}
-                            </h1>
-                            <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-                                {t(
-                                    isManageView
-                                        ? "admin.description"
-                                        : "description",
-                                )}
-                            </p>
-                        </div>
+                        <PageHeading
+                            title={t(isManageView ? "admin.title" : "title")}
+                            icon={<CalendarCheck2 />}
+                            description={t(
+                                isManageView
+                                    ? "admin.description"
+                                    : "description",
+                            )}
+                        />
 
                         {adminGroups.length > 0 && (
                             <nav
@@ -511,49 +506,49 @@ export default async function AssignmentsPage({
                                         </Button>
                                     </div>
                                 )}
-                                <div className="mt-7 grid items-center gap-4 border-border/50 border-y py-4 sm:grid-cols-[auto_minmax(8rem,1fr)_auto] sm:gap-6">
-                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-primary">
-                                        <span className="inline-flex items-center gap-2">
-                                            <CalendarClock className="size-4" />
-                                            {t("summary.meetings", {
-                                                count: meetingGroups.length,
-                                            })}
-                                        </span>
-                                        {filteredAssignments.length > 0 && (
+                                {filteredAssignments.length > 0 && (
+                                    <div className="mt-6 grid items-center gap-4 border-border/50 border-y py-4 sm:grid-cols-[auto_minmax(8rem,1fr)_auto] sm:gap-6">
+                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-primary">
+                                            <span className="inline-flex items-center gap-2">
+                                                <CalendarClock className="size-4" />
+                                                {t("summary.meetings", {
+                                                    count: meetingGroups.length,
+                                                })}
+                                            </span>
                                             <span className="text-muted-foreground">
                                                 {t("summary.active", {
                                                     count: filteredAssignments.length,
                                                 })}
                                             </span>
-                                        )}
-                                        {readyCount > 0 && (
-                                            <span className="inline-flex items-center gap-1.5">
-                                                <CheckCircle2 className="size-3.5" />
-                                                {t("summary.ready", {
-                                                    count: readyCount,
-                                                })}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div
-                                        role="progressbar"
-                                        aria-label={t("summary.progress")}
-                                        aria-valuemin={0}
-                                        aria-valuemax={100}
-                                        aria-valuenow={overallPercentage}
-                                        className="h-1.5 overflow-hidden rounded-full bg-primary/10"
-                                    >
+                                            {readyCount > 0 && (
+                                                <span className="inline-flex items-center gap-1.5">
+                                                    <CheckCircle2 className="size-3.5" />
+                                                    {t("summary.ready", {
+                                                        count: readyCount,
+                                                    })}
+                                                </span>
+                                            )}
+                                        </div>
                                         <div
-                                            className="h-full rounded-full bg-primary"
-                                            style={{
-                                                width: `${overallPercentage}%`,
-                                            }}
-                                        />
+                                            role="progressbar"
+                                            aria-label={t("summary.progress")}
+                                            aria-valuemin={0}
+                                            aria-valuemax={100}
+                                            aria-valuenow={overallPercentage}
+                                            className="h-1.5 overflow-hidden rounded-full bg-primary/10"
+                                        >
+                                            <div
+                                                className="h-full rounded-full bg-primary"
+                                                style={{
+                                                    width: `${overallPercentage}%`,
+                                                }}
+                                            />
+                                        </div>
+                                        <strong className="text-2xl font-semibold text-primary tabular-nums sm:text-end">
+                                            {overallPercentage}%
+                                        </strong>
                                     </div>
-                                    <strong className="text-2xl font-semibold text-primary tabular-nums sm:text-end">
-                                        {overallPercentage}%
-                                    </strong>
-                                </div>
+                                )}
                             </>
                         )}
                     </div>
@@ -600,9 +595,9 @@ export default async function AssignmentsPage({
                                         <details
                                             key={group.key}
                                             className={cn(
-                                                "group/meeting overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm",
+                                                "group/meeting overflow-hidden app-card",
                                                 isOverdue &&
-                                                    "ring-destructive/20",
+                                                    "border-destructive/30",
                                             )}
                                             open={
                                                 index === 0 ||
@@ -740,24 +735,23 @@ export default async function AssignmentsPage({
                                 })}
                             </section>
                         ) : (
-                            <section className="mt-8 grid gap-6 py-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:py-8">
-                                <div className="flex items-start gap-4">
-                                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                        <CalendarCheck2 className="size-5" />
-                                    </span>
-                                    <div>
-                                        <h2 className="text-xl font-semibold">
-                                            {t("empty.title")}
-                                        </h2>
-                                        <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
-                                            {t("empty.description")}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="grid gap-2 sm:flex">
+                            <section className="app-card mt-6 flex flex-col items-center px-5 py-8 text-center sm:px-8 sm:py-10">
+                                <span
+                                    aria-hidden="true"
+                                    className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"
+                                >
+                                    <CalendarCheck2 className="size-6" />
+                                </span>
+                                <h2 className="mt-4 text-lg font-semibold">
+                                    {t("empty.title")}
+                                </h2>
+                                <p className="mt-2 max-w-md text-sm leading-7 text-muted-foreground">
+                                    {t("empty.description")}
+                                </p>
+                                <div className="mt-6 flex w-full flex-col items-center justify-center gap-2 sm:w-auto sm:flex-row">
                                     <Button
                                         asChild
-                                        className="w-full rounded-xl sm:w-auto"
+                                        className="min-h-11 w-full rounded-xl sm:w-auto"
                                     >
                                         <Link href="/practice">
                                             {t("empty.practice")}
@@ -766,7 +760,7 @@ export default async function AssignmentsPage({
                                     <Button
                                         asChild
                                         variant="ghost"
-                                        className="w-full rounded-xl sm:w-auto"
+                                        className="min-h-11 w-full rounded-xl sm:w-auto"
                                     >
                                         <Link href="/groups">
                                             {t("empty.groups")}
@@ -803,7 +797,7 @@ export default async function AssignmentsPage({
                                     ))}
                                 </div>
 
-                                <div className="mt-4 overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-sm">
+                                <div className="mt-4 overflow-hidden app-card">
                                     <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
                                         <div>
                                             <p className="text-xs font-semibold text-primary">
@@ -1076,7 +1070,7 @@ export default async function AssignmentsPage({
                                 </div>
 
                                 {completedAdminAssignments.length > 0 && (
-                                    <details className="group/history mt-6 overflow-hidden rounded-2xl bg-muted/20 ring-1 ring-border/50">
+                                    <details className="app-card group/history mt-6 overflow-hidden">
                                         <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 text-sm font-semibold outline-none hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
                                             <History className="size-4 text-primary" />
                                             {t("admin.completedHistory", {
@@ -1144,7 +1138,7 @@ export default async function AssignmentsPage({
                                 )}
 
                                 {hafsNavigation && warshNavigation && (
-                                    <details className="group/create mt-8 overflow-hidden rounded-2xl bg-primary/[0.045] ring-1 ring-primary/12">
+                                    <details className="app-card group/create mt-6 overflow-hidden">
                                         <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 outline-none hover:bg-primary/[0.04] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
                                             <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                                 <CirclePlus className="size-4.5" />

@@ -2,7 +2,7 @@
 
 import { Check, Copy, Link as LinkIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
@@ -10,11 +10,25 @@ export default function GroupInvite({ inviteCode }: { inviteCode: string }) {
     const t = useTranslations("Groups.detail");
     const [copied, setCopied] = useState<"code" | "link" | null>(null);
 
+    const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(
+        () => () => {
+            if (resetTimer.current) clearTimeout(resetTimer.current);
+        },
+        [],
+    );
+
     async function copy(value: string, type: "code" | "link") {
-        await navigator.clipboard.writeText(value);
-        setCopied(type);
-        toast.success(t("copied"));
-        window.setTimeout(() => setCopied(null), 1800);
+        try {
+            await navigator.clipboard.writeText(value);
+            setCopied(type);
+            toast.success(t("copied"));
+            if (resetTimer.current) clearTimeout(resetTimer.current);
+            resetTimer.current = setTimeout(() => setCopied(null), 1800);
+        } catch {
+            setCopied(null);
+            toast.error(t("copyError"));
+        }
     }
 
     const CopyIcon = copied === "code" ? Check : Copy;
@@ -28,7 +42,7 @@ export default function GroupInvite({ inviteCode }: { inviteCode: string }) {
                 </span>
                 <strong
                     dir="ltr"
-                    className="break-all font-mono text-sm tracking-[0.12em] text-primary"
+                    className="select-all break-all font-mono text-sm tracking-[0.12em] text-primary"
                 >
                     {inviteCode}
                 </strong>

@@ -4,8 +4,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
-import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
 import GroupForms from "@/features/groups/components/group-forms";
 import { getGroupsForUser } from "@/features/groups/server/get-groups";
@@ -50,25 +50,20 @@ export default async function GroupsPage({
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
                 />
 
-                <section className="py-8 sm:py-14">
-                    <div className="max-w-2xl">
-                        <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-                            {t("eyebrow")}
-                        </p>
-                        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                            {t("title")}
-                        </h1>
-                        <p className="mt-4 leading-7 text-muted-foreground">
-                            {t("description")}
-                        </p>
-                    </div>
+                <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
+                    <PageHeading
+                        title={t("title")}
+                        description={t("description")}
+                        icon={<UsersRound />}
+                    />
 
-                    {groups.length > 0 ? (
-                        <div className="mt-8 divide-y divide-border/55 overflow-hidden rounded-3xl border border-border/60 bg-card/45 shadow-sm sm:mt-10">
+                    {groups.length > 0 && (
+                        <div className="mt-8 divide-y divide-border/55 overflow-hidden app-card sm:mt-8">
                             {groups.map((group) => (
-                                <article
+                                <Link
+                                    href={`/groups/${group.id}`}
                                     key={group.id}
-                                    className="group grid grid-cols-[2.75rem_minmax(0,1fr)] items-start gap-x-3 gap-y-3 px-4 py-5 transition-colors hover:bg-muted/25 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:gap-5 sm:px-5 sm:py-6"
+                                    className="group grid grid-cols-[2.75rem_minmax(0,1fr)] items-start gap-x-3 gap-y-3 px-4 py-5 transition-colors hover:bg-muted/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:gap-5 sm:px-5 sm:py-6"
                                 >
                                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                         <UsersRound
@@ -78,7 +73,7 @@ export default async function GroupsPage({
                                     </span>
                                     <div className="min-w-0">
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <h2 className="text-lg font-semibold">
+                                            <h2 className="break-words text-lg font-semibold group-hover:text-primary">
                                                 {group.name}
                                             </h2>
                                             <span className="inline-flex items-center gap-1.5 rounded-full bg-background/60 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
@@ -102,44 +97,22 @@ export default async function GroupsPage({
                                             })}
                                         </p>
                                     </div>
-                                    <Button
-                                        asChild
-                                        variant="ghost"
-                                        className="col-start-2 w-fit rounded-xl px-0 text-primary hover:bg-transparent hover:text-primary sm:col-start-auto sm:px-4"
-                                    >
-                                        <Link href={`/groups/${group.id}`}>
-                                            {t("open")}
-                                            <ArrowRight
-                                                className={cn(
-                                                    "size-4",
-                                                    isArabic && "rotate-180",
-                                                )}
-                                            />
-                                        </Link>
-                                    </Button>
-                                </article>
+                                    <span className="col-start-2 inline-flex items-center gap-2 text-sm font-medium text-primary sm:col-start-auto">
+                                        {t("open")}
+                                        <ArrowRight
+                                            aria-hidden="true"
+                                            className="size-4 rtl:rotate-180"
+                                        />
+                                    </span>
+                                </Link>
                             ))}
-                        </div>
-                    ) : (
-                        <div className="mt-8 flex items-start gap-4 rounded-3xl border border-primary/12 bg-primary/[0.045] p-5 shadow-sm sm:mt-10 sm:p-6">
-                            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                <UsersRound
-                                    aria-hidden="true"
-                                    className="size-5"
-                                />
-                            </span>
-                            <div>
-                                <h2 className="text-xl font-semibold">
-                                    {t("emptyTitle")}
-                                </h2>
-                                <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
-                                    {t("emptyDescription")}
-                                </p>
-                            </div>
                         </div>
                     )}
 
-                    <GroupForms initialInviteCode={params.join ?? ""} />
+                    <GroupForms
+                        initialInviteCode={params.join ?? ""}
+                        firstGroup={groups.length === 0}
+                    />
                 </section>
             </div>
         </main>

@@ -95,6 +95,15 @@
 
 @custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *, .ruby *, .obsidian *, .lagoon *, .copper *));
 
+/* Shared with the halaqa cards. Keep reading typography and theme colors local. */
+@utility app-card {
+    @apply rounded-2xl border border-border/60 bg-card shadow-sm;
+}
+
+@utility app-card-body {
+    @apply border-t border-border/50 bg-muted/20 p-4 sm:p-5;
+}
+
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);

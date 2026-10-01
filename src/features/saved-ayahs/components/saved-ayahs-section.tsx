@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import SectionHeading from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
 import {
     Combobox,
@@ -183,14 +184,14 @@ export default function SavedAyahsSection({
         return (
             <section className="mt-8" aria-labelledby="saved-ayahs-title">
                 <p className="sr-only">{t("saved.eyebrow")}</p>
-                <div className="mt-4 grid gap-5 border-primary/15 border-t pt-6 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <div className="app-card mt-4 grid gap-4 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:p-5">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         <Bookmark aria-hidden="true" className="size-5" />
                     </span>
                     <div className="min-w-0">
                         <h2
                             id="saved-ayahs-title"
-                            className="text-xl font-semibold tracking-tight"
+                            className="font-semibold leading-6"
                         >
                             {t("saved.emptyTitle")}
                         </h2>
@@ -217,23 +218,8 @@ export default function SavedAyahsSection({
     }
 
     return (
-        <section className="mt-8" aria-labelledby="saved-ayahs-title">
-            <div className="rounded-2xl border border-border/70 bg-card/70 p-3 sm:p-4">
-                <div className="sr-only">
-                    <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                        {t("saved.eyebrow")}
-                    </p>
-                    <h2
-                        id="saved-ayahs-title"
-                        className="mt-2 text-2xl font-semibold tracking-tight"
-                    >
-                        {t("saved.title")}
-                    </h2>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                        {t("saved.description")}
-                    </p>
-                </div>
-
+        <section className="mt-6" aria-label={t("saved.collectionsTitle")}>
+            <div className="app-card p-3 sm:p-4">
                 {savedAyahs.length > 0 && (
                     <div className="flex w-full flex-col gap-3 sm:flex-row">
                         <label
@@ -320,34 +306,26 @@ export default function SavedAyahsSection({
             </div>
 
             {savedAyahs.length > 0 && (
-                <div className="mt-3 rounded-2xl border border-border/60 bg-card/50 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-2.5">
-                            <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                <FolderHeart className="size-4" />
-                            </span>
-                            <div>
-                                <h3 className="text-sm font-semibold">
-                                    {t("saved.collectionsTitle")}
-                                </h3>
-                                <p className="text-xs text-muted-foreground">
-                                    {t("saved.collectionsDescription")}
-                                </p>
-                            </div>
-                        </div>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                                setIsCreatingCollection((value) => !value)
-                            }
-                            className="rounded-xl text-primary hover:text-primary"
-                        >
-                            <Plus />
-                            {t("saved.newCollection")}
-                        </Button>
-                    </div>
+                <div className="app-card mt-3 p-4 sm:p-5">
+                    <SectionHeading
+                        title={t("saved.collectionsTitle")}
+                        description={t("saved.collectionsDescription")}
+                        icon={<FolderHeart />}
+                        actions={
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                    setIsCreatingCollection((value) => !value)
+                                }
+                                className="min-h-11 rounded-xl text-primary hover:text-primary"
+                            >
+                                <Plus />
+                                {t("saved.newCollection")}
+                            </Button>
+                        }
+                    />
 
                     {isCreatingCollection && (
                         <form
@@ -534,7 +512,7 @@ export default function SavedAyahsSection({
                             return (
                                 <article
                                     key={ayah.globalAyahNumber}
-                                    className="group rounded-2xl border border-border/70 bg-card/70 p-4 shadow-sm sm:p-6"
+                                    className="group app-card p-4 sm:p-5"
                                 >
                                     <div className="flex flex-wrap items-center justify-between gap-3">
                                         <div className="flex min-w-0 items-center gap-2.5">

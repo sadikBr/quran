@@ -23,7 +23,7 @@ export default function QuranReaderError({
 
     return (
         <div className="grid h-full min-h-0 place-items-center overflow-y-auto p-5">
-            <section className="w-full max-w-lg rounded-3xl bg-card/70 p-6 text-center shadow-sm ring-1 ring-primary/12 backdrop-blur-sm sm:p-10">
+            <section className="w-full max-w-lg app-card p-5 text-center sm:p-8">
                 <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
                     <WifiOff aria-hidden="true" className="size-6" />
                 </span>

@@ -2,6 +2,7 @@
 
 import { CalendarCheck, Check, Flame, Trophy } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import SectionHeading from "@/components/section-heading";
 import type { WirdHistoryStats, WirdUnit } from "../types";
 
 const UNITS: WirdUnit[] = ["ayah", "page", "quarter", "hizb", "juz", "surah"];
@@ -21,28 +22,17 @@ export default function WirdHistory({ stats }: { stats: WirdHistoryStats }) {
     });
 
     return (
-        <section
-            className="mt-8 border-t border-border/60 pt-6"
-            aria-labelledby="wird-history-title"
-        >
-            <div className="max-w-2xl">
-                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                    {t("eyebrow")}
-                </p>
-                <h2
-                    id="wird-history-title"
-                    className="mt-2 text-2xl font-semibold tracking-tight"
-                >
-                    {t("title")}
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    {t("description")}
-                </p>
-            </div>
+        <section className="mt-8" aria-labelledby="wird-history-title">
+            <SectionHeading
+                id="wird-history-title"
+                title={t("title")}
+                description={t("description")}
+                icon={<CalendarCheck />}
+            />
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-3 [&>article]:rounded-xl [&>article]:border [&>article]:border-border/60 [&>article]:bg-card/60 [&>article]:p-4">
-                <article className="flex items-center gap-4">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <div className="mt-5 grid gap-3 sm:grid-cols-3 ">
+                <article className="app-card flex items-center gap-4 p-4 sm:p-5">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         <Flame aria-hidden="true" className="size-5" />
                     </span>
                     <div>
@@ -54,8 +44,8 @@ export default function WirdHistory({ stats }: { stats: WirdHistoryStats }) {
                         </p>
                     </div>
                 </article>
-                <article className="flex items-center gap-4">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
+                <article className="app-card flex items-center gap-4 p-4 sm:p-5">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
                         <Trophy aria-hidden="true" className="size-5" />
                     </span>
                     <div>
@@ -67,8 +57,8 @@ export default function WirdHistory({ stats }: { stats: WirdHistoryStats }) {
                         </p>
                     </div>
                 </article>
-                <article className="flex items-center gap-4">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <article className="app-card flex items-center gap-4 p-4 sm:p-5">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
                         <CalendarCheck aria-hidden="true" className="size-5" />
                     </span>
                     <div>
@@ -82,7 +72,7 @@ export default function WirdHistory({ stats }: { stats: WirdHistoryStats }) {
                 </article>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-border/70 bg-card/80 p-3 sm:p-6">
+            <div className="app-card mt-5 p-4 sm:p-5">
                 <div className="flex items-center justify-between gap-4">
                     <h3 className="font-semibold">{t("lastSevenDays")}</h3>
                     <p className="text-xs text-muted-foreground">
@@ -128,7 +118,7 @@ export default function WirdHistory({ stats }: { stats: WirdHistoryStats }) {
             </div>
 
             {stats.totalCompleted > 0 && (
-                <div className="mt-9 grid gap-8 md:grid-cols-[0.8fr_1.2fr]">
+                <div className="app-card mt-5 grid gap-6 p-4 sm:p-5 md:grid-cols-[0.8fr_1.2fr]">
                     <div>
                         <h3 className="font-semibold">{t("totalsTitle")}</h3>
                         <dl className="mt-4 space-y-3">

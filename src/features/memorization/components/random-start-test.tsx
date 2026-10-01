@@ -1,8 +1,16 @@
 "use client";
 
-import { Eye, LoaderCircle, Minus, Plus, Shuffle } from "lucide-react";
+import {
+    Eye,
+    LoaderCircle,
+    Minus,
+    Plus,
+    Settings2,
+    Shuffle,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import SectionHeading from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
 import QuranRangeSelector, {
     SurahCombobox,
@@ -175,24 +183,17 @@ export default function RandomStartTest({
     }
     return (
         <div className="mt-6 space-y-5">
-            <section
-                data-tour="test-settings"
-                className="rounded-2xl border border-border bg-card/70 p-4 sm:p-6"
-            >
+            <section data-tour="test-settings" className="app-card p-4 sm:p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h2 className="text-sm font-semibold">
-                            {t("testSettings")}
-                        </h2>
-                        {!settingsOpen && (
-                            <p className="mt-1 text-xs text-muted-foreground">
-                                {t(`modes.${mode}`)} ·{" "}
-                                {t("settingsCount", {
-                                    count: continuationCount,
-                                })}
-                            </p>
-                        )}
-                    </div>
+                    <SectionHeading
+                        title={t("testSettings")}
+                        icon={<Settings2 />}
+                        description={
+                            !settingsOpen
+                                ? `${t(`modes.${mode}`)} · ${t("settingsCount", { count: continuationCount })}`
+                                : undefined
+                        }
+                    />
                     <Button
                         type="button"
                         variant="ghost"
@@ -481,7 +482,7 @@ export default function RandomStartTest({
                 )}
             </section>
             {difficult.length > 0 && (
-                <details className="rounded-2xl border border-border bg-card/60 p-4">
+                <details className="app-card p-4">
                     <summary className="cursor-pointer text-sm font-semibold text-primary">
                         {t("difficultList", { count: difficult.length })}
                     </summary>
@@ -532,10 +533,10 @@ export default function RandomStartTest({
             {result && (
                 <section
                     aria-busy={pending}
-                    className="overflow-hidden rounded-3xl border border-primary/20 bg-card/80 shadow-sm"
+                    className="app-card overflow-hidden"
                 >
                     <div
-                        className="border-b border-primary/10 bg-primary/[0.04] p-4 sm:px-6 sm:py-5"
+                        className="border-b border-border/50 bg-muted/20 p-4 sm:p-5"
                         aria-live="polite"
                     >
                         <h2 className="font-semibold text-primary">
@@ -618,7 +619,7 @@ export default function RandomStartTest({
                                 ))}
                         </p>
                     </div>
-                    <div className="flex flex-col gap-3 border-t border-primary/10 bg-primary/[0.025] p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div className="flex flex-col gap-3 border-t border-border/50 bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                         <p className="text-xs leading-5 text-muted-foreground">
                             <span className="mb-1 block font-medium text-foreground">
                                 {t(

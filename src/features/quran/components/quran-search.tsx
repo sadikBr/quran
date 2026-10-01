@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
+import PageHeading from "@/components/page-heading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -209,24 +210,15 @@ export default function QuranSearch({
 
     return (
         <div className="h-full overflow-y-auto bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--primary)_6%,transparent),transparent_55%)]">
-            <div className="app-container pb-16 pt-6 sm:pt-10">
-                <div className="rounded-2xl border border-primary/15 bg-card/70 p-5 shadow-sm sm:rounded-3xl sm:p-8">
-                    <header className="max-w-2xl">
-                        <span className="mb-5 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                            <Search aria-hidden="true" className="size-5" />
-                        </span>
-                        <p className="text-xs font-semibold tracking-[0.22em] text-primary">
-                            {t("eyebrow")}
-                        </p>
-                        <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-4xl">
-                            {t("title")}
-                        </h1>
-                        <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                            {t("description")}
-                        </p>
-                    </header>
+            <div className="app-container pb-16 pt-5 sm:pt-8">
+                <PageHeading
+                    title={t("title")}
+                    description={t("description")}
+                    icon={<Search />}
+                />
 
-                    <div className="relative mt-6">
+                <div className="app-card mt-6 p-4 sm:p-5">
+                    <div className="relative">
                         <Label htmlFor="quran-search" className="sr-only">
                             {t("label")}
                         </Label>

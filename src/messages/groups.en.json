@@ -28,6 +28,7 @@
             "join": "Join the meeting",
             "invite": "Invite members",
             "host": "Meeting host: {name}",
+            "hostLabel": "Meeting host",
             "handover": "Change host",
             "handoverTitle": "Hand over meeting hosting?",
             "handoverDescription": "The selected supervisor will start meetings and admit members. Hosting cannot change while the current host is connected.",
@@ -53,8 +54,8 @@
         "header": "Memorization groups",
         "back": "Back to dashboard",
         "eyebrow": "LEARN TOGETHER",
-        "title": "Your Quran circles",
-        "description": "Join your Quran circles and follow their meetings, assignments and reviews.",
+        "title": "Groups",
+        "description": "Open a Quran circle to see your next meeting, assignments, and members.",
         "emptyTitle": "Join your first Quran circle",
         "emptyDescription": "Ask your circle supervisor for an invitation code to join.",
         "members": "{count, plural, one {# member} other {# members}}",
@@ -120,15 +121,21 @@
             "supervisorReviewer": "Supervisor reviewer",
             "reviewer": "Reviewer",
             "assignYourReviewer": "Your assignments need another person’s review. Appoint a supervisor reviewer or a reviewer from your members.",
-            "chooseReviewer": "Choose a reviewer"
+            "chooseReviewer": "Choose a reviewer",
+            "navigation": "Circle sections",
+            "meetingLink": "Meeting",
+            "assignmentsLink": "Assignments",
+            "aboutReviewRoles": "About review roles",
+            "actionsFor": "Actions for {name}",
+            "copyError": "Couldn’t copy. Select the invitation code and copy it manually."
         },
         "assignments": {
             "viewDetails": "View assignment",
             "eyebrow": "MEETING ASSIGNMENTS",
             "title": "Member assignments",
             "description": "Give each learner their own memorization or revision range. Ranges may continue across surahs.",
-            "hubTitle": "Assignments at a glance",
-            "hubDescriptionAdmin": "Planning, individual assignments, and reviews now live in one focused workspace.",
+            "hubTitle": "Circle assignments",
+            "hubDescriptionAdmin": "View your own work or manage assignments and reviews for the circle.",
             "hubDescriptionMember": "Track what you’re practicing, what you’ve submitted, and what you’ve completed in this circle.",
             "memberHubTitle": "My assignments in this circle",
             "openMyAssignments": "View my assignments",
@@ -215,7 +222,8 @@
                 "not_completed": "Not completed",
                 "needs_revision": "Needs more work",
                 "completed": "Completed"
-            }
+            },
+            "manageCircleAssignments": "Manage circle assignments"
         },
         "planner": {
             "alreadyPlanned": "Work already exists for this meeting. Check the existing assignments before publishing.",
@@ -307,12 +315,15 @@
             "notReadyDescription": "The learner may still be working on it, or someone has already reviewed it.",
             "returnToGroup": "Return to group",
             "selfReviewed": "Self-reviewed",
-            "peerReviewed": "Reviewed by another member"
+            "peerReviewed": "Reviewed by another member",
+            "reviewedBy": "Reviewed by <reviewer>{name}</reviewer>",
+            "latestFeedback": "Latest feedback",
+            "noWrittenFeedback": "No written feedback was added."
         },
         "dashboard": {
             "eyebrow": "Your Quran circles",
             "title": "Learn and revise together",
-            "emptyDescription": "Create a group for family, friends, or students and prepare assignments for each meeting.",
+            "emptyDescription": "Join a Quran circle with an invitation code from your supervisor.",
             "activeDescription": "You belong to {count, plural, one {# memorization group} other {# memorization groups}}.",
             "nextMeetingEyebrow": "Next circle meeting",
             "nextMeetingDescription": "{date} · Open the circle for details.",
@@ -338,7 +349,7 @@
             }
         },
         "meeting": {
-            "rescheduleOne": "Reschedule this meeting",
+            "rescheduleOne": "Move the next meeting",
             "rescheduleHint": "Move only the next meeting (within 90 days). Its unfinished assignments and drafts move with it; progress and readiness stay unchanged. The weekly schedule stays the same.",
             "newTime": "New date and time ({timezone})",
             "rescheduleError": "Could not reschedule. Refresh and choose a future time that does not overlap another meeting. Started meetings cannot be moved.",
@@ -349,7 +360,7 @@
             "newMeetingTime": "New date",
             "confirmScheduleMove": "Confirm and move assignments",
             "schedulePreserved": "Progress and readiness are preserved. Completed work and past deadlines stay unchanged.",
-            "scheduleLocked": "A meeting is active or already prepared. Finish it, or use “Reschedule this meeting” for a future meeting, before changing the weekly schedule.",
+            "scheduleLocked": "A meeting is active or already prepared. Finish it, or use “Move the next meeting” for a future meeting, before changing the weekly schedule.",
             "eyebrow": "GROUP MEETING",
             "liveEyebrow": "MEETING OPEN",
             "setupTitle": "Choose your weekly meeting times",
@@ -367,8 +378,8 @@
             "providerUnavailable": "Video setup required",
             "configure": "Set meeting schedule",
             "editSchedule": "Edit meeting schedule",
-            "scheduleTitle": "Weekly meeting times",
-            "scheduleDescription": "Change the recurring weekly schedule. If future assignment deadlines are affected, you will confirm their new dates before saving. To move just the next meeting, use “Reschedule this meeting”.",
+            "scheduleTitle": "Weekly schedule",
+            "scheduleDescription": "Set the regular weekly days and times. Changes to future assignment dates are shown for confirmation before saving.",
             "day": "Meeting day",
             "time": "Meeting time",
             "addSlot": "Add another time",
@@ -433,7 +444,8 @@
                     "pending": "Awaiting the supervisor’s decision",
                     "accepted": "Absence accepted",
                     "unaccepted": "Absence not accepted"
-                }
+                },
+                "overview": "Attendance and outcomes from previous meetings."
             },
             "agenda": {
                 "eyebrow": "NEXT MEETING",
@@ -499,7 +511,31 @@
             "countdownSoon": "Starts in less than a minute",
             "countdownDays": "{count, plural, one {# day} other {# days}}",
             "countdownHours": "{count, plural, one {# hour} other {# hours}}",
-            "countdownMinutes": "{count, plural, one {# minute} other {# minutes}}"
+            "countdownMinutes": "{count, plural, one {# minute} other {# minutes}}",
+            "waitingTitle": "No meeting scheduled yet",
+            "upcomingDescription": "The room opens at the scheduled time. Members can enter once the host starts the meeting.",
+            "pausedDescription": "No meetings will open while this schedule is paused.",
+            "manageTimes": "Meeting times",
+            "manageTimesDescription": "Choose a one-time change or update the repeating weekly schedule.",
+            "oneTimeScope": "One time",
+            "oneTimeSummary": "Change one date. Your regular weekly times stay the same.",
+            "oneTimeImpact": "Unfinished assignments and drafts for this meeting move to the new date. Other meetings keep their dates.",
+            "oneTimeTimezone": "Times are in {timezone}. Choose a future date within 90 days.",
+            "currentMeeting": "Current meeting",
+            "newDate": "New date",
+            "newClockTime": "New time",
+            "saveOneTime": "Move this meeting",
+            "rescheduled": "The meeting and its unfinished assignments have been moved.",
+            "recurringScope": "Every week",
+            "recurringSummary": "Set the days and times when your circle regularly meets.",
+            "recurringImpact": "This updates the repeating schedule for future meetings. If unfinished assignments need new dates, you will review and confirm those dates before anything is saved.",
+            "progressPreserved": "Practice progress and readiness are kept.",
+            "saveWeekly": "Save weekly schedule",
+            "activeScheduleHint": "Meeting times can be changed after the current meeting ends.",
+            "regularTimes": "Regular weekly times",
+            "rescheduledBadge": "Rescheduled",
+            "setupTimesDescription": "Set up regular meeting times for your circle.",
+            "manageWeeklyDescription": "Manage your circle’s recurring meeting times."
         },
         "loading": "Loading your groups…"
     }

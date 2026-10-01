@@ -2,6 +2,7 @@
 
 import { CalendarCheck, Check, Sparkles, Trophy } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import SectionHeading from "@/components/section-heading";
 import type { KhatmahHistoryStats } from "../types";
 
 export default function KhatmahMilestones({
@@ -22,28 +23,20 @@ export default function KhatmahMilestones({
     const latestFull = stats.recent.find((entry) => entry.fullKhatmah);
 
     return (
-        <section className="mt-14" aria-labelledby="khatmah-history-title">
-            <div className="max-w-2xl">
-                <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                    {t("eyebrow")}
-                </p>
-                <h2
-                    id="khatmah-history-title"
-                    className="mt-2 text-2xl font-semibold tracking-tight"
-                >
-                    {t("title")}
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    {t("description")}
-                </p>
-            </div>
+        <section className="mt-8" aria-labelledby="khatmah-history-title">
+            <SectionHeading
+                id="khatmah-history-title"
+                title={t("title")}
+                description={t("description")}
+                icon={<Trophy />}
+            />
 
             {latestFull && (
-                <div className="relative mt-7 overflow-hidden bg-primary px-6 py-7 text-primary-foreground sm:px-8">
+                <div className="app-card relative mt-5 overflow-hidden p-4 sm:p-5">
                     <Sparkles className="absolute -end-6 -top-6 size-32 opacity-10" />
                     <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex items-center gap-4">
-                            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15">
+                        <div className="app-card flex items-center gap-4 p-4 sm:p-5">
+                            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                 <Trophy className="size-6" aria-hidden="true" />
                             </span>
                             <div>
@@ -70,7 +63,7 @@ export default function KhatmahMilestones({
                 </div>
             )}
 
-            <div className="mt-7 grid gap-5 sm:grid-cols-3">
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 <Stat
                     icon={Trophy}
                     value={stats.totalCompleted}
@@ -88,16 +81,16 @@ export default function KhatmahMilestones({
                 />
             </div>
 
-            <div className="mt-9">
+            <div className="app-card mt-5 p-4 sm:p-5">
                 <h3 className="font-semibold">{t("timeline")}</h3>
                 <div className="mt-4 divide-y divide-border/60 border-y border-border/60">
                     {stats.recent.map((entry) => (
                         <article
                             key={entry.id}
-                            className="flex items-center justify-between gap-5 py-4"
+                            className="flex flex-wrap items-center justify-between gap-3 py-4"
                         >
                             <div className="flex min-w-0 items-center gap-3">
-                                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                     <Check
                                         className="size-4"
                                         aria-hidden="true"
@@ -150,7 +143,7 @@ function Stat({
     label: string;
 }) {
     return (
-        <article className="flex items-center gap-4 bg-muted/35 px-5 py-5">
+        <article className="app-card flex items-center gap-4 p-4 sm:p-5">
             <Icon className="size-5 shrink-0 text-primary" aria-hidden="true" />
             <div>
                 <p className="text-2xl font-semibold tabular-nums">{value}</p>

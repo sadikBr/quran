@@ -32,7 +32,7 @@ export default function WirdLoading() {
                         <div className="h-5 w-5/6 rounded bg-muted/80" />
                     </div>
 
-                    <div className="mt-10 rounded-3xl bg-muted/45 p-5 ring-1 ring-primary/10 sm:p-8">
+                    <div className="mt-10 rounded-2xl bg-muted/45 p-5 ring-1 ring-primary/10 sm:p-8">
                         <div className="flex flex-col gap-6 sm:flex-row sm:justify-between">
                             <div className="space-y-4">
                                 <div className="h-4 w-32 rounded bg-primary/15" />
@@ -49,8 +49,8 @@ export default function WirdLoading() {
                     </div>
 
                     <div className="mt-12 grid gap-6 lg:grid-cols-2">
-                        <div className="h-72 rounded-3xl bg-muted/40 ring-1 ring-primary/8" />
-                        <div className="h-72 rounded-3xl bg-muted/30 ring-1 ring-primary/8" />
+                        <div className="h-72 rounded-2xl bg-muted/40 ring-1 ring-primary/8" />
+                        <div className="h-72 rounded-2xl bg-muted/30 ring-1 ring-primary/8" />
                     </div>
                 </section>
             </div>

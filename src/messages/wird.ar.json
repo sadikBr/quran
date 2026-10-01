@@ -1,27 +1,29 @@
 {
     "Wird": {
         "eyebrow": "الورد اليومي",
-        "title": "داوم على وردك، ولو قليلًا",
-        "description": "حدّد مقدار قراءتك اليومي، وسجّل إتمامه بعد القراءة ليكون وردك التالي جاهزًا في اليوم التالي.",
+        "title": "الورد اليومي",
+        "description": "قراءتك اليومية، وتقدّمك المحفوظ، وخطة ختمتك في مكان واحد.",
         "loading": {
             "overview": "جارٍ إعداد وردك اليومي",
             "reader": "جارٍ إعداد قراءة اليوم"
         },
         "setup": {
             "nextPortion": "تُطبّق التغييرات على الورد القادم. تبقى قراءة اليوم وموضعك المحفوظ وسجل الإنجاز دون تغيير.",
-            "planManaged": "تتحكم خطة الختمة في هذا الهدف. عدّلها من مخطط الختمة أدناه؛ لن تُحذف خطتك أو قراءة اليوم من هنا.",
+            "planManaged": "تحسب خطتك هذا المقدار تلقائيًّا. لتغييره، عدّل مدة الختمة أو وحدة القراءة من خطة الختمة.",
             "title": "حدّد وردك اليومي",
             "description": "ابدأ من أول المصحف وتابع بالترتيب. نحفظ موضعك لتكمل منه كل يوم.",
             "unitLabel": "تقسيم الورد",
             "amountLabel": "المقدار اليومي",
-            "preview": "{amount, number} {unit} كل يوم",
+            "preview": "{unit, select, ayah {{amount, plural, one {آية واحدة} two {آيتان} few {# آيات} many {# آية} other {# آية}}} page {{amount, plural, one {صفحة واحدة} two {صفحتان} few {# صفحات} many {# صفحة} other {# صفحة}}} quarter {{amount, plural, one {ربع حزب} two {ربعان من الحزب} few {# أرباع حزب} many {# ربع حزب} other {# ربع حزب}}} hizb {{amount, plural, one {حزب واحد} two {حزبان} few {# أحزاب} many {# حزبًا} other {# حزب}}} juz {{amount, plural, one {جزء واحد} two {جزءان} few {# أجزاء} many {# جزءًا} other {# جزء}}} surah {{amount, plural, one {سورة واحدة} two {سورتان} few {# سور} many {# سورة} other {# سورة}}} other {{amount, number}}} كل يوم",
             "decrease": "تقليل المقدار اليومي",
             "increase": "زيادة المقدار اليومي",
             "save": "حفظ الورد",
             "update": "تعديل الورد",
             "saving": "جارٍ الحفظ…",
             "success": "حُفظ وردك اليومي.",
-            "error": "تعذّر حفظ وردك. أعد المحاولة."
+            "error": "تعذّر حفظ وردك. أعد المحاولة.",
+            "managedTitle": "المقدار تحدّده خطة الختمة",
+            "viewPlan": "عرض خطة الختمة"
         },
         "units": {
             "ayah": "آيات",
@@ -155,16 +157,16 @@
             "deadline": "موعد الختم",
             "dailyPace": "مقدار الورد الحالي",
             "daysRemaining": "المدة المتبقية",
-            "amount": "{amount, number} {unit}",
+            "amount": "{unit, select, page {{amount, plural, one {صفحة واحدة} two {صفحتان} few {# صفحات} many {# صفحة} other {# صفحة}}} hizb {{amount, plural, one {حزب واحد} two {حزبان} few {# أحزاب} many {# حزبًا} other {# حزب}}} juz {{amount, plural, one {جزء واحد} two {جزءان} few {# أجزاء} many {# جزءًا} other {# جزء}}} other {{amount, number}}}",
             "days": "{count, plural, zero {لا أيام} one {يوم واحد} two {يومان} few {# أيام} many {# يومًا} other {# يوم}}",
-            "repeats": "تبدأ ختمة جديدة تلقائيًّا بعد الإتمام",
+            "repeats": "تتكرر الختمة تلقائيًّا بعد إتمامها.",
             "adaptiveNote": "نعدّل مقدار الورد بعد كل إنجاز لمساعدتك على الالتزام بموعد الختمة، حتى إن فاتك يوم."
         },
         "actions": {
             "edit": "تعديل الخطة",
-            "pause": "إيقاف الخطة مؤقتًا",
+            "pause": "إيقاف مؤقت",
             "resume": "استئناف الخطة",
-            "startAgain": "التخطيط لختمة جديدة",
+            "startAgain": "بدء ختمة جديدة",
             "endPlan": "إلغاء خطة الختمة",
             "cancel": "إلغاء"
         },

@@ -15,8 +15,8 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
-
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
@@ -56,14 +56,14 @@ function DashboardShortcut({
     return (
         <Link
             href={href}
-            className="group grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] items-start gap-3 rounded-xl px-3 py-4 outline-none transition-[background-color,box-shadow] hover:bg-background/70 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-ring"
+            className="app-card group grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] items-start gap-3 p-4 outline-none transition-colors hover:border-primary/30 hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-ring sm:p-5"
         >
             <span
                 className={cn(
-                    "flex size-9 shrink-0 items-center justify-center rounded-full transition-[background-color,color]",
+                    "flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors",
                     emphasized
                         ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-primary group-hover:bg-primary group-hover:text-primary-foreground",
+                        : "bg-primary/10 text-primary",
                 )}
             >
                 <Icon aria-hidden="true" className="size-5" />
@@ -73,7 +73,7 @@ function DashboardShortcut({
                     {eyebrow}
                 </p>
                 <h3 className="mt-1.5 flex min-w-0 items-center gap-2 text-base font-semibold tracking-tight">
-                    <span className="min-w-0 truncate">{title}</span>
+                    <span className="min-w-0 break-words">{title}</span>
                     <ArrowRight
                         aria-hidden="true"
                         className={cn(
@@ -82,7 +82,7 @@ function DashboardShortcut({
                         )}
                     />
                 </h3>
-                <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
                     {description}
                 </p>
             </div>
@@ -279,24 +279,17 @@ export default async function DashboardPage() {
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
                 />
 
-                <GuideDirectory welcome />
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
-                    <div className="border-b border-border/60 pb-6 sm:pb-8">
-                        <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                            {t("eyebrow")}
-                        </p>
-                        <h1 className="mt-2 break-words text-3xl font-semibold leading-snug tracking-tight sm:text-4xl">
-                            {t("welcome", { name: session.user.name })}
-                        </h1>
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                            {t("introduction")}
-                        </p>
-                    </div>
+                    <PageHeading
+                        title={t("welcome", { name: session.user.name })}
+                        description={t("introduction")}
+                    />
+                    <GuideDirectory welcome />
 
                     {nextGroupMeeting && (
                         <Link
                             href={`/groups/${nextGroupMeeting.groupId}`}
-                            className="group mt-6 flex min-w-0 flex-col gap-4 rounded-2xl border border-primary/20 bg-card/60 px-4 py-4 shadow-sm shadow-primary/5 outline-none transition-[background-color,border-color,box-shadow] hover:border-primary/30 hover:bg-card/80 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring sm:px-5 lg:flex-row lg:items-center lg:justify-between"
+                            className="group mt-6 flex min-w-0 flex-col gap-4 app-card px-4 py-4 outline-none transition-[background-color,border-color,box-shadow] hover:border-primary/30 hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-ring sm:px-5 lg:flex-row lg:items-center lg:justify-between"
                         >
                             <div className="flex min-w-0 items-center gap-3.5">
                                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
@@ -359,14 +352,14 @@ export default async function DashboardPage() {
 
                     <section
                         className={cn(
-                            "overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-sm",
+                            "overflow-hidden app-card",
                             nextGroupMeeting ? "mt-4 sm:mt-5" : "mt-8 sm:mt-10",
                         )}
                     >
                         <div className="grid sm:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_minmax(15rem,0.75fr)_minmax(15rem,0.75fr)]">
                             <div className="min-w-0 bg-primary/[0.035] px-4 py-5 sm:col-span-2 sm:px-6 sm:py-6 lg:col-span-1">
                                 <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                                    <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
+                                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                         <FocusIcon
                                             aria-hidden="true"
                                             className="size-5"
@@ -442,7 +435,7 @@ export default async function DashboardPage() {
                                                 )}
                                             </span>
                                         </div>
-                                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
                                             {assignedWork.length > 0
                                                 ? assignmentsT(
                                                       "dashboard.active",
@@ -483,7 +476,7 @@ export default async function DashboardPage() {
                                                 /60
                                             </span>
                                         </div>
-                                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
                                             {memorizationT(
                                                 "dashboard.description",
                                             )}
@@ -506,24 +499,16 @@ export default async function DashboardPage() {
                         className="mt-8 sm:mt-10"
                         aria-labelledby="dashboard-tools"
                     >
-                        <div className="max-w-xl">
-                            <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                {t("tools.eyebrow")}
-                            </p>
-                            <h2
-                                id="dashboard-tools"
-                                className="mt-2 text-2xl font-semibold tracking-tight"
-                            >
-                                {t("tools.title")}
-                            </h2>
-                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                {t("tools.description")}
-                            </p>
-                        </div>
+                        <h2
+                            id="dashboard-tools"
+                            className="text-xl font-semibold tracking-tight"
+                        >
+                            {t("tools.title")}
+                        </h2>
 
                         <div
                             className={cn(
-                                "mt-6 grid gap-1 rounded-2xl bg-muted/25 p-1.5 ring-1 ring-border/50 sm:grid-cols-2 sm:p-2",
+                                "mt-4 grid gap-3 sm:grid-cols-2",
                                 !focusIsAssignment && "lg:grid-cols-3",
                             )}
                         >

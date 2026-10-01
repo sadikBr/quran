@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import SectionNav from "@/components/section-nav";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -232,17 +233,43 @@ export default function SettingsForm({
 
     return (
         <form
-            className="mt-6"
+            className="mt-6 lg:grid lg:grid-cols-[12rem_minmax(0,1fr)] lg:items-start lg:gap-x-6"
             onSubmit={(event) => {
                 event.preventDefault();
                 savePreferences();
             }}
         >
-            <fieldset disabled={isSaving} className="contents">
+            <SectionNav
+                label={t("sectionNavigation")}
+                className="mb-6 lg:sticky lg:top-28 lg:flex-col"
+                items={[
+                    {
+                        id: "settings-appearance",
+                        label: t("sections.appearance.title"),
+                    },
+                    {
+                        id: "settings-reading",
+                        label: t("sections.readingFlow.title"),
+                    },
+                    {
+                        id: "settings-reminders",
+                        label: t("sections.notifications.title"),
+                    },
+                    {
+                        id: "settings-offline",
+                        label: t("sections.offline.title"),
+                    },
+                    {
+                        id: "settings-editions",
+                        label: t("sections.quranText.title"),
+                    },
+                ]}
+            />
+            <fieldset disabled={isSaving} className="min-w-0">
                 <div className="space-y-5">
                     <div className="space-y-5">
                         <SettingsSection
-                            eyebrow={t("sections.appearance.eyebrow")}
+                            id="settings-appearance"
                             title={t("sections.appearance.title")}
                         >
                             <section className="space-y-4">
@@ -377,7 +404,7 @@ export default function SettingsForm({
                         </SettingsSection>
 
                         <SettingsSection
-                            eyebrow={t("sections.readingFlow.eyebrow")}
+                            id="settings-reading"
                             title={t("sections.readingFlow.title")}
                         >
                             <PreferenceCard
@@ -564,7 +591,7 @@ export default function SettingsForm({
                         </SettingsSection>
 
                         <SettingsSection
-                            eyebrow={t("sections.notifications.eyebrow")}
+                            id="settings-reminders"
                             title={t("sections.notifications.title")}
                         >
                             <PushNotificationSetting
@@ -588,7 +615,7 @@ export default function SettingsForm({
                         </SettingsSection>
 
                         <SettingsSection
-                            eyebrow={t("sections.offline.eyebrow")}
+                            id="settings-offline"
                             title={t("sections.offline.title")}
                         >
                             <PreferenceCard
@@ -601,7 +628,7 @@ export default function SettingsForm({
                     </div>
 
                     <SettingsSection
-                        eyebrow={t("sections.quranText.eyebrow")}
+                        id="settings-editions"
                         title={t("sections.quranText.title")}
                     >
                         <PreferenceCard
@@ -749,11 +776,13 @@ export default function SettingsForm({
                     </Button>
                 </div>
             </fieldset>
-            <SettingsNextStep
-                saved={setupSaved}
-                pending={isSaving}
-                onContinue={savePreferences}
-            />
+            <div className="lg:col-start-2">
+                <SettingsNextStep
+                    saved={setupSaved}
+                    pending={isSaving}
+                    onContinue={savePreferences}
+                />
+            </div>
         </form>
     );
 }

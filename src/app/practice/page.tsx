@@ -1,9 +1,17 @@
-import { ArrowRight, BookMarked, ChevronDown, RefreshCcw } from "lucide-react";
+import {
+    ArrowRight,
+    BookMarked,
+    CalendarCheck2,
+    ChevronDown,
+    RefreshCcw,
+} from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
+import ActionCard from "@/components/action-card";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
@@ -54,11 +62,6 @@ export default async function PracticePage() {
         messages,
         namespace: "Practice",
     });
-    const groupsT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Groups.assignments",
-    });
     const isArabic = preferences.language === "ar";
     const surahName = (number: number) => {
         const surah = surahs.find((item) => item.number === number);
@@ -82,147 +85,22 @@ export default async function PracticePage() {
                 />
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
-                    <div className="border-b border-border/60 pb-6">
-                        <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-                            {t("eyebrow")}
-                        </p>
-                        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                            {t("title")}
-                        </h1>
-                        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-                            {t("description")}
-                        </p>
-                    </div>
+                    <PageHeading
+                        title={t("title")}
+                        description={t("description")}
+                        icon={<BookMarked />}
+                    />
 
                     {assignedWork.length > 0 && (
-                        <section className="mt-6">
-                            <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                {groupsT("eyebrow")}
-                            </p>
-                            <h2 className="mt-2 text-xl font-semibold">
-                                {groupsT("title")}
-                            </h2>
-                            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-                                {assignedWork.map((assignment) => (
-                                    <article
-                                        key={assignment.id}
-                                        className="flex flex-col rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm sm:p-5"
-                                    >
-                                        <div className="flex flex-wrap items-center justify-between gap-2">
-                                            <span className="text-xs font-semibold tracking-[0.12em] text-primary uppercase">
-                                                {groupsT(
-                                                    `kinds.${assignment.kind}`,
-                                                )}
-                                            </span>
-                                            <span
-                                                className={cn(
-                                                    "rounded-lg px-2.5 py-1 text-xs font-medium",
-                                                    assignment.status ===
-                                                        "needs_revision"
-                                                        ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
-                                                        : assignment.status ===
-                                                            "completed"
-                                                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                                                          : "bg-muted text-muted-foreground",
-                                                )}
-                                            >
-                                                {groupsT(
-                                                    `statuses.${assignment.status}`,
-                                                )}
-                                            </span>
-                                        </div>
-                                        <h3 className="mt-4 font-semibold leading-7">
-                                            {t("range", {
-                                                startSurah:
-                                                    surahName(
-                                                        assignment.start
-                                                            .surahNumber,
-                                                    ) ?? "",
-                                                startAyah:
-                                                    assignment.start.ayahNumber,
-                                                endSurah:
-                                                    surahName(
-                                                        assignment.end
-                                                            .surahNumber,
-                                                    ) ?? "",
-                                                endAyah:
-                                                    assignment.end.ayahNumber,
-                                            })}
-                                        </h3>
-                                        <div className="mt-3 space-y-1 text-xs text-muted-foreground">
-                                            {assignment.groupName && (
-                                                <p>
-                                                    {groupsT("fromGroup", {
-                                                        group: assignment.groupName,
-                                                    })}
-                                                </p>
-                                            )}
-                                            {assignment.assignedByName && (
-                                                <p>
-                                                    {groupsT("assignedBy", {
-                                                        name: assignment.assignedByName,
-                                                    })}
-                                                </p>
-                                            )}
-                                            {assignment.dueAt && (
-                                                <p>
-                                                    {groupsT("due", {
-                                                        date: new Intl.DateTimeFormat(
-                                                            preferences.language,
-                                                            {
-                                                                dateStyle:
-                                                                    "medium",
-                                                                timeZone: "UTC",
-                                                            },
-                                                        ).format(
-                                                            assignment.dueAt,
-                                                        ),
-                                                    })}
-                                                </p>
-                                            )}
-                                        </div>
-                                        {assignment.instructions && (
-                                            <p className="mt-4 rounded-xl bg-background/55 px-4 py-3 text-sm leading-6 text-muted-foreground">
-                                                {assignment.instructions}
-                                            </p>
-                                        )}
-                                        {assignment.reviewNote && (
-                                            <div className="mt-4 rounded-xl bg-primary/[0.07] px-4 py-3 ring-1 ring-primary/10">
-                                                <p className="text-xs font-semibold text-primary">
-                                                    {t("reader.feedbackTitle")}
-                                                </p>
-                                                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                                    {assignment.reviewNote}
-                                                </p>
-                                            </div>
-                                        )}
-                                        <div className="mt-auto pt-5">
-                                            <Button
-                                                asChild
-                                                variant="outline"
-                                                className="min-h-11 w-full rounded-xl sm:w-auto"
-                                            >
-                                                <Link
-                                                    href={`/practice/${assignment.id}/read`}
-                                                >
-                                                    {assignment.progress
-                                                        ? t("continue")
-                                                        : t("start")}
-                                                    <ArrowRight
-                                                        aria-hidden="true"
-                                                        className={cn(
-                                                            "size-4",
-                                                            isArabic &&
-                                                                "rotate-180",
-                                                        )}
-                                                    />
-                                                </Link>
-                                            </Button>
-                                        </div>
-                                    </article>
-                                ))}
-                            </div>
-                        </section>
+                        <ActionCard
+                            className="mt-6"
+                            href="/assignments"
+                            icon={<CalendarCheck2 />}
+                            title={t("assignedWork.title", {
+                                count: assignedWork.length,
+                            })}
+                            description={t("assignedWork.description")}
+                        />
                     )}
 
                     {assignments.length > 0 && (
@@ -236,14 +114,11 @@ export default async function PracticePage() {
                             >
                                 {t("personalTitle")}
                             </h2>
-                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                {t("personalDescription")}
-                            </p>
                             <div className="mt-4 grid gap-4 lg:grid-cols-2">
                                 {assignments.map((assignment) => (
                                     <section
                                         key={assignment.id}
-                                        className="relative overflow-hidden rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm sm:p-5"
+                                        className="relative overflow-hidden app-card p-4 sm:p-5"
                                     >
                                         <div className="flex h-full flex-col">
                                             <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-primary uppercase">
@@ -322,25 +197,33 @@ export default async function PracticePage() {
 
                     <details
                         open={assignments.length === 0}
-                        className="group mt-6 rounded-2xl border border-border/70 bg-card/60"
+                        className="app-card group mt-6 overflow-hidden"
                     >
-                        <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
-                            <h2 className="text-lg font-semibold">
-                                {t(
-                                    assignments.length > 0
-                                        ? "form.editTitle"
-                                        : "form.createTitle",
-                                )}
-                            </h2>
+                        <summary className="flex min-h-20 cursor-pointer list-none items-center gap-3 p-4 transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:p-5 [&::-webkit-details-marker]:hidden">
+                            <span
+                                aria-hidden="true"
+                                className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
+                            >
+                                <BookMarked className="size-5" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                                <h2 className="font-semibold leading-6">
+                                    {t(
+                                        assignments.length > 0
+                                            ? "form.editTitle"
+                                            : "form.createTitle",
+                                    )}
+                                </h2>
+                                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                    {t("form.description")}
+                                </p>
+                            </div>
                             <ChevronDown
                                 aria-hidden="true"
                                 className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
                             />
                         </summary>
-                        <div className="border-t border-border/60 px-4 pb-5 pt-3 sm:px-6">
-                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                {t("form.description")}
-                            </p>
+                        <div className="app-card-body pt-0 sm:pt-0">
                             <PracticeRangeForm
                                 surahs={options}
                                 navigation={navigation}

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
+import SectionHeading from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
 import ThemeSelector from "@/features/settings/components/theme-selector";
 import { LANGUAGES, type Preferences } from "@/features/settings/preferences";
@@ -52,29 +53,19 @@ export default function AdminPreferences({
         }
     }
     return (
-        <form
-            className="mt-8 max-w-4xl overflow-hidden rounded-2xl border bg-card/60 shadow-sm"
-            action={save}
-        >
+        <form className="app-card mt-6 max-w-4xl overflow-hidden" action={save}>
             <fieldset
                 disabled={pending}
                 className="min-w-0 divide-y disabled:opacity-70"
             >
-                <fieldset className="min-w-0 p-5 sm:p-8">
+                <fieldset className="min-w-0 p-4 sm:p-5">
                     <legend className="sr-only">{t("language.title")}</legend>
-                    <div className="mb-5 flex items-start gap-3">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                            <Languages className="size-5" aria-hidden="true" />
-                        </span>
-                        <div>
-                            <h2 className="font-semibold">
-                                {t("language.title")}
-                            </h2>
-                            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                {t("language.description")}
-                            </p>
-                        </div>
-                    </div>
+                    <SectionHeading
+                        title={t("language.title")}
+                        description={t("language.description")}
+                        icon={<Languages />}
+                        className="mb-5"
+                    />
                     <div className="grid gap-3 sm:grid-cols-2">
                         {LANGUAGES.map((value) => (
                             <label
@@ -126,28 +117,21 @@ export default function AdminPreferences({
                         ))}
                     </div>
                 </fieldset>
-                <fieldset className="min-w-0 p-5 sm:p-8">
+                <fieldset className="min-w-0 p-4 sm:p-5">
                     <legend className="sr-only">{t("theme.title")}</legend>
-                    <div className="mb-5 flex items-start gap-3">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                            <Palette className="size-5" aria-hidden="true" />
-                        </span>
-                        <div>
-                            <h2 className="font-semibold">
-                                {t("theme.title")}
-                            </h2>
-                            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                {t("theme.description")}
-                            </p>
-                        </div>
-                    </div>
+                    <SectionHeading
+                        title={t("theme.title")}
+                        description={t("theme.description")}
+                        icon={<Palette />}
+                        className="mb-5"
+                    />
                     <ThemeSelector
                         value={theme}
                         onChange={setSelectedTheme}
                         disabled={pending}
                     />
                 </fieldset>
-                <div className="flex justify-end bg-muted/20 px-5 py-4 sm:px-8">
+                <div className="flex justify-end bg-muted/20 p-4 sm:p-5">
                     <Button disabled={pending} className="w-full sm:w-auto">
                         {pending && (
                             <Loader2

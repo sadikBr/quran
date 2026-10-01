@@ -1,8 +1,10 @@
 "use client";
 
-import { Search, SearchX, X } from "lucide-react";
+import { BookOpen, Search, SearchX, X } from "lucide-react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import PageHeading from "@/components/page-heading";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSettings } from "@/features/settings/settings-provider";
@@ -12,6 +14,7 @@ import type { SurahType } from "../types";
 import QuranDivisionIndex, {
     type QuranDivisionKind,
 } from "./quran-division-index";
+import QuranPageJump from "./quran-page-jump";
 import SurahFrame from "./surah-frame";
 
 enum RevelationType {
@@ -105,17 +108,25 @@ export default function QuranIndex({
     return (
         <div
             data-quran-scroll-container
-            className="app-container h-full overflow-y-auto pb-12 pt-6 sm:pt-8"
+            className="app-container h-full overflow-y-auto pb-12 pt-5 sm:pt-8"
         >
-            <header className="mb-6 border-b border-border/60 pb-6">
-                <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                    {t("index.title")}
-                </h1>
-                <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                    {t("index.description")}
-                </p>
-            </header>
-            <div className="mb-6 rounded-2xl border border-border/70 bg-card/80 p-3 sm:p-4">
+            <PageHeading
+                className="mb-6"
+                title={t("index.title")}
+                description={t("index.description")}
+                icon={<BookOpen />}
+            />
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                <QuranPageJump maxPage={navigation.pages.length} />
+                <Link
+                    href="/quran/search"
+                    className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary hover:underline underline-offset-4"
+                >
+                    <Search aria-hidden="true" className="size-4" />
+                    {t("search.title")}
+                </Link>
+            </div>
+            <div className="mb-6 app-card p-3 sm:p-4">
                 <div
                     role="tablist"
                     aria-label={t("index.sectionsLabel")}
@@ -194,7 +205,7 @@ export default function QuranIndex({
                                 <button
                                     type="button"
                                     onClick={() => setSearchFilter("")}
-                                    aria-label={t("index.clearFilters")}
+                                    aria-label={t("index.clearSearch")}
                                     className="absolute top-1/2 end-1 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 >
                                     <X aria-hidden="true" className="size-4" />
@@ -214,7 +225,7 @@ export default function QuranIndex({
                                     <button
                                         key={filter.key}
                                         type="button"
-                                        className={`relative min-w-16 px-3 py-2 text-sm font-medium transition-colors after:absolute after:bottom-0 after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-primary after:transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                                        className={`relative min-h-11 min-w-16 px-3 py-2 text-sm font-medium transition-colors after:absolute after:bottom-0 after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-primary after:transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                                             isActive
                                                 ? "text-primary after:scale-100"
                                                 : "text-muted-foreground after:scale-0 hover:text-foreground"
@@ -235,6 +246,14 @@ export default function QuranIndex({
                 )}
             </div>
 
+            {activeSection === "surahs" && (
+                <output className="mb-3 block text-xs text-muted-foreground">
+                    {t("index.resultCount", {
+                        count: surahsToDisplay.length,
+                        total: surahs.length,
+                    })}
+                </output>
+            )}
             {activeSection === "surahs" ? (
                 <div
                     id="surahs-index-panel"

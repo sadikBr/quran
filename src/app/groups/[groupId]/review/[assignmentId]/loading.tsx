@@ -17,10 +17,10 @@ export default function AssignmentReviewLoading() {
                 <div className="py-12">
                     <div className="h-3 w-28 rounded bg-primary/15" />
                     <div className="mt-4 h-10 w-2/3 rounded-xl bg-muted" />
-                    <div className="mt-10 h-32 rounded-3xl bg-muted/45" />
+                    <div className="mt-10 h-32 rounded-2xl bg-muted/45" />
                     <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
-                        <div className="h-[32rem] rounded-3xl bg-muted/35" />
-                        <div className="h-80 rounded-3xl bg-primary/[0.06]" />
+                        <div className="h-[32rem] rounded-2xl bg-muted/35" />
+                        <div className="h-80 rounded-2xl bg-primary/[0.06]" />
                     </div>
                 </div>
             </div>

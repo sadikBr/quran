@@ -105,13 +105,13 @@ export default function MeetingAgenda({
             className={cn(
                 "overflow-hidden",
                 embedded
-                    ? "border-primary/10 border-t bg-background/20"
+                    ? "border-border/50 border-t bg-muted/20"
                     : "mt-8 rounded-3xl bg-muted/25 ring-1 ring-border/55",
             )}
         >
             <div
                 className={cn(
-                    "flex flex-col gap-4 border-border/50 border-b px-4 sm:px-6",
+                    "flex flex-col gap-4 border-border/50 border-b px-4 sm:px-5",
                     !embedded && "lg:flex-row lg:items-end lg:justify-between",
                     embedded ? "py-5" : "py-6",
                 )}
@@ -143,9 +143,7 @@ export default function MeetingAgenda({
                     <h2
                         className={cn(
                             "font-semibold tracking-tight",
-                            embedded
-                                ? "text-lg sm:text-xl"
-                                : "mt-2 text-xl sm:text-2xl",
+                            embedded ? "text-base" : "mt-2 text-xl sm:text-2xl",
                         )}
                     >
                         {t(canReviewOthers ? "title" : "yourAssignments")}
@@ -193,7 +191,7 @@ export default function MeetingAgenda({
                     return (
                         <details
                             key={member.userId}
-                            className="group/member bg-background/15 open:bg-background/45"
+                            className="group/member open:bg-card/60"
                             open={
                                 !canReviewOthers ||
                                 (agenda.active &&
@@ -202,7 +200,7 @@ export default function MeetingAgenda({
                                             member.assignments.length > 0)))
                             }
                         >
-                            <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
+                            <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">
                                 <Avatar className="size-10 shrink-0 border border-primary/15">
                                     {member.image && (
                                         <AvatarImage
@@ -216,7 +214,7 @@ export default function MeetingAgenda({
                                 </Avatar>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <h3 className="truncate text-sm font-semibold sm:text-base">
+                                        <h3 className="break-words text-sm font-semibold">
                                             {member.name}
                                         </h3>
                                         {isCurrentUser && (

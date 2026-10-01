@@ -21,7 +21,7 @@ export default async function NotFound() {
             className="relative isolate grid min-h-dvh place-items-center overflow-hidden bg-background p-4 sm:p-6"
         >
             <PageBackground />
-            <section className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-card/75 p-6 text-center shadow-lg ring-1 ring-primary/12 backdrop-blur-xl sm:p-10">
+            <section className="relative w-full max-w-lg overflow-hidden app-card p-5 text-center sm:p-8">
                 <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
                     <SearchX aria-hidden="true" className="size-6" />
                 </span>

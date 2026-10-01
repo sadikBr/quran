@@ -18,8 +18,8 @@ export default function MeetingPlanLoading() {
                 <div className="py-12">
                     <div className="h-3 w-28 rounded bg-primary/15" />
                     <div className="mt-4 h-10 w-2/3 rounded-xl bg-muted" />
-                    <div className="mt-8 h-32 rounded-3xl bg-primary/[0.06]" />
-                    <div className="mt-6 overflow-hidden rounded-3xl ring-1 ring-border/50">
+                    <div className="mt-8 h-32 rounded-2xl bg-primary/[0.06]" />
+                    <div className="mt-6 overflow-hidden rounded-2xl ring-1 ring-border/50">
                         {[
                             "first",
                             "second",

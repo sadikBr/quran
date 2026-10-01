@@ -19,8 +19,8 @@ export default function AssignmentsLoading() {
                     <div className="mt-4 h-10 w-2/3 rounded-xl bg-muted" />
                     <div className="mt-4 h-5 w-full max-w-xl rounded bg-muted/70" />
                     <div className="mt-12 grid gap-4 lg:grid-cols-2">
-                        <div className="h-72 rounded-3xl bg-muted/50" />
-                        <div className="h-72 rounded-3xl bg-muted/50" />
+                        <div className="h-72 rounded-2xl bg-muted/50" />
+                        <div className="h-72 rounded-2xl bg-muted/50" />
                     </div>
                 </div>
             </div>

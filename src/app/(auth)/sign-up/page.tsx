@@ -85,22 +85,24 @@ export default function SignUpPage() {
             dir={locale === "ar" ? "rtl" : "ltr"}
             className="flex min-h-dvh items-center justify-center px-4 py-24 sm:px-6"
         >
-            <Card className="w-full max-w-lg gap-0 border-primary/15 bg-card/90 py-0 shadow-lg backdrop-blur-sm">
-                <CardHeader className="border-b border-primary/10 px-6 pt-7 pb-6 sm:px-8">
-                    <span className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Card className="w-full max-w-lg gap-0 overflow-hidden py-0">
+                <CardHeader className="border-b border-border/50 p-5 sm:p-6">
+                    <span className="mb-2 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         <BookOpen aria-hidden="true" className="size-5" />
                     </span>
                     <p className="text-xs font-semibold tracking-[0.18em] text-primary">
                         {t("signUp.eyebrow")}
                     </p>
-                    <CardTitle className="text-2xl tracking-tight">
-                        {t("signUp.title")}
+                    <CardTitle>
+                        <h1 className="text-2xl leading-tight tracking-tight">
+                            {t("signUp.title")}
+                        </h1>
                     </CardTitle>
                     <CardDescription className="leading-6">
                         {t("signUp.description")}
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="px-6 py-6 sm:px-8">
+                <CardContent className="p-5 sm:p-6">
                     <form
                         id="signup-form"
                         aria-busy={loading}
@@ -296,7 +298,7 @@ export default function SignUpPage() {
                         </FieldGroup>
                     </form>
                 </CardContent>
-                <CardFooter className="flex-col items-stretch gap-5 border-t border-primary/10 px-6 py-6 sm:px-8">
+                <CardFooter className="flex-col items-stretch gap-5 border-t border-border/50 bg-muted/20 p-5 sm:p-6">
                     <Field orientation="horizontal" className="justify-end">
                         <Button
                             type="button"

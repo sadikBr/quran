@@ -2,7 +2,6 @@ import {
     ArrowRight,
     BookMarked,
     BookOpen,
-    BookText,
     MoonStar,
     UsersRound,
 } from "lucide-react";
@@ -14,7 +13,6 @@ import PageBackground from "@/components/page-background";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
-import GuideDirectory from "@/features/onboarding/guide-directory";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -26,14 +24,17 @@ const readerTools = [
     {
         icon: MoonStar,
         key: "rhythm",
+        href: "/wird",
     },
     {
         icon: BookMarked,
         key: "practice",
+        href: "/practice",
     },
     {
         icon: UsersRound,
         key: "groups",
+        href: "/groups",
     },
 ] as const;
 
@@ -292,13 +293,34 @@ export default async function Home() {
                                             />
                                         </Link>
                                     </Button>
+                                    <Button
+                                        asChild
+                                        variant="outline"
+                                        size="lg"
+                                        className={cn(
+                                            "h-12 rounded-xl bg-background/60 px-5",
+                                            session && "mt-2 w-full",
+                                        )}
+                                    >
+                                        <Link
+                                            href={
+                                                session
+                                                    ? "/dashboard"
+                                                    : "/quran"
+                                            }
+                                        >
+                                            {t(
+                                                session
+                                                    ? "hero.openDashboard"
+                                                    : "hero.browseQuran",
+                                            )}
+                                        </Link>
+                                    </Button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
-
-                {session && <GuideDirectory welcome />}
 
                 <section
                     aria-labelledby="reader-tools"
@@ -321,45 +343,63 @@ export default async function Home() {
                         </div>
 
                         <div className="mt-8 grid gap-4 md:grid-cols-3">
-                            {readerTools.map(({ icon: Icon, key }) => (
-                                <article
-                                    key={key}
-                                    className="rounded-2xl border border-border/60 bg-card/60 p-5 text-start sm:p-6"
-                                >
-                                    <span className="text-primary">
-                                        <Icon
-                                            aria-hidden="true"
-                                            className="size-6"
-                                        />
-                                    </span>
-                                    <div>
-                                        <p className="mt-5 text-[0.65rem] font-semibold tracking-[0.16em] text-primary uppercase">
-                                            {t(`tools.${key}.eyebrow`)}
-                                        </p>
-                                        <h3 className="mt-2 text-xl font-semibold leading-snug tracking-tight">
-                                            {t(`tools.${key}.title`)}
-                                        </h3>
-                                        <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                                            {t(`tools.${key}.description`)}
-                                        </p>
-                                    </div>
-                                </article>
-                            ))}
+                            {readerTools.map(
+                                ({ icon: Icon, key, href: toolHref }) => {
+                                    const cardClassName =
+                                        "app-card flex h-full flex-col p-4 text-start sm:p-5";
+                                    const content = (
+                                        <>
+                                            <span className="flex size-10 shrink-0 items-center justify-center self-start rounded-xl bg-primary/10 text-primary">
+                                                <Icon
+                                                    aria-hidden="true"
+                                                    className="size-5"
+                                                />
+                                            </span>
+                                            <div>
+                                                <h3 className="mt-4 text-lg font-semibold leading-6">
+                                                    {t(`tools.${key}.title`)}
+                                                </h3>
+                                                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                                    {t(
+                                                        `tools.${key}.description`,
+                                                    )}
+                                                </p>
+                                            </div>
+                                            {session && (
+                                                <span className="mt-auto inline-flex items-center gap-2 self-start pt-5 text-sm font-semibold text-primary">
+                                                    {t(`tools.${key}.action`)}
+                                                    <ArrowRight
+                                                        aria-hidden="true"
+                                                        className="size-4 transition-transform group-hover:ltr:translate-x-1 group-hover:rtl:-translate-x-1 rtl:rotate-180"
+                                                    />
+                                                </span>
+                                            )}
+                                        </>
+                                    );
+
+                                    return session ? (
+                                        <Link
+                                            key={key}
+                                            href={toolHref}
+                                            className={cn(
+                                                cardClassName,
+                                                "group transition-colors hover:border-primary/30 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                            )}
+                                        >
+                                            {content}
+                                        </Link>
+                                    ) : (
+                                        <article
+                                            key={key}
+                                            className={cardClassName}
+                                        >
+                                            {content}
+                                        </article>
+                                    );
+                                },
+                            )}
                         </div>
                     </div>
-                </section>
-
-                <section className="mx-auto mb-8 max-w-2xl border-t border-border/60 px-4 py-8 text-center sm:py-10">
-                    <BookText
-                        aria-hidden="true"
-                        className="mx-auto size-7 text-primary"
-                    />
-                    <h2 className="mt-5 text-2xl font-semibold tracking-tight sm:text-3xl">
-                        {t("closing.title")}
-                    </h2>
-                    <p className="mx-auto mt-3 max-w-lg leading-7 text-muted-foreground">
-                        {t("closing.description")}
-                    </p>
                 </section>
             </div>
         </main>

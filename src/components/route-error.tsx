@@ -33,7 +33,7 @@ export default function RouteError({
             )}
         >
             <PageBackground />
-            <section className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-card/75 p-6 text-center shadow-lg ring-1 ring-primary/12 backdrop-blur-xl sm:p-10">
+            <section className="relative w-full max-w-lg overflow-hidden app-card p-5 text-center sm:p-8">
                 <div
                     aria-hidden="true"
                     className="absolute -top-24 -end-20 size-52 rounded-full bg-primary/10 blur-3xl"

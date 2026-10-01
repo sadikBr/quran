@@ -64,8 +64,8 @@
         "header": "Memorization journey",
         "back": "Back to dashboard",
         "eyebrow": "YOUR QURAN JOURNEY",
-        "title": "Build your way to 60 hizbs",
-        "description": "Keep a simple record of what you have memorized. Mark each hizb when it feels secure, and reopen it whenever it needs more work.",
+        "title": "Memorization progress",
+        "description": "Mark the hizbs you have memorized and test your recall.",
         "dashboard": {
             "eyebrow": "Quran memorization",
             "title": "{completed}/60 hizbs completed",

@@ -1,8 +1,10 @@
 import { and, eq } from "drizzle-orm";
+import { UserRound } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import ProfileForm from "@/components/profile-form";
 import StickyAppHeader from "@/components/sticky-app-header";
 import db from "@/drizzle/db";
@@ -63,16 +65,12 @@ export default async function ProfilePage() {
                 />
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
-                    <p className="text-xs font-semibold tracking-[0.2em] text-primary">
-                        {t("page.eyebrow")}
-                    </p>
-                    <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                        {t("page.title")}
-                    </h1>
-                    <p className="mt-3 max-w-xl text-sm leading-7 text-muted-foreground">
-                        {t("page.description")}
-                    </p>
-                    <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-border/60 pb-6 text-xs text-muted-foreground">
+                    <PageHeading
+                        title={t("page.title")}
+                        description={t("page.description")}
+                        icon={<UserRound />}
+                    />
+                    <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 pb-2 text-xs text-muted-foreground">
                         <span>
                             {t("page.memberSince", { date: memberSince })}
                         </span>

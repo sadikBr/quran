@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
@@ -75,27 +76,24 @@ export default async function MeetingHistoryPage({
             <div className="app-container ">
                 <StickyAppHeader navigation className="-mx-4 px-4" />
 
-                <section className="py-10 sm:py-14">
-                    <div className="flex max-w-3xl items-start gap-4">
-                        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                            <History className="size-6" />
-                        </span>
-                        <div>
-                            <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                {t("eyebrow")}
-                            </p>
-                            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-                                {t(pendingOnly ? "pendingTitle" : "title")}
-                            </h1>
-                            <p className="mt-3 leading-7 text-muted-foreground">
-                                {t(
-                                    isAdmin
-                                        ? "descriptionAdmin"
-                                        : "descriptionMember",
-                                )}
-                            </p>
-                        </div>
-                    </div>
+                <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
+                    <Link
+                        href={`/groups/${groupId}`}
+                        className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                        <ArrowLeft
+                            aria-hidden="true"
+                            className="size-4 shrink-0 rtl:rotate-180"
+                        />
+                        <bdi className="break-words">{group.name}</bdi>
+                    </Link>
+                    <PageHeading
+                        title={t(pendingOnly ? "pendingTitle" : "title")}
+                        description={t(
+                            isAdmin ? "descriptionAdmin" : "descriptionMember",
+                        )}
+                        icon={<History />}
+                    />
 
                     <MeetingHistory
                         groupId={groupId}

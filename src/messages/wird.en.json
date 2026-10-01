@@ -1,27 +1,29 @@
 {
     "Wird": {
         "eyebrow": "DAILY WIRD",
-        "title": "A steady portion, every day.",
-        "description": "Choose a portion that fits your rhythm. Complete it when you finish reading, and your next Wird will be prepared for the following day.",
+        "title": "Daily Wird",
+        "description": "Your daily reading, saved progress, and khatmah plan in one place.",
         "loading": {
             "overview": "Preparing your daily Wird",
             "reader": "Preparing today’s reading"
         },
         "setup": {
             "nextPortion": "Changes apply to your next portion. Today’s reading, saved position and completed history stay unchanged.",
-            "planManaged": "Your khatmah plan controls this goal. Adjust it in the khatmah planner below; your plan and reading progress will not be removed here.",
+            "planManaged": "Your plan calculates this amount automatically. To change it, adjust the duration or reading unit in your khatmah plan.",
             "title": "Set your daily Wird",
             "description": "Begin at the start of the Quran and continue in order without losing your place.",
             "unitLabel": "Measure my Wird by",
             "amountLabel": "Daily amount",
-            "preview": "{amount, number} {unit} each day",
+            "preview": "{unit, select, ayah {{amount, plural, one {# ayah} other {# ayahs}}} page {{amount, plural, one {# page} other {# pages}}} quarter {{amount, plural, one {# hizb quarter} other {# hizb quarters}}} hizb {{amount, plural, one {# hizb} other {# hizbs}}} juz {{amount, plural, one {# juz} other {# juzs}}} surah {{amount, plural, one {# surah} other {# surahs}}} other {{amount, number}}} each day",
             "decrease": "Decrease daily amount",
             "increase": "Increase daily amount",
             "save": "Create my Wird",
             "update": "Update my Wird",
             "saving": "Saving…",
             "success": "Your daily Wird has been saved.",
-            "error": "We could not save your Wird. Please try again."
+            "error": "We could not save your Wird. Please try again.",
+            "managedTitle": "Set by your khatmah plan",
+            "viewPlan": "View khatmah plan"
         },
         "units": {
             "ayah": "Ayahs",
@@ -118,8 +120,8 @@
     },
     "Khatmah": {
         "eyebrow": "ADAPTIVE KHATMAH",
-        "title": "Reach the final page at a pace that fits your life.",
-        "description": "Choose how many weeks each Khatmah should take. Your daily Wird adjusts automatically whenever your pace changes.",
+        "title": "A khatmah at your pace",
+        "description": "Choose a duration. Your daily Wird adapts as you progress.",
         "measurements": {
             "page": "pages",
             "hizb": "hizbs",
@@ -155,17 +157,17 @@
             "deadline": "Target date",
             "dailyPace": "Current daily pace",
             "daysRemaining": "Time remaining",
-            "amount": "{amount, number} {unit}",
+            "amount": "{unit, select, page {{amount, plural, one {# page} other {# pages}}} hizb {{amount, plural, one {# hizb} other {# hizbs}}} juz {{amount, plural, one {# juz} other {# juzs}}} other {{amount, number}}}",
             "days": "{count, plural, one {# day} other {# days}}",
-            "repeats": "A new cycle begins automatically after completion",
+            "repeats": "Repeats automatically after completion.",
             "adaptiveNote": "Your next portion is recalculated after every completed Wird, so missing a day never leaves the plan out of sync."
         },
         "actions": {
-            "edit": "Adjust the plan",
+            "edit": "Edit plan",
             "pause": "Pause plan",
             "resume": "Resume plan",
-            "startAgain": "Plan another Khatmah",
-            "endPlan": "End Khatmah plan",
+            "startAgain": "New Khatmah",
+            "endPlan": "End plan",
             "cancel": "Cancel"
         },
         "history": {

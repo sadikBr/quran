@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import db from "@/drizzle/db";
@@ -81,36 +82,26 @@ export default async function AdminPage({
         .limit(21)
         .offset((activityPage - 1) * 20);
     return (
-        <main className="relative isolate min-h-dvh overflow-x-clip bg-background">
+        <main
+            lang={preferences.language}
+            dir={preferences.language === "ar" ? "rtl" : "ltr"}
+            className={`relative isolate min-h-dvh overflow-x-clip bg-background ${preferences.language === "ar" ? "arabic-ui" : ""}`}
+        >
             <PageBackground />
             <div className="app-container ">
                 <StickyAppHeader navigation />
-                <div className="space-y-8 pb-14 pt-8 sm:space-y-10 sm:pt-12">
-                    <header className="relative flex items-start justify-between gap-6 border-b border-border/60 pb-8 sm:pb-10">
-                        <div className="min-w-0">
-                            <p className="mb-3 text-xs font-semibold tracking-wide text-primary">
-                                {t("account")}
-                            </p>
-                            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                                {t("title")}
-                            </h1>
-                            <p className="mt-4 max-w-xl text-sm leading-7 text-muted-foreground sm:text-base">
-                                {t("description")}
-                            </p>
-                        </div>
-                        <span
-                            aria-hidden="true"
-                            className="hidden size-20 shrink-0 items-center justify-center rounded-3xl border border-primary/15 bg-primary/[0.06] text-primary sm:flex"
-                        >
-                            <ShieldCheck className="size-8 stroke-[1.4]" />
-                        </span>
-                    </header>
+                <div className="space-y-6 pb-12 pt-5 sm:pb-16 sm:pt-8">
+                    <PageHeading
+                        title={t("title")}
+                        description={t("description")}
+                        icon={<ShieldCheck />}
+                    />
                     <details
-                        className="group/create overflow-hidden rounded-2xl border border-primary/20 bg-card/75 shadow-sm"
+                        className="group/create overflow-hidden app-card"
                         open={circles.length === 0 && page === 1}
                     >
-                        <summary className="flex min-h-24 cursor-pointer list-none items-center gap-4 p-5 outline-none transition-colors hover:bg-primary/[0.035] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
-                            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                        <summary className="flex min-h-20 cursor-pointer list-none items-center gap-3 p-4 outline-none transition-colors hover:bg-primary/[0.035] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-5 [&::-webkit-details-marker]:hidden">
+                            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                 <Plus aria-hidden="true" className="size-5" />
                             </span>
                             <span className="min-w-0 flex-1">
@@ -126,7 +117,7 @@ export default async function AdminPage({
                                 className="size-4 shrink-0 text-muted-foreground transition-transform group-open/create:rotate-180"
                             />
                         </summary>
-                        <div className="border-t border-border/60 px-5 pb-6 sm:px-6">
+                        <div className="app-card-body pt-0 sm:pt-0">
                             <CreateCircleForm />
                         </div>
                     </details>
@@ -160,7 +151,7 @@ export default async function AdminPage({
                             {circles.slice(0, 20).map((circle) => (
                                 <article
                                     key={circle.id}
-                                    className="min-w-0 overflow-hidden rounded-2xl border border-border/65 bg-card/80 shadow-sm transition-shadow hover:shadow-md"
+                                    className="min-w-0 overflow-hidden app-card transition-shadow hover:shadow-md"
                                 >
                                     <div className="flex items-start gap-3 p-5 pb-4 sm:p-6 sm:pb-5">
                                         <span
@@ -173,7 +164,7 @@ export default async function AdminPage({
                                             <h3 className="break-words text-lg font-semibold">
                                                 {circle.name}
                                             </h3>
-                                            <p className="mt-1 line-clamp-2 break-words text-sm leading-6 text-muted-foreground">
+                                            <p className="mt-1 break-words text-sm leading-6 text-muted-foreground">
                                                 {circle.description}
                                             </p>
                                         </div>
@@ -259,10 +250,10 @@ export default async function AdminPage({
                     </section>
                     <details
                         open={activityPage > 1}
-                        className="group/history rounded-2xl border border-border/60 bg-card/40"
+                        className="group/history app-card"
                         aria-labelledby="activity-title"
                     >
-                        <summary className="flex cursor-pointer list-none items-center gap-3 p-5 outline-none hover:bg-muted/20 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
+                        <summary className="flex cursor-pointer list-none items-center gap-3 p-5 outline-none hover:bg-muted/20 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-5 [&::-webkit-details-marker]:hidden">
                             <History
                                 aria-hidden="true"
                                 className="size-5 text-muted-foreground"

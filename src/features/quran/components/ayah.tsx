@@ -218,47 +218,49 @@ function AyahPlayer({ ayah }: { ayah: AyahType }) {
 
     return (
         <>
-            <span className="relative inline-flex translate-y-[-0.05em] align-middle">
-                {isCurrentAyah && progress > 0 && !hasPlaybackError && (
-                    <svg
-                        aria-hidden="true"
-                        viewBox="0 0 28 28"
-                        className="pointer-events-none absolute -inset-0.5 size-8 -rotate-90 text-primary pointer-coarse:size-11"
-                    >
-                        <circle
-                            cx="14"
-                            cy="14"
-                            r="12"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeDasharray="75.4"
-                            strokeDashoffset={progressOffset}
-                            className="transition-[stroke-dashoffset] duration-300 ease-linear"
-                        />
-                    </svg>
-                )}
-                <button
-                    type="button"
-                    disabled={isLoadingThisAyah}
-                    onClick={() =>
-                        hasPlaybackError
-                            ? retryAudio()
-                            : toggleAudio(playbackAyahNumber, streams)
-                    }
+            <button
+                type="button"
+                disabled={isLoadingThisAyah}
+                onClick={() =>
+                    hasPlaybackError
+                        ? retryAudio()
+                        : toggleAudio(playbackAyahNumber, streams)
+                }
+                className="group/ayah-player relative inline-flex size-11 translate-y-[-0.05em] items-center justify-center rounded-full align-middle bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-wait sm:size-7 pointer-coarse:size-11"
+                aria-label={t("ayah.playerLabel", {
+                    action: actionLabel,
+                    number: ayah.numberInSurah,
+                })}
+            >
+                <span
                     className={cn(
-                        "relative inline-flex size-7 items-center justify-center rounded-full border border-primary/30 bg-primary/8 text-primary transition-[background-color,border-color,color,box-shadow] duration-300 hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-wait pointer-coarse:size-10",
+                        "relative inline-flex size-6 items-center justify-center rounded-full border border-primary/20 text-primary/80 transition-[background-color,border-color,color] duration-200 group-hover/ayah-player:border-primary/50 group-hover/ayah-player:bg-primary/10 group-hover/ayah-player:text-primary sm:size-7",
                         isPlayingThisAyah &&
-                            "border-primary bg-primary/15 shadow-[0_0_0_3px_hsl(var(--primary)/0.1)]",
+                            "border-primary/40 bg-primary/10 text-primary",
                         hasPlaybackError &&
-                            "border-destructive/40 bg-destructive/8 text-destructive hover:border-destructive hover:bg-destructive hover:text-destructive-foreground",
+                            "border-destructive/40 bg-destructive/5 text-destructive group-hover/ayah-player:border-destructive group-hover/ayah-player:bg-destructive/10 group-hover/ayah-player:text-destructive",
                     )}
-                    aria-label={t("ayah.playerLabel", {
-                        action: actionLabel,
-                        number: ayah.numberInSurah,
-                    })}
                 >
+                    {isCurrentAyah && progress > 0 && !hasPlaybackError && (
+                        <svg
+                            aria-hidden="true"
+                            viewBox="0 0 28 28"
+                            className="pointer-events-none absolute top-1/2 left-1/2 size-7 -translate-x-1/2 -translate-y-1/2 -rotate-90 text-primary sm:size-8"
+                        >
+                            <circle
+                                cx="14"
+                                cy="14"
+                                r="12"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeDasharray="75.4"
+                                strokeDashoffset={progressOffset}
+                                className="transition-[stroke-dashoffset] duration-300 ease-linear"
+                            />
+                        </svg>
+                    )}
                     {isLoadingThisAyah ? (
                         <LoaderCircle
                             className="size-3 animate-spin"
@@ -277,8 +279,8 @@ function AyahPlayer({ ayah }: { ayah: AyahType }) {
                             aria-hidden="true"
                         />
                     )}
-                </button>
-            </span>{" "}
+                </span>
+            </button>{" "}
         </>
     );
 }

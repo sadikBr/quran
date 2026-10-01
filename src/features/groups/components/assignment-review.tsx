@@ -1,6 +1,9 @@
 "use client";
 
+import { ClipboardCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import PageHeading from "@/components/page-heading";
+import SectionHeading from "@/components/section-heading";
 import type { PracticeReaderGroup } from "@/features/practice/reader-types";
 import type { AssignmentReviewData } from "../server/get-assignment-review";
 import AssignmentReviewReader from "./assignment-review-reader";
@@ -37,26 +40,23 @@ export default function AssignmentReview({
         )?.surah;
         return (locale === "ar" ? surah?.name : surah?.englishName) ?? number;
     };
+    const Heading = compact ? SectionHeading : PageHeading;
     return (
         <div className="space-y-6">
             <div>
-                <p className="text-xs font-semibold text-primary">
-                    {t("eyebrow")}
-                </p>
-                <h1 className="mt-2 text-2xl font-semibold sm:text-3xl">
-                    {t("title", { name: assignee.name })}
-                </h1>
-                <p className="mt-2 text-sm text-muted-foreground">
-                    {practiceT(`kinds.${assignment.kind}`)}
-                </p>
-                <p className="mt-2 text-sm leading-6">
-                    {practiceT("range", {
-                        startSurah: surahName(assignment.start.surahNumber),
-                        startAyah: assignment.start.ayahNumber,
-                        endSurah: surahName(assignment.end.surahNumber),
-                        endAyah: assignment.end.ayahNumber,
-                    })}
-                </p>
+                <Heading
+                    title={t("title", { name: assignee.name })}
+                    icon={<ClipboardCheck />}
+                    description={`${practiceT(`kinds.${assignment.kind}`)} · ${practiceT(
+                        "range",
+                        {
+                            startSurah: surahName(assignment.start.surahNumber),
+                            startAyah: assignment.start.ayahNumber,
+                            endSurah: surahName(assignment.end.surahNumber),
+                            endAyah: assignment.end.ayahNumber,
+                        },
+                    )}`}
+                />
                 <ReviewMethodLabel method={assignment.reviewMethod} />
                 {assignment.submittedAt && (
                     <p className="mt-2 text-xs text-muted-foreground">
@@ -70,7 +70,7 @@ export default function AssignmentReview({
                 )}
             </div>
             {assignment.instructions && (
-                <section className="rounded-xl border bg-muted/20 p-4">
+                <section className="app-card p-4 sm:p-5">
                     <h2 className="text-sm font-semibold">
                         {t("instructions")}
                     </h2>
@@ -110,7 +110,7 @@ export default function AssignmentReview({
                         />
                     </div>
                 ) : (
-                    <section className="rounded-xl border bg-muted/20 p-4">
+                    <section className="app-card p-4 sm:p-5">
                         <p className="text-sm text-muted-foreground">
                             {t("feedback")}
                         </p>

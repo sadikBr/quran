@@ -1,6 +1,8 @@
-import { Bell, MoonStar } from "lucide-react";
+import { Bell, CircleDot, MoonStar } from "lucide-react";
 import Link from "next/link";
+import ActionCard from "@/components/action-card";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import AdhkarCollections from "@/features/adhkar/components/adhkar-collections";
 import data from "@/features/adhkar/data/collections.json";
@@ -18,55 +20,36 @@ export default async function AdhkarPage() {
             <PageBackground />
             <div className="app-container ">
                 <StickyAppHeader navigation />
-                <header className="flex items-center justify-between gap-4 pb-6 pt-5 sm:pb-8 sm:pt-8">
-                    <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-                        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/15 sm:size-14">
-                            <MoonStar
-                                aria-hidden="true"
-                                className="size-6 text-primary"
-                            />
-                        </span>
-                        <div>
-                            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                                {ar ? "الأذكار" : "Adhkar"}
-                            </h1>
-                            <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
-                                {ar
-                                    ? "لحظات من الذكر، تصحبك في يومك."
-                                    : "A quiet moment of remembrance in your day."}
-                            </p>
-                        </div>
-                    </div>
-                    <Link
-                        href="/settings#adhkar-reminders"
-                        aria-label={ar ? "ضبط التذكيرات" : "Set reminders"}
-                        title={ar ? "ضبط التذكيرات" : "Set reminders"}
-                        className="inline-flex size-11 shrink-0 items-center justify-center gap-2 rounded-full border border-border/70 bg-card/50 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:w-auto sm:rounded-xl sm:px-4"
-                    >
-                        <Bell className="size-4" aria-hidden="true" />
-                        <span className="hidden sm:inline">
+                <PageHeading
+                    className="mt-5 sm:mt-8"
+                    title={ar ? "الأذكار" : "Adhkar"}
+                    description={
+                        ar
+                            ? "لحظات من الذكر، تصحبك في يومك."
+                            : "A quiet moment of remembrance in your day."
+                    }
+                    icon={<MoonStar />}
+                    actions={
+                        <Link
+                            href="/settings#adhkar-reminders"
+                            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/70 px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        >
+                            <Bell className="size-4" aria-hidden="true" />
                             {ar ? "ضبط التذكيرات" : "Set reminders"}
-                        </span>
-                    </Link>
-                </header>
-                <Link
+                        </Link>
+                    }
+                />
+                <ActionCard
+                    className="my-6"
                     href="/azkar/tasbih"
-                    className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-primary/20 bg-primary/5 px-4 py-4 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                    <div>
-                        <h2 className="font-semibold text-primary">
-                            {ar ? "المسبحة" : "Tasbih counter"}
-                        </h2>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                            {ar
-                                ? "عداد مستقل لذكرك الشخصي، دون عدد محدد."
-                                : "A separate counter for personal dhikr, without a target."}
-                        </p>
-                    </div>
-                    <span className="shrink-0 text-sm font-medium text-primary">
-                        {ar ? "ابدأ العدّ" : "Start counting"}
-                    </span>
-                </Link>
+                    icon={<CircleDot />}
+                    title={ar ? "المسبحة" : "Tasbih counter"}
+                    description={
+                        ar
+                            ? "عدّ ذكرك بالوتيرة التي تناسبك."
+                            : "Count your dhikr at your own pace."
+                    }
+                />
                 <AdhkarCollections collections={data.collections} ar={ar} />
             </div>
         </main>

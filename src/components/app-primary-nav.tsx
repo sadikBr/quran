@@ -42,7 +42,8 @@ const destinations = [
         href: "/azkar",
         label: "adhkar",
         icon: MoonStar,
-        matches: (path: string) => path === "/azkar",
+        matches: (path: string) =>
+            path === "/azkar" || path.startsWith("/azkar/"),
     },
     {
         href: "/",

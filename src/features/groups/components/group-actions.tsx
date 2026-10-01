@@ -26,12 +26,14 @@ import type { GroupRole, ReviewerRole, ReviewerScope } from "../types";
 export function MemberActions({
     groupId,
     membershipId,
+    memberName,
     role,
     isReviewer,
     reviewerScope,
 }: {
     groupId: string;
     membershipId: string;
+    memberName: string;
     role: GroupRole;
     isReviewer: boolean;
     reviewerScope: ReviewerScope;
@@ -84,7 +86,7 @@ export function MemberActions({
                     variant="ghost"
                     size="icon"
                     disabled={pending}
-                    aria-label={t("actions")}
+                    aria-label={t("actionsFor", { name: memberName })}
                 >
                     <Ellipsis />
                 </Button>

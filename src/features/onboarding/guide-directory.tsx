@@ -1,7 +1,10 @@
 "use client";
+import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
+import ActionCard from "@/components/action-card";
+import PageHeading from "@/components/page-heading";
 import { Button } from "@/components/ui/button";
 import { getGuideProgress, saveGuideProgress } from "./actions";
 import { guides } from "./guides";
@@ -51,58 +54,67 @@ export default function GuideDirectory({
         }
     }
     return (
-        <section className="my-6 rounded-2xl border border-primary/20 bg-card/80 p-5 sm:p-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                    <h2 className="text-xl font-semibold">
-                        {ar
-                            ? welcome
-                                ? "أهلًا بك، لنضبط التطبيق على ما يناسبك"
-                                : "دليل الاستخدام"
-                            : welcome
-                              ? "Welcome—make the app yours"
-                              : "User guide"}
-                    </h2>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                        {welcome
-                            ? ar
-                                ? "ابدأ باختيار اللغة والرواية والمظهر والتذكيرات من الإعدادات. وبعدها يمكنك زيارة دليل الاستخدام إن احتجت إلى مساعدة."
-                                : "Start with your language, riwayah, appearance and reminders in Settings. Then explore the user guide if you need help."
-                            : ar
-                              ? "جولات قصيرة للتعرّف على التطبيق. يمكنك الخروج في أي وقت وإعادتها من القائمة."
-                              : "Short tours to help you get started. Leave anytime and replay them from the menu."}
-                    </p>
-                </div>
-                {welcome && (
-                    <Button
-                        variant="ghost"
-                        disabled={pending}
-                        onClick={dismiss}
-                    >
-                        {ar ? "ليس الآن" : "Not now"}
-                    </Button>
-                )}
-            </div>
+        <section
+            className={
+                welcome
+                    ? "app-card my-6 p-4 sm:p-5"
+                    : "pb-12 pt-5 sm:pb-16 sm:pt-8"
+            }
+        >
             {welcome ? (
-                <Button asChild className="mt-5 min-h-11 rounded-xl">
-                    <Link href="/settings">
-                        {ar ? "ابدأ بضبط تفضيلاتك" : "Set up your preferences"}
-                    </Link>
-                </Button>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 className="font-semibold">
+                            {ar
+                                ? "اجعل القارئ مناسبًا لك"
+                                : "Make the reader yours"}
+                        </h2>
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                            {ar
+                                ? "اختر لغتك وروايتك ومظهرك المفضّل."
+                                : "Choose your language, riwayah, and preferred appearance."}
+                        </p>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap gap-2">
+                        <Button
+                            asChild
+                            variant="outline"
+                            className="min-h-11 rounded-xl"
+                        >
+                            <Link href="/settings">
+                                {ar ? "ضبط التفضيلات" : "Set preferences"}
+                            </Link>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            disabled={pending}
+                            onClick={dismiss}
+                            className="min-h-11 rounded-xl"
+                        >
+                            {ar ? "ليس الآن" : "Not now"}
+                        </Button>
+                    </div>
+                </div>
             ) : (
                 <>
+                    <PageHeading
+                        title={ar ? "دليل الاستخدام" : "User guide"}
+                        description={
+                            ar
+                                ? "جولات قصيرة للتعرّف على التطبيق. يمكنك إعادتها في أي وقت."
+                                : "Short tours to help you get started. Replay them anytime."
+                        }
+                        icon={<BookOpen />}
+                    />
                     <div className="mt-5 grid gap-3 sm:grid-cols-3">
                         {Object.entries(guides).map(([id, guide]) => (
-                            <Link
+                            <ActionCard
                                 key={id}
                                 href={`${guide.path}?tour=${id}`}
-                                className="rounded-xl border border-border bg-background/60 p-4 transition-colors hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring"
-                            >
-                                <h3 className="font-semibold text-primary">
-                                    {guide.title[ar ? 1 : 0]}
-                                </h3>
-                                <p className="mt-2 text-xs text-muted-foreground">
-                                    {progress?.some(
+                                icon={<BookOpen />}
+                                title={guide.title[ar ? 1 : 0]}
+                                description={
+                                    progress?.some(
                                         (row) =>
                                             row.guideId === id && row.completed,
                                     )
@@ -111,20 +123,20 @@ export default function GuideDirectory({
                                             : "Completed · Replay"
                                         : ar
                                           ? "ابدأ الجولة · 3 خطوات"
-                                          : "Start tour · 3 steps"}
-                                </p>
-                            </Link>
+                                          : "Start tour · 3 steps"
+                                }
+                            />
                         ))}
                     </div>
                     <div className="mt-4 flex flex-wrap gap-4 text-sm">
                         <Link
-                            className="text-primary underline underline-offset-4"
+                            className="inline-flex min-h-11 items-center text-primary underline underline-offset-4"
                             href="/azkar"
                         >
                             {ar ? "الأذكار والعدّاد" : "Adhkar and counter"}
                         </Link>
                         <Link
-                            className="text-primary underline underline-offset-4"
+                            className="inline-flex min-h-11 items-center text-primary underline underline-offset-4"
                             href="/groups"
                         >
                             {ar

@@ -1,7 +1,9 @@
+import { Bookmark } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { auth } from "@/features/auth/auth";
 import QuranAudioProvider from "@/features/quran/components/quran-audio-shell";
@@ -107,12 +109,11 @@ export default async function BookmarksPage() {
             <div className="app-container ">
                 <StickyAppHeader navigation />
                 <section className="pb-12 pt-5 sm:pt-8">
-                    <h1 className="text-3xl font-semibold sm:text-4xl">
-                        {t("title")}
-                    </h1>
-                    <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                        {t("description")}
-                    </p>
+                    <PageHeading
+                        title={t("title")}
+                        description={t("description")}
+                        icon={<Bookmark />}
+                    />
                     <QuranAudioProvider>
                         <SavedAyahsSection
                             savedAyahs={localizedSavedAyahs}

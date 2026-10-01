@@ -48,12 +48,17 @@
             "hizb": "Hizb {number, number}",
             "beginsAt": "{surah} · Ayah {ayah, number}",
             "page": "Page {number, number}",
-            "openDivision": "Open {division}, beginning at {surah}, ayah {ayah, number}"
+            "openDivision": "Open {division}, beginning at {surah}, ayah {ayah, number}",
+            "goToPage": "Go to page",
+            "openPage": "Open",
+            "pageNumber": "Page number, 1 to {max, number}",
+            "resultCount": "{count, number} of {total, number} surahs",
+            "clearSearch": "Clear search"
         },
         "search": {
             "tryExample": "Try a word to begin, or type a phrase you remember.",
             "eyebrow": "QURAN SEARCH",
-            "title": "Find an ayah.",
+            "title": "Search the Quran",
             "description": "Search the Arabic Quran or your selected English translation.",
             "label": "Search the Quran",
             "placeholder": "Type an Arabic word or an English phrase…",

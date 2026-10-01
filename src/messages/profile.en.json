@@ -2,7 +2,7 @@
     "Profile": {
         "page": {
             "eyebrow": "YOUR PROFILE",
-            "title": "Your account details.",
+            "title": "Profile",
             "description": "Update the name and image used across your personal reading space.",
             "memberSince": "Member since {date}",
             "emailVerified": "Email verified",

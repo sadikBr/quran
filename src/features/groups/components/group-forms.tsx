@@ -11,8 +11,10 @@ import joinGroup from "../server/join-group";
 
 export default function GroupForms({
     initialInviteCode = "",
+    firstGroup = false,
 }: {
     initialInviteCode?: string;
+    firstGroup?: boolean;
 }) {
     const t = useTranslations("Groups");
     const router = useRouter();
@@ -43,10 +45,12 @@ export default function GroupForms({
         }
     }
     return (
-        <section className="mt-10 rounded-2xl border border-border/60 bg-card/45 p-5 sm:p-7">
-            <h2 className="text-lg font-semibold">{t("join.title")}</h2>
+        <section className="mt-6 rounded-2xl border border-border/60 bg-card/45 p-5 sm:p-7">
+            <h2 className="text-lg font-semibold">
+                {t(firstGroup ? "emptyTitle" : "join.title")}
+            </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-                {t("join.description")}
+                {t(firstGroup ? "emptyDescription" : "join.description")}
             </p>
             <form
                 action={join}

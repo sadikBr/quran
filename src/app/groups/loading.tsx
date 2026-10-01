@@ -17,7 +17,7 @@ export default function GroupsLoading() {
                 <div className="py-8 sm:py-14">
                     <div className="h-3 w-32 rounded bg-primary/15" />
                     <div className="mt-4 h-10 w-2/3 rounded-xl bg-muted" />
-                    <div className="mt-8 overflow-hidden rounded-3xl border border-border/60 bg-card/40 px-4 sm:mt-10 sm:px-5">
+                    <div className="mt-8 overflow-hidden rounded-2xl border border-border/60 bg-card/40 px-4 sm:mt-10 sm:px-5">
                         <div className="flex items-center gap-4 py-5 sm:py-6">
                             <div className="size-10 rounded-xl bg-muted" />
                             <div className="space-y-2">
@@ -26,7 +26,7 @@ export default function GroupsLoading() {
                             </div>
                         </div>
                     </div>
-                    <div className="mt-10 rounded-3xl border border-border/60 bg-card/40 p-4 sm:mt-12 sm:p-6">
+                    <div className="mt-10 rounded-2xl border border-border/60 bg-card/40 p-4 sm:mt-12 sm:p-6">
                         <div className="h-10 w-72 max-w-full rounded-xl bg-muted" />
                         <div className="mt-8 grid gap-10 lg:grid-cols-[18rem_minmax(0,1fr)]">
                             <div className="h-24 rounded-xl bg-muted/50" />

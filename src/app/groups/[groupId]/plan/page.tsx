@@ -1,8 +1,10 @@
-import { CalendarRange } from "lucide-react";
+import { ArrowLeft, CalendarRange } from "lucide-react";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { auth } from "@/features/auth/auth";
 import MeetingPlanEditor from "@/features/groups/components/meeting-plan-editor";
@@ -93,6 +95,19 @@ export default async function MeetingPlanPage({
         messages,
         namespace: "Groups.planner",
     });
+    const previousMeetingDate = planner.previousMeetingStartsAt
+        ? new Date(planner.previousMeetingStartsAt)
+        : null;
+    const previousMeetingLabel = previousMeetingDate
+        ? new Intl.DateTimeFormat(preferences.language, {
+              dateStyle: "medium",
+              timeStyle: "short",
+              timeZone: getMeetingDisplayTimezone(
+                  meeting?.timezone ?? "Africa/Casablanca",
+                  previousMeetingDate,
+              ),
+          }).format(previousMeetingDate)
+        : null;
     const isArabic = preferences.language === "ar";
 
     return (
@@ -111,29 +126,29 @@ export default async function MeetingPlanPage({
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
                 />
 
-                <section className="py-10 sm:py-14">
-                    <div className="flex max-w-3xl items-start gap-4">
-                        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                            <CalendarRange className="size-6" />
-                        </span>
-                        <div>
-                            <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                {t("eyebrow")}
-                            </p>
-                            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-                                {t("title")}
-                            </h1>
-                            <p className="mt-3 leading-7 text-muted-foreground">
-                                {t("description")}
-                            </p>
-                        </div>
-                    </div>
+                <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
+                    <Link
+                        href={`/groups/${groupId}`}
+                        className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                        <ArrowLeft
+                            aria-hidden="true"
+                            className="size-4 shrink-0 rtl:rotate-180"
+                        />
+                        <bdi className="break-words">{group.name}</bdi>
+                    </Link>
+                    <PageHeading
+                        title={t("title")}
+                        description={t("description")}
+                        icon={<CalendarRange />}
+                    />
 
                     <MeetingPlanEditor
                         groupId={groupId}
                         members={group.members}
                         surahs={assignmentSurahs}
                         planner={planner}
+                        previousMeetingLabel={previousMeetingLabel}
                         meetingOptions={meetingOptions}
                         navigationByRiwayah={{
                             hafs: hafsNavigation,

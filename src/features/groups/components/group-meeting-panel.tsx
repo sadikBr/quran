@@ -2,32 +2,25 @@
 
 import {
     CalendarClock,
-    ChevronDown,
     Clock3,
-    LoaderCircle,
+    Globe2,
     Settings2,
-    ShieldCheck,
+    UserRound,
     Video,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import ConfirmationDialog from "@/components/ui/confirmation-dialog";
 import type {
     GroupMeetingDetails,
     MeetingOccurrenceState,
-    MeetingScheduleSlot,
 } from "../meeting-types";
 import { getMeetingDisplayTimezone } from "../server/meeting-schedule";
-import saveGroupMeeting from "../server/save-group-meeting";
 import CancelMeetingButton from "./cancel-meeting-button";
 import MeetingCountdown from "./meeting-countdown";
 import MeetingHostControl from "./meeting-host-control";
-import MeetingScheduleFields from "./meeting-schedule-fields";
-import RescheduleMeeting from "./reschedule-meeting";
 
 function formatOccurrence(value: string, locale: string, timezone: string) {
     const instant = new Date(value);
@@ -61,6 +54,7 @@ export default function GroupMeetingPanel({
     providerConfigured,
     children,
     supervisors = [],
+    showPlanAction = true,
 }: {
     groupId: string;
     meeting: GroupMeetingDetails | null;
@@ -71,31 +65,12 @@ export default function GroupMeetingPanel({
     providerConfigured: boolean;
     children?: ReactNode;
     supervisors?: { id: string; name: string }[];
+    showPlanAction?: boolean;
 }) {
     const t = useTranslations("Groups.meeting");
     const flow = useTranslations("Groups.flow");
     const router = useRouter();
     const [now, setNow] = useState(Date.now());
-    const [isSaving, setIsSaving] = useState(false);
-    const [impact, setImpact] = useState<{
-        confirmation: string;
-        moves: Array<{ from: string; to: string; count: number }>;
-    } | null>(null);
-    const [scheduleOpen, setScheduleOpen] = useState(!meeting);
-    useEffect(() => {
-        function openSchedule() {
-            if (window.location.hash === "#meeting-schedule")
-                setScheduleOpen(true);
-        }
-        openSchedule();
-        window.addEventListener("hashchange", openSchedule);
-        return () => window.removeEventListener("hashchange", openSchedule);
-    }, []);
-    const [schedule, setSchedule] = useState<MeetingScheduleSlot[]>(
-        meeting?.schedule ?? [{ weekday: 1, localTime: "20:00" }],
-    );
-    const [timezone, setTimezone] = useState(meeting?.timezone ?? "");
-
     useEffect(() => {
         const interval = window.setInterval(() => setNow(Date.now()), 30_000);
         return () => window.clearInterval(interval);
@@ -124,43 +99,6 @@ export default function GroupMeetingPanel({
         return formatTimeRemaining(state.activeEndsAt, now);
     }, [now, state]);
 
-    async function save(confirmation?: string) {
-        if (isSaving) return;
-        setIsSaving(true);
-        try {
-            const result = await saveGroupMeeting({
-                groupId,
-                schedule,
-                timezone,
-                confirmation,
-            });
-            if (!result.success) {
-                if (result.reason === "confirmation") {
-                    setImpact({
-                        confirmation: result.confirmation,
-                        moves: result.moves,
-                    });
-                    return;
-                }
-                toast.error(
-                    t(
-                        result.reason === "active"
-                            ? "scheduleLocked"
-                            : "saveError",
-                    ),
-                );
-                return;
-            }
-            setImpact(null);
-            toast.success(t("saved"));
-            router.refresh();
-        } catch {
-            toast.error(t("saveError"));
-        } finally {
-            setIsSaving(false);
-        }
-    }
-
     const active = state?.status === "active";
     const canJoin = active && providerConfigured;
     const nextLabel =
@@ -168,41 +106,62 @@ export default function GroupMeetingPanel({
             ? formatOccurrence(state.nextStartsAt, locale, meeting.timezone)
             : null;
 
+    const rescheduled = Boolean(
+        !active &&
+            state?.nextStartsAt &&
+            meeting?.rescheduledOccurrences?.some(
+                (change) =>
+                    new Date(change.to).getTime() ===
+                    new Date(state.nextStartsAt ?? "").getTime(),
+            ),
+    );
+
     return (
         <section
             id="meeting-overview"
-            className="relative mt-8 scroll-mt-24 overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-sm"
+            className="relative mt-8 scroll-mt-24 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm"
         >
-            <div className="relative space-y-5 border-t-4 border-primary/70 bg-primary/[0.035] px-4 py-5 sm:px-6 sm:py-6">
+            <div className="relative space-y-4 p-4 sm:p-5">
                 <div className="flex min-w-0 items-start gap-3">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         {active ? (
-                            <Video className="size-5.5" />
+                            <Video className="size-5" />
                         ) : (
-                            <CalendarClock className="size-5.5" />
+                            <CalendarClock className="size-5" />
                         )}
                     </span>
                     <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center justify-between gap-2.5">
-                            <p className="text-xs font-bold tracking-[0.15em] text-primary uppercase">
-                                {active ? t("liveEyebrow") : t("eyebrow")}
-                            </p>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-sm font-medium text-muted-foreground">
+                                    {active ? t("liveEyebrow") : t("eyebrow")}
+                                </p>
+                                {rescheduled && (
+                                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                                        {t("rescheduledBadge")}
+                                    </span>
+                                )}
+                            </div>
                             {meeting && (
-                                <span className="rounded-full bg-background/65 px-2.5 py-1 text-xs text-muted-foreground">
-                                    {meeting.timezone}
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-2.5 py-1 text-xs text-muted-foreground">
+                                    <Globe2
+                                        aria-hidden="true"
+                                        className="size-3.5"
+                                    />
+                                    <bdi>{meeting.timezone}</bdi>
                                 </span>
                             )}
                         </div>
-                        <h2 className="mt-2 break-words text-xl font-semibold leading-relaxed tracking-tight sm:text-2xl">
+                        <h2 className="mt-2 break-words text-xl font-semibold leading-snug tracking-tight sm:text-2xl">
                             {!meeting
-                                ? t("setupTitle")
+                                ? t(isAdmin ? "setupTitle" : "waitingTitle")
                                 : active
                                   ? t("liveTitle")
                                   : nextLabel
                                     ? nextLabel
                                     : t("pausedTitle")}
                         </h2>
-                        <p className="mt-2.5 max-w-2xl text-sm leading-6 text-muted-foreground">
+                        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                             {!meeting
                                 ? t(
                                       isAdmin
@@ -211,48 +170,52 @@ export default function GroupMeetingPanel({
                                   )
                                 : active && remaining
                                   ? t("closesIn", remaining)
-                                  : isHost
-                                    ? t("hostedByYou")
-                                    : t("hostedBy", {
-                                          name: meeting.hostName,
-                                      })}
+                                  : t(
+                                        nextLabel
+                                            ? "upcomingDescription"
+                                            : "pausedDescription",
+                                    )}
                         </p>
-                        {meeting && meeting.schedule.length > 1 && (
-                            <div className="mt-5 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                                {meeting.schedule.map((slot) => (
-                                    <span
-                                        key={`${slot.weekday}:${slot.localTime}`}
-                                        className="inline-flex items-center gap-1.5 rounded-full bg-background/70 px-3 py-1.5 shadow-sm ring-1 ring-border/40"
-                                    >
-                                        <Clock3 className="size-3.5 text-primary" />
-                                        {t(`weekdays.${slot.weekday}`)} ·{" "}
-                                        {slot.localTime}
-                                    </span>
-                                ))}
+                        {meeting && meeting.schedule.length > 0 && (
+                            <div className="mt-4 space-y-2 text-xs text-muted-foreground">
+                                <p>{t("regularTimes")}</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {meeting.schedule.map((slot) => (
+                                        <span
+                                            key={`${slot.weekday}:${slot.localTime}`}
+                                            className="inline-flex items-center gap-1.5 rounded-lg bg-muted/50 px-2.5 py-1.5"
+                                        >
+                                            <Clock3 className="size-3.5 text-primary" />
+                                            {t(`weekdays.${slot.weekday}`)} ·{" "}
+                                            <bdi>
+                                                {new Intl.DateTimeFormat(
+                                                    locale,
+                                                    {
+                                                        hour: "numeric",
+                                                        minute: "2-digit",
+                                                        timeZone: "UTC",
+                                                    },
+                                                ).format(
+                                                    new Date(
+                                                        `2000-01-01T${slot.localTime}:00Z`,
+                                                    ),
+                                                )}
+                                            </bdi>
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {meeting && !active && (
-                    <div className="flex flex-col gap-4 border-t border-primary/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                        {meeting &&
-                            state?.status === "upcoming" &&
-                            state.nextStartsAt && (
-                                <MeetingCountdown
-                                    startsAt={state.nextStartsAt}
-                                />
-                            )}
-                        {meeting && !canJoin && (
-                            <span className="inline-flex w-fit items-start gap-2 rounded-lg bg-primary/10 px-3 py-2 text-xs font-semibold text-primary ring-1 ring-primary/15">
-                                <CalendarClock className="size-4 shrink-0" />
-                                {active
-                                    ? t("providerUnavailable")
-                                    : t("notOpen")}
-                            </span>
-                        )}
-                    </div>
-                )}
+                {meeting &&
+                    state?.status === "upcoming" &&
+                    state.nextStartsAt && (
+                        <div className="flex flex-wrap items-center gap-3 rounded-xl bg-primary/5 px-3 py-2.5">
+                            <MeetingCountdown startsAt={state.nextStartsAt} />
+                        </div>
+                    )}
                 {meeting && active && !canJoin && (
                     <p className="text-sm text-muted-foreground">
                         {t("providerUnavailable")}
@@ -286,155 +249,62 @@ export default function GroupMeetingPanel({
             {children}
 
             {meeting && (
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/50 px-4 py-3 text-sm sm:px-6">
-                    <p className="text-muted-foreground">
-                        {flow("host", { name: meeting.hostName })}
-                    </p>
-                    {isAdmin && (
-                        <Button
-                            asChild
-                            variant="outline"
-                            className="min-h-11 rounded-xl"
+                <div className="flex flex-col gap-4 border-t border-border/50 bg-muted/20 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:p-5">
+                    <div className="flex min-w-0 items-center gap-3 sm:flex-1">
+                        <span
+                            aria-hidden="true"
+                            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-inset ring-primary/15"
                         >
-                            <Link href={`/groups/${groupId}/plan`}>
-                                {flow("plan")}
-                            </Link>
-                        </Button>
+                            <UserRound className="size-5" />
+                        </span>
+                        <dl className="min-w-0 text-sm">
+                            <dt className="text-xs leading-5 text-muted-foreground">
+                                {flow("hostLabel")}
+                            </dt>
+                            <dd className="mt-0.5 break-words font-semibold leading-6 text-foreground">
+                                <bdi>{meeting.hostName}</bdi>
+                            </dd>
+                        </dl>
+                    </div>
+                    {isAdmin && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Button
+                                asChild
+                                variant="ghost"
+                                className="min-h-11 text-primary"
+                            >
+                                <a href="#meeting-settings">
+                                    <Settings2
+                                        aria-hidden="true"
+                                        className="size-4"
+                                    />
+                                    {t("manageTimes")}
+                                </a>
+                            </Button>
+                            {showPlanAction && (
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    className="min-h-11 rounded-xl"
+                                >
+                                    <Link href={`/groups/${groupId}/plan`}>
+                                        {flow("plan")}
+                                    </Link>
+                                </Button>
+                            )}
+                        </div>
                     )}
                 </div>
             )}
-
-            {isAdmin &&
-                meeting &&
-                state?.status === "upcoming" &&
-                state.nextStartsAt && (
-                    <RescheduleMeeting
-                        key={state.nextStartsAt}
+            {isAdmin && meeting && supervisors.length > 1 && (
+                <div className="border-t border-border/50 p-4 sm:p-5">
+                    <MeetingHostControl
+                        key={meeting.hostUserId}
                         groupId={groupId}
-                        startsAt={state.nextStartsAt}
-                        timezone={meeting.timezone}
+                        hostUserId={meeting.hostUserId}
+                        supervisors={supervisors}
                     />
-                )}
-            <ConfirmationDialog
-                open={impact !== null}
-                onOpenChange={(open) => {
-                    if (!open) setImpact(null);
-                }}
-                title={t("scheduleImpact")}
-                description={t("scheduleImpactHint")}
-                confirmLabel={t("confirmScheduleMove")}
-                cancelLabel={flow("cancel")}
-                pending={isSaving}
-                onConfirm={() => save(impact?.confirmation)}
-            >
-                <ul className="mt-5 space-y-3">
-                    {impact?.moves.map((move) => (
-                        <li
-                            key={move.from}
-                            className="overflow-hidden rounded-xl border border-border/70 bg-muted/20"
-                        >
-                            <div className="border-b border-border/50 px-4 py-2.5 text-xs font-semibold text-muted-foreground">
-                                {t("affectedAssignments", {
-                                    count: move.count,
-                                })}
-                            </div>
-                            <dl className="space-y-4 p-4">
-                                <div className="space-y-1">
-                                    <dt className="text-xs text-muted-foreground">
-                                        {t("oldMeetingTime")}
-                                    </dt>
-                                    <dd className="text-sm leading-6 text-muted-foreground">
-                                        <bdi>
-                                            {formatOccurrence(
-                                                move.from,
-                                                locale,
-                                                meeting?.timezone ?? timezone,
-                                            )}
-                                        </bdi>
-                                    </dd>
-                                </div>
-                                <div className="space-y-1 border-s-2 border-primary ps-3">
-                                    <dt className="text-xs font-medium text-primary">
-                                        {t("newMeetingTime")}
-                                    </dt>
-                                    <dd className="text-sm font-semibold leading-6">
-                                        <bdi>
-                                            {formatOccurrence(
-                                                move.to,
-                                                locale,
-                                                timezone,
-                                            )}
-                                        </bdi>
-                                    </dd>
-                                </div>
-                            </dl>
-                        </li>
-                    ))}
-                </ul>
-                <p className="mt-4 flex items-start gap-2 text-xs leading-6 text-muted-foreground">
-                    <ShieldCheck
-                        aria-hidden="true"
-                        className="mt-1 size-4 shrink-0 text-primary"
-                    />
-                    {t("schedulePreserved")}
-                </p>
-            </ConfirmationDialog>
-            {isAdmin && (
-                <details
-                    id="meeting-schedule"
-                    open={scheduleOpen}
-                    onToggle={(event) =>
-                        setScheduleOpen(event.currentTarget.open)
-                    }
-                    className="group relative scroll-mt-24 bg-background/35"
-                >
-                    <summary className="flex cursor-pointer list-none items-center gap-2 border-primary/10 border-t px-4 py-4 text-sm font-semibold text-muted-foreground outline-none transition-colors hover:bg-background/35 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
-                        <Settings2 className="size-4 text-primary" />
-                        {flow("schedule")}
-                        <ChevronDown className="ms-auto size-4 transition-transform group-open:rotate-180" />
-                    </summary>
-                    <div className="grid gap-6 px-4 pb-6 pt-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-end">
-                        <MeetingScheduleFields
-                            schedule={schedule}
-                            setSchedule={setSchedule}
-                            timezone={timezone}
-                            setTimezone={setTimezone}
-                            disabled={isSaving}
-                        />
-                        <div className="space-y-5 lg:border-primary/10 lg:border-s lg:ps-8">
-                            <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                                <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-                                <p>
-                                    {isHost
-                                        ? t("hostNoteSelf")
-                                        : t("hostNote", {
-                                              name:
-                                                  meeting?.hostName ?? t("you"),
-                                          })}
-                                </p>
-                            </div>
-                            <Button
-                                type="button"
-                                disabled={isSaving}
-                                onClick={() => save()}
-                                className="w-full rounded-xl"
-                            >
-                                {isSaving && (
-                                    <LoaderCircle className="size-4 animate-spin" />
-                                )}
-                                {t(isSaving ? "saving" : "save")}
-                            </Button>
-                            {meeting && (
-                                <MeetingHostControl
-                                    key={meeting.hostUserId}
-                                    groupId={groupId}
-                                    hostUserId={meeting.hostUserId}
-                                    supervisors={supervisors}
-                                />
-                            )}
-                        </div>
-                    </div>
-                </details>
+                </div>
             )}
         </section>
     );

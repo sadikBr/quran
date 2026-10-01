@@ -1,8 +1,10 @@
+import { Shuffle, Sparkles } from "lucide-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
+import ActionCard from "@/components/action-card";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { auth } from "@/features/auth/auth";
 import MemorizationProgressMap from "@/features/memorization/components/memorization-progress-map";
@@ -44,29 +46,19 @@ export default async function MemorizationPage() {
                 />
 
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
-                    <div className="border-b border-border/60 pb-6">
-                        <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-                            {t("eyebrow")}
-                        </p>
-                        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                            {t("title")}
-                        </h1>
-                        <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-                            {t("description")}
-                        </p>
-                    </div>
+                    <PageHeading
+                        title={t("title")}
+                        description={t("description")}
+                        icon={<Sparkles />}
+                    />
 
-                    <Link
+                    <ActionCard
                         href="/memorization/test"
-                        className="mt-6 block rounded-2xl border border-primary/20 bg-primary/5 p-5 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                        <h2 className="font-semibold text-primary">
-                            {t("test.title")} ←
-                        </h2>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                            {t("test.description")}
-                        </p>
-                    </Link>
+                        className="mt-6"
+                        icon={<Shuffle />}
+                        title={t("test.title")}
+                        description={t("test.description")}
+                    />
                     <MemorizationProgressMap
                         initialCompletedHizbs={completedHizbs}
                     />

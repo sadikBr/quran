@@ -146,7 +146,7 @@ export default function OfflineQuranReader({
 
             <main className="app-container relative pb-32">
                 <section className="py-4 sm:py-5">
-                    <div className="grid gap-3 rounded-2xl bg-muted/35 p-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-4 sm:p-3">
+                    <div className="app-card grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-4 sm:p-5">
                         <label className="grid min-w-0 gap-1.5 ps-1 text-[0.65rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
                             <span>{labels.surah}</span>
                             <select

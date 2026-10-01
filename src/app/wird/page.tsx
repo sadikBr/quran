@@ -4,12 +4,15 @@ import {
     Check,
     ChevronDown,
     Clock3,
+    MoonStar,
 } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
+import SectionHeading from "@/components/section-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
@@ -121,31 +124,27 @@ export default async function WirdPage() {
                     data-tour="wird-page"
                     className="pb-12 pt-5 sm:pb-16 sm:pt-8"
                 >
-                    <div className="border-b border-border/60 pb-6">
-                        <p className="text-xs font-semibold tracking-[0.18em] text-primary">
-                            {t("eyebrow")}
-                        </p>
-                        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                            {t("title")}
-                        </h1>
-                        <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-                            {t("description")}
-                        </p>
-                    </div>
+                    <PageHeading
+                        title={t("title")}
+                        description={t("description")}
+                        icon={<MoonStar />}
+                    />
 
                     {!wird ? (
-                        <section className="mt-6 rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm sm:p-6">
-                            <h2 className="text-xl font-semibold">
-                                {t("setup.title")}
-                            </h2>
-                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                {t("setup.description")}
-                            </p>
-                            <WirdPreferenceForm />
+                        <section className="app-card mt-6 overflow-hidden">
+                            <SectionHeading
+                                title={t("setup.title")}
+                                description={t("setup.description")}
+                                icon={<CalendarCheck />}
+                                className="p-4 sm:p-5"
+                            />
+                            <div className="app-card-body">
+                                <WirdPreferenceForm />
+                            </div>
                         </section>
                     ) : (
                         <>
-                            <section className="relative mt-6 overflow-hidden rounded-2xl border border-primary/20 bg-card/90 p-5 shadow-sm sm:p-7">
+                            <section className="app-card relative mt-6 overflow-hidden p-4 sm:p-5">
                                 <div className="absolute inset-y-0 start-0 w-1 bg-primary" />
                                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                     <div className="max-w-2xl">
@@ -171,7 +170,7 @@ export default async function WirdPage() {
                                     </div>
                                     <span
                                         className={cn(
-                                            "inline-flex w-fit shrink-0 items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold",
+                                            "inline-flex w-fit shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold",
                                             wird.completed
                                                 ? "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400"
                                                 : wird.scheduledForFuture
@@ -288,29 +287,45 @@ export default async function WirdPage() {
                                     )}
                             </section>
 
-                            <details
-                                open={!khatmahPlan}
-                                className="group mt-4 rounded-2xl border border-border/70 bg-card/60"
-                            >
-                                <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
-                                    {t("today.changeGoal")}
+                            <details className="app-card group mt-4 overflow-hidden">
+                                <summary className="flex min-h-20 cursor-pointer list-none items-center gap-3 p-4 font-semibold transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:p-5 [&::-webkit-details-marker]:hidden">
+                                    <span
+                                        aria-hidden="true"
+                                        className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
+                                    >
+                                        <CalendarCheck className="size-5" />
+                                    </span>
+                                    <h2 className="min-w-0 flex-1 leading-6">
+                                        {t("today.changeGoal")}
+                                    </h2>
                                     <ChevronDown
                                         aria-hidden="true"
                                         className="size-4 text-muted-foreground transition-transform group-open:rotate-180"
                                     />
                                 </summary>
-                                <div className="border-t border-border/60 px-4 pb-5 sm:px-6">
+                                <div className="app-card-body">
                                     <WirdPreferenceForm
+                                        key={
+                                            khatmahPlan?.isActive
+                                                ? "plan-managed"
+                                                : "manual-goal"
+                                        }
                                         compact
                                         managedByPlan={Boolean(
                                             khatmahPlan?.isActive,
                                         )}
                                         initialUnit={
-                                            (wird.nextGoal?.unit as WirdUnit) ??
-                                            wird.unit
+                                            khatmahPlan?.isActive
+                                                ? khatmahPlan.measurement
+                                                : ((wird.nextGoal
+                                                      ?.unit as WirdUnit) ??
+                                                  wird.unit)
                                         }
                                         initialAmount={
-                                            wird.nextGoal?.amount ?? wird.amount
+                                            khatmahPlan?.isActive
+                                                ? khatmahPlan.dailyAmount
+                                                : (wird.nextGoal?.amount ??
+                                                  wird.amount)
                                         }
                                     />
                                 </div>

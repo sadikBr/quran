@@ -1,7 +1,10 @@
+import { ArrowLeft, Shuffle } from "lucide-react";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
+import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { auth } from "@/features/auth/auth";
 import RandomStartTest from "@/features/memorization/components/random-start-test";
@@ -52,11 +55,24 @@ export default async function RandomTestPage() {
                     navigation
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
                 />
-                <div className="pt-6">
-                    <h1 className="text-3xl font-semibold">{t("title")}</h1>
-                    <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-                        {t("description")}
-                    </p>
+                <div className="pb-6 pt-5 sm:pt-8">
+                    <Link
+                        href="/memorization"
+                        className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary"
+                    >
+                        <ArrowLeft
+                            aria-hidden="true"
+                            className="size-4 rtl:rotate-180"
+                        />
+                        {preferences.language === "ar"
+                            ? "متابعة الحفظ"
+                            : "Memorization progress"}
+                    </Link>
+                    <PageHeading
+                        title={t("title")}
+                        description={t("description")}
+                        icon={<Shuffle />}
+                    />
                 </div>
                 <RandomStartTest
                     key={`${session.user.id}:${preferences.riwayah}`}

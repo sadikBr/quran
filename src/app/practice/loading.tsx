@@ -23,8 +23,8 @@ export default function PracticeLoading() {
                     <div className="h-3 w-32 rounded bg-primary/15" />
                     <div className="mt-4 h-10 w-2/3 rounded-lg bg-muted" />
                     <div className="mt-5 h-5 w-full max-w-2xl rounded bg-muted/70" />
-                    <div className="mt-10 h-44 rounded-3xl bg-primary/[0.07] ring-1 ring-primary/10" />
-                    <div className="mt-10 h-96 max-w-3xl rounded-3xl bg-muted/40 ring-1 ring-border/40" />
+                    <div className="mt-10 h-44 rounded-2xl bg-primary/[0.07] ring-1 ring-primary/10" />
+                    <div className="mt-10 h-96 max-w-3xl rounded-2xl bg-muted/40 ring-1 ring-border/40" />
                 </section>
             </div>
         </main>
