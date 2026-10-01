@@ -20,7 +20,7 @@ export default function Ayah({
     highlightEnabled = true,
     hidePrintedDivisionMarker = false,
     divisionMarker,
-    riwayah = "hafs",
+    riwayah,
     actionsHref,
 }: {
     ayah: AyahType;
@@ -28,7 +28,7 @@ export default function Ayah({
     highlightEnabled?: boolean;
     hidePrintedDivisionMarker?: boolean;
     divisionMarker?: QuranDivisionMarker;
-    riwayah?: Riwayah;
+    riwayah: Riwayah;
     actionsHref?: string;
 }) {
     const ayahRef = useRef<HTMLSpanElement>(null);
@@ -112,7 +112,11 @@ export default function Ayah({
                 <QuranText
                     text={displayedText}
                     tajweed={
-                        riwayah === "hafs" || warshTajweed
+                        (
+                            riwayah === "warsh"
+                                ? warshTajweed
+                                : arabicEdition === "quranpedia.mushaf.11"
+                        )
                             ? ayah.tajweed
                             : undefined
                     }

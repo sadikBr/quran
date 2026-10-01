@@ -330,6 +330,9 @@ export default function PracticeReader({
                                                     )}
                                                 >
                                                     <Ayah
+                                                        riwayah={
+                                                            assignment.riwayah
+                                                        }
                                                         ayah={ayah}
                                                         surahNumber={
                                                             group.surah.number

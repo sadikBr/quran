@@ -348,6 +348,7 @@ export default function WirdReader({
                                                 className="text-center leading-[2.5]"
                                             >
                                                 <Ayah
+                                                    riwayah={riwayah}
                                                     ayah={ayah}
                                                     surahNumber={
                                                         group.surah.number

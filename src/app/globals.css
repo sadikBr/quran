@@ -1493,3 +1493,10 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
 [data-tajweed="warsh-ishmam"] {
     --tajweed-color: #167ca3;
 }
+
+/* A verse's actual script takes precedence over the account's reading default.
+   Guided assignments and settings previews can display either riwayah. */
+.ayah[data-arabic-edition="quranpedia.mushaf.4"],
+.arabic-ui .ayah[data-arabic-edition="quranpedia.mushaf.4"] {
+    font-family: "Uthmanic Warsh", Amiri, Ayah, sans-serif;
+}
