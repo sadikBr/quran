@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { authClient } from "../features/auth/auth-client";
 
 function getInitials(name: string) {
@@ -51,12 +52,14 @@ export default function ProfileForm({
     initialEmail,
     currentSessionToken,
     canDeleteAccount = true,
+    className,
 }: {
     initialName: string;
     initialImage: string | null;
     initialEmail: string;
     currentSessionToken: string;
     canDeleteAccount?: boolean;
+    className?: string;
 }) {
     const t = useTranslations("Profile");
     const locale = useLocale();
@@ -265,7 +268,12 @@ export default function ProfileForm({
     }
 
     return (
-        <div className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(12rem,0.55fr)_minmax(0,1.45fr)]">
+        <div
+            className={cn(
+                "mt-6 grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(12rem,0.55fr)_minmax(0,1.45fr)]",
+                className,
+            )}
+        >
             <aside className="app-card p-5 lg:sticky lg:top-24 lg:self-start">
                 <div>
                     <button
@@ -310,7 +318,7 @@ export default function ProfileForm({
                 </div>
             </aside>
 
-            <div>
+            <div className="min-w-0">
                 <section className="app-card p-4 sm:p-5">
                     <SectionHeading
                         title={t("personal.title")}

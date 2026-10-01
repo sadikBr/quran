@@ -9,6 +9,7 @@ import ProfileForm from "@/components/profile-form";
 import StickyAppHeader from "@/components/sticky-app-header";
 import db from "@/drizzle/db";
 import { groupMember } from "@/drizzle/schema";
+import AdminWorkspace from "@/features/admin/components/admin-workspace";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -33,8 +34,8 @@ export default async function ProfilePage() {
             ),
         )
         .limit(1);
-    const canDeleteAccount =
-        !(await isPlatformAdmin(session.user.id)) && !supervised;
+    const isAdmin = await isPlatformAdmin(session.user.id);
+    const canDeleteAccount = !isAdmin && !supervised;
 
     const [preferences] = await Promise.all([getPreferences()]);
     const messages = await getMessages(preferences.language);
@@ -47,6 +48,49 @@ export default async function ProfilePage() {
         month: "long",
         year: "numeric",
     }).format(session.user.createdAt);
+
+    const content = (
+        <>
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 pb-2 text-xs text-muted-foreground">
+                <span>{t("page.memberSince", { date: memberSince })}</span>
+                <span
+                    className={
+                        session.user.emailVerified
+                            ? "text-primary"
+                            : "text-amber-600 dark:text-amber-400"
+                    }
+                >
+                    {session.user.emailVerified
+                        ? t("page.emailVerified")
+                        : t("page.emailNotVerified")}
+                </span>
+            </div>
+            <ProfileForm
+                className={
+                    isAdmin
+                        ? "gap-6 [&_form_button]:min-h-11 [&_[data-slot=input]]:bg-background/50"
+                        : undefined
+                }
+                canDeleteAccount={canDeleteAccount}
+                initialName={session.user.name}
+                initialImage={session.user.image ?? null}
+                initialEmail={session.user.email}
+                currentSessionToken={session.session.token}
+            />
+        </>
+    );
+    if (isAdmin)
+        return (
+            <AdminWorkspace
+                language={preferences.language}
+                title={t("page.title")}
+                description={t("page.description")}
+            >
+                <div className="min-w-0 [&>div:first-child]:mt-0">
+                    {content}
+                </div>
+            </AdminWorkspace>
+        );
 
     return (
         <main
@@ -70,29 +114,7 @@ export default async function ProfilePage() {
                         description={t("page.description")}
                         icon={<UserRound />}
                     />
-                    <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 pb-2 text-xs text-muted-foreground">
-                        <span>
-                            {t("page.memberSince", { date: memberSince })}
-                        </span>
-                        <span
-                            className={
-                                session.user.emailVerified
-                                    ? "text-primary"
-                                    : "text-amber-600 dark:text-amber-400"
-                            }
-                        >
-                            {session.user.emailVerified
-                                ? t("page.emailVerified")
-                                : t("page.emailNotVerified")}
-                        </span>
-                    </div>
-                    <ProfileForm
-                        canDeleteAccount={canDeleteAccount}
-                        initialName={session.user.name}
-                        initialImage={session.user.image ?? null}
-                        initialEmail={session.user.email}
-                        currentSessionToken={session.session.token}
-                    />
+                    {content}
                 </section>
             </div>
         </main>

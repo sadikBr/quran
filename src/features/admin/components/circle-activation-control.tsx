@@ -57,14 +57,15 @@ export default function CircleActivationControl({
         }
     }
     return (
-        <div className="space-y-3 border-t border-border/50 px-5 py-4 sm:px-6">
+        <div className="mt-auto space-y-3 bg-muted/20 p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+                    className={`max-w-full rounded-full px-3 py-1.5 text-xs font-medium leading-5 ${isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
                 >
                     {t(isActive ? "active" : "inactive")}
                 </span>
                 <Button
+                    className="min-h-11 max-w-full whitespace-normal text-start"
                     variant={isActive ? "outline" : "default"}
                     disabled={!isActive && !hasSupervisor}
                     onClick={() => setOpen(true)}

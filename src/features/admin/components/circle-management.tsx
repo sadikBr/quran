@@ -28,6 +28,7 @@ import {
     searchSupervisorCandidates,
     updateCircle,
 } from "../server/actions";
+import AdminDialog from "./admin-dialog";
 
 type Candidate = { id: string; name: string; email: string };
 
@@ -70,11 +71,13 @@ function SupervisorPicker({
                 {t(optional ? "optionalSupervisor" : "supervisor")}
             </Label>
             {optional && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm leading-6 text-muted-foreground">
                     {t("assignLaterHint")}
                 </p>
             )}
-            <p className="text-sm text-muted-foreground">{t("searchHint")}</p>
+            <p className="text-sm leading-6 text-muted-foreground">
+                {t("searchHint")}
+            </p>
             <div className="flex flex-col gap-2 sm:flex-row">
                 <Input
                     className="h-11 min-w-0 bg-background/80 text-start"
@@ -94,6 +97,7 @@ function SupervisorPicker({
                 <Button
                     type="button"
                     variant="outline"
+                    className="min-h-11"
                     disabled={query.trim().length < 2 || searching}
                     onClick={search}
                 >
@@ -110,12 +114,12 @@ function SupervisorPicker({
             </div>
             <div aria-live="polite">
                 {searched && !results.length && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm leading-6 text-muted-foreground">
                         {t("noResults")}
                     </p>
                 )}
                 {results.length > 0 && (
-                    <ul className="max-h-60 overflow-auto rounded-xl border border-border/60 bg-background/80 divide-y divide-border/50 shadow-sm">
+                    <ul className="max-h-60 overflow-y-auto overscroll-contain rounded-xl border border-border/60 bg-card divide-y divide-border/50">
                         {results.map((candidate) => (
                             <li key={candidate.id}>
                                 <button
@@ -127,12 +131,12 @@ function SupervisorPicker({
                                     }}
                                     className="w-full px-4 py-3 text-start transition-colors hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                                 >
-                                    <span className="block font-medium">
+                                    <span className="block break-words font-medium">
                                         {candidate.name}
                                     </span>
                                     <span
                                         dir="ltr"
-                                        className="block truncate text-sm text-muted-foreground"
+                                        className="block break-all text-start text-sm leading-6 text-muted-foreground"
                                     >
                                         {candidate.email}
                                     </span>
@@ -142,7 +146,7 @@ function SupervisorPicker({
                     </ul>
                 )}
                 {value && (
-                    <p className="rounded-xl border border-primary/15 bg-primary/[0.06] p-3 text-sm leading-6">
+                    <p className="break-words rounded-xl border border-primary/20 bg-primary/5 p-3 text-sm leading-6">
                         <Check
                             aria-hidden="true"
                             className="me-2 inline size-4 text-primary"
@@ -203,7 +207,12 @@ export function CreateCircleForm() {
         }
     }
     return (
-        <form ref={form} action={submit} aria-busy={pending} className="pt-6">
+        <form
+            ref={form}
+            action={submit}
+            aria-busy={pending}
+            className="min-w-0"
+        >
             <fieldset disabled={pending} className="min-w-0 space-y-6">
                 <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
                     <section className="min-w-0 space-y-5">
@@ -239,7 +248,7 @@ export function CreateCircleForm() {
                             />
                         </div>
                     </section>
-                    <section className="min-w-0 rounded-xl border border-border/50 bg-muted/25 p-4 sm:p-5">
+                    <section className="min-w-0 space-y-5 border-t border-border/60 pt-6 lg:border-t-0 lg:border-s lg:pt-0 lg:ps-8">
                         <h3 className="mb-5 flex items-center gap-2 text-sm font-semibold">
                             <ShieldCheck
                                 aria-hidden="true"
@@ -266,7 +275,7 @@ export function CreateCircleForm() {
                 </div>
                 <div className="flex justify-end border-t border-border/60 pt-5">
                     <Button
-                        className="min-h-11 w-full rounded-lg px-6 sm:w-auto"
+                        className="min-h-11 w-full px-6 sm:w-auto"
                         disabled={pending || !timezone}
                     >
                         {pending ? (
@@ -346,12 +355,35 @@ export function CircleControls({
             setPending(false);
         }
     }
-    if (!mode)
-        return (
-            <div className="flex flex-wrap items-center gap-2">
+    function close() {
+        setMode(null);
+        setConfirmation("");
+        setSupervisor(null);
+    }
+    const title = t(
+        mode === "edit"
+            ? "edit"
+            : mode === "replace"
+              ? hasSupervisor
+                  ? "replace"
+                  : "assignSupervisor"
+              : "delete",
+    );
+    const dialogDescription = t(
+        mode === "edit"
+            ? "editHint"
+            : mode === "replace"
+              ? hasSupervisor
+                  ? "replaceHint"
+                  : "assignLaterHint"
+              : "deleteHint",
+    );
+    return (
+        <>
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-stretch gap-2">
                 <Button
                     variant="outline"
-                    className="min-h-10 rounded-lg bg-background/60 text-xs sm:text-sm"
+                    className="h-auto min-h-11 whitespace-normal px-3 py-2 text-xs sm:text-sm"
                     onClick={() => {
                         setEditedName(name);
                         setEditedDescription(description ?? "");
@@ -362,9 +394,12 @@ export function CircleControls({
                     {t("edit")}
                 </Button>
                 <Button
-                    className="min-h-10 rounded-lg text-xs sm:text-sm"
+                    className="h-auto min-h-11 whitespace-normal px-3 py-2 text-xs sm:text-sm"
                     variant={hasSupervisor ? "ghost" : "default"}
-                    onClick={() => setMode("replace")}
+                    onClick={() => {
+                        setSupervisor(null);
+                        setMode("replace");
+                    }}
                 >
                     <UserRoundPlus aria-hidden="true" className="size-3.5" />
                     {t(hasSupervisor ? "replace" : "assignSupervisor")}
@@ -374,127 +409,124 @@ export function CircleControls({
                     size="icon"
                     aria-label={t("delete")}
                     title={t("delete")}
-                    className="ms-auto size-10 shrink-0 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => setMode("delete")}
+                    className="size-11 self-center shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => {
+                        setConfirmation("");
+                        setMode("delete");
+                    }}
                 >
                     <Trash2 aria-hidden="true" className="size-4" />
                 </Button>
             </div>
-        );
-    return (
-        <div className="space-y-5 rounded-xl border border-border/60 bg-background/80 p-4 sm:p-5">
-            <h4 className="text-sm font-semibold">
-                {t(
-                    mode === "edit"
-                        ? "edit"
-                        : mode === "replace"
-                          ? hasSupervisor
-                              ? "replace"
-                              : "assignSupervisor"
-                          : "delete",
-                )}
-            </h4>
-            <p className="text-sm leading-6 text-muted-foreground">
-                {t(
-                    mode === "edit"
-                        ? "editHint"
-                        : mode === "replace"
-                          ? hasSupervisor
-                              ? "replaceHint"
-                              : "assignLaterHint"
-                          : "deleteHint",
-                )}
-            </p>
-            {mode === "edit" ? (
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor={`${id}-name`}>{t("name")}</Label>
-                        <Input
-                            id={`${id}-name`}
-                            value={editedName}
+
+            <AdminDialog
+                open={mode !== null}
+                onClose={close}
+                pending={pending}
+                title={title}
+                description={dialogDescription}
+                footer={
+                    <>
+                        <Button
+                            variant="outline"
                             disabled={pending}
-                            minLength={2}
-                            maxLength={80}
-                            onChange={(event) =>
-                                setEditedName(event.target.value)
+                            onClick={close}
+                        >
+                            {t("cancel")}
+                        </Button>
+                        <Button
+                            variant={
+                                mode === "delete" ? "destructive" : "default"
                             }
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor={`${id}-description`}>
-                            {t("descriptionLabel")}
-                        </Label>
-                        <Textarea
-                            id={`${id}-description`}
-                            value={editedDescription}
-                            disabled={pending}
-                            maxLength={300}
-                            onChange={(event) =>
-                                setEditedDescription(event.target.value)
+                            disabled={
+                                pending ||
+                                (mode === "edit"
+                                    ? editedName.trim().length < 2
+                                    : mode === "replace"
+                                      ? !supervisor
+                                      : confirmation !== name)
                             }
-                        />
+                            onClick={submit}
+                        >
+                            {pending && (
+                                <LoaderCircle
+                                    aria-hidden="true"
+                                    className="size-4 animate-spin"
+                                />
+                            )}
+                            {t(
+                                mode === "edit"
+                                    ? "saveDetails"
+                                    : mode === "replace"
+                                      ? "save"
+                                      : "delete",
+                            )}
+                        </Button>
+                    </>
+                }
+            >
+                {mode === "edit" ? (
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor={`${id}-name`}>{t("name")}</Label>
+                            <Input
+                                id={`${id}-name`}
+                                value={editedName}
+                                disabled={pending}
+                                dir="auto"
+                                className="bg-card text-start"
+                                minLength={2}
+                                maxLength={80}
+                                onChange={(event) =>
+                                    setEditedName(event.target.value)
+                                }
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor={`${id}-description`}>
+                                {t("descriptionLabel")}
+                            </Label>
+                            <Textarea
+                                id={`${id}-description`}
+                                value={editedDescription}
+                                disabled={pending}
+                                dir="auto"
+                                className="max-h-60 resize-y bg-card text-start"
+                                maxLength={300}
+                                onChange={(event) =>
+                                    setEditedDescription(event.target.value)
+                                }
+                            />
+                        </div>
                     </div>
-                </div>
-            ) : mode === "replace" ? (
-                <SupervisorPicker
-                    value={supervisor}
-                    onChange={setSupervisor}
-                    disabled={pending}
-                />
-            ) : (
-                <div className="space-y-2">
-                    <Label htmlFor={id}>
-                        {t("confirmation")}: {name}
-                    </Label>
-                    <Input
-                        id={id}
-                        value={confirmation}
+                ) : mode === "replace" ? (
+                    <SupervisorPicker
+                        value={supervisor}
+                        onChange={setSupervisor}
                         disabled={pending}
-                        onChange={(event) =>
-                            setConfirmation(event.target.value)
-                        }
                     />
-                </div>
-            )}
-            <div className="flex flex-wrap gap-2 border-t border-border/50 pt-4">
-                <Button
-                    variant={mode === "delete" ? "destructive" : "default"}
-                    disabled={
-                        pending ||
-                        (mode === "edit"
-                            ? editedName.trim().length < 2
-                            : mode === "replace"
-                              ? !supervisor
-                              : confirmation !== name)
-                    }
-                    onClick={submit}
-                >
-                    {pending && (
-                        <LoaderCircle
-                            aria-hidden="true"
-                            className="size-4 animate-spin"
+                ) : (
+                    <div className="space-y-2">
+                        <Label
+                            htmlFor={id}
+                            className="block break-words leading-6"
+                        >
+                            {t("confirmation")}: {name}
+                        </Label>
+                        <Input
+                            id={id}
+                            dir="auto"
+                            className="bg-card text-start"
+                            autoComplete="off"
+                            value={confirmation}
+                            disabled={pending}
+                            onChange={(event) =>
+                                setConfirmation(event.target.value)
+                            }
                         />
-                    )}
-                    {t(
-                        mode === "edit"
-                            ? "saveDetails"
-                            : mode === "replace"
-                              ? "save"
-                              : "delete",
-                    )}
-                </Button>
-                <Button
-                    variant="ghost"
-                    disabled={pending}
-                    onClick={() => {
-                        setMode(null);
-                        setConfirmation("");
-                        setSupervisor(null);
-                    }}
-                >
-                    {t("cancel")}
-                </Button>
-            </div>
-        </div>
+                    </div>
+                )}
+            </AdminDialog>
+        </>
     );
 }

@@ -7,6 +7,7 @@ import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { env } from "@/data/env/server";
 import AdminPreferences from "@/features/admin/components/admin-preferences";
+import AdminWorkspace from "@/features/admin/components/admin-workspace";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
 import getAvailableReciters from "@/features/quran/server/get-available-reciter";
@@ -96,6 +97,17 @@ export default async function SettingsPage() {
         namespace: "Admin",
     });
 
+    if (isAdmin)
+        return (
+            <AdminWorkspace
+                language={preferences.language}
+                title={homeT("account.settings")}
+                description={adminT("preferencesDescription")}
+            >
+                <AdminPreferences preferences={preferences} />
+            </AdminWorkspace>
+        );
+
     const arabicEditions = editions.filter(
         (edition) =>
             edition.language === "ar" &&
@@ -133,31 +145,19 @@ export default async function SettingsPage() {
                 <section className="pb-12 pt-5 sm:pb-16 sm:pt-8">
                     <PageHeading
                         icon={<SlidersHorizontal />}
-                        title={
-                            isAdmin
-                                ? homeT("account.settings")
-                                : t("page.title")
-                        }
-                        description={
-                            isAdmin
-                                ? adminT("preferencesDescription")
-                                : t("page.description")
-                        }
+                        title={t("page.title")}
+                        description={t("page.description")}
                     />
 
-                    {isAdmin ? (
-                        <AdminPreferences preferences={preferences} />
-                    ) : (
-                        <SettingsForm
-                            surahs={surahs}
-                            preferences={preferences}
-                            vapidPublicKey={env.VAPID_PUBLIC_KEY ?? null}
-                            arabicEditions={arabicEditions}
-                            reciters={localizedReciters}
-                            translationEditions={translationEditions}
-                            tafsirEditions={tafsirEditions}
-                        />
-                    )}
+                    <SettingsForm
+                        surahs={surahs}
+                        preferences={preferences}
+                        vapidPublicKey={env.VAPID_PUBLIC_KEY ?? null}
+                        arabicEditions={arabicEditions}
+                        reciters={localizedReciters}
+                        translationEditions={translationEditions}
+                        tafsirEditions={tafsirEditions}
+                    />
                 </section>
             </div>
         </main>

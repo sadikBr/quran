@@ -53,12 +53,12 @@ export default function AdminPreferences({
         }
     }
     return (
-        <form className="app-card mt-6 max-w-4xl overflow-hidden" action={save}>
+        <form className="min-w-0" aria-busy={pending} action={save}>
             <fieldset
                 disabled={pending}
-                className="min-w-0 divide-y disabled:opacity-70"
+                className="min-w-0 space-y-5 disabled:opacity-70 sm:space-y-6"
             >
-                <fieldset className="min-w-0 p-4 sm:p-5">
+                <fieldset className="app-card min-w-0 p-4 sm:p-6">
                     <legend className="sr-only">{t("language.title")}</legend>
                     <SectionHeading
                         title={t("language.title")}
@@ -70,7 +70,7 @@ export default function AdminPreferences({
                         {LANGUAGES.map((value) => (
                             <label
                                 key={value}
-                                className="relative cursor-pointer"
+                                className="relative min-w-0 cursor-pointer"
                             >
                                 <input
                                     type="radio"
@@ -80,14 +80,14 @@ export default function AdminPreferences({
                                     onChange={() => setLanguage(value)}
                                     className="peer sr-only"
                                 />
-                                <span className="flex min-h-20 items-center gap-4 rounded-xl border bg-background/60 px-4 py-3 transition-colors hover:bg-muted/50 peer-checked:border-primary peer-checked:bg-primary/5 peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2">
+                                <span className="flex min-h-20 items-center gap-4 rounded-xl border border-border/60 bg-background/50 px-4 py-3 transition-colors hover:bg-muted/50 peer-checked:border-primary peer-checked:bg-primary/5 peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-card">
                                     <span
                                         aria-hidden="true"
-                                        className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-lg font-medium"
+                                        className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-lg font-medium text-primary"
                                     >
                                         {value === "ar" ? "ع" : "Aa"}
                                     </span>
-                                    <span className="flex-1">
+                                    <span className="min-w-0 flex-1">
                                         <span
                                             lang={value}
                                             className="block font-medium"
@@ -117,7 +117,7 @@ export default function AdminPreferences({
                         ))}
                     </div>
                 </fieldset>
-                <fieldset className="min-w-0 p-4 sm:p-5">
+                <fieldset className="app-card min-w-0 p-4 sm:p-6">
                     <legend className="sr-only">{t("theme.title")}</legend>
                     <SectionHeading
                         title={t("theme.title")}
@@ -131,8 +131,11 @@ export default function AdminPreferences({
                         disabled={pending}
                     />
                 </fieldset>
-                <div className="flex justify-end bg-muted/20 p-4 sm:p-5">
-                    <Button disabled={pending} className="w-full sm:w-auto">
+                <div className="app-card flex justify-end p-4 sm:p-5">
+                    <Button
+                        disabled={pending}
+                        className="min-h-11 w-full sm:w-auto"
+                    >
                         {pending && (
                             <Loader2
                                 className="size-4 animate-spin"

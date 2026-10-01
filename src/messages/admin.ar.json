@@ -67,6 +67,9 @@
         "activationSupervisorRequired": "عيّن مشرفًا قبل تفعيل الحلقة.",
         "activationScheduleRequired": "حدّد مواعيد الاجتماعات قبل تفعيل الحلقة.",
         "circle_activated": "تفعيل الحلقة",
-        "circle_deactivated": "إيقاف تفعيل الحلقة"
+        "circle_deactivated": "إيقاف تفعيل الحلقة",
+        "close": "إغلاق",
+        "previousCircles": "الحلقات السابقة",
+        "nextCircles": "المزيد من الحلقات"
     }
 }

@@ -19,7 +19,7 @@
         "description": "Create circles and appoint their supervisors. This account does not take part in learning activities.",
         "create": "Create a circle",
         "circles": "Circles",
-        "empty": "No circles yet. Create your first circle below.",
+        "empty": "No circles yet. Create your first circle to get started.",
         "supervisor": "Circle supervisor",
         "search": "Find an account by name or email",
         "searchHint": "The supervisor must first create a personal account.",
@@ -67,6 +67,9 @@
         "activationSupervisorRequired": "Assign a supervisor before activating the circle.",
         "activationScheduleRequired": "Set up a meeting schedule before activating the circle.",
         "circle_activated": "Circle activated",
-        "circle_deactivated": "Circle deactivated"
+        "circle_deactivated": "Circle deactivated",
+        "close": "Close",
+        "previousCircles": "Previous circles",
+        "nextCircles": "More circles"
     }
 }
