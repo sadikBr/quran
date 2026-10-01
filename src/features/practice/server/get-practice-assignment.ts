@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import db from "@/drizzle/db";
 import {
     groupMeeting,
@@ -118,6 +118,10 @@ export default async function getPracticeAssignment(
         .where(
             and(
                 eq(practiceAssignment.id, assignmentId),
+                or(
+                    isNull(practiceAssignment.groupId),
+                    eq(memorizationGroup.isActive, true),
+                ),
                 eq(practiceAssignment.assigneeId, userId),
                 inArray(practiceAssignment.status, activeStatuses),
             ),
@@ -181,6 +185,7 @@ export async function getAssignedPracticeAssignments(
             and(
                 eq(practiceAssignment.assigneeId, userId),
                 isNotNull(practiceAssignment.groupId),
+                eq(memorizationGroup.isActive, true),
                 inArray(practiceAssignment.status, activeStatuses),
             ),
         )

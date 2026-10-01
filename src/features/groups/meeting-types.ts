@@ -13,6 +13,8 @@ export interface GroupMeetingDetails {
     activeWindowMinutes: number;
     hostActiveUntil: Date | null;
     enabled: boolean;
+    groupActive?: boolean;
+    activeSince?: Date | null;
     schedule: MeetingScheduleSlot[];
     closedOccurrences?: string[];
     rescheduledOccurrences?: Array<{ from: string; to: string }>;

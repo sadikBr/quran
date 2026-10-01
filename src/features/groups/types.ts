@@ -6,6 +6,7 @@ export interface GroupSummary {
     id: string;
     name: string;
     description: string | null;
+    isActive: boolean;
     role: GroupRole;
     isReviewer: boolean;
     reviewerScope: ReviewerScope;

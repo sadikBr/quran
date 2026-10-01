@@ -6,9 +6,11 @@ import {
     groupMeeting,
     groupMeetingAttendance,
     groupMeetingSession,
+    memorizationGroup,
 } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
 import { getGroupMeetingForUser } from "@/features/groups/server/get-group-meeting";
+import { activeGroup } from "@/features/groups/server/group-workflow";
 import { ensureMeetingAttendanceRoster } from "@/features/groups/server/meeting-attendance";
 import { calculateMeetingState } from "@/features/groups/server/meeting-schedule";
 import sendMeetingStartNotifications from "@/features/notifications/server/meeting-start-notifications";
@@ -66,6 +68,16 @@ async function recordAttendance(
     });
 
     return db.transaction(async (transaction) => {
+        const [group] = await transaction
+            .select()
+            .from(memorizationGroup)
+            .where(eq(memorizationGroup.id, context.meeting.groupId))
+            .for("update");
+        if (
+            !group?.isActive ||
+            (group.activeSince && scheduledStartsAt < group.activeSince)
+        )
+            return null;
         const [meetingSession] = await transaction
             .select({
                 id: groupMeetingSession.id,
@@ -256,6 +268,7 @@ export async function POST(
                 and(
                     eq(groupMeeting.id, context.meeting.id),
                     eq(groupMeeting.hostUserId, context.userId),
+                    activeGroup(groupMeeting.groupId),
                 ),
             );
 

@@ -23,6 +23,7 @@ async function deliver(kind, overrides = {}) {
         assigneeId: "person",
         groupId: "circle",
         groupName: "Family",
+        groupActive: true,
         assignmentKind: "memorization",
         assigneeRole: "supervisor",
         status: "in_progress",
@@ -115,4 +116,11 @@ test("notification opt-out and membership removal still apply to supervisors", a
     expect(
         (await deliver("published", { assigneeRole: null })).messages,
     ).toHaveLength(0);
+});
+
+test("inactive circles send no assignment or review notifications", async () => {
+    for (const kind of ["published", "due_soon", "review_completed"])
+        expect((await deliver(kind, { groupActive: false })).result.sent).toBe(
+            0,
+        );
 });

@@ -49,7 +49,8 @@ export async function getNextGroupMeetingForUser(
         .innerJoin(
             groupMeetingSchedule,
             eq(groupMeeting.id, groupMeetingSchedule.meetingId),
-        );
+        )
+        .where(eq(memorizationGroup.isActive, true));
 
     const meetings = new Map<
         string,
@@ -84,6 +85,8 @@ export async function getNextGroupMeetingForUser(
             ...meeting,
             closedOccurrences: details?.closedOccurrences,
             rescheduledOccurrences: details?.rescheduledOccurrences,
+            groupActive: details?.groupActive,
+            activeSince: details?.activeSince,
             now,
         });
         const startsAt =

@@ -161,6 +161,7 @@ export async function sendAssignmentNotification(
             reviewedAt: practiceAssignment.reviewedAt,
             reviewMethod: practiceAssignment.reviewMethod,
             groupName: memorizationGroup.name,
+            groupActive: memorizationGroup.isActive,
             language: userSettings.language,
             remindersEnabled: userSettings.assignmentRemindersEnabled,
             assigneeRole: groupMember.role,
@@ -183,6 +184,9 @@ export async function sendAssignmentNotification(
         )
         .where(eq(practiceAssignment.id, assignmentId))
         .limit(1);
+
+    if (assignment?.groupId && !assignment.groupActive)
+        return { sent: 0, duplicate: 0, removed: 0, failed: 0 };
 
     const reviewCompleted = kind === "review_completed";
     const reviewNeedsRevision = kind === "review_needs_revision";

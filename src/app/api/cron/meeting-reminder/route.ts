@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { env } from "@/data/env/server";
 import db from "@/drizzle/db";
@@ -11,6 +11,7 @@ import {
     pushSubscription,
     userSettings,
 } from "@/drizzle/schema";
+import { activeGroup } from "@/features/groups/server/group-workflow";
 import {
     ensureMeetingAttendanceRoster,
     finalizeEndedMeetingAttendance,
@@ -35,6 +36,7 @@ type CandidateMeeting = {
     timezone: string;
     activeWindowMinutes: number;
     enabled: boolean;
+    activeSince: Date | null;
     rescheduledOccurrences: Array<{ from: string; to: string }>;
     schedule: Array<{ weekday: number; localTime: string }>;
     occurrenceStartsAt: Date;
@@ -89,6 +91,7 @@ export async function GET(request: Request) {
             timezone: groupMeeting.timezone,
             activeWindowMinutes: groupMeeting.activeWindowMinutes,
             enabled: groupMeeting.enabled,
+            activeSince: memorizationGroup.activeSince,
             rescheduledOccurrences: groupMeeting.rescheduledOccurrences,
             weekday: groupMeetingSchedule.weekday,
             localTime: groupMeetingSchedule.localTime,
@@ -101,7 +104,8 @@ export async function GET(request: Request) {
         .innerJoin(
             groupMeetingSchedule,
             eq(groupMeeting.id, groupMeetingSchedule.meetingId),
-        );
+        )
+        .where(eq(memorizationGroup.isActive, true));
 
     const meetings = new Map<
         string,
@@ -117,6 +121,7 @@ export async function GET(request: Request) {
             timezone: row.timezone,
             activeWindowMinutes: row.activeWindowMinutes,
             enabled: row.enabled,
+            activeSince: row.activeSince,
             rescheduledOccurrences: row.rescheduledOccurrences,
             schedule: [],
         };
@@ -199,7 +204,12 @@ export async function GET(request: Request) {
             eq(groupMember.userId, pushSubscription.userId),
         )
         .leftJoin(userSettings, eq(groupMember.userId, userSettings.userId))
-        .where(inArray(groupMember.groupId, [...candidateByGroup.keys()]));
+        .where(
+            and(
+                inArray(groupMember.groupId, [...candidateByGroup.keys()]),
+                activeGroup(groupMember.groupId),
+            ),
+        );
 
     let sent = 0;
     let duplicate = 0;

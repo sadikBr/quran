@@ -76,6 +76,11 @@ export default async function GroupsPage({
                                             <h2 className="break-words text-lg font-semibold group-hover:text-primary">
                                                 {group.name}
                                             </h2>
+                                            {!group.isActive && (
+                                                <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+                                                    {t("activation.inactive")}
+                                                </span>
+                                            )}
                                             <span className="inline-flex items-center gap-1.5 rounded-full bg-background/60 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
                                                 {group.role ===
                                                     "supervisor" && (

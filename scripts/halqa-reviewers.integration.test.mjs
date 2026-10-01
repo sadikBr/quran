@@ -84,7 +84,7 @@ run(
                 );
             for (const id of ["circle", "other"])
                 await client.query(
-                    "insert into memorization_group (id,name,invite_code,created_by_id) values ($1,$1,$1,'supervisor')",
+                    "insert into memorization_group (id,name,invite_code,created_by_id,is_active) values ($1,$1,$1,'supervisor',true)",
                     [id],
                 );
             for (const id of ["supervisor", "reviewer", "specialist", "member"])

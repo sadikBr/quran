@@ -537,6 +537,11 @@
             "setupTimesDescription": "Set up regular meeting times for your circle.",
             "manageWeeklyDescription": "Manage your circle’s recurring meeting times."
         },
-        "loading": "Loading your groups…"
+        "loading": "Loading your groups…",
+        "activation": {
+            "inactive": "Circle in preparation",
+            "supervisorHint": "This circle is inactive. Invite members, assign review roles, and prepare the schedule. Ask the app admin to activate it when you are ready. Meetings, assignments, and reminders will start after activation.",
+            "memberHint": "Your circle is being prepared. You can join now; meetings and assignments will become available once the app admin activates it."
+        }
     }
 }

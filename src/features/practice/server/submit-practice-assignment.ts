@@ -7,6 +7,7 @@ import { z } from "zod";
 import db from "@/drizzle/db";
 import { groupMember, practiceAssignment } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import { activeGroup } from "@/features/groups/server/group-workflow";
 
 const inputSchema = z.object({
     assignmentId: z.string().min(1),
@@ -32,6 +33,7 @@ export default async function submitPracticeAssignment(input: unknown) {
                 eq(practiceAssignment.id, parsed.data.assignmentId),
                 eq(practiceAssignment.assigneeId, session.user.id),
                 isNotNull(practiceAssignment.groupId),
+                activeGroup(practiceAssignment.groupId),
                 inArray(practiceAssignment.status, [
                     "in_progress",
                     "needs_revision",

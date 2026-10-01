@@ -211,14 +211,20 @@ export default async function GroupPage({
                                     "grid grid-cols-2 sm:flex [&>a]:justify-center sm:[&>a]:justify-start",
                             )}
                             items={[
-                                {
-                                    id: "meeting-overview",
-                                    label: t("detail.meetingLink"),
-                                },
-                                {
-                                    id: "circle-assignments",
-                                    label: t("detail.assignmentsLink"),
-                                },
+                                ...(group.isActive
+                                    ? [
+                                          {
+                                              id: "meeting-overview",
+                                              label: t("detail.meetingLink"),
+                                          },
+                                          {
+                                              id: "circle-assignments",
+                                              label: t(
+                                                  "detail.assignmentsLink",
+                                              ),
+                                          },
+                                      ]
+                                    : []),
                                 {
                                     id: "members",
                                     label: t("detail.memberHeading"),
@@ -235,12 +241,26 @@ export default async function GroupPage({
                         />
                     </PageHeading>
 
-                    {nextStep.label !== "join" && (
+                    {group.isActive && nextStep.label !== "join" && (
                         <CircleNextStep step={nextStep} />
                     )}
                     <div className="mt-6 grid items-start gap-6 sm:mt-8 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-8">
                         <div className="min-w-0 space-y-6 [&>section]:mt-0">
-                            {pendingAbsence && (
+                            {!group.isActive && (
+                                <section className="app-card p-4 sm:p-5">
+                                    <h2 className="font-semibold text-primary">
+                                        {t("activation.inactive")}
+                                    </h2>
+                                    <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                                        {t(
+                                            isAdmin
+                                                ? "activation.supervisorHint"
+                                                : "activation.memberHint",
+                                        )}
+                                    </p>
+                                </section>
+                            )}
+                            {group.isActive && pendingAbsence && (
                                 <section
                                     id="absence-excuse"
                                     className="scroll-mt-24 overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-sm"
@@ -276,105 +296,118 @@ export default async function GroupPage({
                                     </div>
                                 </section>
                             )}
-                            <GroupMeetingPanel
-                                groupId={group.id}
-                                meeting={meeting}
-                                state={meetingState}
-                                isAdmin={isAdmin}
-                                isHost={meeting?.hostUserId === session.user.id}
-                                locale={preferences.language}
-                                providerConfigured={providerConfigured}
-                                showPlanAction={nextStep.label !== "plan"}
-                                supervisors={group.members
-                                    .filter(
-                                        (member) =>
-                                            member.role === "supervisor",
-                                    )
-                                    .map((member) => ({
-                                        id: member.userId,
-                                        name: member.name,
-                                    }))}
-                            >
-                                {meeting && meetingAgenda && (
-                                    <MeetingAgenda
+                            {group.isActive && (
+                                <>
+                                    <GroupMeetingPanel
                                         groupId={group.id}
-                                        agenda={meetingAgenda}
-                                        currentUserId={session.user.id}
-                                        canReviewOthers={canReviewOthers}
+                                        meeting={meeting}
+                                        state={meetingState}
+                                        isAdmin={isAdmin}
+                                        isHost={
+                                            meeting?.hostUserId ===
+                                            session.user.id
+                                        }
                                         locale={preferences.language}
-                                        timezone={meeting.timezone}
-                                        embedded
-                                        surahNames={surahNames}
-                                    />
-                                )}
-                            </GroupMeetingPanel>
-                            <section
-                                id="circle-assignments"
-                                className="scroll-mt-24 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm"
-                            >
-                                <div className="flex items-start gap-3 p-4 sm:gap-4 sm:p-5">
-                                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                        <ClipboardList
-                                            aria-hidden="true"
-                                            className="size-5"
-                                        />
-                                    </span>
-                                    <div className="min-w-0">
-                                        <h2 className="font-semibold">
-                                            {t(
-                                                isAdmin
-                                                    ? "assignments.hubTitle"
-                                                    : "assignments.memberHubTitle",
-                                            )}
-                                        </h2>
-                                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                                            {t(
-                                                isAdmin
-                                                    ? "assignments.hubDescriptionAdmin"
-                                                    : "assignments.hubDescriptionMember",
-                                            )}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="grid gap-3 border-t border-border/50 bg-muted/20 p-4 sm:flex sm:flex-wrap sm:p-5">
-                                    <Button
-                                        asChild
-                                        variant="outline"
-                                        className="min-h-11 rounded-xl"
+                                        providerConfigured={providerConfigured}
+                                        showPlanAction={
+                                            nextStep.label !== "plan"
+                                        }
+                                        supervisors={group.members
+                                            .filter(
+                                                (member) =>
+                                                    member.role ===
+                                                    "supervisor",
+                                            )
+                                            .map((member) => ({
+                                                id: member.userId,
+                                                name: member.name,
+                                            }))}
                                     >
-                                        <Link
-                                            href={`/assignments?group=${group.id}`}
-                                        >
-                                            <CalendarRange
-                                                aria-hidden="true"
-                                                className="size-4"
+                                        {meeting && meetingAgenda && (
+                                            <MeetingAgenda
+                                                groupId={group.id}
+                                                agenda={meetingAgenda}
+                                                currentUserId={session.user.id}
+                                                canReviewOthers={
+                                                    canReviewOthers
+                                                }
+                                                locale={preferences.language}
+                                                timezone={meeting.timezone}
+                                                embedded
+                                                surahNames={surahNames}
                                             />
-                                            {t("assignments.openMyAssignments")}
-                                        </Link>
-                                    </Button>
-                                    {isAdmin && (
-                                        <Button
-                                            asChild
-                                            variant="outline"
-                                            className="min-h-11 rounded-xl"
-                                        >
-                                            <Link
-                                                href={`/assignments?view=manage&group=${group.id}`}
-                                            >
-                                                <UsersRound
+                                        )}
+                                    </GroupMeetingPanel>
+                                    <section
+                                        id="circle-assignments"
+                                        className="scroll-mt-24 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm"
+                                    >
+                                        <div className="flex items-start gap-3 p-4 sm:gap-4 sm:p-5">
+                                            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                                <ClipboardList
                                                     aria-hidden="true"
-                                                    className="size-4"
+                                                    className="size-5"
                                                 />
-                                                {t(
-                                                    "assignments.manageCircleAssignments",
-                                                )}
-                                            </Link>
-                                        </Button>
-                                    )}
-                                </div>
-                            </section>
-
-                            {latestFeedback && (
+                                            </span>
+                                            <div className="min-w-0">
+                                                <h2 className="font-semibold">
+                                                    {t(
+                                                        isAdmin
+                                                            ? "assignments.hubTitle"
+                                                            : "assignments.memberHubTitle",
+                                                    )}
+                                                </h2>
+                                                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                                    {t(
+                                                        isAdmin
+                                                            ? "assignments.hubDescriptionAdmin"
+                                                            : "assignments.hubDescriptionMember",
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="grid gap-3 border-t border-border/50 bg-muted/20 p-4 sm:flex sm:flex-wrap sm:p-5">
+                                            <Button
+                                                asChild
+                                                variant="outline"
+                                                className="min-h-11 rounded-xl"
+                                            >
+                                                <Link
+                                                    href={`/assignments?group=${group.id}`}
+                                                >
+                                                    <CalendarRange
+                                                        aria-hidden="true"
+                                                        className="size-4"
+                                                    />
+                                                    {t(
+                                                        "assignments.openMyAssignments",
+                                                    )}
+                                                </Link>
+                                            </Button>
+                                            {isAdmin && (
+                                                <Button
+                                                    asChild
+                                                    variant="outline"
+                                                    className="min-h-11 rounded-xl"
+                                                >
+                                                    <Link
+                                                        href={`/assignments?view=manage&group=${group.id}`}
+                                                    >
+                                                        <UsersRound
+                                                            aria-hidden="true"
+                                                            className="size-4"
+                                                        />
+                                                        {t(
+                                                            "assignments.manageCircleAssignments",
+                                                        )}
+                                                    </Link>
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </section>
+                                </>
+                            )}
+                            {group.isActive && latestFeedback && (
                                 <ReviewFeedbackCard
                                     feedback={{
                                         status: latestFeedback.status,
@@ -471,7 +504,9 @@ export default async function GroupPage({
                             <section>
                                 <AnchoredDetails
                                     id="members"
-                                    defaultOpen={needsReviewer}
+                                    defaultOpen={
+                                        !group.isActive || needsReviewer
+                                    }
                                     className="group/members scroll-mt-24 overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm"
                                 >
                                     <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">

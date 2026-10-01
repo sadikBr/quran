@@ -7,9 +7,11 @@ import {
     groupMeetingAttendance,
     groupMeetingSession,
     groupMember,
+    memorizationGroup,
     practiceAssignment,
 } from "@/drizzle/schema";
 import { getGroupMeetingForUser } from "./get-group-meeting";
+import { activeGroupOccurrence } from "./group-workflow";
 import { getRevisionMeetingDate } from "./revision-meeting";
 
 export async function ensureMeetingAttendanceRoster({
@@ -24,6 +26,16 @@ export async function ensureMeetingAttendanceRoster({
     scheduledEndsAt: Date;
 }) {
     return db.transaction(async (transaction) => {
+        const [group] = await transaction
+            .select()
+            .from(memorizationGroup)
+            .where(eq(memorizationGroup.id, groupId))
+            .for("update");
+        if (
+            !group?.isActive ||
+            (group.activeSince && scheduledStartsAt < group.activeSince)
+        )
+            return null;
         const insertedSessions = await transaction
             .insert(groupMeetingSession)
             .values({
@@ -103,6 +115,10 @@ export async function finalizeEndedMeetingAttendance(now = new Date()) {
         .where(
             and(
                 lte(groupMeetingSession.scheduledEndsAt, now),
+                activeGroupOccurrence(
+                    groupMeeting.groupId,
+                    groupMeetingSession.scheduledStartsAt,
+                ),
                 isNull(groupMeetingSession.finalizedAt),
             ),
         );
@@ -115,13 +131,26 @@ export async function finalizeEndedMeetingAttendance(now = new Date()) {
               )
             : null;
         await db.transaction(async (transaction) => {
+            // Activation changes and attendance writes take the group lock first.
+            const [group] = await transaction
+                .select()
+                .from(memorizationGroup)
+                .where(eq(memorizationGroup.id, meetingSession.groupId))
+                .for("update");
+            if (!group?.isActive) return;
             // Serialize against presence updates and manual closure.
             const [current] = await transaction
                 .select()
                 .from(groupMeetingSession)
                 .where(eq(groupMeetingSession.id, meetingSession.id))
                 .for("update");
-            if (!current || current.finalizedAt) return;
+            if (
+                !current ||
+                current.finalizedAt ||
+                (group.activeSince &&
+                    current.scheduledStartsAt < group.activeSince)
+            )
+                return;
             const [host] = meetingSession.hostUserId
                 ? await transaction
                       .select({ joinedAt: groupMeetingAttendance.joinedAt })

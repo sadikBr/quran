@@ -15,6 +15,8 @@ export const adminActivity = pgTable(
                 "supervisor_changed",
                 "circle_deleted",
                 "circle_updated",
+                "circle_activated",
+                "circle_deactivated",
             ],
         }).notNull(),
         groupId: text("group_id").notNull(),

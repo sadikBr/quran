@@ -183,6 +183,13 @@
             "when": 1790875183953,
             "tag": "0025_push_session_ownership",
             "breakpoints": true
+        },
+        {
+            "idx": 26,
+            "version": "7",
+            "when": 1790878312367,
+            "tag": "0026_circle_activation",
+            "breakpoints": true
         }
     ]
 }

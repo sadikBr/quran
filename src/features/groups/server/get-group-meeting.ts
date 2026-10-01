@@ -7,6 +7,7 @@ import {
     groupMeetingSchedule,
     groupMeetingSession,
     groupMember,
+    memorizationGroup,
     user,
 } from "@/drizzle/schema";
 import type { GroupMeetingDetails } from "../meeting-types";
@@ -27,9 +28,15 @@ export async function getGroupMeetingForUser(
             activeWindowMinutes: groupMeeting.activeWindowMinutes,
             hostActiveUntil: groupMeeting.hostActiveUntil,
             enabled: groupMeeting.enabled,
+            groupActive: memorizationGroup.isActive,
+            activeSince: memorizationGroup.activeSince,
             rescheduledOccurrences: groupMeeting.rescheduledOccurrences,
         })
         .from(groupMeeting)
+        .innerJoin(
+            memorizationGroup,
+            eq(memorizationGroup.id, groupMeeting.groupId),
+        )
         .innerJoin(
             groupMember,
             and(

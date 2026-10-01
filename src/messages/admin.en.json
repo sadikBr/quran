@@ -1,12 +1,12 @@
 {
     "Admin": {
-        "createHint": "Start a new circle. Choose its supervisor now or later.",
+        "createHint": "Create a circle in preparation, then activate it when the members and schedule are ready.",
         "circleListHint": "Manage your learning circles",
         "circleDetails": "Circle details",
         "supervision": "Supervision",
         "scheduleSection": "Meeting schedule",
         "optionalSupervisor": "Circle supervisor (optional)",
-        "assignLaterHint": "You can assign a supervisor later. Meetings stay unavailable until a supervisor is assigned.",
+        "assignLaterHint": "You can assign a supervisor later. The circle remains inactive until the app admin activates it.",
         "assignLater": "Assign later",
         "assignSupervisor": "Assign supervisor",
         "unassigned": "No supervisor assigned",
@@ -52,6 +52,21 @@
         "account": "Platform admin",
         "choose": "Choose this account",
         "searching": "Searching…",
-        "of": "Page {page}"
+        "of": "Page {page}",
+        "active": "Active",
+        "inactive": "In preparation · Inactive",
+        "activate": "Activate circle",
+        "deactivate": "Deactivate circle",
+        "activeHint": "The circle workflow is enabled. Members can prepare assignments and attend meetings.",
+        "inactiveHint": "Invitations, members, and schedules can be prepared. The app admin activates the circle when everyone is ready.",
+        "activateTitle": "Activate “{name}”?",
+        "deactivateTitle": "Deactivate “{name}”?",
+        "activateHint": "The workflow will begin with the next scheduled meeting. Unfinished assignments with past dates will move to that meeting.",
+        "deactivateHint": "Meetings, assignments, reminders, and attendance tracking will pause. Members, progress, and history will be kept. You can continue preparing members and schedules.",
+        "activationActiveMeeting": "End the live meeting before deactivating this circle.",
+        "activationSupervisorRequired": "Assign a supervisor before activating the circle.",
+        "activationScheduleRequired": "Set up a meeting schedule before activating the circle.",
+        "circle_activated": "Circle activated",
+        "circle_deactivated": "Circle deactivated"
     }
 }

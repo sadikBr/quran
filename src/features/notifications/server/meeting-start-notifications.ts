@@ -43,7 +43,12 @@ export default async function sendMeetingStartNotifications({
     const [group] = await db
         .select({ name: memorizationGroup.name })
         .from(memorizationGroup)
-        .where(eq(memorizationGroup.id, groupId))
+        .where(
+            and(
+                eq(memorizationGroup.id, groupId),
+                eq(memorizationGroup.isActive, true),
+            ),
+        )
         .limit(1);
     if (!group) {
         return { sent: 0, duplicate: 0, removed: 0, failed: 0 };

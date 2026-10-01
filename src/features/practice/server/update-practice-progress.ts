@@ -1,12 +1,13 @@
 "use server";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import db from "@/drizzle/db";
 import { practiceAssignment } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import { activeGroup } from "@/features/groups/server/group-workflow";
 import {
     isReferenceWithin,
     quranReferenceSchema,
@@ -62,6 +63,10 @@ export default async function updatePracticeProgress(input: unknown) {
         .where(
             and(
                 eq(practiceAssignment.id, assignment.id),
+                or(
+                    isNull(practiceAssignment.groupId),
+                    activeGroup(practiceAssignment.groupId),
+                ),
                 eq(practiceAssignment.assigneeId, session.user.id),
                 inArray(practiceAssignment.status, [
                     "in_progress",

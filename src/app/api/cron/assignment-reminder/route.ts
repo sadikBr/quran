@@ -4,6 +4,7 @@ import { env } from "@/data/env/server";
 import db from "@/drizzle/db";
 import { practiceAssignment } from "@/drizzle/schema";
 import { expireUnsubmittedAssignments } from "@/features/groups/server/expire-unsubmitted-assignments";
+import { activeGroup } from "@/features/groups/server/group-workflow";
 import { sendAssignmentNotification } from "@/features/notifications/server/assignment-notifications";
 
 export const runtime = "nodejs";
@@ -35,6 +36,7 @@ export async function GET(request: Request) {
                     "not_completed",
                 ]),
                 gt(practiceAssignment.dueAt, now),
+                activeGroup(practiceAssignment.groupId),
                 lte(practiceAssignment.dueAt, reminderCutoff),
             ),
         );

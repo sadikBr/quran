@@ -5,10 +5,12 @@ import db from "@/drizzle/db";
 import {
     groupMeeting,
     groupMeetingSession,
+    memorizationGroup,
     practiceAssignment,
 } from "@/drizzle/schema";
 import { sendAssignmentNotification } from "@/features/notifications/server/assignment-notifications";
 import { getGroupMeetingForUser } from "./get-group-meeting";
+import { activeGroupOccurrence } from "./group-workflow";
 import {
     ensureMeetingAttendanceRoster,
     finalizeEndedMeetingAttendance,
@@ -37,6 +39,10 @@ export async function expireUnsubmittedAssignments(
         .where(
             and(
                 lte(practiceAssignment.dueAt, now),
+                activeGroupOccurrence(
+                    practiceAssignment.groupId,
+                    practiceAssignment.dueAt,
+                ),
                 inArray(practiceAssignment.status, [
                     "in_progress",
                     "submitted",
@@ -61,6 +67,10 @@ export async function expireUnsubmittedAssignments(
     }
     await finalizeEndedMeetingAttendance(now);
     const eligible = and(
+        activeGroupOccurrence(
+            practiceAssignment.groupId,
+            practiceAssignment.dueAt,
+        ),
         inArray(practiceAssignment.status, [
             "in_progress",
             "needs_revision",
@@ -120,37 +130,55 @@ export async function expireUnsubmittedAssignments(
     let withoutNextMeeting = 0;
     let failed = 0;
     for (const row of rows) {
-        if (!row.dueAt) continue;
+        const dueAt = row.dueAt;
+        if (!dueAt) continue;
         try {
-            const meeting = row.hostUserId
-                ? await getGroupMeetingForUser(row.groupId, row.hostUserId)
-                : null;
-            const next = getRevisionMeetingDate(meeting, row.dueAt, now);
-            const updated = await db
-                .update(practiceAssignment)
-                .set({
-                    status: "not_completed",
-                    dueAt: next ?? row.dueAt,
-                    reviewedAt: now,
-                    reviewedById: null,
-                    reviewMethod: null,
-                    submittedAt: null,
-                    progressSurahNumber: null,
-                    progressAyahNumber: null,
-                    updatedAt: now,
-                })
-                .where(
-                    and(
-                        eq(practiceAssignment.id, row.id),
-                        eq(practiceAssignment.dueAt, row.dueAt),
-                        eligible,
-                    ),
+            const result = await db.transaction(async (tx) => {
+                const [group] = await tx
+                    .select()
+                    .from(memorizationGroup)
+                    .where(eq(memorizationGroup.id, row.groupId))
+                    .for("update");
+                if (
+                    !group?.isActive ||
+                    (group.activeSince && dueAt < group.activeSince)
                 )
-                .returning({ id: practiceAssignment.id });
+                    return null;
+                const meeting = row.hostUserId
+                    ? await getGroupMeetingForUser(
+                          row.groupId,
+                          row.hostUserId,
+                          tx,
+                      )
+                    : null;
+                const next = getRevisionMeetingDate(meeting, dueAt, now);
+                const updated = await tx
+                    .update(practiceAssignment)
+                    .set({
+                        status: "not_completed",
+                        dueAt: next ?? dueAt,
+                        reviewedAt: now,
+                        reviewedById: null,
+                        reviewMethod: null,
+                        submittedAt: null,
+                        progressSurahNumber: null,
+                        progressAyahNumber: null,
+                        updatedAt: now,
+                    })
+                    .where(
+                        and(
+                            eq(practiceAssignment.id, row.id),
+                            eq(practiceAssignment.dueAt, dueAt),
+                            eligible,
+                        ),
+                    )
+                    .returning({ id: practiceAssignment.id });
+                return { updated, next };
+            });
             // Recheck at update time: submission or another cron may have won.
-            if (!updated.length) continue;
+            if (!result?.updated.length) continue;
             expired++;
-            if (!next) withoutNextMeeting++;
+            if (!result.next) withoutNextMeeting++;
             await sendAssignmentNotification(row.id, "review_not_completed");
         } catch {
             failed++;

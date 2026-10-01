@@ -19,6 +19,8 @@ export const memorizationGroup = pgTable(
         id,
         name: text("name").notNull(),
         description: text("description"),
+        isActive: boolean("is_active").notNull().default(false),
+        activeSince: timestamp("active_since", { withTimezone: true }),
         inviteCode: text("invite_code").notNull(),
         createdById: text("created_by_id")
             .notNull()

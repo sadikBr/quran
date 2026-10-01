@@ -154,6 +154,24 @@ to an **empty disposable database whose name ends in `_safety_tests`**, then run
 `bun test scripts/safety-fixes.integration.test.mjs`. This test refuses a
 nonempty database and never uses the application's database environment variables.
 
+## Circle activation
+
+Apply migration `0026_circle_activation` with `bun run db:migrate` before running
+the updated app. Existing circles remain active; new circles start inactive and
+in preparation. In **Platform administration**, the app admin can activate or
+deactivate each circle. A supervisor and meeting schedule are required to activate.
+
+Invites, membership/reviewer setup, and schedule editing remain available during
+preparation. Meetings, assignments, reminders, and attendance tracking pause until
+activation. Activation starts with the next scheduled meeting and moves unfinished
+work with elapsed deadlines forward while preserving progress and history. End a
+live meeting before deactivating its circle.
+
+To test this lifecycle against PostgreSQL, set `ACTIVATION_TEST_DATABASE_URL` to an
+**empty disposable database whose name ends in `_activation_tests`**, then run
+`bun test scripts/circle-activation.integration.test.mjs`. The test checks migration
+compatibility, admin permissions, preparation, pause/resume, and workflow guards.
+
 ## Group video meetings
 
 Group creators choose one or more weekday/time combinations and a timezone.

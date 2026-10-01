@@ -22,6 +22,7 @@ import {
     memorizationGroup,
     user,
 } from "@/drizzle/schema";
+import CircleActivationControl from "@/features/admin/components/circle-activation-control";
 import {
     CircleControls,
     CreateCircleForm,
@@ -56,6 +57,7 @@ export default async function AdminPage({
     const circles = await db
         .select({
             id: memorizationGroup.id,
+            isActive: memorizationGroup.isActive,
             name: memorizationGroup.name,
             description: memorizationGroup.description,
             inviteCode: memorizationGroup.inviteCode,
@@ -214,6 +216,14 @@ export default async function AdminPage({
                                             </dd>
                                         </div>
                                     </dl>
+                                    <CircleActivationControl
+                                        groupId={circle.id}
+                                        name={circle.name}
+                                        isActive={circle.isActive}
+                                        hasSupervisor={Boolean(
+                                            circle.supervisor,
+                                        )}
+                                    />
                                     <div className="border-t border-border/55 bg-muted/15 p-3 sm:px-4">
                                         <CircleControls
                                             groupId={circle.id}

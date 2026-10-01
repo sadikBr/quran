@@ -72,6 +72,7 @@ export default async function createGroup(input: unknown) {
                 id: groupId,
                 name: parsed.data.name,
                 description: parsed.data.description || null,
+                isActive: false,
                 inviteCode: createInviteCode(),
                 createdById: admin.id,
             });

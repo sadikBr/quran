@@ -8,6 +8,7 @@ import {
     groupMember,
     practiceAssignment,
 } from "@/drizzle/schema";
+import { activeGroupOccurrence } from "./group-workflow";
 
 /** A scheduled window alone never grants review permission. */
 export async function getLiveReviewContext(
@@ -50,6 +51,10 @@ export async function getLiveReviewContext(
         .where(
             and(
                 eq(groupMeeting.groupId, groupId),
+                activeGroupOccurrence(
+                    groupMeeting.groupId,
+                    groupMeetingSession.scheduledStartsAt,
+                ),
                 eq(groupMeeting.enabled, true),
                 eq(groupMeetingSession.scheduledStartsAt, date),
                 isNotNull(groupMeetingSession.startedAt),

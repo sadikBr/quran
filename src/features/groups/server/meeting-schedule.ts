@@ -55,16 +55,23 @@ export function getUpcomingMeetingOccurrences({
     now = new Date(),
     limit = 12,
     rescheduledOccurrences = [],
+    groupActive = true,
+    activeSince,
+    closedOccurrences = [],
 }: {
     schedule: MeetingScheduleSlot[];
     timezone: string;
     enabled: boolean;
+    groupActive?: boolean;
+    activeSince?: Date | null;
+    closedOccurrences?: string[];
     now?: Date;
     limit?: number;
     rescheduledOccurrences?: Array<{ from: string; to: string }>;
 }) {
     if (
         !enabled ||
+        !groupActive ||
         schedule.length === 0 ||
         !isValidTimezone(timezone) ||
         limit <= 0
@@ -99,7 +106,15 @@ export function getUpcomingMeetingOccurrences({
         .concat(
             rescheduledOccurrences.map((change) => DateTime.fromISO(change.to)),
         )
-        .filter((candidate) => candidate > zonedNow)
+        .filter(
+            (candidate) =>
+                candidate > zonedNow &&
+                !closedOccurrences.some(
+                    (value) =>
+                        new Date(value).getTime() === candidate.toMillis(),
+                ) &&
+                (!activeSince || candidate.toMillis() >= activeSince.getTime()),
+        )
         .sort((first, second) => first.toMillis() - second.toMillis());
 
     return [
@@ -118,16 +133,25 @@ export function calculateMeetingState({
     enabled,
     now = new Date(),
     rescheduledOccurrences = [],
+    groupActive = true,
+    activeSince,
 }: {
     schedule: MeetingScheduleSlot[];
     timezone: string;
     activeWindowMinutes: number;
     closedOccurrences?: string[];
     enabled: boolean;
+    groupActive?: boolean;
+    activeSince?: Date | null;
     now?: Date;
     rescheduledOccurrences?: Array<{ from: string; to: string }>;
 }): MeetingOccurrenceState {
-    if (!enabled || schedule.length === 0 || !isValidTimezone(timezone)) {
+    if (
+        !enabled ||
+        !groupActive ||
+        schedule.length === 0 ||
+        !isValidTimezone(timezone)
+    ) {
         return {
             status: "disabled",
             activeStartsAt: null,
@@ -167,6 +191,8 @@ export function calculateMeetingState({
             const endsAt = candidate.plus({ minutes: activeWindowMinutes });
             return (
                 candidate <= zonedNow &&
+                (!activeSince ||
+                    candidate.toMillis() >= activeSince.getTime()) &&
                 zonedNow < endsAt &&
                 !closedOccurrences.some(
                     (value) =>
@@ -194,6 +220,9 @@ export function calculateMeetingState({
         enabled,
         now,
         rescheduledOccurrences,
+        groupActive,
+        activeSince,
+        closedOccurrences,
         limit: 1,
     });
 

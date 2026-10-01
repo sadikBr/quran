@@ -8,6 +8,7 @@ import {
     groupMeetingSession,
     groupMember,
 } from "@/drizzle/schema";
+import { activeGroup } from "./group-workflow";
 
 // Independent of history pagination, so older unexplained absences remain actionable.
 export default async function getPendingAbsence(
@@ -38,6 +39,7 @@ export default async function getPendingAbsence(
         .where(
             and(
                 eq(groupMeeting.groupId, groupId),
+                activeGroup(groupMeeting.groupId),
                 eq(groupMeetingAttendance.userId, userId),
                 eq(groupMeetingAttendance.status, "pending"),
                 isNotNull(groupMeetingSession.finalizedAt),

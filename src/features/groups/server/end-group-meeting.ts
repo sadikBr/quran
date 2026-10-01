@@ -9,6 +9,7 @@ import {
     groupMeetingAttendance,
     groupMeetingSession,
     groupMember,
+    memorizationGroup,
     practiceAssignment,
 } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
@@ -62,6 +63,17 @@ export default async function endGroupMeeting(
     if (!id) return { success: false };
     const now = new Date();
     const didClose = await db.transaction(async (tx) => {
+        // Share the activation lock order before touching the session or room.
+        const [group] = await tx
+            .select()
+            .from(memorizationGroup)
+            .where(eq(memorizationGroup.id, groupId))
+            .for("update");
+        if (
+            !group?.isActive ||
+            (group.activeSince && new Date(occurrence) < group.activeSince)
+        )
+            return false;
         const closed = await tx
             .update(groupMeetingSession)
             .set({

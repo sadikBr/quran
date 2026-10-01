@@ -22,6 +22,7 @@ const source = ts.transpileModule(
 
 async function close({
     joined = false,
+    isActive = true,
     finalized = false,
     next = new Date("2026-10-07T12:00:00Z"),
 } = {}) {
@@ -33,6 +34,7 @@ async function close({
             "groupMeetingAttendance",
             "groupMember",
             "practiceAssignment",
+            "memorizationGroup",
         ].map((name) => [
             name,
             new Proxy(
@@ -51,15 +53,17 @@ async function close({
         select: () => ({
             from: (table) => ({
                 where: () =>
-                    table === schema.groupMeetingSession
-                        ? { for: async () => [current] }
-                        : Promise.resolve([
-                              {
-                                  joinedAt: joined
-                                      ? current.scheduledStartsAt
-                                      : null,
-                              },
-                          ]),
+                    table === schema.memorizationGroup
+                        ? { for: async () => [{ isActive, activeSince: null }] }
+                        : table === schema.groupMeetingSession
+                          ? { for: async () => [current] }
+                          : Promise.resolve([
+                                {
+                                    joinedAt: joined
+                                        ? current.scheduledStartsAt
+                                        : null,
+                                },
+                            ]),
             }),
         }),
         update: (table) => ({
@@ -91,6 +95,7 @@ async function close({
         "@/drizzle/db": { default: db, __esModule: true },
         "@/drizzle/schema": schema,
         "./get-group-meeting": { getGroupMeetingForUser: async () => ({}) },
+        "./group-workflow": { activeGroupOccurrence: () => true },
         "./revision-meeting": { getRevisionMeetingDate: () => next },
     };
     const context = {
@@ -137,4 +142,8 @@ test("missing next schedule still cancels without altering assignments", async (
     const writes = await close({ next: null });
     assert.equal(writes.length, 1);
     assert.ok(writes[0].values.cancelledAt);
+});
+
+test("inactive circle never finalizes attendance even from a stale job", async () => {
+    assert.deepEqual(await close({ isActive: false }), []);
 });
