@@ -76,7 +76,7 @@ export default async function reviewMemberAssignment(input: unknown) {
                     data.decision === "needs_revision" ? "revision" : undefined,
                 dueAt: next ?? undefined,
                 reviewNote: data.note || null,
-                reviewedForDueAt: sql`${practiceAssignment.dueAt}`,
+                reviewedForDueAt: context.startsAt,
                 reviewedAt: new Date(),
                 submittedAt: reschedule ? null : undefined,
                 progressSurahNumber: reschedule ? null : undefined,

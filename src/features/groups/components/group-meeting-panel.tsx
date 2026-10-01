@@ -15,6 +15,7 @@ import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import ConfirmationDialog from "@/components/ui/confirmation-dialog";
 import { cn } from "@/lib/utils";
 import type {
     GroupMeetingDetails,
@@ -26,6 +27,7 @@ import saveGroupMeeting from "../server/save-group-meeting";
 import CancelMeetingButton from "./cancel-meeting-button";
 import MeetingHostControl from "./meeting-host-control";
 import MeetingScheduleFields from "./meeting-schedule-fields";
+import RescheduleMeeting from "./reschedule-meeting";
 
 function formatOccurrence(value: string, locale: string, timezone: string) {
     const instant = new Date(value);
@@ -75,6 +77,10 @@ export default function GroupMeetingPanel({
     const router = useRouter();
     const [now, setNow] = useState(Date.now());
     const [isSaving, setIsSaving] = useState(false);
+    const [impact, setImpact] = useState<{
+        confirmation: string;
+        moves: Array<{ from: string; to: string; count: number }>;
+    } | null>(null);
     const [scheduleOpen, setScheduleOpen] = useState(!meeting);
     useEffect(() => {
         function openSchedule() {
@@ -118,7 +124,7 @@ export default function GroupMeetingPanel({
         return formatTimeRemaining(state.activeEndsAt, now);
     }, [now, state]);
 
-    async function save() {
+    async function save(confirmation?: string) {
         if (isSaving) return;
         setIsSaving(true);
         try {
@@ -126,11 +132,26 @@ export default function GroupMeetingPanel({
                 groupId,
                 schedule,
                 timezone,
+                confirmation,
             });
             if (!result.success) {
-                toast.error(t("saveError"));
+                if (result.reason === "confirmation") {
+                    setImpact({
+                        confirmation: result.confirmation,
+                        moves: result.moves,
+                    });
+                    return;
+                }
+                toast.error(
+                    t(
+                        result.reason === "active"
+                            ? "scheduleLocked"
+                            : "saveError",
+                    ),
+                );
                 return;
             }
+            setImpact(null);
             toast.success(t("saved"));
             router.refresh();
         } catch {
@@ -272,6 +293,81 @@ export default function GroupMeetingPanel({
                 </div>
             )}
 
+            {isAdmin &&
+                meeting &&
+                state?.status === "upcoming" &&
+                state.nextStartsAt && (
+                    <RescheduleMeeting
+                        key={state.nextStartsAt}
+                        groupId={groupId}
+                        startsAt={state.nextStartsAt}
+                        timezone={meeting.timezone}
+                    />
+                )}
+            <ConfirmationDialog
+                open={impact !== null}
+                onOpenChange={(open) => {
+                    if (!open) setImpact(null);
+                }}
+                title={t("scheduleImpact")}
+                description={t("scheduleImpactHint")}
+                confirmLabel={t("confirmScheduleMove")}
+                cancelLabel={flow("cancel")}
+                pending={isSaving}
+                onConfirm={() => save(impact?.confirmation)}
+            >
+                <ul className="mt-5 space-y-3">
+                    {impact?.moves.map((move) => (
+                        <li
+                            key={move.from}
+                            className="overflow-hidden rounded-xl border border-border/70 bg-muted/20"
+                        >
+                            <div className="border-b border-border/50 px-4 py-2.5 text-xs font-semibold text-muted-foreground">
+                                {t("affectedAssignments", {
+                                    count: move.count,
+                                })}
+                            </div>
+                            <dl className="space-y-4 p-4">
+                                <div className="space-y-1">
+                                    <dt className="text-xs text-muted-foreground">
+                                        {t("oldMeetingTime")}
+                                    </dt>
+                                    <dd className="text-sm leading-6 text-muted-foreground">
+                                        <bdi>
+                                            {formatOccurrence(
+                                                move.from,
+                                                locale,
+                                                meeting?.timezone ?? timezone,
+                                            )}
+                                        </bdi>
+                                    </dd>
+                                </div>
+                                <div className="space-y-1 border-s-2 border-primary ps-3">
+                                    <dt className="text-xs font-medium text-primary">
+                                        {t("newMeetingTime")}
+                                    </dt>
+                                    <dd className="text-sm font-semibold leading-6">
+                                        <bdi>
+                                            {formatOccurrence(
+                                                move.to,
+                                                locale,
+                                                timezone,
+                                            )}
+                                        </bdi>
+                                    </dd>
+                                </div>
+                            </dl>
+                        </li>
+                    ))}
+                </ul>
+                <p className="mt-4 flex items-start gap-2 text-xs leading-6 text-muted-foreground">
+                    <ShieldCheck
+                        aria-hidden="true"
+                        className="mt-1 size-4 shrink-0 text-primary"
+                    />
+                    {t("schedulePreserved")}
+                </p>
+            </ConfirmationDialog>
             {isAdmin && (
                 <details
                     id="meeting-schedule"
@@ -309,7 +405,7 @@ export default function GroupMeetingPanel({
                             <Button
                                 type="button"
                                 disabled={isSaving}
-                                onClick={save}
+                                onClick={() => save()}
                                 className="w-full rounded-xl"
                             >
                                 {isSaving && (

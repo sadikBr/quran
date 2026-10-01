@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import db from "@/drizzle/db";
 import {
     groupMeeting,
@@ -39,7 +39,7 @@ export default async function getMeetingHistory(
     groupId: string,
     requestingUserId: string,
     isAdmin: boolean,
-    options: { limit?: number; offset?: number } = {},
+    options: { limit?: number; offset?: number; pendingOnly?: boolean } = {},
 ): Promise<MeetingHistoryEntry[]> {
     const limit = Math.min(25, Math.max(1, options.limit ?? 10));
     const offset = Math.max(0, options.offset ?? 0);
@@ -78,6 +78,22 @@ export default async function getMeetingHistory(
             and(
                 eq(groupMeeting.groupId, groupId),
                 isNotNull(groupMeetingSession.finalizedAt),
+                options.pendingOnly && canReview
+                    ? isNull(groupMeetingSession.cancelledAt)
+                    : undefined,
+                options.pendingOnly && canReview
+                    ? inArray(
+                          groupMeetingSession.id,
+                          db
+                              .select({
+                                  sessionId: groupMeetingAttendance.sessionId,
+                              })
+                              .from(groupMeetingAttendance)
+                              .where(
+                                  eq(groupMeetingAttendance.status, "pending"),
+                              ),
+                      )
+                    : undefined,
             ),
         )
         .orderBy(desc(groupMeetingSession.scheduledStartsAt))
@@ -184,7 +200,10 @@ export default async function getMeetingHistory(
                 (item) => item.status === "present",
             ).length,
             attendance: canReview
-                ? sessionAttendance
+                ? sessionAttendance.filter(
+                      (item) =>
+                          !options.pendingOnly || item.status === "pending",
+                  )
                 : sessionAttendance.filter(
                       (item) => item.userId === requestingUserId,
                   ),

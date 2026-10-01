@@ -37,6 +37,8 @@ function mapAssignment(row: {
 }
 
 const selection = {
+    id: practiceAssignment.id,
+    status: practiceAssignment.status,
     assigneeId: practiceAssignment.assigneeId,
     kind: practiceAssignment.kind,
     riwayah: practiceAssignment.riwayah,
@@ -86,6 +88,12 @@ export default async function getMeetingPlannerData(
         : [];
 
     return {
+        published: publishedRows.map((row) => ({
+            ...mapAssignment(row),
+            id: row.id,
+            status: row.status,
+            dueAt: row.dueAt?.toISOString() ?? null,
+        })),
         drafts: draftRows
             .filter((row) => row.dueAt !== null)
             .map((row) => ({

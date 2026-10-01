@@ -140,6 +140,11 @@ test("allowed review locks the session and filters for an attended member", asyn
     expect(check[4]).toBe(tx);
     expect(check[5]).toBe(true);
     expect(calls.find(([name]) => name === "attendance")[1]).toBe("session");
+    expect(
+        calls
+            .find(([name]) => name === "save")[1]
+            .reviewedForDueAt.toISOString(),
+    ).toBe(input.occurrence);
 });
 test("carried-over revision is scheduled after the current meeting", async () => {
     const { action, calls } = setup();

@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
@@ -8,11 +8,18 @@ import db from "@/drizzle/db";
 import {
     groupMeeting,
     groupMeetingSchedule,
+    groupMeetingSession,
     groupMember,
     memorizationGroup,
+    practiceAssignment,
 } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
-import { isValidTimezone } from "./meeting-schedule";
+import { getGroupMeetingForUser } from "./get-group-meeting";
+import {
+    calculateMeetingState,
+    getUpcomingMeetingOccurrences,
+    isValidTimezone,
+} from "./meeting-schedule";
 
 const slotSchema = z.object({
     weekday: z.number().int().min(1).max(7),
@@ -23,6 +30,7 @@ const inputSchema = z.object({
     groupId: z.string().min(1),
     timezone: z.string().min(1).max(100),
     schedule: z.array(slotSchema).min(1).max(14),
+    confirmation: z.string().optional(),
 });
 
 function uniqueSchedule(schedule: Array<z.infer<typeof slotSchema>>) {
@@ -86,6 +94,108 @@ export default async function saveGroupMeeting(input: unknown) {
 
         const meetingId = existing?.id ?? crypto.randomUUID();
         if (existing) {
+            const current = await getGroupMeetingForUser(
+                parsed.data.groupId,
+                session.user.id,
+                transaction,
+            );
+            if (!current || calculateMeetingState(current).status === "active")
+                return { success: false as const, reason: "active" as const };
+            // A prepared occurrence has attendance attached; use the dedicated
+            // reschedule action to move it rather than silently abandoning it.
+            const prepared = await transaction
+                .select({ id: groupMeetingSession.id })
+                .from(groupMeetingSession)
+                .where(
+                    and(
+                        eq(groupMeetingSession.meetingId, meetingId),
+                        isNull(groupMeetingSession.finalizedAt),
+                    ),
+                )
+                .limit(1);
+            if (prepared.length)
+                return { success: false as const, reason: "active" as const };
+            const now = new Date();
+            const work = await transaction
+                .select({
+                    id: practiceAssignment.id,
+                    dueAt: practiceAssignment.dueAt,
+                })
+                .from(practiceAssignment)
+                .where(
+                    and(
+                        eq(practiceAssignment.groupId, parsed.data.groupId),
+                        gt(practiceAssignment.dueAt, now),
+                        inArray(practiceAssignment.status, [
+                            "draft",
+                            "in_progress",
+                            "submitted",
+                            "needs_revision",
+                            "not_completed",
+                        ]),
+                    ),
+                )
+                .orderBy(asc(practiceAssignment.dueAt));
+            const upcoming = getUpcomingMeetingOccurrences({
+                schedule: parsed.data.schedule,
+                timezone: parsed.data.timezone,
+                enabled: true,
+                now,
+                limit: 1000,
+                rescheduledOccurrences: current.rescheduledOccurrences,
+            });
+            const affected = work.filter(
+                (item) =>
+                    item.dueAt && !upcoming.includes(item.dueAt.toISOString()),
+            );
+            const dates = [
+                ...new Set(
+                    affected.flatMap((item) =>
+                        item.dueAt ? [item.dueAt.toISOString()] : [],
+                    ),
+                ),
+            ];
+            const moves = dates.map((from, index) => ({
+                from,
+                to: upcoming[index],
+                count: affected.filter(
+                    (item) => item.dueAt?.toISOString() === from,
+                ).length,
+            }));
+            if (moves.some((move) => !move.to))
+                return { success: false as const, reason: "invalid" as const };
+            const confirmation = JSON.stringify({
+                schedule: current.schedule,
+                timezone: current.timezone,
+                proposedSchedule: parsed.data.schedule,
+                proposedTimezone: parsed.data.timezone,
+                ids: affected.map((item) => item.id),
+                moves,
+            });
+            if (moves.length && parsed.data.confirmation !== confirmation)
+                return {
+                    success: false as const,
+                    reason: "confirmation" as const,
+                    confirmation,
+                    moves,
+                };
+            for (const move of moves)
+                await transaction
+                    .update(practiceAssignment)
+                    .set({ dueAt: new Date(move.to), updatedAt: now })
+                    .where(
+                        inArray(
+                            practiceAssignment.id,
+                            affected
+                                .filter(
+                                    (item) =>
+                                        item.dueAt?.toISOString() === move.from,
+                                )
+                                .map((item) => item.id),
+                        ),
+                    );
+        }
+        if (existing) {
             await transaction
                 .update(groupMeeting)
                 .set({
@@ -118,5 +228,10 @@ export default async function saveGroupMeeting(input: unknown) {
     });
 
     revalidatePath(`/groups/${parsed.data.groupId}`);
+    revalidatePath(`/groups/${parsed.data.groupId}/plan`);
+    revalidatePath("/assignments");
+    revalidatePath("/practice");
+    revalidatePath("/dashboard");
+    revalidatePath("/groups");
     return result;
 }

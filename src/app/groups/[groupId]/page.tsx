@@ -85,6 +85,12 @@ export default async function GroupPage({
         ]);
     // History finalizes ended meetings first, including when cron is unavailable.
     const pendingAbsence = await getPendingAbsence(group.id, currentUserId);
+    const pendingAbsenceReviews = isAdmin
+        ? await getMeetingHistory(group.id, currentUserId, true, {
+              limit: 1,
+              pendingOnly: true,
+          })
+        : [];
     const meetingState = meeting ? calculateMeetingState(meeting) : null;
     const agendaStartsAt = meetingState
         ? new Date(
@@ -102,20 +108,6 @@ export default async function GroupPage({
                   active: meetingState?.status === "active",
               })
             : null;
-    const activeAssignmentCount = assignments.filter(
-        (assignment) => assignment.status !== "completed",
-    ).length;
-    const awaitingReviewCount = assignments.filter(
-        (assignment) => assignment.status === "submitted",
-    ).length;
-    const practicingCount = assignments.filter((assignment) =>
-        ["in_progress", "needs_revision", "not_completed"].includes(
-            assignment.status,
-        ),
-    ).length;
-    const completedCount = assignments.filter(
-        (assignment) => assignment.status === "completed",
-    ).length;
     const latestFeedback = !isAdmin
         ? assignments
               .filter((item) => item.reviewedAt)
@@ -125,11 +117,6 @@ export default async function GroupPage({
                       (a.reviewedAt?.getTime() ?? 0),
               )[0]
         : null;
-    const assignedMemberCount = new Set(
-        assignments
-            .filter((assignment) => assignment.status !== "completed")
-            .map((assignment) => assignment.assigneeId),
-    ).size;
 
     return (
         <main
@@ -187,6 +174,7 @@ export default async function GroupPage({
                         assignments={assignments}
                         nextStartsAt={meetingState?.nextStartsAt}
                         pendingAbsence={Boolean(pendingAbsence)}
+                        pendingAbsenceReviews={pendingAbsenceReviews.length > 0}
                     />
                     <div className="mt-6 grid items-start gap-6 sm:mt-8 xl:grid-cols-[minmax(0,1fr)_20rem] xl:gap-8">
                         <div className="min-w-0 space-y-6 [&>section]:mt-0">
@@ -300,102 +288,60 @@ export default async function GroupPage({
                                     />
                                 )}
                             </GroupMeetingPanel>
-                            <section className="overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-sm">
-                                <div className="grid gap-5 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-                                    <div>
-                                        <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                            {t("assignments.eyebrow")}
-                                        </p>
-                                        <h2 className="mt-2 text-xl font-semibold tracking-tight">
-                                            {t(
-                                                isAdmin
-                                                    ? "assignments.hubTitle"
-                                                    : "assignments.memberHubTitle",
-                                            )}
-                                        </h2>
-                                        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-                                            {t(
-                                                isAdmin
-                                                    ? "assignments.hubDescriptionAdmin"
-                                                    : "assignments.hubDescriptionMember",
-                                            )}
-                                        </p>
-                                    </div>
-                                    <Button
-                                        asChild
-                                        className="w-full rounded-xl lg:w-auto"
+                            <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-card/40 p-4">
+                                <h2 className="text-sm font-semibold">
+                                    {t(
+                                        isAdmin
+                                            ? "assignments.hubTitle"
+                                            : "assignments.memberHubTitle",
+                                    )}
+                                </h2>
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    className="min-h-11 w-full rounded-xl sm:w-auto"
+                                >
+                                    <Link
+                                        href={
+                                            isAdmin
+                                                ? `/assignments?view=manage&group=${group.id}`
+                                                : `/assignments?group=${group.id}`
+                                        }
                                     >
-                                        <Link
-                                            href={
-                                                isAdmin
-                                                    ? `/assignments?view=manage&group=${group.id}`
-                                                    : `/assignments?group=${group.id}`
-                                            }
-                                        >
-                                            <CalendarRange className="size-4" />
-                                            {t(
-                                                isAdmin
-                                                    ? "assignments.openHub"
-                                                    : "assignments.openMyAssignments",
-                                            )}
-                                        </Link>
-                                    </Button>
-                                </div>
-                                <div className="grid grid-cols-3 border-border/50 border-t">
-                                    <div className="p-3 text-center sm:p-4">
-                                        <strong className="text-2xl text-primary tabular-nums">
-                                            {isAdmin
-                                                ? activeAssignmentCount
-                                                : practicingCount}
-                                        </strong>
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            {t(
-                                                isAdmin
-                                                    ? "assignments.hubActive"
-                                                    : "assignments.memberPracticing",
-                                            )}
-                                        </p>
-                                    </div>
-                                    <div className="border-border/50 border-x p-3 text-center sm:p-4">
-                                        <strong className="text-2xl text-primary tabular-nums">
-                                            {isAdmin
-                                                ? assignedMemberCount
-                                                : awaitingReviewCount}
-                                        </strong>
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            {t(
-                                                isAdmin
-                                                    ? "assignments.hubMembers"
-                                                    : "assignments.memberAwaitingReview",
-                                            )}
-                                        </p>
-                                    </div>
-                                    <div className="p-3 text-center sm:p-4">
-                                        <strong className="text-2xl text-primary tabular-nums">
-                                            {isAdmin
-                                                ? awaitingReviewCount
-                                                : completedCount}
-                                        </strong>
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            {t(
-                                                isAdmin
-                                                    ? "assignments.hubReview"
-                                                    : "assignments.memberCompleted",
-                                            )}
-                                        </p>
-                                    </div>
-                                </div>
+                                        <CalendarRange
+                                            aria-hidden="true"
+                                            className="size-4"
+                                        />
+                                        {t(
+                                            isAdmin
+                                                ? "assignments.openHub"
+                                                : "assignments.openMyAssignments",
+                                        )}
+                                    </Link>
+                                </Button>
                             </section>
 
                             {meeting && (
-                                <MeetingHistory
-                                    groupId={group.id}
-                                    history={meetingHistory}
-                                    locale={preferences.language}
-                                    timezone={meeting.timezone}
-                                    isAdmin={isAdmin}
-                                    viewAllHref={`/groups/${group.id}/history`}
-                                />
+                                <details className="group/history rounded-2xl border border-border/60 bg-card/40">
+                                    <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+                                        {t("meeting.history.title")}
+                                        <ChevronDown
+                                            aria-hidden="true"
+                                            className="size-4 text-muted-foreground transition-transform group-open/history:rotate-180"
+                                        />
+                                    </summary>
+                                    <div className="border-t border-border/50 px-4 pb-4 [&>section]:mt-0">
+                                        <MeetingHistory
+                                            groupId={group.id}
+                                            history={meetingHistory}
+                                            locale={preferences.language}
+                                            timezone={meeting.timezone}
+                                            isAdmin={isAdmin}
+                                            viewAllHref={`/groups/${group.id}/history`}
+                                            showHeading={false}
+                                        />
+                                    </div>
+                                </details>
                             )}
                         </div>
                         <div className="min-w-0 space-y-4 [&>section]:mt-0 [&>section]:border-t-0 [&>section]:pt-0">

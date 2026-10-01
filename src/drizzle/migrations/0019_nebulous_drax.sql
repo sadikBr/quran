@@ -1,0 +1,1 @@
+ALTER TABLE "group_meeting" ADD COLUMN "rescheduled_occurrences" jsonb DEFAULT '[]'::jsonb NOT NULL;

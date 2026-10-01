@@ -37,16 +37,12 @@ export default async function getKhatmahPlan(
             measurement: record.measurement as KhatmahMeasurement,
             restDays: [],
         },
-        currentDate,
+        record.cycleStartedOn > currentDate
+            ? record.cycleStartedOn
+            : currentDate,
         navigation,
         [],
     );
-    if (adaptive.targetDate !== record.targetDate && record.isActive) {
-        await db
-            .update(userKhatmahPlan)
-            .set({ targetDate: adaptive.targetDate })
-            .where(eq(userKhatmahPlan.userId, userId));
-    }
     const totalPlanAyahs = TOTAL_QURAN_AYAHS - record.startGlobalAyah + 1;
     const completedAyahs = Math.max(
         0,
@@ -57,7 +53,7 @@ export default async function getKhatmahPlan(
     );
 
     return {
-        targetDate: adaptive.targetDate,
+        targetDate: record.targetDate,
         durationWeeks: record.durationWeeks,
         repeatable: record.repeatable,
         startGlobalAyah: record.startGlobalAyah,
@@ -67,7 +63,7 @@ export default async function getKhatmahPlan(
         isActive: record.isActive,
         completed: record.completedAt !== null,
         progressPercentage: Math.round((completedAyahs / totalPlanAyahs) * 100),
-        remainingDays: countCalendarDays(currentDate, adaptive.targetDate),
+        remainingDays: countCalendarDays(currentDate, record.targetDate),
         readingDaysRemaining: adaptive.readingDays,
         dailyAmount: adaptive.amount,
         nextReadingDate: adaptive.scheduledDate,

@@ -1,6 +1,7 @@
 {
     "Groups": {
         "flow": {
+            "reviewAbsences": "Review absences awaiting a decision",
             "provideExcuse": "Provide a reason for your absence",
             "awaitingRecitation": "Members are ready to recite at the meeting.",
             "readyHint": "Prepare here or from your mushaf, then confirm you’re ready to recite.",
@@ -208,6 +209,8 @@
             }
         },
         "planner": {
+            "alreadyPlanned": "Work already exists for this meeting. Check the existing assignments before publishing.",
+            "existingWork": "Already planned or carried forward — no new assignment needed.",
             "sharedAssignment": "Assignment for everyone",
             "sharedAssignmentHint": "Set the assignment once and apply it to all members. You can then adjust any member’s assignment before publishing.",
             "rangeRiwayah": "Riwayah for selecting the range",
@@ -324,6 +327,18 @@
             }
         },
         "meeting": {
+            "rescheduleOne": "Reschedule this meeting",
+            "rescheduleHint": "Move only the next meeting (within 90 days). Its unfinished assignments and drafts move with it; progress and readiness stay unchanged. The weekly schedule stays the same.",
+            "newTime": "New date and time ({timezone})",
+            "rescheduleError": "Could not reschedule. Refresh and choose a future time that does not overlap another meeting. Started meetings cannot be moved.",
+            "scheduleImpact": "Move assignments with the new schedule?",
+            "scheduleImpactHint": "Review the new assignment dates before saving.",
+            "affectedAssignments": "{count, plural, one {# assignment} other {# assignments}}",
+            "oldMeetingTime": "Current date",
+            "newMeetingTime": "New date",
+            "confirmScheduleMove": "Confirm and move assignments",
+            "schedulePreserved": "Progress and readiness are preserved. Completed work and past deadlines stay unchanged.",
+            "scheduleLocked": "A meeting is active or already prepared. Finish it, or use “Reschedule this meeting” for a future meeting, before changing the weekly schedule.",
             "eyebrow": "GROUP MEETING",
             "liveEyebrow": "MEETING OPEN",
             "setupTitle": "Choose your weekly meeting times",
@@ -342,7 +357,7 @@
             "configure": "Set meeting schedule",
             "editSchedule": "Edit meeting schedule",
             "scheduleTitle": "Weekly meeting times",
-            "scheduleDescription": "Add every day and time when this circle normally meets.",
+            "scheduleDescription": "Change the recurring weekly schedule. If future assignment deadlines are affected, you will confirm their new dates before saving. To move just the next meeting, use “Reschedule this meeting”.",
             "day": "Meeting day",
             "time": "Meeting time",
             "addSlot": "Add another time",
@@ -356,6 +371,7 @@
             "saved": "The meeting schedule has been saved.",
             "saveError": "We couldn’t save this schedule. Check the times and timezone.",
             "history": {
+                "pendingTitle": "Absences awaiting a decision",
                 "cancelled": "Cancelled",
                 "cancelledDescription": "This meeting was cancelled. No absences are counted against members, and assignments are preserved for the next meeting.",
                 "title": "Meeting history",
@@ -423,6 +439,8 @@
                 "assignmentCount": "{count, plural, =0 {No assignment due} one {# assignment due} other {# assignments due}}",
                 "noAssignment": "No assignment due at this meeting",
                 "noAssignmentDescription": "There is no assignment scheduled for this member at this meeting.",
+                "yourAssignments": "Your work for this meeting",
+                "continuePractice": "Continue practising",
                 "carriedForward": "Carried forward · awaiting recitation",
                 "sameSurahRange": "{surah}, {start, number}–{end, number}",
                 "crossSurahRange": "{startSurah} {start, number} — {endSurah} {end, number}",

@@ -4,6 +4,8 @@ export const KHATMAH_MEASUREMENTS = ["page", "hizb", "juz"] as const;
 export type KhatmahMeasurement = (typeof KHATMAH_MEASUREMENTS)[number];
 
 export const khatmahPlanSchema = z.object({
+    mode: z.enum(["create", "edit", "restart"]).default("create"),
+    confirmRestart: z.boolean().default(false),
     durationWeeks: z.number().int().min(1).max(52),
     repeatable: z.boolean(),
     startSurah: z.number().int().min(1).max(114),

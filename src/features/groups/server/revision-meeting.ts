@@ -6,6 +6,7 @@ export function getRevisionMeetingDate(
         schedule: MeetingScheduleSlot[];
         timezone: string;
         enabled: boolean;
+        rescheduledOccurrences?: Array<{ from: string; to: string }>;
     } | null,
     previousDueAt: Date | null,
     now = new Date(),

@@ -142,11 +142,22 @@ export default function MeetingPlanEditor({
     const [pendingMode, setPendingMode] = useState<"draft" | "publish" | null>(
         null,
     );
-    const selectedCount = entries.filter((entry) => entry.enabled).length;
+    const existing = planner.published.filter(
+        (item) =>
+            item.dueAt === dueMeetingStartsAt ||
+            (item.status === "submitted" &&
+                (!item.dueAt || item.dueAt < dueMeetingStartsAt)),
+    );
+    const covered = new Set(existing.map((item) => item.assigneeId));
+    const selectedCount = entries.filter(
+        (entry) => entry.enabled && !covered.has(entry.assigneeId),
+    ).length;
     const [copySource, setCopySource] = useState<EditableAssignment | null>(
         null,
     );
-    const missingCount = members.length - selectedCount;
+    const missingCount =
+        members.filter((member) => !covered.has(member.userId)).length -
+        selectedCount;
     const [bulkOpen, setBulkOpen] = useState(false);
     const initialBulk: EditableAssignment = {
         enabled: true,
@@ -266,7 +277,9 @@ export default function MeetingPlanEditor({
             toast.error(t("noUpcomingMeetings"));
             return;
         }
-        const selected = entries.filter((entry) => entry.enabled);
+        const selected = entries.filter(
+            (entry) => entry.enabled && !covered.has(entry.assigneeId),
+        );
         if (selected.length === 0) {
             toast.error(t("selectOne"));
             return;
@@ -295,7 +308,14 @@ export default function MeetingPlanEditor({
             });
 
             if (!result.success) {
-                toast.error(t("saveError"));
+                toast.error(
+                    t(
+                        result.reason === "already_planned"
+                            ? "alreadyPlanned"
+                            : "saveError",
+                    ),
+                );
+                if (result.reason === "already_planned") router.refresh();
                 return;
             }
             if (mode === "publish") {
@@ -545,6 +565,44 @@ export default function MeetingPlanEditor({
 
             <section className="mt-6 divide-y divide-border/55 overflow-hidden rounded-3xl bg-muted/30 ring-1 ring-border/50">
                 {members.map((member) => {
+                    if (covered.has(member.userId))
+                        return (
+                            <div key={member.userId} className="space-y-2 p-5">
+                                <p className="font-semibold">{member.name}</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {t("existingWork")}
+                                </p>
+                                {existing
+                                    .filter(
+                                        (item) =>
+                                            item.assigneeId === member.userId,
+                                    )
+                                    .map((item) => (
+                                        <a
+                                            key={item.id}
+                                            className="block text-sm text-primary underline"
+                                            href={`/groups/${groupId}/review/${item.id}`}
+                                        >
+                                            {
+                                                surahs.find(
+                                                    (surah) =>
+                                                        surah.number ===
+                                                        item.start.surahNumber,
+                                                )?.name
+                                            }{" "}
+                                            {item.start.ayahNumber} –{" "}
+                                            {
+                                                surahs.find(
+                                                    (surah) =>
+                                                        surah.number ===
+                                                        item.end.surahNumber,
+                                                )?.name
+                                            }{" "}
+                                            {item.end.ayahNumber}
+                                        </a>
+                                    ))}
+                            </div>
+                        );
                     const entry = entries.find(
                         (item) => item.assigneeId === member.userId,
                     );
@@ -779,6 +837,7 @@ export default function MeetingPlanEditor({
                         disabled={
                             pendingMode !== null ||
                             missingCount > 0 ||
+                            selectedCount === 0 ||
                             !dueMeetingStartsAt
                         }
                         onClick={() => save("publish")}

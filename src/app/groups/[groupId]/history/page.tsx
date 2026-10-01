@@ -22,7 +22,7 @@ export default async function MeetingHistoryPage({
     searchParams,
 }: {
     params: Promise<{ groupId: string }>;
-    searchParams: Promise<{ page?: string }>;
+    searchParams: Promise<{ page?: string; pending?: string }>;
 }) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) redirect("/sign-in");
@@ -39,11 +39,13 @@ export default async function MeetingHistoryPage({
     if (!group) notFound();
 
     const isAdmin = group.role === "supervisor";
+    const pendingOnly = isAdmin && query.pending === "1";
     const [meeting, historyRows, messages] = await Promise.all([
         getGroupMeetingForUser(groupId, session.user.id),
         getMeetingHistory(groupId, session.user.id, isAdmin, {
             limit: PAGE_SIZE + 1,
             offset: (page - 1) * PAGE_SIZE,
+            pendingOnly,
         }),
         getMessages(preferences.language),
     ]);
@@ -58,7 +60,7 @@ export default async function MeetingHistoryPage({
     });
     const isArabic = preferences.language === "ar";
     const pageHref = (target: number) =>
-        `/groups/${groupId}/history?page=${target}`;
+        `/groups/${groupId}/history?page=${target}${pendingOnly ? "&pending=1" : ""}`;
 
     return (
         <main
@@ -83,7 +85,7 @@ export default async function MeetingHistoryPage({
                                 {t("eyebrow")}
                             </p>
                             <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-                                {t("title")}
+                                {t(pendingOnly ? "pendingTitle" : "title")}
                             </h1>
                             <p className="mt-3 leading-7 text-muted-foreground">
                                 {t(

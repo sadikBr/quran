@@ -8,6 +8,15 @@ import getAssignmentReview from "./get-assignment-review";
 import getReviewQueue from "./get-review-queue";
 import { getLiveReviewContext } from "./live-review-context";
 
+export async function refreshMeetingReviewQueue(
+    groupId: string,
+    occurrence: string,
+) {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) throw new Error("Unauthorized");
+    return getReviewQueue(groupId, session.user.id, occurrence);
+}
+
 export default async function loadMeetingReview(
     groupId: string,
     occurrence: string,

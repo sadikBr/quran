@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, isNull, lt, ne, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { after } from "next/server";
@@ -8,6 +8,7 @@ import { z } from "zod";
 import db from "@/drizzle/db";
 import {
     groupMember,
+    memorizationGroup,
     practiceAssignment,
     userSettings,
 } from "@/drizzle/schema";
@@ -142,7 +143,50 @@ export default async function saveMeetingPlan(input: unknown) {
         };
     });
     try {
-        await db.transaction(async (transaction) => {
+        const result = await db.transaction(async (transaction) => {
+            // Serialize republishing from multiple tabs/supervisors.
+            await transaction
+                .select({ id: memorizationGroup.id })
+                .from(memorizationGroup)
+                .where(eq(memorizationGroup.id, parsed.data.groupId))
+                .for("update");
+            const freshMeeting = await getGroupMeetingForUser(
+                parsed.data.groupId,
+                session.user.id,
+                transaction,
+            );
+            if (
+                !freshMeeting ||
+                !getUpcomingMeetingOccurrences({
+                    ...freshMeeting,
+                    limit: 12,
+                }).includes(parsed.data.dueMeetingStartsAt)
+            )
+                return false;
+            const existing = await transaction
+                .select({ id: practiceAssignment.id })
+                .from(practiceAssignment)
+                .where(
+                    and(
+                        eq(practiceAssignment.groupId, parsed.data.groupId),
+                        inArray(practiceAssignment.assigneeId, [
+                            ...uniqueAssignees,
+                        ]),
+                        ne(practiceAssignment.status, "draft"),
+                        or(
+                            eq(practiceAssignment.dueAt, dueAt),
+                            and(
+                                eq(practiceAssignment.status, "submitted"),
+                                or(
+                                    lt(practiceAssignment.dueAt, dueAt),
+                                    isNull(practiceAssignment.dueAt),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+                .limit(1);
+            if (existing.length) return false;
             await transaction
                 .delete(practiceAssignment)
                 .where(
@@ -154,7 +198,10 @@ export default async function saveMeetingPlan(input: unknown) {
                 );
 
             await transaction.insert(practiceAssignment).values(assignments);
+            return true;
         });
+        if (!result)
+            return { success: false as const, reason: "already_planned" };
     } catch {
         return { success: false as const, reason: "failed" };
     }

@@ -35,6 +35,7 @@ type CandidateMeeting = {
     timezone: string;
     activeWindowMinutes: number;
     enabled: boolean;
+    rescheduledOccurrences: Array<{ from: string; to: string }>;
     schedule: Array<{ weekday: number; localTime: string }>;
     occurrenceStartsAt: Date;
 };
@@ -88,6 +89,7 @@ export async function GET(request: Request) {
             timezone: groupMeeting.timezone,
             activeWindowMinutes: groupMeeting.activeWindowMinutes,
             enabled: groupMeeting.enabled,
+            rescheduledOccurrences: groupMeeting.rescheduledOccurrences,
             weekday: groupMeetingSchedule.weekday,
             localTime: groupMeetingSchedule.localTime,
         })
@@ -115,6 +117,7 @@ export async function GET(request: Request) {
             timezone: row.timezone,
             activeWindowMinutes: row.activeWindowMinutes,
             enabled: row.enabled,
+            rescheduledOccurrences: row.rescheduledOccurrences,
             schedule: [],
         };
         meeting.schedule.push({

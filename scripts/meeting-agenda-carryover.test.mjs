@@ -118,6 +118,18 @@ test("absent member's older submission stays ready in the next agenda", async ()
     expect(result.members[0].attendance).toBe("not_started");
 });
 
+test("reviewed carry-over remains visible in the meeting where it was reviewed", async () => {
+    const result = await agendaFor([
+        {
+            ...assignment("reviewed", "completed", new Date("2026-09-30")),
+            reviewedForDueAt: occurrence,
+        },
+    ]);
+    expect(result.assignmentCount).toBe(1);
+    expect(result.readyCount).toBe(0);
+    expect(result.members[0].reviewState).toBe("done");
+});
+
 test("current and undated submissions remain visible, future and resolved older work do not", async () => {
     const result = await agendaFor(
         [

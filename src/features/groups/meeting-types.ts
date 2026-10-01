@@ -15,6 +15,7 @@ export interface GroupMeetingDetails {
     enabled: boolean;
     schedule: MeetingScheduleSlot[];
     closedOccurrences?: string[];
+    rescheduledOccurrences?: Array<{ from: string; to: string }>;
 }
 
 export interface MeetingOccurrenceState {

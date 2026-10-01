@@ -14,7 +14,9 @@ export default function CircleNextStep(
         <section className="mt-5 flex flex-col gap-3 rounded-xl border border-primary/15 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <p className="text-xs text-muted-foreground">{t("next")}</p>
-                <p className="mt-1 text-sm font-medium">{t(step.label)}</p>
+                {(!step.href || label !== t(step.label)) && (
+                    <p className="mt-1 text-sm font-medium">{t(step.label)}</p>
+                )}
             </div>
             {step.href && (
                 <Button asChild className="min-h-11 shrink-0 rounded-xl">

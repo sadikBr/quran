@@ -4,6 +4,7 @@ import {
     check,
     index,
     integer,
+    jsonb,
     pgTable,
     text,
     timestamp,
@@ -74,6 +75,10 @@ export const groupMeeting = pgTable(
             onDelete: "restrict",
         }),
         roomName: text("room_name").notNull(),
+        rescheduledOccurrences: jsonb("rescheduled_occurrences")
+            .$type<Array<{ from: string; to: string }>>()
+            .notNull()
+            .default([]),
         timezone: text("timezone").notNull(),
         activeWindowMinutes: integer("active_window_minutes")
             .notNull()

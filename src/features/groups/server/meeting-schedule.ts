@@ -54,12 +54,14 @@ export function getUpcomingMeetingOccurrences({
     enabled,
     now = new Date(),
     limit = 12,
+    rescheduledOccurrences = [],
 }: {
     schedule: MeetingScheduleSlot[];
     timezone: string;
     enabled: boolean;
     now?: Date;
     limit?: number;
+    rescheduledOccurrences?: Array<{ from: string; to: string }>;
 }) {
     if (
         !enabled ||
@@ -74,16 +76,29 @@ export function getUpcomingMeetingOccurrences({
         zone: getMeetingDisplayTimezone(timezone, now),
     });
     const weekStart = zonedNow.startOf("week");
-    const candidates = Array.from({ length: 13 }, (_, weekOffset) =>
-        schedule.map((slot) =>
-            occurrenceForWeek(
-                weekStart.plus({ weeks: weekOffset }),
-                slot,
-                timezone,
+    const candidates = Array.from(
+        { length: Math.max(13, Math.ceil(limit / schedule.length) + 1) },
+        (_, weekOffset) =>
+            schedule.map((slot) =>
+                occurrenceForWeek(
+                    weekStart.plus({ weeks: weekOffset }),
+                    slot,
+                    timezone,
+                ),
             ),
-        ),
     )
         .flat()
+        .filter(
+            (candidate) =>
+                !rescheduledOccurrences.some(
+                    (change) =>
+                        new Date(change.from).getTime() ===
+                        candidate.toMillis(),
+                ),
+        )
+        .concat(
+            rescheduledOccurrences.map((change) => DateTime.fromISO(change.to)),
+        )
         .filter((candidate) => candidate > zonedNow)
         .sort((first, second) => first.toMillis() - second.toMillis());
 
@@ -102,6 +117,7 @@ export function calculateMeetingState({
     closedOccurrences = [],
     enabled,
     now = new Date(),
+    rescheduledOccurrences = [],
 }: {
     schedule: MeetingScheduleSlot[];
     timezone: string;
@@ -109,6 +125,7 @@ export function calculateMeetingState({
     closedOccurrences?: string[];
     enabled: boolean;
     now?: Date;
+    rescheduledOccurrences?: Array<{ from: string; to: string }>;
 }): MeetingOccurrenceState {
     if (!enabled || schedule.length === 0 || !isValidTimezone(timezone)) {
         return {
@@ -123,15 +140,27 @@ export function calculateMeetingState({
         zone: getMeetingDisplayTimezone(timezone, now),
     });
     const weekStart = zonedNow.startOf("week");
-    const candidates = schedule.flatMap((slot) => {
-        return [-1, 0, 1].map((weekOffset) =>
-            occurrenceForWeek(
-                weekStart.plus({ weeks: weekOffset }),
-                slot,
-                timezone,
-            ),
+    const candidates = schedule
+        .flatMap((slot) => {
+            return [-1, 0, 1].map((weekOffset) =>
+                occurrenceForWeek(
+                    weekStart.plus({ weeks: weekOffset }),
+                    slot,
+                    timezone,
+                ),
+            );
+        })
+        .filter(
+            (candidate) =>
+                !rescheduledOccurrences.some(
+                    (change) =>
+                        new Date(change.from).getTime() ===
+                        candidate.toMillis(),
+                ),
+        )
+        .concat(
+            rescheduledOccurrences.map((change) => DateTime.fromISO(change.to)),
         );
-    });
 
     const active = candidates
         .filter((candidate) => {
@@ -159,14 +188,19 @@ export function calculateMeetingState({
         };
     }
 
-    const next = candidates
-        .filter((candidate) => candidate > zonedNow)
-        .sort((a, b) => a.toMillis() - b.toMillis())[0];
+    const [next] = getUpcomingMeetingOccurrences({
+        schedule,
+        timezone,
+        enabled,
+        now,
+        rescheduledOccurrences,
+        limit: 1,
+    });
 
     return {
         status: "upcoming",
         activeStartsAt: null,
         activeEndsAt: null,
-        nextStartsAt: next?.toUTC().toISO() ?? null,
+        nextStartsAt: next ?? null,
     };
 }

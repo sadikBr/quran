@@ -14,8 +14,9 @@ import type { GroupMeetingDetails } from "../meeting-types";
 export async function getGroupMeetingForUser(
     groupId: string,
     userId: string,
+    executor: Pick<typeof db, "select"> = db,
 ): Promise<GroupMeetingDetails | null> {
-    const [meeting] = await db
+    const [meeting] = await executor
         .select({
             id: groupMeeting.id,
             groupId: groupMeeting.groupId,
@@ -26,6 +27,7 @@ export async function getGroupMeetingForUser(
             activeWindowMinutes: groupMeeting.activeWindowMinutes,
             hostActiveUntil: groupMeeting.hostActiveUntil,
             enabled: groupMeeting.enabled,
+            rescheduledOccurrences: groupMeeting.rescheduledOccurrences,
         })
         .from(groupMeeting)
         .innerJoin(
@@ -41,7 +43,7 @@ export async function getGroupMeetingForUser(
 
     if (!meeting?.hostUserId) return null;
 
-    const schedule = await db
+    const schedule = await executor
         .select({
             weekday: groupMeetingSchedule.weekday,
             localTime: groupMeetingSchedule.localTime,
@@ -53,7 +55,7 @@ export async function getGroupMeetingForUser(
             asc(groupMeetingSchedule.localTime),
         );
 
-    const closed = await db
+    const closed = await executor
         .select({ startsAt: groupMeetingSession.scheduledStartsAt })
         .from(groupMeetingSession)
         .where(

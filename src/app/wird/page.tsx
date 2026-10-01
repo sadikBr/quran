@@ -196,7 +196,7 @@ export default async function WirdPage() {
                                             wird.completed
                                                 ? "today.completed"
                                                 : wird.scheduledForFuture
-                                                  ? "today.restDay"
+                                                  ? "today.scheduled"
                                                   : wird.carriedOver
                                                     ? "today.carriedOver"
                                                     : "today.ready",
@@ -208,10 +208,11 @@ export default async function WirdPage() {
                                         wird.completed
                                             ? "today.completedDescription"
                                             : wird.scheduledForFuture
-                                              ? "today.restDayDescription"
+                                              ? "today.scheduledDescription"
                                               : wird.carriedOver
                                                 ? "today.carriedOverDescription"
                                                 : "today.readyDescription",
+                                        { date: wird.targetDate },
                                     )}
                                 </p>
                                 {!wird.completed &&
@@ -287,7 +288,10 @@ export default async function WirdPage() {
                                     )}
                             </section>
 
-                            <details className="group mt-4 rounded-2xl border border-border/70 bg-card/60">
+                            <details
+                                open={!khatmahPlan}
+                                className="group mt-4 rounded-2xl border border-border/70 bg-card/60"
+                            >
                                 <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
                                     {t("today.changeGoal")}
                                     <ChevronDown
@@ -315,6 +319,7 @@ export default async function WirdPage() {
                     )}
 
                     <KhatmahPlanner
+                        key={khatmahPlan ? "existing-plan" : "no-plan"}
                         plan={khatmahPlan}
                         surahs={surahs.map((surah) => ({
                             number: surah.number,

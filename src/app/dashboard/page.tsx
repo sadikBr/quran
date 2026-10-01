@@ -187,7 +187,7 @@ export default async function DashboardPage() {
         ? focusAssignment.status === "submitted"
             ? "/assignments"
             : `/practice/${focusAssignment.id}/read`
-        : dailyWird?.completed || !dailyWird
+        : dailyWird?.completed || dailyWird?.scheduledForFuture || !dailyWird
           ? "/wird"
           : "/wird/read";
     const focusEyebrow = focusAssignment
@@ -211,7 +211,7 @@ export default async function DashboardPage() {
           ? dailyWird.completed
               ? wirdT("dashboard.completed")
               : dailyWird.scheduledForFuture
-                ? wirdT("dashboard.restDay")
+                ? wirdT("dashboard.scheduled", { date: dailyWird.targetDate })
                 : wirdT("dashboard.pending")
           : wirdT("dashboard.emptyDescription");
     const focusAction = focusAssignment
@@ -222,11 +222,13 @@ export default async function DashboardPage() {
               : assignmentsT("card.start")
         : !dailyWird
           ? wirdT("dashboard.setup")
-          : dailyWird.completed
-            ? wirdT("dashboard.open")
-            : dailyWird.progressGlobalAyah
-              ? wirdT("today.continueReading")
-              : wirdT("today.startReading");
+          : dailyWird.scheduledForFuture
+            ? wirdT("dashboard.viewPlan")
+            : dailyWird.completed
+              ? wirdT("dashboard.open")
+              : dailyWird.progressGlobalAyah
+                ? wirdT("today.continueReading")
+                : wirdT("today.startReading");
     const savedNumber =
         preferences.readingMode === "page"
             ? readingProgress.lastPageNumber
@@ -547,7 +549,12 @@ export default async function DashboardPage() {
                                             ? dailyWird.completed
                                                 ? wirdT("dashboard.completed")
                                                 : dailyWird.scheduledForFuture
-                                                  ? wirdT("dashboard.restDay")
+                                                  ? wirdT(
+                                                        "dashboard.scheduled",
+                                                        {
+                                                            date: dailyWird.targetDate,
+                                                        },
+                                                    )
                                                   : wirdT("dashboard.pending")
                                             : wirdT(
                                                   "dashboard.emptyDescription",

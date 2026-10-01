@@ -61,6 +61,9 @@ export default function MeetingAgenda({
     const router = useRouter();
     const isArabic = locale === "ar";
     const DirectionArrow = isArabic ? ArrowLeft : ArrowRight;
+    const visibleMembers = isAdmin
+        ? agenda.members
+        : agenda.members.filter((member) => member.userId === currentUserId);
 
     useEffect(() => {
         if (!agenda.active) return;
@@ -144,7 +147,7 @@ export default function MeetingAgenda({
                                 : "mt-2 text-xl sm:text-2xl",
                         )}
                     >
-                        {t("title")}
+                        {t(isAdmin ? "title" : "yourAssignments")}
                     </h2>
                     {!embedded && (
                         <p className="mt-1.5 text-sm text-muted-foreground">
@@ -153,46 +156,49 @@ export default function MeetingAgenda({
                     )}
                 </div>
 
-                <div
-                    className={cn(
-                        "grid grid-cols-3 gap-2 text-center",
-                        embedded && "max-w-xl",
-                    )}
-                >
-                    <AgendaStat
-                        icon={ClipboardCheck}
-                        value={agenda.readyCount}
-                        label={t("ready")}
-                    />
-                    <AgendaStat
-                        icon={BookOpenCheck}
-                        value={agenda.assignmentCount}
-                        label={t("assignments")}
-                    />
-                    <AgendaStat
-                        icon={UsersRound}
-                        value={
-                            agenda.active
-                                ? agenda.presentCount
-                                : agenda.members.length
-                        }
-                        label={agenda.active ? t("present") : t("members")}
-                    />
-                </div>
+                {isAdmin && (
+                    <div
+                        className={cn(
+                            "grid grid-cols-3 gap-2 text-center",
+                            embedded && "max-w-xl",
+                        )}
+                    >
+                        <AgendaStat
+                            icon={ClipboardCheck}
+                            value={agenda.readyCount}
+                            label={t("ready")}
+                        />
+                        <AgendaStat
+                            icon={BookOpenCheck}
+                            value={agenda.assignmentCount}
+                            label={t("assignments")}
+                        />
+                        <AgendaStat
+                            icon={UsersRound}
+                            value={
+                                agenda.active
+                                    ? agenda.presentCount
+                                    : agenda.members.length
+                            }
+                            label={agenda.active ? t("present") : t("members")}
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="divide-y divide-border/45">
-                {agenda.members.map((member) => {
+                {visibleMembers.map((member) => {
                     const isCurrentUser = member.userId === currentUserId;
                     return (
                         <details
                             key={member.userId}
                             className="group/member bg-background/15 open:bg-background/45"
                             open={
-                                agenda.active &&
-                                (member.queuePosition === 1 ||
-                                    (isCurrentUser &&
-                                        member.assignments.length > 0))
+                                !isAdmin ||
+                                (agenda.active &&
+                                    (member.queuePosition === 1 ||
+                                        (isCurrentUser &&
+                                            member.assignments.length > 0)))
                             }
                         >
                             <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-6 [&::-webkit-details-marker]:hidden">
@@ -225,7 +231,7 @@ export default function MeetingAgenda({
                                     </p>
                                 </div>
 
-                                {member.queuePosition !== null && (
+                                {isAdmin && member.queuePosition !== null && (
                                     <span className="hidden rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary sm:inline-flex">
                                         {t("queuePosition", {
                                             position: member.queuePosition,
@@ -356,9 +362,7 @@ export default function MeetingAgenda({
                                                         )}
                                                     {isCurrentUser &&
                                                         assignment.status !==
-                                                            "completed" &&
-                                                        assignment.status !==
-                                                            "submitted" && (
+                                                            "completed" && (
                                                             <Button
                                                                 asChild
                                                                 size="sm"
@@ -369,7 +373,10 @@ export default function MeetingAgenda({
                                                                     href={`/practice/${assignment.id}/read`}
                                                                 >
                                                                     {t(
-                                                                        "openPractice",
+                                                                        assignment.status ===
+                                                                            "submitted"
+                                                                            ? "continuePractice"
+                                                                            : "openPractice",
                                                                     )}
                                                                     <DirectionArrow className="size-4" />
                                                                 </Link>

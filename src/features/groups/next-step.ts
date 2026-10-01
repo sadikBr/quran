@@ -14,6 +14,7 @@ export function circleNextStep({
     assignments,
     nextStartsAt,
     pendingAbsence = false,
+    pendingAbsenceReviews = false,
 }: {
     groupId: string;
     supervisor: boolean;
@@ -23,6 +24,7 @@ export function circleNextStep({
     assignments: Assignment[];
     nextStartsAt?: string | null;
     pendingAbsence?: boolean;
+    pendingAbsenceReviews?: boolean;
 }) {
     const base = `/groups/${groupId}`;
     if (live) return { label: "join" as const, href: `${base}/meeting` };
@@ -32,6 +34,11 @@ export function circleNextStep({
             href: `${base}#absence-excuse`,
         };
     if (supervisor) {
+        if (pendingAbsenceReviews)
+            return {
+                label: "reviewAbsences" as const,
+                href: `${base}/history?pending=1`,
+            };
         if (!scheduled)
             return {
                 label: "setup" as const,

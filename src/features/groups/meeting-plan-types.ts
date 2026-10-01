@@ -11,6 +11,13 @@ export interface MeetingPlanAssignment {
 }
 
 export interface MeetingPlannerData {
+    published: Array<
+        MeetingPlanAssignment & {
+            id: string;
+            status: string;
+            dueAt: string | null;
+        }
+    >;
     drafts: Array<
         MeetingPlanAssignment & {
             dueMeetingStartsAt: string;

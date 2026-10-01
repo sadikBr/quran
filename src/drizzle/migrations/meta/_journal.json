@@ -134,6 +134,13 @@
       "when": 1790804829818,
       "tag": "0018_bitter_cobalt_man",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1790813120050,
+      "tag": "0019_nebulous_drax",
+      "breakpoints": true
     }
   ]
 }

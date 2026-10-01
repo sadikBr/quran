@@ -48,8 +48,8 @@
             "carriedOverDescription": "This portion is waiting from an earlier day. Complete it before moving forward.",
             "ready": "Ready for today",
             "readyDescription": "Read at your own pace, then mark the portion complete when you reach the end.",
-            "restDay": "A planned rest day",
-            "restDayDescription": "Nothing has fallen behind. Your next portion is already scheduled for your next reading day.",
+            "scheduled": "Upcoming portion",
+            "scheduledDescription": "Your next Wird is scheduled for {date}.",
             "completed": "Completed for today",
             "completedDescription": "Beautifully done. Your next portion will be prepared tomorrow.",
             "startReading": "Start today’s Wird",
@@ -68,7 +68,8 @@
             "open": "Open today’s Wird",
             "completed": "Today’s portion is complete",
             "pending": "Your portion is ready",
-            "restDay": "Today is a planned rest day",
+            "scheduled": "Your next Wird is scheduled for {date}",
+            "viewPlan": "View plan",
             "khatmahProgress": "Khatmah progress",
             "streak": "{count, plural, one {# day in a row} other {# days in a row}}"
         },
@@ -125,6 +126,12 @@
             "juz": "juzs"
         },
         "form": {
+            "restartTitle": "Restart this Khatmah?",
+            "endTitle": "End this Khatmah plan?",
+            "endDescription": "This permanently removes the current plan, not just pauses it. Your current Wird, saved reading position and completed history stay safe. You can use the regular daily-Wird planner or create a new Khatmah later.",
+            "ended": "Khatmah plan ended. You can now adjust your daily Wird.",
+            "restartDescription": "This starts a new cycle from the selected surah and replaces the current portion, including its saved reading position. Completed reading and Khatmah history will be kept.",
+            "editHint": "Your progress, history and current portion stay unchanged. Pacing changes apply to the next portion. Changing the number of weeks sets a new deadline from today (tomorrow if today’s portion is complete); otherwise your deadline stays the same.",
             "duration": "Complete one Khatmah in",
             "weeks": "{count, plural, one {# week} other {# weeks}}",
             "decreaseWeeks": "Use fewer weeks",
@@ -158,6 +165,7 @@
             "pause": "Pause plan",
             "resume": "Resume plan",
             "startAgain": "Plan another Khatmah",
+            "endPlan": "End Khatmah plan",
             "cancel": "Cancel"
         },
         "history": {

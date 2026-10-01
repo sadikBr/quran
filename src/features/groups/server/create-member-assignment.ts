@@ -8,6 +8,7 @@ import { z } from "zod";
 import db from "@/drizzle/db";
 import {
     groupMember,
+    memorizationGroup,
     practiceAssignment,
     userSettings,
 } from "@/drizzle/schema";
@@ -107,21 +108,44 @@ export default async function createMemberAssignment(input: unknown) {
 
     const assignmentId = crypto.randomUUID();
     try {
-        await db.insert(practiceAssignment).values({
-            id: assignmentId,
-            groupId: parsed.data.groupId,
-            assigneeId: parsed.data.assigneeId,
-            assignedById: session.user.id,
-            kind: parsed.data.kind,
-            riwayah,
-            startSurahNumber: start.surahNumber,
-            startAyahNumber: start.ayahNumber,
-            endSurahNumber: end.surahNumber,
-            endAyahNumber: end.ayahNumber,
-            status: "in_progress",
-            dueAt: new Date(parsed.data.dueMeetingStartsAt),
-            instructions: parsed.data.instructions || null,
+        const saved = await db.transaction(async (tx) => {
+            await tx
+                .select({ id: memorizationGroup.id })
+                .from(memorizationGroup)
+                .where(eq(memorizationGroup.id, parsed.data.groupId))
+                .for("update");
+            const current = await getGroupMeetingForUser(
+                parsed.data.groupId,
+                session.user.id,
+                tx,
+            );
+            if (
+                !current ||
+                !getUpcomingMeetingOccurrences({
+                    ...current,
+                    limit: 12,
+                }).includes(parsed.data.dueMeetingStartsAt)
+            )
+                return false;
+            await tx.insert(practiceAssignment).values({
+                id: assignmentId,
+                groupId: parsed.data.groupId,
+                assigneeId: parsed.data.assigneeId,
+                assignedById: session.user.id,
+                kind: parsed.data.kind,
+                riwayah,
+                startSurahNumber: start.surahNumber,
+                startAyahNumber: start.ayahNumber,
+                endSurahNumber: end.surahNumber,
+                endAyahNumber: end.ayahNumber,
+                status: "in_progress",
+                dueAt: new Date(parsed.data.dueMeetingStartsAt),
+                instructions: parsed.data.instructions || null,
+            });
+            return true;
         });
+        if (!saved)
+            return { success: false as const, reason: "invalid_meeting" };
     } catch {
         return { success: false as const, reason: "failed" };
     }

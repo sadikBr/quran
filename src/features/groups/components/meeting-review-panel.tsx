@@ -5,7 +5,9 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import ConfirmationDialog from "@/components/ui/confirmation-dialog";
-import loadMeetingReview from "../server/load-meeting-review";
+import loadMeetingReview, {
+    refreshMeetingReviewQueue,
+} from "../server/load-meeting-review";
 import AssignmentReview from "./assignment-review";
 
 export default function MeetingReviewPanel({
@@ -25,6 +27,9 @@ export default function MeetingReviewPanel({
     const [selected, setSelected] = useState<string | null>(null);
     const flow = useTranslations("Groups.flow");
     const request = useRef(0);
+    const [queue, setQueue] = useState<
+        NonNullable<Awaited<ReturnType<typeof loadMeetingReview>>>["queue"]
+    >([]);
     const load = useCallback(
         async (id?: string) => {
             const current = ++request.current;
@@ -33,7 +38,10 @@ export default function MeetingReviewPanel({
             setPaused(false);
             try {
                 const result = await loadMeetingReview(groupId, occurrence, id);
-                if (current === request.current) setData(result);
+                if (current === request.current) {
+                    setData(result);
+                    setQueue(result?.queue ?? []);
+                }
             } catch {
                 if (current === request.current) setError(true);
             } finally {
@@ -48,6 +56,43 @@ export default function MeetingReviewPanel({
             request.current++;
         };
     }, [load]);
+    useEffect(() => {
+        let cancelled = false;
+        let running = false;
+        const refresh = async () => {
+            if (
+                running ||
+                busy ||
+                loading ||
+                document.visibilityState !== "visible"
+            )
+                return;
+            running = true;
+            const version = request.current;
+            try {
+                const next = await refreshMeetingReviewQueue(
+                    groupId,
+                    occurrence,
+                );
+                if (!cancelled && version === request.current) setQueue(next);
+            } catch {
+                // Retain the current review and notes during transient failures.
+            } finally {
+                running = false;
+            }
+        };
+        const interval = window.setInterval(refresh, 15_000);
+        window.addEventListener("focus", refresh);
+        return () => {
+            cancelled = true;
+            window.clearInterval(interval);
+            window.removeEventListener("focus", refresh);
+        };
+    }, [groupId, occurrence, busy, loading]);
+    useEffect(() => {
+        if (!data && !paused && !loading && !error && queue.length > 0)
+            void load(queue[0].id);
+    }, [data, paused, loading, error, queue, load]);
     if (loading)
         return (
             <output className="flex justify-center p-10">
@@ -110,7 +155,14 @@ export default function MeetingReviewPanel({
                     setSelected(event.target.value);
                 }}
             >
-                {data.queue.map((item, index) => (
+                {!queue.some(
+                    (item) => item.id === data.review.assignment.id,
+                ) && (
+                    <option value={data.review.assignment.id}>
+                        {t("refreshQueue")}
+                    </option>
+                )}
+                {queue.map((item, index) => (
                     <option key={item.id} value={item.id}>
                         {item.name} · {index + 1}
                     </option>
@@ -119,6 +171,7 @@ export default function MeetingReviewPanel({
             <AssignmentReview
                 key={data.review.assignment.id}
                 {...data}
+                pendingCount={queue.length}
                 compact
                 occurrence={occurrence}
                 onBusyChange={setBusy}

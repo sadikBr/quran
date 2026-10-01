@@ -13,6 +13,29 @@ const base = {
 };
 const assignment = (status) => ({ id: "assignment", status, reviewNote: null });
 const source = (path) => readFileSync(`src/${path}`, "utf8");
+test("supervisor pending absences link directly to the filtered history", () => {
+    expect(
+        circleNextStep({
+            ...base,
+            supervisor: true,
+            pendingAbsenceReviews: true,
+        }),
+    ).toEqual({
+        label: "reviewAbsences",
+        href: "/groups/circle/history?pending=1",
+    });
+    expect(
+        circleNextStep({
+            ...base,
+            supervisor: true,
+            pendingAbsenceReviews: true,
+            live: true,
+        }).label,
+    ).toBe("join");
+    expect(circleNextStep({ ...base, pendingAbsenceReviews: true }).label).toBe(
+        "waiting",
+    );
+});
 test("unexplained absence takes priority over preparation and awaiting recitation", () => {
     for (const status of ["submitted", "in_progress", "needs_revision"]) {
         expect(

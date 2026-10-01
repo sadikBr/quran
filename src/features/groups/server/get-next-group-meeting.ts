@@ -83,6 +83,7 @@ export async function getNextGroupMeetingForUser(
         const state = calculateMeetingState({
             ...meeting,
             closedOccurrences: details?.closedOccurrences,
+            rescheduledOccurrences: details?.rescheduledOccurrences,
             now,
         });
         const startsAt =
