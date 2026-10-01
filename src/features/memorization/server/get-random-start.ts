@@ -46,7 +46,7 @@ export default async function getRandomStart(input: z.input<typeof schema>) {
             getSurahsMeta(),
             warsh ? getWarshChapters() : Promise.resolve(null),
             warsh ? getWarshNavigationMeta() : getQuranNavigationMeta(),
-            getMemorizationProgress(session.user.id),
+            getMemorizationProgress(session.user.id, preferences.riwayah),
         ]);
         const surahs = meta.map((surah) => ({
             ...surah,

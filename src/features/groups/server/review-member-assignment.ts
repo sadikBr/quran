@@ -12,6 +12,7 @@ import {
     practiceAssignment,
 } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import { recordAssessment } from "@/features/memorization/server/record-service";
 import { sendAssignmentNotification } from "@/features/notifications/server/assignment-notifications";
 import { assignmentReviewPermission } from "./assignment-review-permission";
 import { getGroupMeetingForUser } from "./get-group-meeting";
@@ -106,7 +107,18 @@ export default async function reviewMemberAssignment(input: unknown) {
                     sql`exists (select 1 from ${groupMeetingSession} where ${groupMeetingSession.id} = ${context.id} and ${groupMeetingSession.scheduledEndsAt} > clock_timestamp())`,
                 ),
             )
-            .returning({ id: practiceAssignment.id });
+            .returning();
+        if (updated[0] && data.decision !== "not_completed") {
+            await recordAssessment(tx, updated[0], {
+                method: "peer",
+                outcome:
+                    data.decision === "completed"
+                        ? "confirmed"
+                        : "needs_revision",
+                reviewerId: session.user.id,
+                sourceKey: `peer:${data.assignmentId}:${data.occurrence}`,
+            });
+        }
         return updated.length
             ? { success: true as const }
             : { success: false as const, reason: "meeting_required" };
@@ -129,6 +141,8 @@ export default async function reviewMemberAssignment(input: unknown) {
     revalidatePath("/assignments");
     revalidatePath("/practice");
     revalidatePath("/dashboard");
+    revalidatePath("/memorization");
+    revalidatePath("/memorization/test");
     const queue = data.reviewNext
         ? await getReviewQueue(data.groupId, session.user.id, data.occurrence)
         : [];

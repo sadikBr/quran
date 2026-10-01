@@ -190,6 +190,13 @@
             "when": 1790878312367,
             "tag": "0026_circle_activation",
             "breakpoints": true
+        },
+        {
+            "idx": 27,
+            "version": "7",
+            "when": 1790889576347,
+            "tag": "0027_automatic_memorization",
+            "breakpoints": true
         }
     ]
 }

@@ -78,6 +78,11 @@ function setup(options = {}) {
                 },
             },
         },
+        "@/features/memorization/server/record-service": {
+            recordAssessment: async (...args) => {
+                calls.push(["assessment", ...args]);
+            },
+        },
         "@/features/notifications/server/assignment-notifications": {
             sendAssignmentNotification: async () => {},
         },
@@ -206,4 +211,27 @@ test("standalone inspection cannot render evaluation controls and submitted work
             expiry.indexOf("const eligible =") + 240,
         ),
     ).not.toContain('"submitted"');
+});
+
+test("only completed and revision reviews record immutable assessment snapshots in the same transaction", async () => {
+    for (const decision of ["completed", "needs_revision", "not_completed"]) {
+        const { action, calls, tx } = setup();
+        expect((await action({ ...input, decision })).success).toBe(true);
+        const assessment = calls.find(([name]) => name === "assessment");
+        if (decision === "not_completed") expect(assessment).toBeUndefined();
+        else {
+            expect(assessment[1]).toBe(tx);
+            expect(assessment[2].id).toBe("assignment");
+            expect(assessment[3]).toEqual({
+                method: "peer",
+                outcome:
+                    decision === "completed" ? "confirmed" : "needs_revision",
+                reviewerId: "supervisor",
+                sourceKey: `peer:${input.assignmentId}:${input.occurrence}`,
+            });
+        }
+    }
+    const { action, calls } = setup({ closedDuringSave: true });
+    await action(input);
+    expect(calls.some(([name]) => name === "assessment")).toBe(false);
 });

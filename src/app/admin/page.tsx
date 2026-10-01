@@ -16,6 +16,7 @@ import db from "@/drizzle/db";
 import {
     adminActivity,
     groupMember,
+    memorizationCorrectionRequest,
     memorizationGroup,
     user,
 } from "@/drizzle/schema";
@@ -81,12 +82,30 @@ export default async function AdminPage({
         .orderBy(desc(adminActivity.createdAt), adminActivity.id)
         .limit(21)
         .offset((activityPage - 1) * 20);
+    const [{ count: correctionCount }] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(memorizationCorrectionRequest)
+        .where(eq(memorizationCorrectionRequest.status, "pending"));
+    const memoryT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Memorization.admin",
+    });
     return (
         <AdminWorkspace
             language={preferences.language}
             title={t("title")}
             description={t("description")}
         >
+            <Link
+                href="/admin/memorization"
+                className="app-card flex flex-wrap items-center justify-between gap-3 p-5 hover:border-primary/40"
+            >
+                <span className="font-semibold">{memoryT("title")}</span>
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
+                    {memoryT("count", { count: correctionCount })}
+                </span>
+            </Link>
             <details
                 className="group/create app-card overflow-hidden"
                 open={circles.length === 0 && page === 1}

@@ -116,7 +116,7 @@ export default async function DashboardPage() {
         getPracticeAssignments(session.user.id),
         getAssignedPracticeAssignments(session.user.id),
         getGroupsForUser(session.user.id),
-        getMemorizationProgress(session.user.id),
+        getMemorizationProgress(session.user.id, preferences.riwayah),
         getNextGroupMeetingForUser(session.user.id),
     ]);
     const practiceAssignment = practiceAssignments[0] ?? null;

@@ -329,6 +329,34 @@ run(
             expect(saved.review_method).toBe("peer");
             expect(saved.reviewed_by_id).toBe("reviewer");
             expect(saved.due_at > startsAt).toBe(true);
+            const assessments = (
+                await client.query(
+                    "select assignment_id, method, outcome, reviewer_id, source_key from memorization_assessment order by assignment_id",
+                )
+            ).rows;
+            expect(assessments).toHaveLength(5);
+            expect(
+                assessments.filter(
+                    (row) => row.assignment_id === "revoked-work",
+                ),
+            ).toHaveLength(1);
+            expect(
+                assessments.find((row) => row.assignment_id === "revision"),
+            ).toMatchObject({
+                method: "peer",
+                outcome: "needs_revision",
+                reviewer_id: "reviewer",
+            });
+            expect(
+                assessments.find(
+                    (row) => row.assignment_id === "work-supervisor",
+                ),
+            ).toMatchObject({
+                method: "peer",
+                outcome: "confirmed",
+                reviewer_id: "specialist",
+                source_key: `peer:work-supervisor:${occurrence}`,
+            });
             await assignment("disconnected", "member");
             await client.query(
                 "update group_meeting_attendance set last_seen_at=now()-interval '2 minutes' where user_id='reviewer'",

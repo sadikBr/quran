@@ -8,12 +8,14 @@ import {
     LoaderCircle,
     MapPin,
 } from "lucide-react";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import ConfirmationDialog from "@/components/ui/confirmation-dialog";
 import ReviewMethodLabel from "@/features/groups/components/review-method-label";
+import { confirmPersonalMemorization } from "@/features/memorization/server/record-actions";
 import Ayah from "@/features/quran/components/ayah";
 import GuidedReader, {
     GuidedReaderSurah,
@@ -42,6 +44,8 @@ export default function PracticeReader({
     const locale = useLocale();
     const t = useTranslations("Practice.reader");
     const flow = useTranslations("Groups.flow");
+    const memoryT = useTranslations("Memorization.personal");
+    const [confirmMemory, setConfirmMemory] = useState(false);
     const [confirmReady, setConfirmReady] = useState(false);
     const [progress, setProgress] = useState(assignment.progress);
     const [status, setStatus] = useState(assignment.status);
@@ -107,7 +111,7 @@ export default function PracticeReader({
     }, [next]);
 
     async function saveProgress(reference: QuranReference) {
-        if (mutationInFlight.current) return;
+        if (mutationInFlight.current || status === "completed") return;
         mutationInFlight.current = true;
         setSavingReference(reference);
         try {
@@ -152,6 +156,35 @@ export default function PracticeReader({
         } finally {
             setIsSubmitting(false);
             mutationInFlight.current = false;
+        }
+    }
+
+    async function confirmMemorization() {
+        if (mutationInFlight.current) return;
+        mutationInFlight.current = true;
+        setIsSubmitting(true);
+        try {
+            const result = await confirmPersonalMemorization({
+                assignmentId: assignment.id,
+                riwayah: assignment.riwayah,
+                startSurahNumber: assignment.start.surahNumber,
+                startAyahNumber: assignment.start.ayahNumber,
+                endSurahNumber: assignment.end.surahNumber,
+                endAyahNumber: assignment.end.ayahNumber,
+                confirmed: true,
+            });
+            if (!result.success) {
+                toast.error(memoryT("failed"));
+                return;
+            }
+            setStatus("completed");
+            setConfirmMemory(false);
+            toast.success(memoryT("saved"));
+        } catch {
+            toast.error(memoryT("failed"));
+        } finally {
+            mutationInFlight.current = false;
+            setIsSubmitting(false);
         }
     }
 
@@ -208,7 +241,23 @@ export default function PracticeReader({
                 </Button>
             }
         >
-            <ReviewMethodLabel method={assignment.reviewMethod} />
+            <ConfirmationDialog
+                open={confirmMemory}
+                onOpenChange={setConfirmMemory}
+                title={memoryT("confirmTitle")}
+                description={memoryT("confirmDescription")}
+                confirmLabel={memoryT("confirm")}
+                cancelLabel={flow("cancel")}
+                pending={isSubmitting}
+                onConfirm={confirmMemorization}
+            />
+            <ReviewMethodLabel
+                method={
+                    status === "completed" && assignment.source === "personal"
+                        ? "self"
+                        : assignment.reviewMethod
+                }
+            />
             {assignment.source === "group" && assignment.reviewNote && (
                 <section className="mt-6 rounded-2xl bg-primary/[0.07] px-5 py-4 ring-1 ring-primary/15">
                     <p className="text-xs font-semibold text-primary">
@@ -398,7 +447,9 @@ export default function PracticeReader({
                                                     }
                                                     disabled={
                                                         savingReference !==
-                                                            null || isSubmitting
+                                                            null ||
+                                                        isSubmitting ||
+                                                        status === "completed"
                                                     }
                                                     onClick={() =>
                                                         saveProgress(reference)
@@ -429,6 +480,36 @@ export default function PracticeReader({
                     );
                 })}
             </div>
+            {assignment.source === "personal" && (
+                <section className="mt-6 space-y-3 rounded-2xl bg-primary/8 p-5 ring-1 ring-primary/15">
+                    <h2 className="font-semibold">
+                        {memoryT(status === "completed" ? "saved" : "title")}
+                    </h2>
+                    <p className="text-sm leading-7 text-muted-foreground">
+                        {memoryT(
+                            status === "completed" ? "completedHint" : "hint",
+                        )}
+                    </p>
+                    {status !== "completed" && (
+                        <Button
+                            disabled={
+                                !reachedEnd ||
+                                isSubmitting ||
+                                savingReference !== null
+                            }
+                            onClick={() => setConfirmMemory(true)}
+                        >
+                            {memoryT("confirm")}
+                        </Button>
+                    )}
+                    <Link
+                        href="/memorization"
+                        className="block text-sm font-medium text-primary underline underline-offset-4"
+                    >
+                        {memoryT("map")}
+                    </Link>
+                </section>
+            )}
         </GuidedReader>
     );
 }

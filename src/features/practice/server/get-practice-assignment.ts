@@ -123,7 +123,13 @@ export default async function getPracticeAssignment(
                     eq(memorizationGroup.isActive, true),
                 ),
                 eq(practiceAssignment.assigneeId, userId),
-                inArray(practiceAssignment.status, activeStatuses),
+                or(
+                    inArray(practiceAssignment.status, activeStatuses),
+                    and(
+                        isNull(practiceAssignment.groupId),
+                        eq(practiceAssignment.status, "completed"),
+                    ),
+                ),
             ),
         )
         .limit(1);

@@ -34,7 +34,7 @@ export const guides = {
                 target: "test-settings",
                 text: [
                     "Choose a random start, surah opening, or surah ending. Memorized hizbs come from your memorization map; you can also choose a range or surah.",
-                    "اختر موضعًا عشوائيًا أو أوائل السور أو أواخرها. نستخدم الأحزاب التي علّمتها في خريطة الحفظ، ويمكنك اختيار مقطع أو سورة بنفسك.",
+                    "اختر موضعًا عشوائيًا أو أوائل السور أو أواخرها. نستخدم الأحزاب المكتملة في خريطة الحفظ، ويمكنك اختيار مقطع أو سورة بنفسك.",
                 ],
             },
             {

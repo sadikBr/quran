@@ -8,7 +8,7 @@ import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { auth } from "@/features/auth/auth";
 import MemorizationProgressMap from "@/features/memorization/components/memorization-progress-map";
-import getMemorizationProgress from "@/features/memorization/server/get-memorization-progress";
+import getMemorizationRecord from "@/features/memorization/server/get-memorization-record";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -17,10 +17,11 @@ export default async function MemorizationPage() {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) redirect("/sign-in");
 
-    const [preferences, completedHizbs] = await Promise.all([
-        getPreferences(),
-        getMemorizationProgress(session.user.id),
-    ]);
+    const preferences = await getPreferences();
+    const record = await getMemorizationRecord(
+        session.user.id,
+        preferences.riwayah,
+    );
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
@@ -59,9 +60,7 @@ export default async function MemorizationPage() {
                         title={t("test.title")}
                         description={t("test.description")}
                     />
-                    <MemorizationProgressMap
-                        initialCompletedHizbs={completedHizbs}
-                    />
+                    <MemorizationProgressMap record={record} />
                 </section>
             </div>
         </main>

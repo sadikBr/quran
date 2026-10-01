@@ -40,6 +40,20 @@ Quranpedia supplies the Arabic surah metadata, page and division assignments, an
 
 Run `bun test scripts/quranpedia-data.test.mjs scripts/quranpedia-reader.test.mjs` for provider and reader regression checks. `bun scripts/verify-quranpedia.mjs` additionally validates the current public upstream datasets (requires network access).
 
+## Automatic memorization tracking
+
+Learners review and lock their starting hizbs at `/memorization`. Existing manual selections are prefilled; an empty starting record is valid. One changed correction is allowed immediately after setup, until three hours have elapsed. Cancelling, saving an unchanged selection, and failed saves do not consume it. Later requests appear in the administrator’s `/admin/memorization` inbox. Approval grants one saved correction, available until used.
+
+Progress combines the starting record with confirmed personal practice and successful circle reviews. Reaching a reading position or playing audio alone does not add memorization. Personal practice requires an explicit confirmation after reaching the range’s end and works without circle membership. Coverage accumulates by ayah without counting overlaps twice; a hizb is complete only when its entire range is covered. Hafs and Warsh share Quranpedia’s verse correspondence, including split verses. Revision feedback flags a range without deleting earned progress.
+
+Run `bun run db:migrate` before deploying this feature. Migration `0027_automatic_memorization` preserves existing selections and backfills previously reviewed completed assignments. Starting-record changes, requests, and assessments are stored separately, so later corrections or assignment deletion do not erase earned progress.
+
+Validation:
+
+- `bun test scripts/memorization-progress.test.mjs scripts/meeting-only-review.test.mjs`
+- `MEMORIZATION_TEST_DATABASE_URL=… bun test scripts/memorization-record.integration.test.mjs` requires an **empty disposable** PostgreSQL database ending in `_memorization_tests`; it never loads the app’s database environment.
+- `REVIEWER_TEST_DATABASE_URL=… bun test scripts/halqa-reviewers.integration.test.mjs` checks group permissions and assessment snapshots in an empty disposable database ending in `_reviewer_tests`.
+
 ## Getting started
 
 1. Install dependencies:

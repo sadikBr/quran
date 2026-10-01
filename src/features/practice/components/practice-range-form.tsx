@@ -9,7 +9,11 @@ import { Button } from "@/components/ui/button";
 import type { QuranNavigationMeta } from "@/features/quran/navigation-types";
 import { cn } from "@/lib/utils";
 import savePracticeAssignment from "../server/save-practice-assignment";
-import type { PracticeAssignment, PracticeKind } from "../types";
+import type {
+    PracticeAssignment,
+    PracticeKind,
+    QuranReference,
+} from "../types";
 import QuranRangeSelector, { type SurahOption } from "./quran-range-selector";
 
 export default function PracticeRangeForm({
@@ -17,11 +21,13 @@ export default function PracticeRangeForm({
     navigation,
     assignments,
     locale,
+    initialRange,
 }: {
     surahs: SurahOption[];
     navigation: QuranNavigationMeta;
     assignments: PracticeAssignment[];
     locale: string;
+    initialRange?: { start: QuranReference; end: QuranReference };
 }) {
     const router = useRouter();
     const t = useTranslations("Practice.form");
@@ -29,13 +35,17 @@ export default function PracticeRangeForm({
         assignments.find((item) => item.kind === "memorization") ??
         assignments[0];
     const [kind, setKind] = useState<PracticeKind>(
-        initialAssignment?.kind ?? "memorization",
+        initialRange
+            ? "memorization"
+            : (initialAssignment?.kind ?? "memorization"),
     );
     const [start, setStart] = useState(
-        initialAssignment?.start ?? { surahNumber: 1, ayahNumber: 1 },
+        initialRange?.start ??
+            initialAssignment?.start ?? { surahNumber: 1, ayahNumber: 1 },
     );
     const [end, setEnd] = useState(
-        initialAssignment?.end ?? { surahNumber: 1, ayahNumber: 7 },
+        initialRange?.end ??
+            initialAssignment?.end ?? { surahNumber: 1, ayahNumber: 7 },
     );
     const [isSaving, setIsSaving] = useState(false);
     const activeAssignment = assignments.find((item) => item.kind === kind);

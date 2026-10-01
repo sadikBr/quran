@@ -1,15 +1,12 @@
 import "server-only";
+import getPreferences from "@/features/settings/server/get-preferences";
+import type { Riwayah } from "../progress";
+import getMemorizationRecord from "./get-memorization-record";
 
-import { asc, eq } from "drizzle-orm";
-import db from "@/drizzle/db";
-import { userMemorizedHizb } from "@/drizzle/schema";
-
-export default async function getMemorizationProgress(userId: string) {
-    const rows = await db
-        .select({ hizbNumber: userMemorizedHizb.hizbNumber })
-        .from(userMemorizedHizb)
-        .where(eq(userMemorizedHizb.userId, userId))
-        .orderBy(asc(userMemorizedHizb.hizbNumber));
-
-    return rows.map((row) => row.hizbNumber);
+export default async function getMemorizationProgress(
+    userId: string,
+    riwayah?: Riwayah,
+) {
+    const reading = riwayah ?? (await getPreferences()).riwayah;
+    return (await getMemorizationRecord(userId, reading)).completedHizbs;
 }

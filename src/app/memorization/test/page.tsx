@@ -29,7 +29,7 @@ export default async function RandomTestPage() {
             getSurahsMeta(),
             warsh ? getWarshChapters() : Promise.resolve(null),
             warsh ? getWarshNavigationMeta() : getQuranNavigationMeta(),
-            getMemorizationProgress(session.user.id),
+            getMemorizationProgress(session.user.id, preferences.riwayah),
         ],
     );
     const t = createTranslator({

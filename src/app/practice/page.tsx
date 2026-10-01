@@ -15,6 +15,7 @@ import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
+import getMemoryCatalogue from "@/features/memorization/server/get-memory-catalogue";
 import DeletePracticeButton from "@/features/practice/components/delete-practice-button";
 import PracticeRangeForm from "@/features/practice/components/practice-range-form";
 import {
@@ -31,7 +32,11 @@ import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
-export default async function PracticePage() {
+export default async function PracticePage({
+    searchParams,
+}: {
+    searchParams: Promise<{ hizb?: string }>;
+}) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) redirect("/sign-in");
 
@@ -56,6 +61,28 @@ export default async function PracticePage() {
         ...surah,
         numberOfAyahs: warshCounts.get(surah.number) ?? surah.numberOfAyahs,
     }));
+    const hizb = Number((await searchParams).hizb);
+    const rangeVerses =
+        Number.isInteger(hizb) && hizb >= 1 && hizb <= 60
+            ? (await getMemoryCatalogue())[preferences.riwayah].filter(
+                  (verse) => verse.hizb === hizb,
+              )
+            : [];
+    const first = rangeVerses[0];
+    const last = rangeVerses.at(-1);
+    const initialRange =
+        first && last
+            ? {
+                  start: {
+                      surahNumber: first.surahNumber,
+                      ayahNumber: first.ayahNumber,
+                  },
+                  end: {
+                      surahNumber: last.surahNumber,
+                      ayahNumber: last.ayahNumber,
+                  },
+              }
+            : undefined;
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
@@ -196,7 +223,8 @@ export default async function PracticePage() {
                     )}
 
                     <details
-                        open={assignments.length === 0}
+                        id="practice-range"
+                        open={Boolean(initialRange) || assignments.length === 0}
                         className="app-card group mt-6 overflow-hidden"
                     >
                         <summary className="flex min-h-20 cursor-pointer list-none items-center gap-3 p-4 transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:p-5 [&::-webkit-details-marker]:hidden">
@@ -225,6 +253,8 @@ export default async function PracticePage() {
                         </summary>
                         <div className="app-card-body pt-0 sm:pt-0">
                             <PracticeRangeForm
+                                key={initialRange ? hizb : "saved"}
+                                initialRange={initialRange}
                                 surahs={options}
                                 navigation={navigation}
                                 assignments={assignments}
