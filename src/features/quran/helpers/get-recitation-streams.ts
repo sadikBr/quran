@@ -22,7 +22,7 @@ function replaceNumberPlaceholder(
 
 export default function getRecitationStreams(
     reciter: Reciter,
-    { surahNumber, ayahNumber, globalAyahNumber }: RecitationLocation,
+    { surahNumber, ayahNumber }: RecitationLocation,
 ): string[] {
     if (
         reciter.availableSurahs &&
@@ -42,11 +42,8 @@ export default function getRecitationStreams(
         return [stream];
     }
 
-    const audioAyahNumber =
-        reciter.host === "islamic_network" ? globalAyahNumber : ayahNumber;
+    if (ayahNumber === undefined) return [];
 
-    if (audioAyahNumber === undefined) return [];
-
-    stream = replaceNumberPlaceholder(stream, "ayah", audioAyahNumber);
+    stream = replaceNumberPlaceholder(stream, "ayah", ayahNumber);
     return [stream];
 }

@@ -1,4 +1,3 @@
-import { migrateReciterId } from "@/features/quran/helpers/quranpedia-reciters";
 import type { Edition, Reciter } from "@/features/quran/types";
 import {
     DEFAULT_PREFERENCES,
@@ -41,9 +40,7 @@ export function normalizeEditionPreferences(
     const arabicEdition = editions.find(
         (edition) => edition.identifier === preferences.arabicEdition,
     );
-    const reciter = reciters.find(
-        (item) => item.id === migrateReciterId(preferences.reciter),
-    );
+    const reciter = reciters.find((item) => item.id === preferences.reciter);
     const compatibleReciters = reciters.filter((item) =>
         isReciterCompatible(item, preferences.readingMode, preferences.riwayah),
     );

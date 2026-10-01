@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl";
 import type { PracticeReaderGroup } from "@/features/practice/reader-types";
-import TajweedText from "@/features/quran/components/tajweed-text";
+import QuranText from "@/features/quran/components/quran-text";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 
 export default function AssignmentReviewReader({
@@ -43,7 +43,7 @@ export default function AssignmentReviewReader({
                                 key={ayah.number}
                                 className="me-[0.35em] inline"
                             >
-                                <TajweedText text={ayah.text} />{" "}
+                                <QuranText text={ayah.text} />{" "}
                                 <span className="frame inline-block align-[0.08em] text-primary">
                                     {getArabicNumber(ayah.numberInSurah)}
                                 </span>{" "}

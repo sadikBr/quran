@@ -21,6 +21,7 @@ import PushNotificationSetting from "@/features/notifications/components/push-no
 import OfflineLibrarySetting from "@/features/offline/components/offline-library-setting";
 import SettingsNextStep from "@/features/onboarding/settings-next-step";
 import EditionCombobox from "@/features/quran/components/edition-combobox";
+import HafsPresentationPreview from "@/features/quran/components/hafs-presentation-preview";
 import ReciterCombobox from "@/features/quran/components/reciter-combobox";
 import ReciterCoverage from "@/features/quran/components/reciter-coverage";
 import type { Edition, Reciter, SurahType } from "@/features/quran/types";
@@ -46,24 +47,22 @@ import SettingField from "./settings-field";
 import SettingsSection from "./settings-section";
 
 const TRANSLATION_NAME_KEYS = {
-    "en.ahmedali": "ahmedAli",
-    "en.ahmedraza": "ahmedRaza",
-    "en.arberry": "arberry",
-    "en.asad": "asad",
-    "en.daryabadi": "daryabadi",
-    "en.hilali": "hilali",
-    "en.pickthall": "pickthall",
-    "en.qaribullah": "qaribullah",
-    "en.sahih": "sahih",
-    "en.sarwar": "sarwar",
-    "en.yusufali": "yusufAli",
-    "en.maududi": "maududi",
-    "en.shakir": "shakir",
-    "en.itani": "itani",
-    "en.mubarakpuri": "mubarakpuri",
-    "en.qarai": "qarai",
-    "en.wahiduddin": "wahiduddin",
+    "quranpedia.translation.1948": "hilali",
+    "quranpedia.translation.13604": "pickthall",
+    "quranpedia.translation.13638": "sahih",
+    "quranpedia.translation.13605": "yusufAli",
+    "quranpedia.translation.13640": "maududi",
 } as const;
+
+const WARSH_EDITION: Edition = {
+    identifier: "quranpedia.mushaf.4",
+    name: "مصحف ورش",
+    englishName: "Warsh — King Fahd Complex",
+    language: "ar",
+    format: "text",
+    type: "quran",
+    direction: "rtl",
+};
 
 export default function SettingsForm({
     surahs = [],
@@ -645,17 +644,37 @@ export default function SettingsForm({
                             >
                                 <EditionCombobox
                                     id="arabic-edition"
-                                    editions={availableArabicEditions}
-                                    value={values.arabicEdition}
-                                    onValueChange={(value) =>
-                                        updateValue("arabicEdition", value)
+                                    editions={
+                                        values.riwayah === "warsh"
+                                            ? [WARSH_EDITION]
+                                            : availableArabicEditions
                                     }
-                                    disabled={values.riwayah === "warsh"}
+                                    value={
+                                        values.riwayah === "warsh"
+                                            ? WARSH_EDITION.identifier
+                                            : values.arabicEdition
+                                    }
+                                    onValueChange={(value) => {
+                                        if (values.riwayah !== "warsh") {
+                                            updateValue("arabicEdition", value);
+                                        }
+                                    }}
                                     placeholder={t("arabicEdition.placeholder")}
                                     className={selectClassName}
                                     emptyMessage={t("arabicEdition.empty")}
                                     getBadge={() => t("arabicEdition.badge")}
                                 />
+                                {values.riwayah === "hafs" && (
+                                    <HafsPresentationPreview
+                                        edition={values.arabicEdition}
+                                        label={t(
+                                            values.arabicEdition ===
+                                                "quranpedia.mushaf.2"
+                                                ? "arabicEdition.versePreview"
+                                                : "arabicEdition.mushafPreview",
+                                        )}
+                                    />
+                                )}
                             </SettingField>
                         </PreferenceCard>
 

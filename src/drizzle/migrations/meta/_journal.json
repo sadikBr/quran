@@ -162,6 +162,13 @@
             "when": 1790865072919,
             "tag": "0022_arabic_default_language",
             "breakpoints": true
+        },
+        {
+            "idx": 23,
+            "version": "7",
+            "when": 1790868124312,
+            "tag": "0023_quranpedia_editions",
+            "breakpoints": true
         }
     ]
 }

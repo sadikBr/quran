@@ -1,10 +1,7 @@
 import { expect, test } from "bun:test";
 import getRecitationStreams from "../src/features/quran/helpers/get-recitation-streams";
 import { usesNativeWarshAyahNumbering } from "../src/features/quran/helpers/map-warsh-ayahs";
-import {
-    migrateReciterId,
-    parseQuranpediaReciters,
-} from "../src/features/quran/helpers/quranpedia-reciters";
+import { parseQuranpediaReciters } from "../src/features/quran/helpers/quranpedia-reciters";
 
 const entry = (id, rawi, classification = 2) => ({
     id,
@@ -40,19 +37,6 @@ test("one catalog serves Hafs and native Warsh ayah URLs", () => {
     expect(
         getRecitationStreams(warsh, { surahNumber: 1, ayahNumber: 0 }),
     ).toEqual([]);
-});
-test("legacy choices migrate and old Yassine is no longer considered native", () => {
-    expect(
-        migrateReciterId("everyayah/warsh/warsh_yassin_al_jazaery_64kbps"),
-    ).toBe("quranpedia/263");
-    expect(migrateReciterId("everyayah/Alafasy_64kbps")).toBe("quranpedia/255");
-    expect(
-        usesNativeWarshAyahNumbering({
-            id: "everyayah/warsh/warsh_yassin_al_jazaery_64kbps",
-            host: "everyayah",
-            scope: "ayah",
-        }),
-    ).toBe(false);
 });
 test("retains partial recordings but blocks unavailable surah URLs", () => {
     expect(() => parseQuranpediaReciters({})).toThrow();

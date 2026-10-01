@@ -1,9 +1,8 @@
 import "server-only";
 
-import type { Edition, EditionData } from "../types";
-import fetchQuranCloud from "./fetch-quran-cloud";
+import { QURANPEDIA_EDITIONS } from "../quranpedia-editions";
+import type { Edition } from "../types";
 
 export default async function getAvailableQuranEditions(): Promise<Edition[]> {
-    const editionResponse = await fetchQuranCloud<EditionData>("/edition");
-    return editionResponse.data;
+    return QURANPEDIA_EDITIONS.map((edition) => ({ ...edition }));
 }

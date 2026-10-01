@@ -7,7 +7,7 @@ import getSavedAyah from "@/features/saved-ayahs/server/get-saved-ayah";
 import type { Riwayah } from "@/features/settings/preferences";
 import getPreferences from "@/features/settings/server/get-preferences";
 import type { AyahActionsProps } from "../components/ayah-actions";
-import { getPlainQuranText } from "../components/tajweed-text";
+import { getPlainQuranText } from "../components/quran-text";
 import { stripBasmalaPrefix } from "../helpers/basmala";
 import getRecitationStreams from "../helpers/get-recitation-streams";
 import {
@@ -18,8 +18,8 @@ import {
     usesNativeWarshAyahNumbering,
 } from "../helpers/map-warsh-ayahs";
 import getAvailableReciters from "./get-available-reciter";
-import getAyah from "./get-ayah";
 import getAvailableQuranEditions from "./get-quran-edition";
+import getReaderTafsir from "./get-reader-tafsir";
 import getSurahData from "./get-surah";
 import getWarshChapter from "./get-warsh-chapter";
 
@@ -85,7 +85,12 @@ export default async function getAyahActionsData(
 
     const [tafsirAyah, tafsirEditions, savedAyah, bookmarkCollections] =
         await Promise.all([
-            getAyah(ayah.number, preferences.tafsirEdition),
+            getReaderTafsir(
+                surahNumber,
+                ayahNumber,
+                riwayah,
+                preferences.tafsirEdition,
+            ),
             session
                 ? getAvailableQuranEditions().then((editions) =>
                       editions.filter((edition) => edition.type === "tafsir"),

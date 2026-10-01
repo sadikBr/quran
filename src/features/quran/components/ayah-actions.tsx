@@ -43,7 +43,7 @@ import type { Edition } from "../types";
 import AyahShareCard from "./ayah-share-card";
 import EditionCombobox from "./edition-combobox";
 import { useQuranAudio } from "./quran-audio-provider";
-import TajweedText, { getPlainQuranText } from "./tajweed-text";
+import QuranText, { getPlainQuranText } from "./quran-text";
 
 function TafsirReadingPane({
     text,
@@ -72,7 +72,7 @@ function TafsirReadingPane({
                     isLoading && "opacity-35",
                 )}
             >
-                {text}
+                {text || t("actions.noTafsirCommentary")}
             </p>
         </section>
     );
@@ -131,7 +131,7 @@ function QuranAyahPreview({
                         isExpanded ? "" : "max-h-36 overflow-hidden sm:max-h-40"
                     }`}
                 >
-                    <TajweedText text={text} />
+                    <QuranText text={text} />
                 </p>
             </div>
             {isCollapsible && (
@@ -358,7 +358,9 @@ export default function AyahActions({
 
         try {
             const ayah = await getTafsirAyah(
-                globalAyahNumber,
+                surahNumber,
+                ayahNumber,
+                riwayah,
                 editionIdentifier,
             );
             setSelectedTafsirIdentifier(editionIdentifier);

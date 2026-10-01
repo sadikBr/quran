@@ -5,7 +5,6 @@ import QuranAudioQueue from "@/features/quran/components/quran-audio-queue";
 import QuranPageNavigation from "@/features/quran/components/quran-page-navigation";
 import ReaderToolbar from "@/features/quran/components/reader-toolbar";
 import Surah from "@/features/quran/components/surah";
-import TajweedLegend from "@/features/quran/components/tajweed-legend";
 import getRecitationStreams from "@/features/quran/helpers/get-recitation-streams";
 import mapWarshAyahs, {
     getWarshAudioAyahNumbers,
@@ -152,9 +151,6 @@ export default async function SurahPage({
             audioSecondary: streams.slice(1),
         };
     });
-    const showTajweedLegend =
-        preferences.riwayah === "hafs" &&
-        surahData.edition.identifier === "quran-tajweed";
     const markerByDisplayedAyah = new Map<number, QuranDivisionMarker>();
 
     function displayedMarkerAnchor(
@@ -223,7 +219,6 @@ export default async function SurahPage({
             >
                 <div className="mx-auto max-w-5xl p-3 sm:p-4">
                     <ReaderToolbar>
-                        {showTajweedLegend && <TajweedLegend embedded />}
                         {audioQueue.length > 0 && (
                             <QuranAudioQueue
                                 queue={audioQueue}

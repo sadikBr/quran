@@ -899,6 +899,12 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
     font-display: swap;
 }
 
+@font-face {
+    font-family: "Uthmanic Hafs";
+    src: url("/api/quran/hafs-font") format("truetype");
+    font-display: swap;
+}
+
 .rtl {
     direction: rtl;
 }
@@ -1389,4 +1395,32 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
             var(--background) 100%
         );
     }
+}
+
+/* Responsive presentations retain the live verse elements and their actions. */
+.quran-reading-surface[data-presentation="verses"] {
+    max-width: 56rem;
+    margin: 1rem auto;
+    --quran-reading-line-height: 2.6;
+}
+
+.quran-reading-surface[data-presentation="verses"] .quran-reading-flow > .ayah {
+    display: block;
+    margin-inline: 0;
+    padding: 0.65em 0.4em;
+    border-bottom: 1px solid
+        color-mix(in oklab, var(--primary) 15%, transparent);
+    text-align: center;
+    text-align-last: center;
+}
+
+.quran-reading-surface[data-presentation="verses"]
+    .quran-reading-flow
+    > .ayah:last-child {
+    border-bottom: 0;
+}
+
+.ayah[data-arabic-edition="quranpedia.mushaf.2"],
+.arabic-ui .ayah[data-arabic-edition="quranpedia.mushaf.2"] {
+    font-family: "Uthmanic Hafs", Amiri, Ayah, serif;
 }

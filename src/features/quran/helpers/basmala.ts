@@ -15,8 +15,6 @@ export function getBasmalaText() {
 }
 
 export function stripBasmalaPrefix(text: string) {
-    if (text.includes("[")) return text;
-
     let normalizedPrefix = "";
 
     for (let index = 0; index < text.length; index += 1) {

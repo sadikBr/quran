@@ -2,18 +2,11 @@ import "server-only";
 
 import type { QuranNavigationMeta } from "../navigation-types";
 import type { WarshChapter, WarshMushaf, WarshVerse } from "../types";
+import { createQuranpediaCache } from "./fetch-quranpedia";
+import getQuranpediaMushaf from "./get-quranpedia-mushaf";
 
-const QURANPEDIA_WARSH_URL = "https://api.quranpedia.net/v1/mushafs/4";
-const REVALIDATE_SECONDS = 60 * 60 * 24;
 const PRINTED_DIVISION_MARKER = "۞";
-let cachedMushaf: { value: WarshMushaf; expiresAt: number } | undefined;
-let pendingMushaf: Promise<WarshMushaf> | undefined;
-
-function isValidMushaf(value: unknown): value is WarshMushaf {
-    if (!value || typeof value !== "object") return false;
-    const mushaf = value as Partial<WarshMushaf>;
-    return mushaf.id === 4 && Array.isArray(mushaf.surahs);
-}
+const cached = createQuranpediaCache<WarshMushaf>(1);
 
 function normalizeDivisionMetadata(mushaf: WarshMushaf): WarshMushaf {
     let juz = 1;
@@ -100,58 +93,10 @@ function normalizeDivisionMetadata(mushaf: WarshMushaf): WarshMushaf {
     };
 }
 
-async function fetchWarshMushaf(): Promise<WarshMushaf> {
-    let response: Response;
-
-    try {
-        response = await fetch(QURANPEDIA_WARSH_URL, {
-            cache: "no-store",
-            headers: { Accept: "application/json" },
-        });
-    } catch (error) {
-        console.error("Unable to reach Quranpedia for Warsh text.", error);
-        throw new Error("Unable to load the Warsh Quran text right now.");
-    }
-
-    if (!response.ok) {
-        console.error("Quranpedia returned a Warsh text error.", {
-            status: response.status,
-            statusText: response.statusText,
-        });
-        throw new Error("Unable to load the Warsh Quran text right now.");
-    }
-
-    const value: unknown = await response.json();
-    if (!isValidMushaf(value)) {
-        console.error("Quranpedia returned an unexpected Warsh response.");
-        throw new Error("Unable to load the Warsh Quran text right now.");
-    }
-
-    return normalizeDivisionMetadata(value);
-}
-
 export default function getWarshMushaf(): Promise<WarshMushaf> {
-    if (cachedMushaf && cachedMushaf.expiresAt > Date.now()) {
-        return Promise.resolve(cachedMushaf.value);
-    }
-    if (pendingMushaf) return pendingMushaf;
-
-    pendingMushaf = fetchWarshMushaf()
-        .then((value) => {
-            cachedMushaf = {
-                value,
-                expiresAt: Date.now() + REVALIDATE_SECONDS * 1_000,
-            };
-            return value;
-        })
-        .catch((error) => {
-            if (cachedMushaf) return cachedMushaf.value;
-            throw error;
-        })
-        .finally(() => {
-            pendingMushaf = undefined;
-        });
-    return pendingMushaf;
+    return cached("warsh", async () =>
+        normalizeDivisionMetadata(await getQuranpediaMushaf(4)),
+    );
 }
 
 export async function getWarshChapters(): Promise<WarshChapter[]> {

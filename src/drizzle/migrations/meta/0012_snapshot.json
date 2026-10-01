@@ -2684,28 +2684,28 @@
                     "type": "text",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "'quran-simple'"
+                    "default": "'quranpedia.mushaf.1'"
                 },
                 "reciter": {
                     "name": "reciter",
                     "type": "text",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "'everyayah/Alafasy_64kbps'"
+                    "default": "'quranpedia/255'"
                 },
                 "translation_edition": {
                     "name": "translation_edition",
                     "type": "text",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "'en.sahih'"
+                    "default": "'quranpedia.translation.13638'"
                 },
                 "tafsir_edition": {
                     "name": "tafsir_edition",
                     "type": "text",
                     "primaryKey": false,
                     "notNull": true,
-                    "default": "'ar.muyassar'"
+                    "default": "'quranpedia.tafsir.2012'"
                 },
                 "show_translation": {
                     "name": "show_translation",

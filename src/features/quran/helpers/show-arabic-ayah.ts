@@ -8,15 +8,23 @@ const HIGHLIGHT_DURATION = 1800;
 const SETTLED_FRAME_COUNT = 4;
 const MAX_SCROLL_WAIT = 4000;
 
-export default function showArabicAyah(ayahNumber: number) {
-    const anchor = document.getElementById(`ayah-${ayahNumber}`);
+export function findArabicAyah(
+    ayahNumber: number,
+    root: Pick<Document, "getElementById" | "querySelector"> = document,
+) {
+    if (!Number.isInteger(ayahNumber) || ayahNumber < 1) return null;
+    return (
+        root.getElementById(`ayah-${ayahNumber}`) ??
+        root.querySelector<HTMLElement>(
+            `.ayah[data-hafs-ayahs~="${ayahNumber}"]`,
+        )
+    );
+}
 
-    if (!anchor) return null;
-    const targetAyah = anchor.matches(".ayah")
-        ? anchor
-        : anchor.nextElementSibling?.matches(".ayah")
-          ? (anchor.nextElementSibling as HTMLElement)
-          : anchor;
+export default function showArabicAyah(ayahNumber: number) {
+    const foundAyah = findArabicAyah(ayahNumber);
+    if (!foundAyah) return null;
+    const targetAyah = foundAyah;
 
     const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)",

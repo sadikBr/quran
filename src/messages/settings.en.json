@@ -145,8 +145,10 @@
         },
         "arabicEdition": {
             "title": "Arabic edition",
-            "description": "Choose the Arabic text style used throughout the reader.",
-            "warshDescription": "Warsh uses its dedicated Quran script; your Hafs edition remains saved for when you switch back.",
+            "description": "Choose flowing text or separate, centered ayahs in the Uthmani font. Both layouts adjust to your screen and keep verse actions available.",
+            "mushafPreview": "Preview · flowing text, with responsive line breaks",
+            "versePreview": "Preview · centered ayahs in the Uthmani Hafs font",
+            "warshDescription": "The available Warsh edition is the King Fahd Complex mushaf.",
             "label": "Edition",
             "placeholder": "Search text editions…",
             "empty": "No matching text editions found.",
@@ -192,7 +194,7 @@
         },
         "tafsir": {
             "title": "Tafsir edition",
-            "description": "Choose the commentary that will be used when you explore an ayah.",
+            "description": "Choose a general tafsir book for exploring ayahs in Hafs or Warsh. These editions are not labelled as specific to either riwayah.",
             "label": "Tafsir",
             "placeholder": "Search tafsir editions…",
             "empty": "No matching tafsir editions found."

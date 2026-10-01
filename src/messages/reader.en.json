@@ -175,31 +175,6 @@
             "hizbNumber": "Hizb {number, number}",
             "quarterNumber": "Quarter {number}/4"
         },
-        "tajweed": {
-            "button": "Tajweed colors",
-            "title": "Tajweed color guide",
-            "description": "Each color highlights a pronunciation rule in the selected Tajweed edition.",
-            "paletteNote": "Light mode follows Al Quran Cloud’s official palette. Dark mode uses contrast-adjusted shades of the same colors.",
-            "rules": {
-                "h": "Hamzat ul Wasl",
-                "s": "Silent letter",
-                "l": "Lam Shamsiyyah",
-                "n": "Normal prolongation",
-                "p": "Permissible prolongation",
-                "m": "Necessary prolongation",
-                "q": "Qalqalah",
-                "o": "Obligatory prolongation",
-                "c": "Ikhafa Shafawi",
-                "f": "Ikhafa",
-                "w": "Idgham Shafawi",
-                "i": "Iqlab",
-                "a": "Idgham with Ghunnah",
-                "u": "Idgham without Ghunnah",
-                "d": "Idgham Mutajanisayn",
-                "b": "Idgham Mutaqaribayn",
-                "g": "Ghunnah"
-            }
-        },
         "actions": {
             "close": "Close ayah actions",
             "back": "Ayah actions",
@@ -227,6 +202,7 @@
             "searchTafsir": "Search tafsir editions…",
             "noTafsir": "No matching tafsir editions found.",
             "loadingTafsir": "Loading tafsir…",
+            "noTafsirCommentary": "This commentary has no entry for this verse.",
             "tafsirCommentary": "Tafsir commentary",
             "continueReading": "Continue reading",
             "showLess": "Show less",

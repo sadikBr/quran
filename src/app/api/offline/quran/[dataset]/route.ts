@@ -3,25 +3,16 @@ import {
     OFFLINE_QURAN_VERSION,
     type OfflineQuranDataset,
 } from "@/features/offline/types";
-import fetchQuranCloud from "@/features/quran/server/fetch-quran-cloud";
+import type { QuranCorpus } from "@/features/quran/helpers/quranpedia-data";
+import getQuranCorpus from "@/features/quran/server/get-quran-corpus";
 import getWarshMushaf from "@/features/quran/server/get-warsh-mushaf";
-import type { AyahType, SurahType, WarshMushaf } from "@/features/quran/types";
+import type { WarshMushaf } from "@/features/quran/types";
 
 export const runtime = "nodejs";
 export const revalidate = 86400;
 
-type QuranCloudResponse = {
-    data: {
-        surahs: Array<
-            SurahType & {
-                ayahs: AyahType[];
-            }
-        >;
-    };
-};
-
-function compactCloudDataset(
-    response: QuranCloudResponse,
+function compactHafsDataset(
+    response: QuranCorpus,
     kind: "hafs" | "translation",
     edition: string,
 ): OfflineQuranDataset {
@@ -29,7 +20,7 @@ function compactCloudDataset(
         version: OFFLINE_QURAN_VERSION,
         kind,
         edition,
-        surahs: response.data.surahs.map((surah) => ({
+        surahs: response.surahs.map((surah) => ({
             number: surah.number,
             name: surah.name,
             englishName: surah.englishName,
@@ -52,7 +43,7 @@ function compactWarshDataset(mushaf: WarshMushaf): OfflineQuranDataset {
     return {
         version: OFFLINE_QURAN_VERSION,
         kind: "warsh",
-        edition: "warsh-an-nafi",
+        edition: "quranpedia.mushaf.4",
         surahs: mushaf.surahs.map((surah) => ({
             number: surah.id,
             name: surah.name,
@@ -77,14 +68,15 @@ export async function GET(
 
     let payload: OfflineQuranDataset;
     if (dataset === "hafs") {
-        const data = await fetchQuranCloud<QuranCloudResponse>(
-            "/quran/quran-simple",
-        );
-        payload = compactCloudDataset(data, "hafs", "quran-simple");
+        const data = await getQuranCorpus("quranpedia.mushaf.1");
+        payload = compactHafsDataset(data, "hafs", "quranpedia.mushaf.1");
     } else if (dataset === "translation") {
-        const data =
-            await fetchQuranCloud<QuranCloudResponse>("/quran/en.sahih");
-        payload = compactCloudDataset(data, "translation", "en.sahih");
+        const data = await getQuranCorpus("quranpedia.translation.13638");
+        payload = compactHafsDataset(
+            data,
+            "translation",
+            "quranpedia.translation.13638",
+        );
     } else if (dataset === "warsh") {
         payload = compactWarshDataset(await getWarshMushaf());
     } else {

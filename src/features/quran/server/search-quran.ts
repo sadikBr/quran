@@ -8,29 +8,19 @@ import {
     normalizeSearchTextWithMap,
     stripQuranMarkup,
 } from "../helpers/normalize-quran-search";
+import type { QuranCorpus } from "../helpers/quranpedia-data";
 import type {
     QuranSearchField,
     QuranSearchResponse,
     QuranSearchResult,
 } from "../search-types";
-import type { AyahType, Edition, SurahType, WarshChapter } from "../types";
-import fetchQuranCloud from "./fetch-quran-cloud";
+import type { Edition, WarshChapter } from "../types";
+import getQuranCorpus from "./get-quran-corpus";
 import { getWarshChapters } from "./get-warsh-mushaf";
 
 const MAX_CACHED_CORPORA = 8;
 const MAX_CACHED_EDITIONS = 16;
 const MAX_RESULTS = 50;
-
-interface CompleteSurah extends SurahType {
-    ayahs: Array<Omit<AyahType, "surah">>;
-}
-
-interface CompleteEditionResponse {
-    data: {
-        surahs: CompleteSurah[];
-        edition: Edition;
-    };
-}
 
 interface SearchDocument {
     surahNumber: number;
@@ -53,7 +43,7 @@ interface SearchCorpus {
 }
 
 const corpusCache = new Map<string, Promise<SearchCorpus>>();
-const editionCache = new Map<string, Promise<CompleteEditionResponse>>();
+const editionCache = new Map<string, Promise<QuranCorpus>>();
 
 function rememberCorpus(key: string, corpus: Promise<SearchCorpus>) {
     if (!corpusCache.has(key) && corpusCache.size >= MAX_CACHED_CORPORA) {
@@ -67,7 +57,8 @@ function rememberCorpus(key: string, corpus: Promise<SearchCorpus>) {
 }
 
 async function getCompleteEdition(identifier: string) {
-    const cached = editionCache.get(identifier);
+    const cacheKey = `${identifier}:${Math.floor(Date.now() / 86400000)}`;
+    const cached = editionCache.get(cacheKey);
     if (cached) return cached;
 
     if (editionCache.size >= MAX_CACHED_EDITIONS) {
@@ -75,12 +66,9 @@ async function getCompleteEdition(identifier: string) {
         if (oldestKey) editionCache.delete(oldestKey);
     }
 
-    const edition = fetchQuranCloud<CompleteEditionResponse>(
-        `/quran/${identifier}`,
-        { cache: "no-store" },
-    );
-    editionCache.set(identifier, edition);
-    edition.catch(() => editionCache.delete(identifier));
+    const edition = getQuranCorpus(identifier);
+    editionCache.set(cacheKey, edition);
+    edition.catch(() => editionCache.delete(cacheKey));
     return edition;
 }
 
@@ -89,14 +77,14 @@ function editionName(edition: Edition) {
 }
 
 function buildHafsDocuments(
-    arabic: CompleteEditionResponse,
-    translation: CompleteEditionResponse,
+    arabic: QuranCorpus,
+    translation: QuranCorpus,
 ): SearchDocument[] {
     const translatedSurahs = new Map(
-        translation.data.surahs.map((surah) => [surah.number, surah]),
+        translation.surahs.map((surah) => [surah.number, surah]),
     );
 
-    return arabic.data.surahs.flatMap((surah) => {
+    return arabic.surahs.flatMap((surah) => {
         const translatedAyahs = new Map(
             (translatedSurahs.get(surah.number)?.ayahs ?? []).map((ayah) => [
                 ayah.numberInSurah,
@@ -128,15 +116,15 @@ function buildHafsDocuments(
 }
 
 function buildWarshDocuments(
-    hafs: CompleteEditionResponse,
+    hafs: QuranCorpus,
     warsh: WarshChapter[],
-    translation: CompleteEditionResponse,
+    translation: QuranCorpus,
 ): SearchDocument[] {
     const hafsSurahs = new Map(
-        hafs.data.surahs.map((surah) => [surah.number, surah]),
+        hafs.surahs.map((surah) => [surah.number, surah]),
     );
     const translatedSurahs = new Map(
-        translation.data.surahs.map((surah) => [surah.number, surah]),
+        translation.surahs.map((surah) => [surah.number, surah]),
     );
 
     return warsh.flatMap((chapter) => {
@@ -197,7 +185,7 @@ async function buildSearchCorpus(
 
     if (riwayah === "warsh") {
         const [hafs, warsh, translation] = await Promise.all([
-            getCompleteEdition("quran-simple"),
+            getCompleteEdition("quranpedia.mushaf.1"),
             getWarshChapters(),
             translationPromise,
         ]);
@@ -209,8 +197,8 @@ async function buildSearchCorpus(
                 name: "Warsh ‘an Nafi‘",
             },
             translationEdition: {
-                identifier: translation.data.edition.identifier,
-                name: editionName(translation.data.edition),
+                identifier: translation.edition.identifier,
+                name: editionName(translation.edition),
             },
         };
     }
@@ -223,12 +211,12 @@ async function buildSearchCorpus(
     return {
         documents: buildHafsDocuments(arabic, translation),
         arabicEdition: {
-            identifier: arabic.data.edition.identifier,
-            name: editionName(arabic.data.edition),
+            identifier: arabic.edition.identifier,
+            name: editionName(arabic.edition),
         },
         translationEdition: {
-            identifier: translation.data.edition.identifier,
-            name: editionName(translation.data.edition),
+            identifier: translation.edition.identifier,
+            name: editionName(translation.edition),
         },
     };
 }
@@ -238,7 +226,12 @@ function getSearchCorpus(
     translationEdition: string,
     riwayah: Riwayah,
 ) {
-    const key = [riwayah, arabicEdition, translationEdition].join(":");
+    const key = [
+        riwayah,
+        arabicEdition,
+        translationEdition,
+        Math.floor(Date.now() / 86400000),
+    ].join(":");
     return (
         corpusCache.get(key) ??
         rememberCorpus(

@@ -12,7 +12,6 @@ import PageDivisionSummary from "./page-division-summary";
 import QuranAudioQueue from "./quran-audio-queue";
 import ReaderToolbar from "./reader-toolbar";
 import Surah from "./surah";
-import TajweedLegend from "./tajweed-legend";
 import WarshQuranPage from "./warsh-quran-page";
 
 export default async function QuranPage({ page }: { page: number }) {
@@ -44,7 +43,7 @@ export default async function QuranPage({ page }: { page: number }) {
             })),
         ]);
     const reciter = reciters.find((item) => item.id === preferences.reciter);
-    const audioQueue = pageData.data.ayahs
+    const audioQueue = pageData.ayahs
         .map((ayah) => ({
             ayahNumber: ayah.audioNumber ?? ayah.number,
             streams:
@@ -57,8 +56,8 @@ export default async function QuranPage({ page }: { page: number }) {
                     : [],
         }))
         .filter((ayah) => ayah.streams.length > 0);
-    const pageJuzs = [...new Set(pageData.data.ayahs.map((ayah) => ayah.juz))];
-    const firstAyah = pageData.data.ayahs[0];
+    const pageJuzs = [...new Set(pageData.ayahs.map((ayah) => ayah.juz))];
+    const firstAyah = pageData.ayahs[0];
     const markerByAyah = new Map<number, QuranDivisionMarker>();
 
     function addMarkers(
@@ -97,9 +96,6 @@ export default async function QuranPage({ page }: { page: number }) {
                 navigation={navigation}
             />
             <ReaderToolbar>
-                {pageData.data.edition.identifier === "quran-tajweed" && (
-                    <TajweedLegend embedded />
-                )}
                 {audioQueue.length > 0 && (
                     <QuranAudioQueue
                         queue={audioQueue}
@@ -110,9 +106,9 @@ export default async function QuranPage({ page }: { page: number }) {
                 )}
                 <FocusModeToggle embedded />
             </ReaderToolbar>
-            {Object.keys(pageData.data.surahs).map((surahNumber) => {
-                const surah = pageData.data.surahs[surahNumber];
-                const ayahs = pageData.data.ayahs
+            {Object.keys(pageData.surahs).map((surahNumber) => {
+                const surah = pageData.surahs[surahNumber];
+                const ayahs = pageData.ayahs
                     .filter((ayah) => ayah.surah.number === surah.number)
                     .map((ayah) => {
                         const streams =
@@ -144,7 +140,7 @@ export default async function QuranPage({ page }: { page: number }) {
                             ayahs={ayahs}
                             translatedAyahs={
                                 preferences.showTranslation
-                                    ? (translatedPageData?.data.ayahs.filter(
+                                    ? (translatedPageData?.ayahs.filter(
                                           (ayah) =>
                                               ayah.surah.number ===
                                               surah.number,
@@ -152,9 +148,7 @@ export default async function QuranPage({ page }: { page: number }) {
                                     : []
                             }
                             showTranslation={preferences.showTranslation}
-                            translationEdition={
-                                translatedPageData?.data.edition
-                            }
+                            translationEdition={translatedPageData?.edition}
                             divisionMarkers={[...markerByAyah.values()]}
                             riwayah="hafs"
                         />

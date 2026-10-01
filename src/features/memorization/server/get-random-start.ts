@@ -143,7 +143,7 @@ export default async function getRandomStart(input: z.input<typeof schema>) {
                         : (
                               await getSurahData(
                                   String(number),
-                                  "quran-uthmani",
+                                  "quranpedia.mushaf.2",
                               )
                           ).ayahs.map((verse) => ({
                               number: verse.numberInSurah,

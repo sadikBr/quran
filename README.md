@@ -8,7 +8,7 @@ A Quran reading and memorization application built with Next.js. The current app
 - Tailwind CSS 4 with shadcn/ui-style components
 - Better Auth with email and password authentication
 - PostgreSQL and Drizzle ORM
-- Al Quran Cloud for Quran text and metadata
+- Quranpedia for Hafs and Warsh text, translations, tafsir, and reciters
 - Biome for formatting and static analysis
 
 ## Project structure
@@ -23,18 +23,22 @@ src/
     auth/                  # Better Auth client and server configuration
     quran/
       components/          # Quran-specific presentation components
-      server/              # Server-only Quran Cloud data access
-      types.ts             # Quran Cloud response types
+      server/              # Server-only Quranpedia data access
+      types.ts             # Shared reader data types
   drizzle/                 # Database client and schema
   data/env/                # Server environment validation
   lib/                     # Cross-feature utilities
 ```
 
-The Quran reader calls server-only functions directly; it does not make HTTP requests back to its own application. The only API route is the Better Auth handler required by the authentication library.
+The Quran reader calls server-only functions directly; it does not make HTTP requests back to its own application. API routes also serve search and versioned offline Quran datasets.
 
 ## Quran data
 
-Quran data is retrieved from [Al Quran Cloud](https://alquran.cloud/api). The server utilities validate upstream HTTP responses and JSON before returning data to pages. Failures are logged on the server and return a safe, generic error to the application.
+Quran content is retrieved exclusively from [Quranpedia](https://api.quranpedia.net/). Hafs and Warsh use its official compressed mushaf downloads; translations use its complete book downloads, and tafsir uses its per-ayah API. All reader, search, practice, memorization, and offline flows share the same normalized data.
+
+Quranpedia supplies the Arabic surah metadata, page and division assignments, and sajda markers. Editions use Quranpedia resource IDs throughout settings, reading, search and offline downloads. The app maintains its own English interface labels. See [the data-layer notes](src/features/quran/server/README.md) for the catalogue, validation and database setup.
+
+Run `bun test scripts/quranpedia-data.test.mjs scripts/quranpedia-reader.test.mjs` for provider and reader regression checks. `bun scripts/verify-quranpedia.mjs` additionally validates the current public upstream datasets (requires network access).
 
 ## Getting started
 

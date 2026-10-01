@@ -62,6 +62,14 @@ export default async function getPreferences(): Promise<Preferences> {
         ]);
         return normalizeEditionPreferences(preferences, editions, reciters);
     } catch {
-        return preferences;
+        // Edition validation uses the local Quranpedia catalogue even when
+        // the reciter service is temporarily unavailable.
+        const editions = await getAvailableQuranEditions();
+        const normalized = normalizeEditionPreferences(
+            preferences,
+            editions,
+            [],
+        );
+        return { ...normalized, reciter: preferences.reciter };
     }
 }

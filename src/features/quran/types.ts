@@ -1,19 +1,7 @@
 export interface PageData {
-    code: number;
-    status: string;
-    data: Data;
-}
-
-export interface EditionData {
-    code: number;
-    status: string;
-    data: Edition[];
-}
-
-export interface Data {
     number: number;
     ayahs: AyahType[];
-    surahs: Surahs;
+    surahs: Record<string, SurahType>;
     edition: Edition;
 }
 
@@ -23,8 +11,6 @@ export interface AyahType {
     hafsGlobalNumber?: number;
     /** All Hafs ayahs represented by this ayah (some Warsh boundaries differ). */
     hafsGlobalNumbers?: number[];
-    /** Backwards-compatible hash target for links saved before Warsh migration. */
-    legacyAnchorNumber?: number;
     audioNumber?: number;
     isBasmalaSentinel?: boolean;
     audio?: string;
@@ -51,10 +37,7 @@ export interface SurahType {
     englishNameTranslation: string;
     revelationType: string;
     numberOfAyahs: number;
-}
-
-export interface Surahs {
-    [key: string]: SurahType;
+    startingPage?: number;
 }
 
 export interface Edition {
@@ -67,36 +50,9 @@ export interface Edition {
     direction: string;
 }
 
-export type HostType =
-    | "everyayah"
-    | "mp3quran"
-    | "islamic_network"
-    | "quranpedia";
-
-export interface QuranJsonResponse {
-    note: string;
-    hosts: Record<HostType, Host>;
-    reciters: Reciter[];
-}
-
-export interface Host {
-    name: string;
-    home: string;
-    template: string;
-    indexing: string;
-    indexing_mode: string;
-    surah_pad: number;
-    ayah_pad: number;
-    cors: boolean;
-    accept_ranges: boolean;
-    license_status: string;
-    license: string;
-    license_url: string;
-}
-
 export interface Reciter {
     id: string;
-    host: HostType;
+    host: "quranpedia";
     name: string;
     arabicName?: string;
     bitrate_kbps?: number;
@@ -133,12 +89,12 @@ export interface WarshVerse {
 export interface WarshMushaf {
     id: number;
     name: string;
-    description: string;
-    image: string;
+    description: string | null;
+    image: string | null;
     bismillah: string;
-    font_file: string;
-    images: string;
-    images_png: string | null;
+    font_file: string | null;
+    images?: string | null;
+    images_png?: string | null;
     surahs: Array<{
         id: number;
         name: string;

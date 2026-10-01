@@ -24,7 +24,7 @@ export default function TranslationAyah({ ayah }: { ayah: AyahType }) {
                 ayahNumber={ayah.number}
                 numberInSurah={ayah.numberInSurah}
             />
-            {ayah.text}
+            <span className="whitespace-pre-line">{ayah.text}</span>
         </p>
     );
 }

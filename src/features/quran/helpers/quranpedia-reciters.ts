@@ -118,10 +118,3 @@ export function parseQuranpediaReciters(data: unknown): Reciter[] {
         throw new Error("Incomplete Quranpedia catalog");
     return reciters;
 }
-
-export function migrateReciterId(id: string) {
-    if (id === "everyayah/warsh/warsh_yassin_al_jazaery_64kbps")
-        return "quranpedia/263";
-    if (/^everyayah\/Alafasy_/.test(id)) return "quranpedia/255";
-    return id;
-}

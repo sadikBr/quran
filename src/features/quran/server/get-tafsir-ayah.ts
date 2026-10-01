@@ -2,12 +2,15 @@
 
 import { headers } from "next/headers";
 import { auth } from "@/features/auth/auth";
+import type { Riwayah } from "@/features/settings/preferences";
 import type { AyahData } from "../types";
-import getAyah from "./get-ayah";
 import getAvailableQuranEditions from "./get-quran-edition";
+import getReaderTafsir from "./get-reader-tafsir";
 
 export default async function getTafsirAyah(
-    globalAyahNumber: number,
+    surahNumber: number,
+    ayahNumber: number,
+    riwayah: Riwayah,
     editionIdentifier: string,
 ): Promise<AyahData> {
     const session = await auth.api.getSession({
@@ -28,5 +31,10 @@ export default async function getTafsirAyah(
         throw new Error("That tafsir edition is not available.");
     }
 
-    return getAyah(globalAyahNumber, edition.identifier);
+    return getReaderTafsir(
+        surahNumber,
+        ayahNumber,
+        riwayah,
+        edition.identifier,
+    );
 }

@@ -5,13 +5,14 @@ import Link, { useLinkStatus } from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import type { Riwayah } from "@/features/settings/preferences";
+import { useSettings } from "@/features/settings/settings-provider";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { cn } from "@/lib/utils";
 import getAyahAudioStreams from "../helpers/get-ayah-audio-streams";
 import type { QuranDivisionMarker } from "../navigation-types";
 import type { AyahType } from "../types";
 import { useQuranAudio } from "./quran-audio-provider";
-import TajweedText from "./tajweed-text";
+import QuranText from "./quran-text";
 
 export default function Ayah({
     ayah,
@@ -33,6 +34,7 @@ export default function Ayah({
     const ayahRef = useRef<HTMLSpanElement>(null);
     const t = useTranslations("Reader");
     const locale = useLocale();
+    const { arabicEdition } = useSettings();
     const { activeAyahNumber, playbackStatus } = useQuranAudio();
     const playbackAyahNumber = ayah.audioNumber ?? ayah.number;
     const isActiveAyah =
@@ -74,68 +76,64 @@ export default function Ayah({
     }, [isActiveAyah]);
 
     return (
-        <>
-            {ayah.legacyAnchorNumber !== undefined &&
-                ayah.legacyAnchorNumber !== ayah.number && (
-                    <span
-                        id={`ayah-${ayah.legacyAnchorNumber}`}
-                        className="scroll-mt-6"
-                        aria-hidden="true"
-                    />
-                )}
+        <span
+            ref={ayahRef}
+            id={`ayah-${ayah.number}`}
+            data-hafs-ayah={ayah.hafsGlobalNumber ?? ayah.number}
+            data-hafs-ayahs={(
+                ayah.hafsGlobalNumbers ?? [ayah.hafsGlobalNumber ?? ayah.number]
+            ).join(" ")}
+            data-ayah-number={ayah.numberInSurah}
+            data-arabic-edition={
+                riwayah === "hafs" ? arabicEdition : "quranpedia.mushaf.4"
+            }
+            data-audio-ayah={playbackAyahNumber}
+            tabIndex={-1}
+            className={cn(
+                "ayah quran-reader-text group/ayah me-[0.35em] inline scroll-mt-6 rounded-md leading-[inherit] text-foreground transition-[background-color,color,box-shadow] duration-500 ease-out",
+                isActiveAyah &&
+                    "bg-primary/6 shadow-[inset_0_-1px_0_hsl(var(--primary)/0.45)] dark:bg-primary/9",
+            )}
+        >
             <span
-                ref={ayahRef}
-                id={`ayah-${ayah.number}`}
-                data-hafs-ayah={ayah.hafsGlobalNumber ?? ayah.number}
-                data-ayah-number={ayah.numberInSurah}
-                data-audio-ayah={playbackAyahNumber}
-                tabIndex={-1}
                 className={cn(
-                    "ayah quran-reader-text group/ayah me-[0.35em] inline scroll-mt-6 rounded-md leading-[inherit] text-foreground transition-[background-color,color,box-shadow] duration-500 ease-out",
-                    isActiveAyah &&
-                        "bg-primary/6 shadow-[inset_0_-1px_0_hsl(var(--primary)/0.45)] dark:bg-primary/9",
+                    divisionMarker && !ayah.sajda && "text-division",
+                    ayah.sajda &&
+                        "text-primary underline decoration-primary/40 decoration-2 underline-offset-8",
                 )}
             >
-                <span
-                    className={cn(
-                        divisionMarker && !ayah.sajda && "text-division",
-                        ayah.sajda &&
-                            "text-primary underline decoration-primary/40 decoration-2 underline-offset-8",
-                    )}
+                {divisionMarker && (
+                    <AyahDivisionIndicator
+                        marker={divisionMarker}
+                        locale={locale}
+                        riwayah={riwayah}
+                    />
+                )}
+                <QuranText text={displayedText} />
+            </span>{" "}
+            <AyahPlayer ayah={ayah} />
+            <span className="relative inline-block align-[0.08em]">
+                <Link
+                    href={resolvedActionsHref}
+                    scroll={false}
+                    className="frame relative inline-block rounded-sm text-primary transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={t("ayah.openActions", {
+                        number: ayah.numberInSurah,
+                    })}
                 >
-                    {divisionMarker && (
-                        <AyahDivisionIndicator
-                            marker={divisionMarker}
-                            locale={locale}
-                            riwayah={riwayah}
-                        />
-                    )}
-                    <TajweedText text={displayedText} />
-                </span>{" "}
-                <AyahPlayer ayah={ayah} />
-                <span className="relative inline-block align-[0.08em]">
-                    <Link
-                        href={resolvedActionsHref}
-                        scroll={false}
-                        className="frame relative inline-block rounded-sm text-primary transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        aria-label={t("ayah.openActions", {
-                            number: ayah.numberInSurah,
-                        })}
+                    <AyahActionsPending />
+                    <span className="transition-opacity duration-300 ease-out sm:group-hover/ayah:opacity-0 sm:group-focus-within/ayah:opacity-0">
+                        {getArabicNumber(ayah.numberInSurah)}
+                    </span>
+                    <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute top-[55%] left-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 scale-95 items-center justify-center rounded-full bg-primary/10 font-sans text-primary opacity-0 transition-[opacity,transform,background-color,color] duration-200 ease-out sm:group-hover/ayah:scale-100 sm:group-hover/ayah:opacity-100 sm:group-focus-within/ayah:scale-100 sm:group-focus-within/ayah:opacity-100"
                     >
-                        <AyahActionsPending />
-                        <span className="transition-opacity duration-300 ease-out sm:group-hover/ayah:opacity-0 sm:group-focus-within/ayah:opacity-0">
-                            {getArabicNumber(ayah.numberInSurah)}
-                        </span>
-                        <span
-                            aria-hidden="true"
-                            className="pointer-events-none absolute top-[55%] left-1/2 flex size-6 -translate-x-1/2 -translate-y-1/2 scale-95 items-center justify-center rounded-full bg-primary/10 font-sans text-primary opacity-0 transition-[opacity,transform,background-color,color] duration-200 ease-out sm:group-hover/ayah:scale-100 sm:group-hover/ayah:opacity-100 sm:group-focus-within/ayah:scale-100 sm:group-focus-within/ayah:opacity-100"
-                        >
-                            <Ellipsis className="size-4" />
-                        </span>
-                    </Link>
-                </span>
+                        <Ellipsis className="size-4" />
+                    </span>
+                </Link>
             </span>
-        </>
+        </span>
     );
 }
 

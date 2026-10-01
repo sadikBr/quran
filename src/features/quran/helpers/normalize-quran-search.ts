@@ -1,4 +1,3 @@
-const TAJWEED_TOKEN_START = /\[[a-z](?::\d+)?\[/g;
 const IGNORED_QURAN_MARK =
     /[\u0610-\u061a\u064b-\u065f\u0670\u06d6-\u06ed\u08d4-\u08ff]/u;
 const PUNCTUATION_OR_SYMBOL = /[\p{P}\p{S}]/u;
@@ -10,13 +9,7 @@ const KAF_VARIANT = /[کڪ]/u;
 const HEH_VARIANT = /[ہھۀە]/u;
 
 export function stripQuranMarkup(text: string) {
-    return text
-        .replace(/\[ٮٰ\]/g, "ىٰ")
-        .replace(TAJWEED_TOKEN_START, "")
-        .replace(/\]/g, "")
-        .replace(/ٮ/g, "ى")
-        .replace(/ٲ/g, "ا")
-        .replace(/^\uFEFF/, "");
+    return text.replace(/\uFEFF/g, "");
 }
 
 function normalizeUnit(character: string) {

@@ -1,6 +1,6 @@
 /* global self, caches */
 
-const OFFLINE_VERSION = "2026.09.28.2";
+const OFFLINE_VERSION = "2026.10.01.2";
 const SHELL_CACHE = `quran-shell-${OFFLINE_VERSION}`;
 const LIBRARY_CACHE = `quran-library-${OFFLINE_VERSION}`;
 const RUNTIME_CACHE = `quran-runtime-${OFFLINE_VERSION}`;

@@ -1,4 +1,4 @@
-export const OFFLINE_QURAN_VERSION = "2026.09.28.2";
+export const OFFLINE_QURAN_VERSION = "2026.10.01.2";
 
 export type OfflineDataset = "hafs" | "warsh" | "translation";
 

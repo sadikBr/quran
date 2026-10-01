@@ -31,12 +31,16 @@ export const userSettings = pgTable("user_settings", {
     theme: Theme("theme").notNull().default("system"),
     language: Language("language").notNull().default("ar"),
     riwayah: Riwayah("riwayah").notNull().default("hafs"),
-    arabicEdition: text("arabic_edition").notNull().default("quran-simple"),
+    arabicEdition: text("arabic_edition")
+        .notNull()
+        .default("quranpedia.mushaf.1"),
     reciter: text("reciter").notNull().default("quranpedia/255"),
     translationEdition: text("translation_edition")
         .notNull()
-        .default("en.sahih"),
-    tafsirEdition: text("tafsir_edition").notNull().default("ar.muyassar"),
+        .default("quranpedia.translation.13638"),
+    tafsirEdition: text("tafsir_edition")
+        .notNull()
+        .default("quranpedia.tafsir.2012"),
     showTranslation: boolean("show_translation").notNull().default(false),
     readingMode: ReadingMode("reading_mode").notNull().default("page"),
     continuousRecitation: boolean("continuous_recitation")

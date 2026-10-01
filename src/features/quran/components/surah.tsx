@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Fragment } from "react";
 import type { Riwayah } from "@/features/settings/preferences";
+import { useSettings } from "@/features/settings/settings-provider";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import { stripBasmalaPrefix } from "../helpers/basmala";
 import type { QuranDivisionMarker as QuranDivisionMarkerType } from "../navigation-types";
@@ -59,6 +60,13 @@ export default function Surah({
     riwayah?: Riwayah;
 }) {
     const t = useTranslations("Reader");
+    const { arabicEdition } = useSettings();
+    const presentation =
+        riwayah === "warsh"
+            ? undefined
+            : arabicEdition === "quranpedia.mushaf.2"
+              ? "verses"
+              : "mushaf";
     const beginsAtSurahStart = ayahs[0]?.numberInSurah === 1;
     const hasUnnumberedFatihaBasmala =
         beginsAtSurahStart &&
@@ -89,6 +97,7 @@ export default function Surah({
             <div
                 className="rtl quran-reading-surface"
                 data-riwayah={riwayah}
+                data-presentation={presentation}
                 data-surah-heading={
                     beginsAtSurahStart && showSurahHeading ? "true" : undefined
                 }

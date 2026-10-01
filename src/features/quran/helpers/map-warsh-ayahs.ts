@@ -60,7 +60,6 @@ export default function mapWarshAyahs(
     const hafsByNumber = new Map(
         hafsAyahs.map((ayah) => [ayah.numberInSurah, ayah]),
     );
-    const claimedLegacyAnchors = new Set<number>();
     const mappedAyahs = chapter.verses.flatMap((verse) => {
         const anchor = getWarshHafsAnchor(verse, chapter.id);
         const hafsAyah = hafsByNumber.get(anchor);
@@ -75,18 +74,12 @@ export default function mapWarshAyahs(
             return mapped ? [mapped.number] : [];
         });
 
-        const legacyAnchorNumber = claimedLegacyAnchors.has(hafsAyah.number)
-            ? undefined
-            : hafsAyah.number;
-        claimedLegacyAnchors.add(hafsAyah.number);
-
         return [
             {
                 ...hafsAyah,
                 number: verse.id,
                 hafsGlobalNumber: hafsAyah.number,
                 hafsGlobalNumbers,
-                legacyAnchorNumber,
                 audioNumber: nativeAudioNumbering
                     ? getNativeWarshPlaybackNumber(verse, chapter.id)
                     : getWarshPlaybackNumber(verse, chapter.id),
@@ -107,7 +100,7 @@ export default function mapWarshAyahs(
 
     // Surah renders Al-Faatiha's first item as the standalone basmala. Keep a
     // Basmala sentinel solely for that presentation behavior. Its text is
-    // independent of the saved Hafs edition, which may contain Tajweed tags.
+    // independent of the selected Hafs script.
     return [
         {
             ...basmala,

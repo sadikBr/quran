@@ -270,7 +270,8 @@ export default function QuranIndex({
                                 href={getReadingHref(
                                     surah.number,
                                     preferences,
-                                    surahStartingPages?.[surah.number],
+                                    surahStartingPages?.[surah.number] ??
+                                        surah.startingPage,
                                 )}
                             />
                         ))

@@ -1,42 +1,20 @@
 import "server-only";
 
-import type { AyahType, Edition, SurahType } from "../types";
-import fetchQuranCloud from "./fetch-quran-cloud";
+import getQuranCorpus from "./get-quran-corpus";
 
 export default async function getSurahData(
     number: string,
-    edition: string = "quran-simple",
+    edition = "quranpedia.mushaf.1",
 ) {
-    const data = await fetchQuranCloud<{
-        data: SurahType & {
-            ayahs: AyahType[];
-            edition: Edition;
-            audio?: string;
-            audioSecondary?: string[];
-        };
-    }>(`/surah/${number}/${edition}`);
-
-    const {
-        ayahs,
-        edition: editionData,
-        audio,
-        audioSecondary,
-        ...surahMeta
-    } = data.data;
-
-    // The full-surah endpoint omits the nested `surah` object that is present
-    // on page responses. Keep the app's AyahType contract consistent so
-    // shared reader/audio code can safely use the same shape in both modes.
-    const normalizedAyahs = ayahs.map((ayah) => ({
-        ...ayah,
-        surah: ayah.surah ?? surahMeta,
-    }));
-
+    const corpus = await getQuranCorpus(edition);
+    const surah = corpus.surahs.find((item) => item.number === Number(number));
+    if (!surah) throw new Error("Invalid Quran surah.");
+    const { ayahs, ...surahMeta } = surah;
     return {
-        ayahs: normalizedAyahs,
-        edition: editionData,
+        ayahs,
+        edition: corpus.edition,
         surahMeta,
-        audio,
-        audioSecondary,
+        audio: undefined,
+        audioSecondary: undefined,
     };
 }

@@ -34,7 +34,10 @@ export default async function WarshQuranPage({ page }: { page: number }) {
                 async (surahNumber) =>
                     [
                         surahNumber,
-                        await getSurahData(String(surahNumber), "quran-simple"),
+                        await getSurahData(
+                            String(surahNumber),
+                            "quranpedia.mushaf.1",
+                        ),
                     ] as const,
             ),
         ),
