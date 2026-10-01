@@ -1,7 +1,6 @@
 "use client";
 
 import {
-    ArrowLeft,
     Bookmark,
     BookOpenText,
     Check,
@@ -19,7 +18,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +40,7 @@ import { cn } from "@/lib/utils";
 import type { TajweedSegment } from "../helpers/quranpedia-tajweed";
 import getTafsirAyah from "../server/get-tafsir-ayah";
 import type { Edition } from "../types";
+import AyahActionsToolbar from "./ayah-actions-toolbar";
 import AyahShareCard from "./ayah-share-card";
 import EditionCombobox from "./edition-combobox";
 import { useQuranAudio } from "./quran-audio-provider";
@@ -60,16 +60,16 @@ function TafsirReadingPane({
     return (
         <section
             aria-label={t("actions.tafsirCommentary")}
-            className="mt-4 rounded-xl border border-border/60 bg-card/50 p-4 sm:p-5"
+            className="app-card min-w-0 p-4 sm:p-5"
         >
             <p
                 dir={isRightToLeft ? "rtl" : "ltr"}
                 lang={isRightToLeft ? "ar" : undefined}
                 className={cn(
-                    "whitespace-pre-line text-start text-card-foreground/90 transition-opacity",
+                    "whitespace-pre-line text-start text-card-foreground [overflow-wrap:anywhere] transition-opacity",
                     isRightToLeft
-                        ? "font-(family-name:--font-tafsir) text-lg leading-[2.05] sm:text-xl sm:leading-[2.15]"
-                        : "font-serif text-base leading-8 sm:text-lg sm:leading-9",
+                        ? "font-(family-name:--font-tafsir) text-xl leading-[2]"
+                        : "font-serif text-base leading-8 sm:text-lg",
                     isLoading && "opacity-35",
                 )}
             >
@@ -115,7 +115,7 @@ function QuranAyahPreview({
     }, [isExpanded]);
 
     return (
-        <figure className="my-6 px-1">
+        <figure className="my-4 min-w-0 rounded-2xl border border-border/60 bg-muted/20 px-4 py-3 sm:px-5">
             <figcaption className="sr-only">
                 {t("actions.quranAyah", { number: ayahNumber })}
             </figcaption>
@@ -135,23 +135,25 @@ function QuranAyahPreview({
                         isCollapsible && !isExpanded
                             ? {
                                   maskImage:
-                                      "linear-gradient(to bottom, black 65%, transparent)",
+                                      "linear-gradient(to bottom, black 75%, transparent)",
                               }
                             : undefined
                     }
-                    className={`ayah quran-display-text mt-3 text-center leading-loose text-foreground sm:leading-[2.1] ${
-                        isExpanded ? "" : "max-h-36 overflow-hidden sm:max-h-40"
+                    className={`ayah quran-display-text text-center leading-[2] text-foreground [overflow-wrap:anywhere] ${
+                        isExpanded ? "" : "max-h-28 overflow-hidden sm:max-h-32"
                     }`}
                 >
                     <QuranText text={text} tajweed={tajweed} />
                 </p>
             </div>
             {isCollapsible && (
-                <button
+                <Button
                     type="button"
+                    variant="ghost"
+                    size="sm"
                     aria-expanded={isExpanded}
                     onClick={() => setIsExpanded((expanded) => !expanded)}
-                    className="mx-auto mt-3 flex min-h-11 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="mx-auto mt-2 flex min-h-10 text-xs text-primary"
                 >
                     {isExpanded
                         ? t("actions.showLess")
@@ -160,7 +162,7 @@ function QuranAyahPreview({
                         aria-hidden="true"
                         className={`size-3.5 transition-transform ${isExpanded ? "rotate-180" : ""}`}
                     />
-                </button>
+                </Button>
             )}
         </figure>
     );
@@ -206,13 +208,45 @@ function SurahTitle({
 }) {
     if (locale === "ar") {
         return (
-            <span className="surah-name block max-w-full text-[clamp(2.25rem,10vw,3.25rem)] font-normal leading-none tracking-normal text-foreground">
+            <span className="surah-name block max-w-full text-[clamp(2rem,8vw,2.75rem)] font-normal leading-none tracking-normal text-foreground">
                 {getArabicNumber(surahNumber)}
             </span>
         );
     }
 
     return <>{surahName}</>;
+}
+
+function VerseHeading({
+    locale,
+    surahNumber,
+    surahName,
+    ayahNumber,
+}: {
+    locale: string;
+    surahNumber: number;
+    surahName: string;
+    ayahNumber: number;
+}) {
+    const t = useTranslations("Reader.actions");
+    return (
+        <header className="flex min-w-0 flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4">
+            <h1
+                id="ayah-actions-title"
+                tabIndex={-1}
+                className="min-w-0 break-words text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
+            >
+                <SurahTitle
+                    locale={locale}
+                    surahNumber={surahNumber}
+                    surahName={surahName}
+                />
+            </h1>
+            <span className="shrink-0 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
+                {t("ayah", { number: ayahNumber })}
+            </span>
+        </header>
+    );
 }
 
 function ActionTile({
@@ -239,23 +273,23 @@ function ActionTile({
             aria-pressed={pressed}
             onClick={onClick}
             className={cn(
-                "group grid min-h-24 w-full min-w-0 grid-cols-[2.25rem_minmax(0,1fr)] content-center items-center gap-x-3 rounded-xl border border-border/55 bg-card/50 p-3.5 text-start transition-colors hover:border-primary/25 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60",
+                "app-card group grid min-h-24 w-full min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] content-center items-center gap-x-3 p-4 text-start transition-colors hover:border-primary/30 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60",
                 pressed && "border-primary/25 bg-primary/8",
                 className,
             )}
         >
             <span
                 className={cn(
-                    "row-span-2 flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-primary transition-colors group-hover:bg-primary/10 [&_svg]:size-4",
+                    "row-span-2 flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15 [&_svg]:size-5",
                     pressed && "bg-primary/15 text-primary",
                 )}
             >
                 {icon}
             </span>
-            <span className="block min-w-0 text-sm font-semibold leading-6 text-card-foreground">
+            <span className="block min-w-0 break-words text-sm font-semibold leading-6 text-card-foreground">
                 {title}
             </span>
-            <span className="mt-0.5 block min-w-0 text-xs leading-5 text-muted-foreground">
+            <span className="mt-1 block min-w-0 break-words text-xs leading-5 text-muted-foreground">
                 {description}
             </span>
         </button>
@@ -299,6 +333,7 @@ export default function AyahActions({
     const commonT = useTranslations("Common");
     const locale = useLocale();
     const direction = locale === "ar" ? "rtl" : "ltr";
+    const tafsirSelectId = useId();
     const [isTafsirVisible, setIsTafsirVisible] = useState(false);
     const [selectedTafsirIdentifier, setSelectedTafsirIdentifier] = useState(
         tafsirEditionIdentifier,
@@ -539,20 +574,13 @@ export default function AyahActions({
     if (isCollectionsVisible) {
         return (
             <div dir={direction} className="pb-1">
-                <button
-                    type="button"
-                    onClick={() => setIsCollectionsVisible(false)}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 pe-12 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                    <ArrowLeft
-                        aria-hidden="true"
-                        className="size-4 rtl:rotate-180"
-                    />
-                    {t("actions.back")}
-                </button>
-                <header className="mt-4 border-b border-border/55 pb-4">
+                <AyahActionsToolbar
+                    title={t("actions.organizeBookmark")}
+                    onBack={() => setIsCollectionsVisible(false)}
+                />
+                <header className="border-b border-border/60 pb-4">
                     <div className="flex items-center gap-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/60 text-primary">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                             <FolderHeart
                                 aria-hidden="true"
                                 className="size-4"
@@ -700,39 +728,19 @@ export default function AyahActions({
     if (isReflectionVisible) {
         return (
             <div dir={direction} className="pb-1">
-                <button
-                    type="button"
-                    onClick={() => setIsReflectionVisible(false)}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 pe-12 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                    <ArrowLeft
-                        aria-hidden="true"
-                        className="size-4 rtl:rotate-180"
-                    />
-                    {t("actions.back")}
-                </button>
-                <header className="relative isolate mt-4 pe-9">
-                    <p className="text-xs font-semibold tracking-[0.16em] text-primary">
-                        {t("actions.privateReflection")}
-                    </p>
-                    <h1
-                        id="ayah-actions-title"
-                        tabIndex={-1}
-                        className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
-                    >
-                        <SurahTitle
-                            locale={locale}
-                            surahNumber={surahNumber}
-                            surahName={surahName}
-                        />
-                        <span className="ms-3 align-middle font-sans text-sm font-normal text-muted-foreground">
-                            {t("actions.ayah", { number: ayahNumber })}
-                        </span>
-                    </h1>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                        {t("actions.privateNote")}
-                    </p>
-                </header>
+                <AyahActionsToolbar
+                    title={t("actions.privateReflection")}
+                    onBack={() => setIsReflectionVisible(false)}
+                />
+                <VerseHeading
+                    locale={locale}
+                    surahNumber={surahNumber}
+                    surahName={surahName}
+                    ayahNumber={ayahNumber}
+                />
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                    {t("actions.privateNote")}
+                </p>
 
                 <QuranAyahPreview
                     riwayah={riwayah}
@@ -802,57 +810,33 @@ export default function AyahActions({
     if (isTafsirVisible) {
         return (
             <div dir={direction} className="pb-1">
-                <button
-                    type="button"
-                    onClick={() => setIsTafsirVisible(false)}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 pe-12 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                    <ArrowLeft
-                        aria-hidden="true"
-                        className="size-4 rtl:rotate-180"
-                    />
-                    {t("actions.back")}
-                </button>
-                <header className="mt-4 pe-9">
-                    <div className="flex items-center gap-3">
-                        <span
-                            aria-hidden="true"
-                            className="h-px w-6 bg-primary/70"
-                        />
-                        <p className="text-[0.65rem] font-semibold tracking-[0.22em] text-primary">
-                            {t("actions.tafsir")}
-                        </p>
-                    </div>
-                    <div className="mt-4 flex flex-wrap items-center gap-3">
-                        <h1
-                            id="ayah-actions-title"
-                            tabIndex={-1}
-                            className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
-                        >
-                            <SurahTitle
-                                locale={locale}
-                                surahNumber={surahNumber}
-                                surahName={surahName}
-                            />
-                        </h1>
-                        <span className="text-sm text-muted-foreground">
-                            {t("actions.ayah", { number: ayahNumber })}
-                        </span>
-                    </div>
-                </header>
+                <AyahActionsToolbar
+                    title={t("actions.tafsir")}
+                    onBack={() => setIsTafsirVisible(false)}
+                />
+                <VerseHeading
+                    locale={locale}
+                    surahNumber={surahNumber}
+                    surahName={surahName}
+                    ayahNumber={ayahNumber}
+                />
                 <QuranAyahPreview
                     riwayah={riwayah}
                     text={arabicText}
                     tajweed={arabicTajweed}
                     ayahNumber={ayahNumber}
                 />
-                <div className="mt-5 space-y-3">
-                    <p className="text-[0.65rem] font-semibold tracking-[0.18em] text-primary uppercase">
+                <div className="sticky top-0 z-10 space-y-2 border-b border-border/60 bg-background pt-2 pb-4">
+                    <label
+                        htmlFor={canChooseTafsir ? tafsirSelectId : undefined}
+                        className="block text-xs font-semibold text-muted-foreground"
+                    >
                         {t("actions.commentary")}
-                    </p>
+                    </label>
                     <div className="min-w-0 max-w-full">
                         {canChooseTafsir ? (
                             <EditionCombobox
+                                id={tafsirSelectId}
                                 ariaLabel={t("actions.chooseTafsir")}
                                 editions={tafsirEditions}
                                 value={selectedTafsirIdentifier}
@@ -860,27 +844,27 @@ export default function AyahActions({
                                 disabled={isChangingTafsir}
                                 placeholder={t("actions.searchTafsir")}
                                 emptyMessage={t("actions.noTafsir")}
-                                className="w-full min-w-0 border-primary/15 bg-muted/30 text-sm shadow-none"
+                                className="h-11 w-full min-w-0 rounded-xl border-border bg-card text-sm shadow-sm dark:bg-card"
                             />
                         ) : (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-sm font-medium text-foreground">
                                 {selectedTafsir.editionName}
                             </span>
                         )}
                     </div>
                 </div>
                 <article
-                    className="mt-4 transition-opacity"
+                    className="mt-4 min-w-0 transition-opacity"
                     aria-busy={isChangingTafsir}
                 >
                     {isChangingTafsir && (
-                        <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                        <output className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
                             <LoaderCircle
                                 aria-hidden="true"
                                 className="size-3.5 animate-spin text-primary"
                             />
                             {t("actions.loadingTafsir")}
-                        </p>
+                        </output>
                     )}
                     <TafsirReadingPane
                         key={selectedTafsirIdentifier}
@@ -909,27 +893,13 @@ export default function AyahActions({
                 }
             }}
         >
-            <header className="relative min-w-0 border-border/55 border-b pb-5 pe-11 pt-1">
-                <p className="text-[0.65rem] font-semibold tracking-[0.2em] text-primary">
-                    {t("actions.title")}
-                </p>
-                <div className="mt-2 flex min-w-0 items-end justify-between gap-4">
-                    <h1
-                        id="ayah-actions-title"
-                        tabIndex={-1}
-                        className="min-w-0 text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl"
-                    >
-                        <SurahTitle
-                            locale={locale}
-                            surahNumber={surahNumber}
-                            surahName={surahName}
-                        />
-                    </h1>
-                    <p className="mb-0.5 shrink-0 rounded-lg bg-muted/60 px-3 py-1.5 text-xs font-medium text-muted-foreground">
-                        {t("actions.ayah", { number: ayahNumber })}
-                    </p>
-                </div>
-            </header>
+            <AyahActionsToolbar title={t("actions.title")} />
+            <VerseHeading
+                locale={locale}
+                surahNumber={surahNumber}
+                surahName={surahName}
+                ayahNumber={ayahNumber}
+            />
 
             <div className="min-w-0 pt-4 pb-1">
                 {audioStreams.length > 0 && (
@@ -941,10 +911,10 @@ export default function AyahActions({
                                 ? retryAudio()
                                 : toggleAudio(playbackAyahNumber, audioStreams)
                         }
-                        className="w-full min-w-0 overflow-hidden rounded-xl border border-primary/20 bg-primary/5 p-4 text-start text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait"
+                        className="app-card w-full min-w-0 overflow-hidden border-primary/20 bg-primary/5 p-4 text-start text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait"
                     >
                         <span className="flex items-center gap-4">
-                            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_8px_22px_-12px_hsl(var(--primary))]">
+                            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                                 {isLoadingThisAyah ? (
                                     <LoaderCircle
                                         aria-hidden="true"
@@ -968,7 +938,7 @@ export default function AyahActions({
                                 )}
                             </span>
                             <span className="min-w-0 flex-1">
-                                <span className="text-[0.65rem] font-semibold tracking-[0.14em] text-primary">
+                                <span className="text-xs font-medium text-primary">
                                     {t("actions.recitation")}
                                 </span>
                                 <span className="mt-1 block font-medium">

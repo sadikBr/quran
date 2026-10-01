@@ -93,12 +93,12 @@ export default function EditionCombobox({
             />
             <ComboboxContent
                 dir={locale === "ar" ? "rtl" : "ltr"}
-                className="w-[min(28rem,calc(100vw-2rem))] min-w-0 rounded-xl bg-popover/98 p-1 shadow-xl ring-primary/10 backdrop-blur-md"
+                className="w-(--anchor-width) min-w-0 rounded-xl bg-popover p-1 shadow-lg ring-border/60"
             >
                 <ComboboxEmpty className="px-4 py-8">
                     {emptyMessage}
                 </ComboboxEmpty>
-                <ComboboxList className="max-h-80 p-1">
+                <ComboboxList className="max-h-[min(20rem,calc(var(--available-height)-1rem))] p-1">
                     {(
                         group: { label: string; items: Edition[] },
                         groupIndex,

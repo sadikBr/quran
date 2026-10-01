@@ -952,6 +952,27 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
     font-family: var(--font-arabic-ui), sans-serif;
 }
 
+/* Long commentary stays in one visible, bounded scrolling region. */
+[data-ayah-actions-scroll] {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(
+            in oklab,
+            var(--muted-foreground) 35%,
+            transparent
+        )
+        transparent;
+}
+
+[data-ayah-actions-scroll]::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+}
+
+[data-ayah-actions-scroll]::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--muted-foreground) 35%, transparent);
+}
+
 .arabic-ui :is(h1, h2, h3) {
     letter-spacing: 0;
     line-height: 1.4;

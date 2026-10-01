@@ -15,6 +15,11 @@ import {
 
 const Combobox = ComboboxPrimitive.Root;
 
+// Dialogs can keep popup portals within their focus and pointer boundary.
+const ComboboxPortalContainerContext = React.createContext<HTMLElement | null>(
+    null,
+);
+
 function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {
     return <ComboboxPrimitive.Value data-slot="combobox-value" {...props} />;
 }
@@ -108,8 +113,9 @@ function ComboboxContent({
         | "anchor"
         | "positionMethod"
     >) {
+    const portalContainer = React.useContext(ComboboxPortalContainerContext);
     return (
-        <ComboboxPrimitive.Portal>
+        <ComboboxPrimitive.Portal container={portalContainer}>
             <ComboboxPrimitive.Positioner
                 side={side}
                 sideOffset={sideOffset}
@@ -117,6 +123,7 @@ function ComboboxContent({
                 alignOffset={alignOffset}
                 anchor={anchor}
                 positionMethod={positionMethod}
+                collisionBoundary={portalContainer ?? undefined}
                 className="isolate z-50"
             >
                 <ComboboxPrimitive.Popup
@@ -304,6 +311,7 @@ export {
     Combobox,
     ComboboxInput,
     ComboboxContent,
+    ComboboxPortalContainerContext,
     ComboboxList,
     ComboboxItem,
     ComboboxGroup,

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-    ArrowLeft,
     BookOpenText,
     Check,
     Clipboard,
@@ -14,6 +13,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { getArabicNumber } from "@/lib/arabic-numbers";
+import AyahActionsToolbar from "./ayah-actions-toolbar";
 
 type CardTheme = "night" | "parchment" | "emerald";
 
@@ -463,23 +463,16 @@ export default function AyahShareCard({
 
     return (
         <div className="pb-1">
-            <button
-                type="button"
-                onClick={onBack}
-                className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 pe-12 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-                <ArrowLeft className="size-4 rtl:rotate-180" />
-                {t("back")}
-            </button>
+            <AyahActionsToolbar title={t("shareAyah")} onBack={onBack} />
 
-            <header className="mt-4 pe-9">
+            <header className="border-b border-border/60 pb-4">
                 <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                     {t("shareCardEyebrow")}
                 </p>
                 <h1
                     id="ayah-actions-title"
                     tabIndex={-1}
-                    className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl"
+                    className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl"
                 >
                     {t("shareCardTitle")}
                 </h1>
@@ -508,7 +501,7 @@ export default function AyahShareCard({
                     {t("shareRenderFailed")}
                 </p>
             )}
-            <div className="mt-4 rounded-xl border border-border/60 bg-card/50 p-4">
+            <div className="app-card mt-4 p-4">
                 <div className="flex items-center gap-2 text-sm font-semibold">
                     <Palette className="size-4 text-primary" />
                     {t("shareStyle")}
