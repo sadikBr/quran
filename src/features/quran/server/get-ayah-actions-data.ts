@@ -85,7 +85,7 @@ export default async function getAyahActionsData(
 
     const [tafsirAyah, tafsirEditions, savedAyah, bookmarkCollections] =
         await Promise.all([
-            getAyah(ayah.number),
+            getAyah(ayah.number, preferences.tafsirEdition),
             session
                 ? getAvailableQuranEditions().then((editions) =>
                       editions.filter((edition) => edition.type === "tafsir"),

@@ -275,6 +275,11 @@ export default function AyahActions({
     closeOnCopy = false,
     onSavedAyahChangeAction,
 }: AyahActionsProps) {
+    // A retry tap can land on an action as the streamed content appears.
+    const readyAt = useRef(0);
+    useEffect(() => {
+        readyAt.current = performance.now();
+    }, []);
     const router = useRouter();
     const t = useTranslations("Reader");
     const commonT = useTranslations("Common");
@@ -863,7 +868,21 @@ export default function AyahActions({
     }
 
     return (
-        <div dir={direction} className="min-w-0 pb-1">
+        <div
+            dir={direction}
+            className="min-w-0 pb-1"
+            onClickCapture={(event) => {
+                // Preserve keyboard/assistive activation (detail === 0).
+                if (
+                    event.detail > 0 &&
+                    (event.detail > 1 ||
+                        performance.now() - readyAt.current < 400)
+                ) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            }}
+        >
             <header className="relative min-w-0 border-border/55 border-b pb-5 pe-11 pt-1">
                 <p className="text-[0.65rem] font-semibold tracking-[0.2em] text-primary">
                     {t("actions.title")}

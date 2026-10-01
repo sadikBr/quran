@@ -1,7 +1,7 @@
 "use client";
 
 import { Ellipsis, LoaderCircle, Pause, Play, RefreshCcw } from "lucide-react";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import type { Riwayah } from "@/features/settings/preferences";
@@ -122,6 +122,7 @@ export default function Ayah({
                             number: ayah.numberInSurah,
                         })}
                     >
+                        <AyahActionsPending />
                         <span className="transition-opacity duration-300 ease-out sm:group-hover/ayah:opacity-0 sm:group-focus-within/ayah:opacity-0">
                             {getArabicNumber(ayah.numberInSurah)}
                         </span>
@@ -279,5 +280,17 @@ function AyahPlayer({ ayah }: { ayah: AyahType }) {
                 </button>
             </span>{" "}
         </>
+    );
+}
+
+function AyahActionsPending() {
+    const { pending } = useLinkStatus();
+    const t = useTranslations("Common");
+    if (!pending) return null;
+    return (
+        <output className="absolute inset-0 z-10 flex items-center justify-center rounded-full bg-background">
+            <LoaderCircle aria-hidden="true" className="size-5 animate-spin" />
+            <span className="sr-only">{t("loading.label")}</span>
+        </output>
     );
 }

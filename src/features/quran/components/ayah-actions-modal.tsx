@@ -4,7 +4,9 @@ import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Dialog } from "radix-ui";
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, Suspense, useRef } from "react";
+
+import AyahActionsLoading from "./ayah-actions-loading";
 
 export default function AyahActionsModal({
     children,
@@ -62,7 +64,9 @@ export default function AyahActionsModal({
                         data-ayah-actions-scroll
                         className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-5 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-7 sm:pt-7 sm:pb-7"
                     >
-                        {children}
+                        <Suspense fallback={<AyahActionsLoading />}>
+                            {children}
+                        </Suspense>
                     </div>
                 </Dialog.Content>
             </Dialog.Portal>
