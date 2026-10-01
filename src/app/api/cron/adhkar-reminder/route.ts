@@ -1,6 +1,5 @@
 import { and, eq, isNull, lt, ne, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import webpush from "web-push";
 import { env } from "@/data/env/server";
 import db from "@/drizzle/db";
 import {
@@ -13,6 +12,7 @@ import { dueAdhkarDate } from "@/features/adhkar/reminder-schedule";
 import {
     configureWebPush,
     isExpiredPushSubscription,
+    sendPushNotification,
 } from "@/features/notifications/server/web-push";
 
 export const runtime = "nodejs";
@@ -98,8 +98,9 @@ export async function GET(request: Request) {
             }
             const ar = settings.language === "ar";
             try {
-                await webpush.sendNotification(
+                await sendPushNotification(
                     {
+                        userId: subscription.userId,
                         endpoint: subscription.endpoint,
                         keys: {
                             p256dh: subscription.p256dh,

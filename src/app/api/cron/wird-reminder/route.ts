@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import webpush from "web-push";
 import { env } from "@/data/env/server";
 import db from "@/drizzle/db";
 import {
@@ -12,6 +11,7 @@ import {
 import {
     configureWebPush,
     isExpiredPushSubscription,
+    sendPushNotification,
 } from "@/features/notifications/server/web-push";
 import getWirdDate from "@/features/wird/server/wird-date";
 
@@ -63,6 +63,7 @@ export async function GET(request: Request) {
     const subscriptions = await db
         .select({
             id: pushSubscription.id,
+            userId: pushSubscription.userId,
             endpoint: pushSubscription.endpoint,
             p256dh: pushSubscription.p256dh,
             auth: pushSubscription.auth,
@@ -99,8 +100,9 @@ export async function GET(request: Request) {
 
         const copy = notificationCopy(subscription.language);
         try {
-            await webpush.sendNotification(
+            await sendPushNotification(
                 {
+                    userId: subscription.userId,
                     endpoint: subscription.endpoint,
                     keys: {
                         p256dh: subscription.p256dh,

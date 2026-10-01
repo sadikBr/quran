@@ -7,6 +7,7 @@ import { Dialog } from "radix-ui";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/features/auth/auth-client";
+import { clearDevicePushSubscription } from "@/features/notifications/device-subscription";
 import ThemeSelector from "@/features/settings/components/theme-selector";
 import {
     DEFAULT_PREFERENCES,
@@ -50,7 +51,8 @@ export default function useAccountMenuActions(focusMenu: () => void) {
         setIsSigningOut(true);
         authClient.signOut({
             fetchOptions: {
-                onSuccess: () => {
+                onSuccess: async () => {
+                    await clearDevicePushSubscription().catch(() => {});
                     setTheme(DEFAULT_PREFERENCES.theme);
                     window.location.assign("/");
                 },

@@ -176,6 +176,13 @@
             "when": 1790872067471,
             "tag": "0024_warsh_tajweed",
             "breakpoints": true
+        },
+        {
+            "idx": 25,
+            "version": "7",
+            "when": 1790875183953,
+            "tag": "0025_push_session_ownership",
+            "breakpoints": true
         }
     ]
 }

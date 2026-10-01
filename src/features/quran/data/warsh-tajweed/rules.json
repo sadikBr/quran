@@ -1,142 +1,43 @@
 {
-  "warsh-ikhfaa": [
-    "إخفاء",
-    "Ikhfaa"
-  ],
-  "warsh-iqlab": [
-    "إقلاب",
-    "Iqlab"
-  ],
-  "warsh-idgham_bi_ghunnah": [
-    "إدغام بغنة",
-    "Idgham bi-Ghunnah"
-  ],
-  "warsh-idgham_bila_ghunnah": [
-    "إدغام بلا غنة",
-    "Idgham bila-Ghunnah"
-  ],
-  "warsh-ghunnah_mushaddadah": [
-    "غنة مشددة",
-    "Ghunnah Mushaddadah"
-  ],
-  "warsh-ikhfaa_shafawi": [
-    "إخفاء شفوي",
-    "Ikhfaa Shafawi"
-  ],
-  "warsh-idgham_shafawi": [
-    "إدغام شفوي",
-    "Idgham Shafawi"
-  ],
-  "warsh-idgham_mutamathilayn": [
-    "إدغام متماثلين",
-    "Idgham Mutamathilayn"
-  ],
-  "warsh-idgham_mutaqaribayn": [
-    "إدغام متقاربين",
-    "Idgham Mutaqaribayn"
-  ],
-  "warsh-idgham_mutajanisayn_kamil": [
-    "إدغام متجانسين كامل",
-    "Idgham Mutajanisayn Kamil"
-  ],
-  "warsh-idgham_mutajanisayn_naqis": [
-    "إدغام متجانسين ناقص",
-    "Idgham Mutajanisayn Naqis"
-  ],
-  "warsh-lam_shamsiyyah": [
-    "لام شمسية",
-    "Lam Shamsiyyah"
-  ],
-  "warsh-qalqala_sughra": [
-    "قلقلة صغرى",
-    "Qalqala Sughra"
-  ],
-  "warsh-qalqala_kubra": [
-    "قلقلة كبرى",
-    "Qalqala Kubra"
-  ],
-  "warsh-qalqala_akbar": [
-    "قلقلة أكبر",
-    "Qalqala Akbar"
-  ],
-  "warsh-taqlil": [
-    "تقليل",
-    "Taqlil"
-  ],
-  "warsh-imala": [
-    "إمالة",
-    "Imala"
-  ],
-  "warsh-tashil": [
-    "تسهيل",
-    "Tashil"
-  ],
-  "warsh-ishmam": [
-    "إشمام",
-    "Ishmam"
-  ],
-  "warsh-madd_tabii": [
-    "مد طبيعي",
-    "Madd Tabii"
-  ],
-  "warsh-madd_muttasil": [
-    "مد متصل",
-    "Madd Muttasil"
-  ],
-  "warsh-madd_munfasil": [
-    "مد منفصل",
-    "Madd Munfasil"
-  ],
-  "warsh-madd_lazim": [
-    "مد لازم",
-    "Madd Lazim"
-  ],
-  "warsh-madd_arid_lissukun": [
-    "مد عارض للسكون",
-    "Madd Arid Lissukun"
-  ],
-  "warsh-madd_leen": [
-    "مد لين",
-    "Madd Leen"
-  ],
-  "warsh-madd_iwad": [
-    "مد عوض",
-    "Madd Iwad"
-  ],
-  "warsh-madd_badal": [
-    "مد بدل",
-    "Madd Badal"
-  ],
-  "warsh-madd_leen_mahmuz": [
-    "مد اللين المهموز",
-    "Madd Leen Mahmuz"
-  ],
-  "warsh-madd_silah": [
-    "مد صلة",
-    "Madd Silah"
-  ],
-  "warsh-madd_mim_al_jam": [
-    "مد ميم الجمع",
-    "Madd Mim al-Jam"
-  ],
-  "warsh-madd_yaa_zawaid": [
-    "مد ياءات الزوائد",
-    "Madd Yaa Zawaid"
-  ],
-  "warsh-ibdal_hamza": [
-    "إبدال الهمزة",
-    "Ibdal Hamza"
-  ],
-  "warsh-naql": [
-    "نقل",
-    "Naql"
-  ],
-  "warsh-hamza_wasl_silent": [
-    "حذف همزة الوصل",
-    "Hamza Wasl Silent"
-  ],
-  "warsh-orthographic_silence": [
-    "حرف لا ينطق به",
-    "Orthographic Silence"
-  ]
+    "warsh-ikhfaa": ["إخفاء", "Ikhfaa"],
+    "warsh-iqlab": ["إقلاب", "Iqlab"],
+    "warsh-idgham_bi_ghunnah": ["إدغام بغنة", "Idgham bi-Ghunnah"],
+    "warsh-idgham_bila_ghunnah": ["إدغام بلا غنة", "Idgham bila-Ghunnah"],
+    "warsh-ghunnah_mushaddadah": ["غنة مشددة", "Ghunnah Mushaddadah"],
+    "warsh-ikhfaa_shafawi": ["إخفاء شفوي", "Ikhfaa Shafawi"],
+    "warsh-idgham_shafawi": ["إدغام شفوي", "Idgham Shafawi"],
+    "warsh-idgham_mutamathilayn": ["إدغام متماثلين", "Idgham Mutamathilayn"],
+    "warsh-idgham_mutaqaribayn": ["إدغام متقاربين", "Idgham Mutaqaribayn"],
+    "warsh-idgham_mutajanisayn_kamil": [
+        "إدغام متجانسين كامل",
+        "Idgham Mutajanisayn Kamil"
+    ],
+    "warsh-idgham_mutajanisayn_naqis": [
+        "إدغام متجانسين ناقص",
+        "Idgham Mutajanisayn Naqis"
+    ],
+    "warsh-lam_shamsiyyah": ["لام شمسية", "Lam Shamsiyyah"],
+    "warsh-qalqala_sughra": ["قلقلة صغرى", "Qalqala Sughra"],
+    "warsh-qalqala_kubra": ["قلقلة كبرى", "Qalqala Kubra"],
+    "warsh-qalqala_akbar": ["قلقلة أكبر", "Qalqala Akbar"],
+    "warsh-taqlil": ["تقليل", "Taqlil"],
+    "warsh-imala": ["إمالة", "Imala"],
+    "warsh-tashil": ["تسهيل", "Tashil"],
+    "warsh-ishmam": ["إشمام", "Ishmam"],
+    "warsh-madd_tabii": ["مد طبيعي", "Madd Tabii"],
+    "warsh-madd_muttasil": ["مد متصل", "Madd Muttasil"],
+    "warsh-madd_munfasil": ["مد منفصل", "Madd Munfasil"],
+    "warsh-madd_lazim": ["مد لازم", "Madd Lazim"],
+    "warsh-madd_arid_lissukun": ["مد عارض للسكون", "Madd Arid Lissukun"],
+    "warsh-madd_leen": ["مد لين", "Madd Leen"],
+    "warsh-madd_iwad": ["مد عوض", "Madd Iwad"],
+    "warsh-madd_badal": ["مد بدل", "Madd Badal"],
+    "warsh-madd_leen_mahmuz": ["مد اللين المهموز", "Madd Leen Mahmuz"],
+    "warsh-madd_silah": ["مد صلة", "Madd Silah"],
+    "warsh-madd_mim_al_jam": ["مد ميم الجمع", "Madd Mim al-Jam"],
+    "warsh-madd_yaa_zawaid": ["مد ياءات الزوائد", "Madd Yaa Zawaid"],
+    "warsh-ibdal_hamza": ["إبدال الهمزة", "Ibdal Hamza"],
+    "warsh-naql": ["نقل", "Naql"],
+    "warsh-hamza_wasl_silent": ["حذف همزة الوصل", "Hamza Wasl Silent"],
+    "warsh-orthographic_silence": ["حرف لا ينطق به", "Orthographic Silence"]
 }

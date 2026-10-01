@@ -1,6 +1,5 @@
 import { eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import webpush from "web-push";
 import { env } from "@/data/env/server";
 import db from "@/drizzle/db";
 import {
@@ -20,6 +19,7 @@ import { calculateMeetingState } from "@/features/groups/server/meeting-schedule
 import {
     configureWebPush,
     isExpiredPushSubscription,
+    sendPushNotification,
 } from "@/features/notifications/server/web-push";
 
 export const runtime = "nodejs";
@@ -235,8 +235,9 @@ export async function GET(request: Request) {
         });
 
         try {
-            await webpush.sendNotification(
+            await sendPushNotification(
                 {
+                    userId: recipient.userId,
                     endpoint: recipient.endpoint,
                     keys: {
                         p256dh: recipient.p256dh,

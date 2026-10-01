@@ -1,9 +1,9 @@
 {
-  "commit": "f280f65e2ebca2c3096b620db021952a58d2ec9f",
-  "quranpediaVersion": "2026-09-29",
-  "scope": "Warsh via al-Azraq; upstream default variants; start/stop at each ayah",
-  "included": 6213,
-  "excluded": {
-    "67:10": "ValueError: Text does not align with Quranpedia"
-  }
+    "commit": "f280f65e2ebca2c3096b620db021952a58d2ec9f",
+    "quranpediaVersion": "2026-09-29",
+    "scope": "Warsh via al-Azraq; upstream default variants; start/stop at each ayah",
+    "included": 6213,
+    "excluded": {
+        "67:10": "ValueError: Text does not align with Quranpedia"
+    }
 }

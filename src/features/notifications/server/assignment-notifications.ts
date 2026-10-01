@@ -1,7 +1,6 @@
 import "server-only";
 
 import { and, eq } from "drizzle-orm";
-import webpush from "web-push";
 import db from "@/drizzle/db";
 import {
     assignmentNotificationDelivery,
@@ -11,7 +10,11 @@ import {
     pushSubscription,
     userSettings,
 } from "@/drizzle/schema";
-import { configureWebPush, isExpiredPushSubscription } from "./web-push";
+import {
+    configureWebPush,
+    isExpiredPushSubscription,
+    sendPushNotification,
+} from "./web-push";
 
 export type AssignmentNotificationKind =
     | "published"
@@ -259,8 +262,9 @@ export async function sendAssignmentNotification(
         }
 
         try {
-            await webpush.sendNotification(
+            await sendPushNotification(
                 {
+                    userId: assignment.assigneeId,
                     endpoint: subscription.endpoint,
                     keys: {
                         p256dh: subscription.p256dh,

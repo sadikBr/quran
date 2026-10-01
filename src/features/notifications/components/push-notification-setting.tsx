@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { getOwnedPushSubscription } from "../device-subscription";
 
 type NotificationStatus =
     | "checking"
@@ -72,10 +73,7 @@ export default function PushNotificationSetting({
                 return;
             }
 
-            const registration =
-                await navigator.serviceWorker.getRegistration("/");
-            const subscription =
-                await registration?.pushManager.getSubscription();
+            const subscription = await getOwnedPushSubscription();
             if (active) setStatus(subscription ? "enabled" : "disabled");
         }
 

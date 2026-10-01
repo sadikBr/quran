@@ -1,7 +1,6 @@
 import "server-only";
 
 import { and, eq } from "drizzle-orm";
-import webpush from "web-push";
 import db from "@/drizzle/db";
 import {
     groupMeetingStartDelivery,
@@ -10,7 +9,11 @@ import {
     pushSubscription,
     userSettings,
 } from "@/drizzle/schema";
-import { configureWebPush, isExpiredPushSubscription } from "./web-push";
+import {
+    configureWebPush,
+    isExpiredPushSubscription,
+    sendPushNotification,
+} from "./web-push";
 
 function notificationCopy(language: "ar" | "en", groupName: string) {
     if (language === "ar") {
@@ -49,6 +52,7 @@ export default async function sendMeetingStartNotifications({
     const recipients = await db
         .select({
             subscriptionId: pushSubscription.id,
+            userId: pushSubscription.userId,
             endpoint: pushSubscription.endpoint,
             p256dh: pushSubscription.p256dh,
             auth: pushSubscription.auth,
@@ -93,8 +97,9 @@ export default async function sendMeetingStartNotifications({
         }
 
         try {
-            await webpush.sendNotification(
+            await sendPushNotification(
                 {
+                    userId: recipient.userId,
                     endpoint: recipient.endpoint,
                     keys: {
                         p256dh: recipient.p256dh,

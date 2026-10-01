@@ -18,6 +18,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AccountRoleProvider } from "@/features/auth/account-role-provider";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
+import PushSubscriptionSync from "@/features/notifications/components/push-subscription-sync";
 import OfflineLibraryManager from "@/features/offline/components/offline-library-manager";
 import TourRunner from "@/features/onboarding/tour-runner";
 import ThemePreferenceSync from "@/features/settings/components/theme-preference-sync";
@@ -149,6 +150,9 @@ export default async function RootLayout({
                                 <ContentProtection />
                                 <ConnectionStatus />
                                 <OfflineLibraryManager />
+                                <PushSubscriptionSync
+                                    key={session?.session.id ?? "signed-out"}
+                                />
                                 <NavigationFeedback />
                                 <ThemePreferenceSync />
                                 <Toaster

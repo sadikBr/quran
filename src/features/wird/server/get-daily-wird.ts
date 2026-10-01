@@ -51,19 +51,34 @@ export default async function getDailyWird(
         : null;
 
     if (completedOn && completedOn < currentDate) {
-        const [navigation, surahs, activePlans] = await Promise.all([
+        // Fetch remote data before locking. Another request may advance the
+        // portion while this is in flight, so re-read it inside the transaction.
+        const [navigation, surahs] = await Promise.all([
             getQuranNavigationMeta(),
             getSurahsMeta(),
-            db
+        ]);
+        record = await db.transaction(async (tx) => {
+            const [current] = await tx
+                .select(columns)
+                .from(userWird)
+                .where(eq(userWird.userId, userId))
+                .for("update");
+            const today = getWirdDate();
+            if (
+                !current?.completedAt ||
+                getWirdDate(current.completedAt) >= today
+            )
+                return current;
+
+            // Match completion and plan editing: lock the portion before its plan.
+            const [plan] = await tx
                 .select()
                 .from(userKhatmahPlan)
                 .where(eq(userKhatmahPlan.userId, userId))
-                .limit(1),
-        ]);
-        const plan = activePlans[0];
-        if (!plan?.completedAt || record.nextGoal) {
+                .for("update");
+            if (plan?.completedAt && !current.nextGoal) return current;
             const nextCursor = Math.min(
-                record.targetEndGlobalAyah + 1,
+                current.targetEndGlobalAyah + 1,
                 TOTAL_QURAN_AYAHS,
             );
             const adaptive = plan?.isActive
@@ -75,13 +90,13 @@ export default async function getDailyWird(
                           measurement: plan.measurement as KhatmahMeasurement,
                           restDays: plan.restDays,
                       },
-                      currentDate,
+                      today,
                       navigation,
                       surahs,
                   )
                 : null;
             if (adaptive && adaptive.targetDate !== plan?.targetDate) {
-                await db
+                await tx
                     .update(userKhatmahPlan)
                     .set({ targetDate: adaptive.targetDate })
                     .where(eq(userKhatmahPlan.userId, userId));
@@ -89,36 +104,40 @@ export default async function getDailyWird(
             const nextTarget =
                 adaptive ??
                 buildWirdTarget(
-                    (record.nextGoal?.unit ?? record.unit) as WirdUnit,
-                    record.nextGoal?.amount ?? record.amount,
-                    record.targetEndGlobalAyah >= TOTAL_QURAN_AYAHS
+                    (current.nextGoal?.unit ?? current.unit) as WirdUnit,
+                    current.nextGoal?.amount ?? current.amount,
+                    current.targetEndGlobalAyah >= TOTAL_QURAN_AYAHS
                         ? 1
                         : nextCursor,
                     navigation,
                     surahs,
                 );
 
-            [record] = await db
+            const [advanced] = await tx
                 .update(userWird)
                 .set({
                     unit: plan?.isActive
                         ? plan.measurement
-                        : (record.nextGoal?.unit ?? record.unit),
+                        : (current.nextGoal?.unit ?? current.unit),
                     amount:
                         adaptive?.amount ??
-                        record.nextGoal?.amount ??
-                        record.amount,
+                        current.nextGoal?.amount ??
+                        current.amount,
                     targetStartGlobalAyah: nextTarget.startGlobalAyah,
                     targetEndGlobalAyah: nextTarget.endGlobalAyah,
                     progressGlobalAyah: null,
                     progressVerse: null,
-                    targetDate: adaptive?.scheduledDate ?? currentDate,
+                    targetDate: adaptive?.scheduledDate ?? today,
                     completedAt: null,
+                    updatedAt: sql`greatest(clock_timestamp(), ${userWird.updatedAt} + interval '1 microsecond')`,
                 })
                 .where(eq(userWird.userId, userId))
                 .returning(columns);
-        }
+            return advanced;
+        });
     }
+
+    if (!record) return null;
 
     const [start, end] = await Promise.all([
         location(record.targetStartGlobalAyah, arabicEdition),

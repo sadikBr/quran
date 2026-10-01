@@ -8,7 +8,7 @@ import {
     uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt } from "../helpers";
-import { user } from "./auth-schema";
+import { session, user } from "./auth-schema";
 import { groupMeeting, groupMeetingSession } from "./memorization-group";
 import { practiceAssignment } from "./practice-assignment";
 
@@ -19,6 +19,10 @@ export const pushSubscription = pgTable(
         userId: text("user_id")
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
+        // Legacy subscriptions stay unbound until the device opts in again.
+        sessionId: text("session_id").references(() => session.id, {
+            onDelete: "cascade",
+        }),
         endpoint: text("endpoint").notNull(),
         p256dh: text("p256dh").notNull(),
         auth: text("auth").notNull(),
@@ -32,6 +36,7 @@ export const pushSubscription = pgTable(
     (table) => [
         uniqueIndex("push_subscription_endpoint_idx").on(table.endpoint),
         index("push_subscription_user_idx").on(table.userId),
+        index("push_subscription_session_idx").on(table.sessionId),
     ],
 );
 

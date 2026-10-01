@@ -130,6 +130,30 @@ the download state can be checked or refreshed from Settings.
 Quran text remains available without a connection at `/offline`. Audio, tafsir,
 account updates, bookmarks, and progress syncing still require the network.
 
+Offline readiness includes the reader's scripts, styles and fonts. A failed
+download keeps the previous cached reader available and does not report the new
+version as ready.
+
+## Push subscription security
+
+Apply migration `0025_push_session_ownership` with `bun run db:migrate` before
+deploying this version. It adds a nullable session reference to device push
+subscriptions; deleting or revoking the session removes its subscriptions.
+Existing subscriptions have no verified session and must be enabled again from
+Settings after the upgrade. Signing out also clears local subscriptions and
+displayed notifications. Queued notifications are displayed only after checking
+that their original session is still signed in on the device.
+
+Push destinations are restricted to supported Google, Mozilla, Apple and Windows
+browser push services, and all sends use a ten-second socket timeout. New push
+providers must be explicitly added to the allowlist.
+
+Run `bun test scripts` for regression checks. To test migration, concurrent Wird
+rollover and push revocation against PostgreSQL, set `SAFETY_TEST_DATABASE_URL`
+to an **empty disposable database whose name ends in `_safety_tests`**, then run
+`bun test scripts/safety-fixes.integration.test.mjs`. This test refuses a
+nonempty database and never uses the application's database environment variables.
+
 ## Group video meetings
 
 Group creators choose one or more weekday/time combinations and a timezone.

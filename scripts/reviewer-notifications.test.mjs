@@ -58,10 +58,6 @@ async function deliver(kind, overrides = {}) {
     const modules = {
         "server-only": {},
         "drizzle-orm": { and: (...v) => v, eq: (...v) => v },
-        "web-push": {
-            sendNotification: async (_, payload) =>
-                messages.push(JSON.parse(payload)),
-        },
         "@/drizzle/db": db,
         "@/drizzle/schema": Object.fromEntries(
             [
@@ -75,6 +71,8 @@ async function deliver(kind, overrides = {}) {
         ),
         "./web-push": {
             configureWebPush: () => true,
+            sendPushNotification: async (_, payload) =>
+                messages.push(JSON.parse(payload)),
             isExpiredPushSubscription: () => false,
         },
     };
