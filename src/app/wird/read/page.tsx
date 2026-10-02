@@ -32,7 +32,7 @@ export default async function WirdReaderPage() {
 
     return (
         <main
-            data-wird-scroll-container
+            data-quran-scroll-container
             lang={preferences.language}
             dir={getTextDirection(preferences.language)}
             className={cn(

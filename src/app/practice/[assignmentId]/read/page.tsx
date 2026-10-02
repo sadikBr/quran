@@ -30,6 +30,7 @@ export default async function PracticeReaderPage({
 
     return (
         <main
+            data-quran-scroll-container
             lang={preferences.language}
             dir={getTextDirection(preferences.language)}
             className={cn(
