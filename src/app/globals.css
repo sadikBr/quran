@@ -93,7 +93,7 @@
     }
 }
 
-@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *, .ruby *, .obsidian *, .lagoon *, .copper *));
+@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *, .ruby *, .obsidian *, .lagoon *, .copper *, .midnight *));
 
 /* Shared with the halaqa cards. Keep reading typography and theme colors local. */
 @utility app-card {
@@ -447,6 +447,7 @@
 }
 
 .dark,
+.midnight,
 .copper,
 .emerald,
 .sapphire,
@@ -1399,6 +1400,67 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
     }
 }
 
+/* Midnight Bloom matches the companion terminal and editor palettes. */
+.midnight {
+    color-scheme: dark;
+    --background: #171b24;
+    --foreground: #d8dee9;
+    --card: #1e2430;
+    --card-foreground: #d8dee9;
+    --popover: #232a38;
+    --popover-foreground: #d8dee9;
+    --primary: #8caaee;
+    --primary-foreground: #171b24;
+    --secondary: #2b3547;
+    --secondary-foreground: #d8dee9;
+    --muted: #202735;
+    --muted-foreground: #a0abc0;
+    --accent: #302d42;
+    --accent-foreground: #dcbaf2;
+    --destructive: #e78284;
+    --destructive-foreground: #171b24;
+    --border: #354158;
+    --input: #68758b;
+    --ring: #b7a5e8;
+    --division: #81c8be;
+    --chart-1: #8caaee;
+    --chart-2: #81c8be;
+    --chart-3: #b7a5e8;
+    --chart-4: #a6d189;
+    --chart-5: #e5c890;
+    --sidebar: #141820;
+    --sidebar-foreground: #d8dee9;
+    --sidebar-primary: #8caaee;
+    --sidebar-primary-foreground: #171b24;
+    --sidebar-accent: #2d3a52;
+    --sidebar-accent-foreground: #adc5ff;
+    --sidebar-border: #354158;
+    --sidebar-ring: #b7a5e8;
+}
+
+.midnight .home-landscape {
+    background-color: #54658a;
+    background-blend-mode: luminosity;
+}
+.midnight .home-landscape-shade {
+    background-image:
+        radial-gradient(ellipse at 75% 12%, #b7a5e81a, transparent 60%),
+        linear-gradient(90deg, #171b24eb, #171b2480 45%, #171b2414);
+}
+.midnight .home-session-shade {
+    background: transparent;
+}
+@media (max-width: 1023px) {
+    .midnight .home-landscape-shade {
+        background-image: linear-gradient(
+            180deg,
+            #171b2426,
+            #171b2480 45%,
+            #171b24eb
+        );
+    }
+}
+
 .lagoon {
     color-scheme: dark;
     --background: #0e252d;
@@ -1702,7 +1764,8 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
 [data-tajweed="warsh-madd_lazim"] {
     --tajweed-color: #8c2672;
 }
-.dark [data-tajweed] {
+.dark [data-tajweed],
+.midnight [data-tajweed] {
     color: color-mix(in srgb, var(--tajweed-color) 55%, white);
 }
 

@@ -37,6 +37,7 @@
             }
         },
         "theme": {
+            "midnight": "Midnight Bloom",
             "copper": "Copper Night",
             "celadon": "Celadon",
             "quickHint": "Choose a theme. Your selection applies and saves automatically.",

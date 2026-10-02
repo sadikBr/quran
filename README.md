@@ -40,6 +40,12 @@ Quranpedia supplies the Arabic surah metadata, page and division assignments, an
 
 Run `bun test scripts/quranpedia-data.test.mjs scripts/quranpedia-reader.test.mjs` for provider and reader regression checks. `bun scripts/verify-quranpedia.mjs` additionally validates the current public upstream datasets (requires network access).
 
+## Midnight Bloom theme
+
+Choose **Midnight Bloom** (أزهار منتصف الليل) in Settings → Appearance. The theme uses the same navy, soft blue, lavender, and teal palette as the companion terminal and editor themes, with brighter tajweed colors for reading on a dark background.
+
+Run `bun run db:migrate` before deploying to an existing database. Migration `0029_midnight_bloom_theme` adds the theme to the saved-preference enum.
+
 ## Automatic memorization tracking
 
 Learners review and lock their starting hizbs at `/memorization`. Existing manual selections are prefilled; an empty starting record is valid. One changed correction is allowed immediately after setup, until three hours have elapsed. Cancelling, saving an unchanged selection, and failed saves do not consume it. Later requests appear in the administrator’s `/admin/memorization` inbox. Approval grants one saved correction, available until used.
