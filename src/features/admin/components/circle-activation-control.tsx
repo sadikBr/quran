@@ -57,7 +57,7 @@ export default function CircleActivationControl({
         }
     }
     return (
-        <div className="mt-auto space-y-3 bg-muted/20 p-4 sm:p-5">
+        <div className="admin-status-panel mt-auto space-y-3 bg-muted/20 p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <span
                     className={`max-w-full rounded-full px-3 py-1.5 text-xs font-medium leading-5 ${isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}

@@ -104,6 +104,208 @@
     @apply border-t border-border/50 bg-muted/20 p-4 sm:p-5;
 }
 
+/* Platform admin surfaces: a quieter, more editorial dashboard treatment. */
+.admin-workspace {
+    background-image:
+        radial-gradient(
+            ellipse 75% 36% at 50% 0%,
+            color-mix(in oklab, var(--primary) 10%, transparent),
+            transparent 72%
+        ),
+        linear-gradient(
+            180deg,
+            color-mix(in oklab, var(--background) 94%, var(--primary) 6%),
+            var(--background) 26rem
+        );
+}
+
+.admin-page-heading {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--border) 72%, var(--primary));
+    border-radius: 1.5rem;
+    padding: 1.25rem 1.25rem 1.5rem;
+    background:
+        linear-gradient(
+            110deg,
+            color-mix(in oklab, var(--primary) 11%, transparent),
+            transparent 44%
+        ), color-mix(in oklab, var(--card) 92%, transparent);
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-page-heading::before {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 7rem;
+    height: 7rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--primary) 10%, transparent);
+    content: "";
+    filter: blur(1px);
+    opacity: 0.75;
+    transform: translate(-38%, -48%);
+    z-index: -1;
+}
+
+:where(.admin-page-heading > *) {
+    position: relative;
+    z-index: 1;
+}
+
+.admin-stat-card {
+    min-width: 0;
+    border: 1px solid color-mix(in oklab, var(--border) 72%, transparent);
+    border-radius: 1.15rem;
+    padding: 1rem 1.1rem;
+    background: color-mix(in oklab, var(--card) 82%, transparent);
+    box-shadow: var(--shadow-xs);
+    transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.admin-stat-card:hover {
+    border-color: color-mix(in oklab, var(--primary) 35%, var(--border));
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+}
+
+.admin-stat-icon {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.7rem;
+    background: color-mix(in oklab, var(--primary) 12%, transparent);
+    color: var(--primary);
+}
+
+.admin-stat-icon-active {
+    background: color-mix(in oklab, #34d399 13%, transparent);
+    color: #34d399;
+}
+
+.admin-stat-icon-review {
+    background: color-mix(in oklab, #fbbf24 14%, transparent);
+    color: #fbbf24;
+}
+
+.admin-feature-card {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            105deg,
+            color-mix(in oklab, var(--primary) 8%, transparent),
+            transparent 58%
+        ), color-mix(in oklab, var(--card) 86%, transparent);
+}
+
+.admin-feature-card::after {
+    position: absolute;
+    inset-inline-end: -2rem;
+    bottom: -3rem;
+    width: 8rem;
+    height: 8rem;
+    border: 1px solid color-mix(in oklab, var(--primary) 18%, transparent);
+    border-radius: 999px;
+    content: "";
+    pointer-events: none;
+}
+
+.admin-create-card[open] {
+    border-color: color-mix(in oklab, var(--primary) 42%, var(--border));
+    box-shadow: var(--shadow-md);
+}
+
+:where(.admin-create-card) > summary {
+    position: relative;
+}
+
+.admin-create-card > summary::before {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 0.2rem;
+    background: var(--primary);
+    content: "";
+    opacity: 0;
+    transition: opacity 180ms ease;
+}
+
+.admin-create-card[open] > summary::before {
+    opacity: 0.9;
+}
+
+.admin-circle-card {
+    position: relative;
+    border-color: color-mix(in oklab, var(--border) 80%, transparent);
+    background: color-mix(in oklab, var(--card) 94%, transparent);
+    transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.admin-circle-card::before {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 1.2rem;
+    height: 0.15rem;
+    border-radius: 999px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in oklab, var(--primary) 72%, transparent),
+        transparent
+    );
+    content: "";
+    opacity: 0.8;
+}
+
+.admin-circle-card:hover {
+    border-color: color-mix(in oklab, var(--primary) 34%, var(--border));
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.admin-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    padding: 0.25rem 0.55rem;
+    background: color-mix(in oklab, var(--muted) 72%, transparent);
+    color: var(--muted-foreground);
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.admin-status-chip-active {
+    background: color-mix(in oklab, #34d399 13%, transparent);
+    color: #34d399;
+}
+
+.admin-status-panel {
+    border-top: 1px solid color-mix(in oklab, var(--border) 62%, transparent);
+    background: color-mix(in oklab, var(--muted) 38%, transparent);
+}
+
+.admin-circle-footer {
+    background: color-mix(in oklab, var(--muted) 28%, transparent);
+}
+
+@media (width >= 40rem) {
+    .admin-page-heading {
+        padding: 1.5rem 1.75rem 1.75rem;
+    }
+}
+
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);

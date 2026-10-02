@@ -21,7 +21,7 @@ export default function AdminWorkspace({
             lang={language}
             dir={language === "ar" ? "rtl" : "ltr"}
             className={cn(
-                "relative isolate min-h-dvh overflow-x-clip bg-background",
+                "admin-workspace relative isolate min-h-dvh overflow-x-clip bg-background",
                 language === "ar" && "arabic-ui",
             )}
         >
@@ -36,8 +36,9 @@ export default function AdminWorkspace({
                         title={title}
                         description={description}
                         icon={<ShieldCheck />}
+                        className="admin-page-heading"
                     />
-                    <div className="mt-6 min-w-0 space-y-6 sm:mt-8 sm:space-y-8">
+                    <div className="admin-content mt-6 min-w-0 space-y-6 sm:mt-8 sm:space-y-8">
                         {children}
                     </div>
                 </div>

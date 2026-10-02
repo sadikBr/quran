@@ -37,7 +37,7 @@ export default function MemorizationCorrectionReview({
         }
     }
     return (
-        <div className="mt-4 space-y-3">
+        <div className="space-y-4">
             <label htmlFor={`review-${requestId}`} className="block text-sm">
                 {t("note")}
             </label>
@@ -46,6 +46,7 @@ export default function MemorizationCorrectionReview({
                 value={note}
                 maxLength={1000}
                 disabled={pending}
+                className="min-h-24 bg-background/80"
                 onChange={(event) => setNote(event.target.value)}
             />
             <div className="flex flex-wrap gap-2">

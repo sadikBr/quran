@@ -163,7 +163,7 @@ export default function AppPrimaryNav() {
     ];
     // A single ordered model and rendering path for every header and screen size.
     const sections = isAdmin
-        ? [{ title: "overview", links: ["/admin", "/guide"] }]
+        ? [{ title: "overview", links: ["/admin"] }]
         : [
               {
                   title: "overview",

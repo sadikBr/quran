@@ -1,4 +1,5 @@
 import { asc, desc, eq, sql } from "drizzle-orm";
+import { BookOpen, BookOpenCheck, CheckCircle2, History } from "lucide-react";
 import Link from "next/link";
 import { createTranslator } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,24 @@ import MemorizationCorrectionReview from "@/features/admin/components/memorizati
 import { requirePlatformAdmin } from "@/features/auth/permissions";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages } from "@/i18n/config";
+
+function HizbBadges({ hizbs, empty }: { hizbs: number[]; empty: string }) {
+    if (!hizbs.length) {
+        return <p className="mt-3 text-sm text-muted-foreground">{empty}</p>;
+    }
+    return (
+        <div dir="ltr" className="mt-3 flex flex-wrap gap-1.5">
+            {hizbs.map((hizb) => (
+                <span
+                    key={hizb}
+                    className="inline-flex min-w-9 items-center justify-center rounded-lg bg-background/75 px-2.5 py-1.5 font-mono text-sm font-medium text-foreground ring-1 ring-border/60"
+                >
+                    {hizb}
+                </span>
+            ))}
+        </div>
+    );
+}
 
 export default async function MemorizationRequestsPage({
     searchParams,
@@ -52,63 +71,118 @@ export default async function MemorizationRequestsPage({
             title={t("title")}
             description={t("description")}
         >
-            <Button asChild variant="outline">
-                <Link href="/admin">{t("back")}</Link>
-            </Button>
             {!requests.length && (
-                <p className="app-card p-6 text-muted-foreground">
-                    {t("empty")}
-                </p>
+                <div className="app-card flex items-center gap-3 p-5 sm:p-6">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <BookOpenCheck aria-hidden="true" className="size-5" />
+                    </span>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                        {t("empty")}
+                    </p>
+                </div>
             )}
-            {requests.slice(0, 20).map(({ request, name, changes }) => (
-                <article key={request.id} className="app-card space-y-3 p-5">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                        <h2 className="font-semibold">
-                            <bdi>{name}</bdi>
-                        </h2>
-                        <span className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">
-                            {t(request.status)}
-                        </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                        {request.createdAt.toLocaleString(
-                            preferences.language,
-                            { timeZone: "UTC" },
-                        )}{" "}
-                        UTC
-                    </p>
-                    <p className="whitespace-pre-line text-sm leading-7">
-                        {request.reason}
-                    </p>
-                    {request.reviewNote && (
-                        <p className="rounded-xl bg-muted/40 p-3 text-sm leading-7">
-                            {request.reviewNote}
-                        </p>
-                    )}
-                    {request.status === "pending" && (
-                        <MemorizationCorrectionReview requestId={request.id} />
-                    )}
-                    {changes.map((change) => (
-                        <div
-                            key={JSON.stringify(change)}
-                            className="border-t border-border/50 pt-3 text-sm leading-7"
+            {requests.length > 0 && (
+                <div className="space-y-4">
+                    {requests.slice(0, 20).map(({ request, name, changes }) => (
+                        <article
+                            key={request.id}
+                            className="app-card overflow-hidden"
                         >
-                            <p>
-                                {t("before", {
-                                    hizbs:
-                                        change.previousHizbs.join("، ") ||
-                                        t("none"),
-                                })}
-                            </p>
-                            <p>
-                                {t("after", {
-                                    hizbs: change.hizbs.join("، ") || t("none"),
-                                })}
-                            </p>
-                        </div>
+                            <header className="flex items-start gap-3 p-4 sm:gap-4 sm:p-5">
+                                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                    <BookOpenCheck
+                                        aria-hidden="true"
+                                        className="size-5"
+                                    />
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                    <h2 className="break-words font-semibold">
+                                        <bdi>{name}</bdi>
+                                    </h2>
+                                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                        {request.createdAt.toLocaleString(
+                                            preferences.language,
+                                            { timeZone: "UTC" },
+                                        )}{" "}
+                                        UTC
+                                    </p>
+                                </div>
+                                <span className="shrink-0 rounded-full bg-primary/10 px-3 py-1.5 text-xs text-primary">
+                                    {t(request.status)}
+                                </span>
+                            </header>
+
+                            <div className="border-t border-border/50 bg-muted/15 px-4 py-4 sm:px-5 sm:py-5">
+                                <p className="whitespace-pre-line text-sm leading-7">
+                                    {request.reason}
+                                </p>
+                                {request.reviewNote && (
+                                    <p className="mt-4 rounded-xl border border-border/50 bg-background/45 p-3 text-sm leading-7 text-muted-foreground">
+                                        {request.reviewNote}
+                                    </p>
+                                )}
+                            </div>
+
+                            {changes.length > 0 && (
+                                <section className="border-t border-border/50 bg-background/20 px-4 py-4 sm:px-5 sm:py-5">
+                                    <div className="flex items-center gap-2 text-sm font-semibold">
+                                        <History
+                                            aria-hidden="true"
+                                            className="size-4 text-primary"
+                                        />
+                                        <h3>{t("changeHistory")}</h3>
+                                    </div>
+                                    <div className="mt-3 space-y-3">
+                                        {changes.map((change) => (
+                                            <div
+                                                key={JSON.stringify(change)}
+                                                className="grid gap-3 sm:grid-cols-2"
+                                            >
+                                                <div className="rounded-xl border border-border/50 bg-card/60 p-3">
+                                                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                                                        <BookOpen
+                                                            aria-hidden="true"
+                                                            className="size-3.5"
+                                                        />
+                                                        {t("previousHizbs")}
+                                                    </div>
+                                                    <HizbBadges
+                                                        hizbs={
+                                                            change.previousHizbs
+                                                        }
+                                                        empty={t("none")}
+                                                    />
+                                                </div>
+                                                <div className="rounded-xl border border-primary/20 bg-primary/[0.06] p-3">
+                                                    <div className="flex items-center gap-2 text-xs font-medium text-primary">
+                                                        <CheckCircle2
+                                                            aria-hidden="true"
+                                                            className="size-3.5"
+                                                        />
+                                                        {t("correctedHizbs")}
+                                                    </div>
+                                                    <HizbBadges
+                                                        hizbs={change.hizbs}
+                                                        empty={t("none")}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {request.status === "pending" && (
+                                <div className="border-t border-border/50 bg-muted/20 px-4 py-4 sm:px-5 sm:py-5">
+                                    <MemorizationCorrectionReview
+                                        requestId={request.id}
+                                    />
+                                </div>
+                            )}
+                        </article>
                     ))}
-                </article>
-            ))}
+                </div>
+            )}
             <div className="flex gap-3">
                 {page > 1 && (
                     <Button asChild variant="outline">
