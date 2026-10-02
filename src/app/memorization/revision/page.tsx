@@ -1,12 +1,10 @@
 import { CalendarDays } from "lucide-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createTranslator } from "next-intl";
 import PageBackground from "@/components/page-background";
 import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
-import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
@@ -51,9 +49,6 @@ export default async function RevisionPage() {
                         description={t("intro")}
                         icon={<CalendarDays />}
                     />
-                    <Button asChild variant="outline" className="mt-5">
-                        <Link href="/memorization">{t("map")}</Link>
-                    </Button>
                     <WeeklyRevision
                         view={view}
                         defaultTimezone={preferences.adhkarTimezone}

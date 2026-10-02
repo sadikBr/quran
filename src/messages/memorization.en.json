@@ -259,7 +259,19 @@
             "day5": "Friday",
             "day6": "Saturday",
             "day7": "Sunday",
-            "amount3": "Three quarters of a hizb"
+            "amount3": "Three quarters of a hizb",
+            "editor": {
+                "intro": "Choose your days and pace, then preview the ayahs.",
+                "chooseDays": "Choose at least one revision day.",
+                "reading": "Reading",
+                "reminderHint": "Optional, at a time that suits you.",
+                "summary": "Your plan at a glance",
+                "daysPerWeek": "revision days / week",
+                "weeklyMaximum": "hizbs / week, at most",
+                "limitHint": "The actual ranges depend on your memorized hizbs and the days remaining.",
+                "eachDay": " per day",
+                "previewHint": "Preview your ayah ranges, then enable the plan when you’re ready."
+            }
         },
         "overview": {
             "title": "Your memorization",

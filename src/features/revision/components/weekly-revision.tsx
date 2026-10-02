@@ -6,7 +6,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import type { RevisionSettings, ScheduledRange } from "../schedule";
 import {
     pauseWeeklyRevision,
@@ -14,6 +13,7 @@ import {
     saveWeeklyRevision,
 } from "../server/actions";
 import type { RevisionPreview, RevisionView } from "../server/service";
+import RevisionPlanSettings from "./revision-plan-settings";
 
 export default function WeeklyRevision({
     view,
@@ -244,272 +244,142 @@ export default function WeeklyRevision({
                         </section>
                     )}
                     {editing && (
-                        <section className="app-card space-y-5 p-5 sm:p-6">
-                            <h2 className="font-semibold">{t("settings")}</h2>
-                            <fieldset disabled={pending} className="space-y-3">
-                                <legend className="mb-3 text-sm font-medium">
-                                    {t("days")}
-                                </legend>
-                                <div className="flex flex-wrap gap-2">
-                                    {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-                                        <label
-                                            key={day}
-                                            className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm ${settings.days.includes(day) ? "border-primary/40 bg-primary/10" : "border-border"}`}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={settings.days.includes(
-                                                    day,
-                                                )}
-                                                onChange={() =>
-                                                    change({
-                                                        days: settings.days.includes(
-                                                            day,
-                                                        )
-                                                            ? settings.days.filter(
-                                                                  (d) =>
-                                                                      d !== day,
-                                                              )
-                                                            : [
-                                                                  ...settings.days,
-                                                                  day,
-                                                              ].sort(),
-                                                    })
-                                                }
-                                                className="accent-primary"
-                                            />
-                                            {t(`day${day}`)}
-                                        </label>
-                                    ))}
-                                </div>
-                            </fieldset>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <label className="space-y-2 text-sm">
-                                    <span>{t("amount")}</span>
-                                    <select
-                                        disabled={pending}
-                                        value={settings.quartersPerDay}
-                                        onChange={(e) =>
-                                            change({
-                                                quartersPerDay: Number(
-                                                    e.target.value,
-                                                ) as 1 | 2 | 4,
-                                            })
-                                        }
-                                        className="flex h-11 w-full rounded-xl border border-input bg-background px-3"
-                                    >
-                                        {[1, 2, 4].map((q) => (
-                                            <option key={q} value={q}>
-                                                {t(`amount${q}`)}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
-                                <label
-                                    htmlFor="revision-timezone"
-                                    className="space-y-2 text-sm"
-                                >
-                                    <span>{t("timezone")}</span>
-                                    <Input
-                                        id="revision-timezone"
-                                        disabled={pending}
-                                        value={settings.timezone}
-                                        onChange={(e) =>
-                                            change({ timezone: e.target.value })
-                                        }
-                                        placeholder="Africa/Casablanca"
-                                        dir="ltr"
-                                    />
-                                </label>
-                            </div>
-                            <label className="block space-y-2 text-sm">
-                                <span>{t("reading")}</span>
-                                <select
-                                    disabled={pending}
-                                    value={settings.riwayah}
-                                    onChange={(e) =>
-                                        change({
-                                            riwayah: e.target.value as
-                                                | "hafs"
-                                                | "warsh",
-                                        })
-                                    }
-                                    className="flex h-11 w-full rounded-xl border border-input bg-background px-3"
-                                >
-                                    <option value="hafs">{t("hafs")}</option>
-                                    <option value="warsh">{t("warsh")}</option>
-                                </select>
-                            </label>
-                            <div className="space-y-3">
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input
-                                        type="checkbox"
-                                        disabled={pending}
-                                        checked={settings.reminderTime !== null}
-                                        onChange={(e) =>
-                                            change({
-                                                reminderTime: e.target.checked
-                                                    ? "19:00"
-                                                    : null,
-                                            })
-                                        }
-                                        className="accent-primary"
-                                    />
-                                    {t("reminder")}
-                                </label>
-                                {settings.reminderTime !== null && (
-                                    <>
-                                        <label
-                                            htmlFor="revision-reminder-time"
-                                            className="block space-y-2 text-sm"
-                                        >
-                                            <span>{t("reminderTime")}</span>
-                                            <Input
-                                                id="revision-reminder-time"
-                                                type="time"
-                                                disabled={pending}
-                                                value={settings.reminderTime}
-                                                onChange={(e) =>
-                                                    change({
-                                                        reminderTime:
-                                                            e.target.value,
-                                                    })
-                                                }
-                                            />
-                                        </label>
-                                        <p className="text-xs leading-6 text-muted-foreground">
-                                            {t("reminderHint")}{" "}
-                                            <Link
-                                                href="/settings"
-                                                className="text-primary underline"
-                                            >
-                                                {t("deviceSettings")}
-                                            </Link>
-                                        </p>
-                                    </>
-                                )}
-                            </div>
-                            <p className="text-sm leading-7 text-muted-foreground">
-                                {t("previewHint")}
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                                <Button
-                                    disabled={
-                                        pending ||
-                                        !settings.days.length ||
-                                        !settings.timezone
-                                    }
-                                    onClick={() =>
-                                        act(async () => {
-                                            const r =
-                                                await previewWeeklyRevision(
-                                                    settings,
-                                                );
-                                            if (!r.success)
-                                                toast.error(t("invalid"));
-                                            else setPreview(r.preview);
-                                        })
-                                    }
-                                >
-                                    {t("preview")}
-                                </Button>
-                                {view.plan && (
-                                    <Button
-                                        variant="outline"
-                                        disabled={pending}
-                                        onClick={() => {
-                                            setEditing(false);
-                                            setPreview(null);
-                                        }}
-                                    >
-                                        {t("cancel")}
-                                    </Button>
-                                )}
-                            </div>
+                        <>
+                            <RevisionPlanSettings
+                                settings={settings}
+                                pending={pending}
+                                hasPlan={Boolean(view.plan)}
+                                onChange={change}
+                                onPreview={() =>
+                                    act(async () => {
+                                        const r =
+                                            await previewWeeklyRevision(
+                                                settings,
+                                            );
+                                        if (!r.success)
+                                            toast.error(t("invalid"));
+                                        else setPreview(r.preview);
+                                    })
+                                }
+                                onCancel={() => {
+                                    setEditing(false);
+                                    setPreview(null);
+                                }}
+                            />
                             {preview && (
-                                <div className="space-y-4 rounded-xl border border-primary/25 bg-primary/5 p-4">
-                                    <h3 className="font-semibold">
-                                        {t(
-                                            preview.nextWeek
-                                                ? "nextPreview"
-                                                : "currentPreview",
+                                <section
+                                    aria-labelledby="revision-preview-title"
+                                    aria-live="polite"
+                                    className="rounded-3xl border border-primary/25 bg-primary/[0.04] p-5 sm:p-6"
+                                >
+                                    <div className="flex flex-wrap items-start justify-between gap-3">
+                                        <div>
+                                            <p className="text-xs font-medium uppercase tracking-[0.16em] text-primary">
+                                                {t("preview")}
+                                            </p>
+                                            <h2
+                                                id="revision-preview-title"
+                                                className="mt-1 text-lg font-semibold"
+                                            >
+                                                {t(
+                                                    preview.nextWeek
+                                                        ? "nextPreview"
+                                                        : "currentPreview",
+                                                )}
+                                            </h2>
+                                        </div>
+                                        <span className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
+                                            {t("pool", {
+                                                count: preview.completedHizbs,
+                                            })}
+                                        </span>
+                                    </div>
+                                    <div className="mt-5">
+                                        {!preview.ready ? (
+                                            <p className="rounded-2xl border border-border/40 bg-background/20 p-4 text-sm">
+                                                {t("noMemorization")}
+                                            </p>
+                                        ) : !preview.sessions.length ? (
+                                            <p className="rounded-2xl border border-border/40 bg-background/20 p-4 text-sm">
+                                                {t("noDaysLeft")}
+                                            </p>
+                                        ) : (
+                                            <ol className="grid gap-2 sm:grid-cols-2">
+                                                {preview.sessions.map(
+                                                    (item) => (
+                                                        <li
+                                                            key={item.ordinal}
+                                                            className="rounded-2xl border border-border/40 bg-background/20 p-4"
+                                                        >
+                                                            <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                                                                <span className="font-medium text-foreground">
+                                                                    {date(
+                                                                        item.scheduledDate,
+                                                                    )}
+                                                                </span>
+                                                                <span>
+                                                                    {t(
+                                                                        `amount${item.quarters.length}`,
+                                                                    )}
+                                                                </span>
+                                                            </div>
+                                                            <p className="mt-2 text-sm leading-7">
+                                                                {range(item)}
+                                                            </p>
+                                                        </li>
+                                                    ),
+                                                )}
+                                            </ol>
                                         )}
-                                    </h3>
-                                    <p className="text-sm">
-                                        {t("pool", {
-                                            count: preview.completedHizbs,
-                                        })}
-                                    </p>
-                                    {!preview.ready ? (
-                                        <p className="text-sm">
-                                            {t("noMemorization")}
+                                    </div>
+                                    <div className="mt-5 flex flex-col gap-4 border-t border-primary/15 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                        <p className="text-xs leading-6 text-muted-foreground">
+                                            {t("capacityHint")}
                                         </p>
-                                    ) : !preview.sessions.length ? (
-                                        <p className="text-sm">
-                                            {t("noDaysLeft")}
-                                        </p>
-                                    ) : (
-                                        <ol className="space-y-3">
-                                            {preview.sessions.map((item) => (
-                                                <li
-                                                    key={item.ordinal}
-                                                    className="border-b border-border/50 pb-3 text-sm leading-7"
-                                                >
-                                                    <strong>
-                                                        {date(
-                                                            item.scheduledDate,
-                                                        )}
-                                                    </strong>
-                                                    <p>{range(item)}</p>
-                                                    <span className="text-xs text-muted-foreground">
-                                                        {t(
-                                                            `amount${item.quarters.length}`,
-                                                        )}
-                                                    </span>
-                                                </li>
-                                            ))}
-                                        </ol>
-                                    )}
-                                    <p className="text-xs leading-6 text-muted-foreground">
-                                        {t("capacityHint")}
-                                    </p>
-                                    <Button
-                                        disabled={pending || !preview.ready}
-                                        onClick={() =>
-                                            act(async () => {
-                                                const r =
-                                                    await saveWeeklyRevision({
-                                                        settings,
-                                                        key: preview.key,
-                                                        confirmed: true,
-                                                    });
-                                                if (!r.success) {
-                                                    toast.error(
-                                                        t(
-                                                            r.reason === "stale"
-                                                                ? "stale"
-                                                                : "failed",
-                                                        ),
-                                                    );
-                                                    setPreview(null);
-                                                } else {
-                                                    setEditing(false);
-                                                    setPreview(null);
-                                                    toast.success(t("saved"));
-                                                    router.refresh();
-                                                }
-                                            })
-                                        }
-                                    >
-                                        {t(
-                                            view.plan?.enabled
-                                                ? "save"
-                                                : "enable",
-                                        )}
-                                    </Button>
-                                </div>
+                                        <Button
+                                            disabled={pending || !preview.ready}
+                                            onClick={() =>
+                                                act(async () => {
+                                                    const r =
+                                                        await saveWeeklyRevision(
+                                                            {
+                                                                settings,
+                                                                key: preview.key,
+                                                                confirmed: true,
+                                                            },
+                                                        );
+                                                    if (!r.success) {
+                                                        toast.error(
+                                                            t(
+                                                                r.reason ===
+                                                                    "stale"
+                                                                    ? "stale"
+                                                                    : "failed",
+                                                            ),
+                                                        );
+                                                        setPreview(null);
+                                                    } else {
+                                                        setEditing(false);
+                                                        setPreview(null);
+                                                        toast.success(
+                                                            t("saved"),
+                                                        );
+                                                        router.refresh();
+                                                    }
+                                                })
+                                            }
+                                            className="shrink-0"
+                                        >
+                                            {t(
+                                                view.plan?.enabled
+                                                    ? "save"
+                                                    : "enable",
+                                            )}
+                                        </Button>
+                                    </div>
+                                </section>
                             )}
-                        </section>
+                        </>
                     )}
                     {view.week && (
                         <section
