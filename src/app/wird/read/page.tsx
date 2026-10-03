@@ -56,7 +56,7 @@ export default async function WirdReaderPage() {
                     initialPosition={wird.progressVerse}
                     initialRevision={wird.revision ?? ""}
                     targetDate={wird.targetDate}
-                    draftKey={`quran:wird-draft:v1:${session.user.id}:${wird.targetDate}:${wird.start.globalAyahNumber}:${wird.end.globalAyahNumber}:${preferences.riwayah}`}
+                    draftKey={`quran:wird-draft:v1:${session.user.id}:${wird.targetDate}:${wird.start.globalAyahNumber}:${wird.end.globalAyahNumber}:${preferences.riwayah}${session.user.dataResetAt ? `:${session.user.dataResetAt.getTime()}` : ""}`}
                     riwayah={preferences.riwayah}
                     showTranslation={preferences.showTranslation}
                     continuousRecitation={preferences.continuousRecitation}

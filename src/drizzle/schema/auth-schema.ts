@@ -22,12 +22,21 @@ export const user = pgTable(
         role: text("role", { enum: ["admin", "member"] })
             .notNull()
             .default("member"),
+        suspendedAt: timestamp("suspended_at", { withTimezone: true }),
+        dataResetAt: timestamp("data_reset_at", { withTimezone: true }),
+        sessionsRevokedAt: timestamp("sessions_revoked_at", {
+            withTimezone: true,
+        }),
 
         createdAt,
         updatedAt,
     },
     (table) => [
         check("user_role_check", sql`${table.role} in ('admin', 'member')`),
+        check(
+            "admin_not_suspended_check",
+            sql`${table.role} <> 'admin' or ${table.suspendedAt} is null`,
+        ),
         uniqueIndex("single_platform_admin_idx")
             .on(table.role)
             .where(sql`${table.role} = 'admin'`),

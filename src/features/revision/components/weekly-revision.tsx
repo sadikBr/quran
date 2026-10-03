@@ -21,6 +21,7 @@ import {
 } from "../server/actions";
 import type { RevisionPreview, RevisionView } from "../server/service";
 import RevisionPlanSettings from "./revision-plan-settings";
+import RevisionRotationSummary from "./revision-rotation";
 
 export default function WeeklyRevision({
     view,
@@ -70,7 +71,7 @@ export default function WeeklyRevision({
                 ? "continue"
                 : "open",
         ),
-        amount: t(`amount${item.quarters.length}`),
+        amount: t("ayahCount", { count: item.total }),
         state: item.done
             ? item.outcome === "difficult"
                 ? "difficult"
@@ -158,7 +159,7 @@ export default function WeeklyRevision({
                             })
                         }
                         notice={
-                            view.completedHizbs === 0
+                            view.memorizedAyahs === 0
                                 ? t("noMemorization")
                                 : undefined
                         }
@@ -177,6 +178,13 @@ export default function WeeklyRevision({
                             })
                         }
                     />
+                    {view.rotation && (
+                        <RevisionRotationSummary
+                            rotation={view.rotation}
+                            surahs={surahs}
+                            paused={!view.plan?.enabled}
+                        />
+                    )}
                     {editor.editing && (
                         <>
                             <RevisionPlanSettings
@@ -223,9 +231,11 @@ export default function WeeklyRevision({
                             items={items}
                             today={view.today}
                             emptyMessage={
-                                !revisionDays.length
-                                    ? common("noStudyDays")
-                                    : t("noDaysLeft")
+                                view.memorizedAyahs === 0
+                                    ? t("noMemorization")
+                                    : !revisionDays.length
+                                      ? common("noStudyDays")
+                                      : t("noDaysLeft")
                             }
                         />
                     )}

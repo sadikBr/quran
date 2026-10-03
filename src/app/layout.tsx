@@ -18,6 +18,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AccountRoleProvider } from "@/features/auth/account-role-provider";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
+import ResetLocalDataSync from "@/features/auth/reset-local-data-sync";
 import PushSubscriptionSync from "@/features/notifications/components/push-subscription-sync";
 import OfflineLibraryManager from "@/features/offline/components/offline-library-manager";
 import TourRunner from "@/features/onboarding/tour-runner";
@@ -155,6 +156,12 @@ export default async function RootLayout({
                                 />
                                 <NavigationFeedback />
                                 <ThemePreferenceSync />
+                                <ResetLocalDataSync
+                                    userId={session?.user.id}
+                                    resetAt={session?.user.dataResetAt
+                                        ?.getTime()
+                                        .toString()}
+                                />
                                 <Toaster
                                     closeButton
                                     dir={

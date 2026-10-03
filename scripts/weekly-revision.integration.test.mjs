@@ -10,8 +10,10 @@ import * as schema from "../src/drizzle/schema";
 import * as carry from "../src/features/learning/carry-forward";
 import * as progress from "../src/features/memorization/progress";
 import { quranReferenceSchema } from "../src/features/practice/types";
+import * as rotation from "../src/features/revision/rotation";
 import * as schedule from "../src/features/revision/schedule";
 import { databaseClock } from "./helpers/database-clock.mjs";
+import { loadRevisionReconciliation } from "./helpers/load-revision-reconciliation.mjs";
 import { loadTypeScript } from "./helpers/load-typescript.mjs";
 
 const target = process.env.REVISION_TEST_DATABASE_URL;
@@ -78,9 +80,18 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                     luxon: { DateTime },
                 },
             );
+            const reconciliation = loadRevisionReconciliation(
+                modules,
+                async () => catalogue,
+            );
             const records = loadTypeScript(
                 "src/features/memorization/server/record-service.ts",
-                { ...modules, "../progress": progress },
+                {
+                    ...modules,
+                    "../progress": progress,
+                    "@/features/revision/server/reconcile-plan": reconciliation,
+                    "./get-memory-catalogue": async () => catalogue,
+                },
             );
             const service = loadTypeScript(
                 "src/features/revision/server/service.ts",
@@ -95,6 +106,8 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                         async () => catalogue,
                     "@/features/memorization/server/record-service": records,
                     "../schedule": schedule,
+                    "./reconcile-plan": reconciliation,
+                    "../rotation": rotation,
                 },
             );
             await db.insert(schema.learningSchedule).values(
@@ -361,7 +374,7 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
             ).toBe(false);
             expect(await events("other")).toHaveLength(1);
 
-            // A baseline correction invalidates unrevised ranges and stale previews.
+            // A baseline correction removes invalid sessions atomically and invalidates previews.
             const correct = await activate("correct");
             const stale = await service.previewRevisionPlan("correct", changed);
             await records.saveBaseline(
@@ -374,10 +387,14 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                     .reason,
             ).toBe("stale");
             expect(
-                (await service.getRevisionView("correct")).sessions.every(
-                    (s) => !s.available,
-                ),
-            ).toBe(true);
+                await db
+                    .select()
+                    .from(schema.revisionSession)
+                    .where(orm.eq(schema.revisionSession.userId, "correct")),
+            ).toEqual([]);
+            expect((await service.getRevisionView("correct")).sessions).toEqual(
+                [],
+            );
             expect(
                 (
                     await service.updateRevisionSession(
@@ -581,6 +598,8 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                     },
                     "@/features/practice/types": { quranReferenceSchema },
                     "../schedule": schedule,
+                    "./reconcile-plan": reconciliation,
+                    "../rotation": rotation,
                     "./service": service,
                 },
             );
@@ -648,6 +667,8 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                 {
                     ...modules,
                     "../schedule": schedule,
+                    "./reconcile-plan": reconciliation,
+                    "../rotation": rotation,
                     "./service": service,
                     "@/features/notifications/server/web-push": {
                         isExpiredPushSubscription: () => false,
@@ -734,6 +755,269 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
             expect((await service.getRevisionView("notify")).plan).toBeNull();
             await reminders.sendRevisionReminders(notificationTime.toJSDate());
             expect(sent).toBe(1);
+
+            // A surah-only learner can enable revision and use sessions without completing a hizb.
+            testClock.set(new Date("2026-10-05T12:00:00Z"));
+            await db.insert(schema.user).values({
+                id: "partial",
+                name: "Partial",
+                email: "partial@example.test",
+            });
+            await db.insert(schema.learningSchedule).values({
+                userId: "partial",
+                revisionDays: [1, 2, 3, 4, 5, 6, 7],
+                memorizationDays: [],
+            });
+            const partialRanges = [1, 3].map((ayah) => ({
+                surahNumber: 2,
+                startAyahNumber: ayah,
+                endAyahNumber: ayah,
+            }));
+            expect(
+                (
+                    await records.saveBaseline(
+                        "partial",
+                        {
+                            hizbs: [],
+                            ranges: partialRanges,
+                            revision: 0,
+                            setup: true,
+                        },
+                        "hafs",
+                    )
+                ).success,
+            ).toBe(true);
+            const partialPreview = await service.previewRevisionPlan(
+                "partial",
+                settings,
+            );
+            expect(partialPreview.ready).toBe(true);
+            expect(partialPreview.completedHizbs).toBe(0);
+            expect(partialPreview.memorizedAyahs).toBe(2);
+            expect(
+                (
+                    await service.saveRevisionPlan(
+                        "partial",
+                        settings,
+                        partialPreview.key,
+                    )
+                ).success,
+            ).toBe(true);
+            const partialView = await service.getRevisionView("partial");
+            expect(partialView.rotation.totalAyahs).toBe(2);
+            expect(partialView.rotation.scheduledAyahs).toBe(2);
+            expect(partialView.rotation.remainingAyahs).toBe(0);
+            expect(partialView.sessions.every((s) => s.available)).toBe(true);
+            expect(
+                partialView.sessions.map((s) => [
+                    s.startAyahNumber,
+                    s.endAyahNumber,
+                ]),
+            ).toEqual([
+                [1, 1],
+                [3, 3],
+            ]);
+            const partialSession = partialView.sessions[0];
+            expect(
+                (
+                    await service.updateRevisionSession(
+                        "partial",
+                        partialSession.id,
+                        { surahNumber: 2, ayahNumber: 1 },
+                    )
+                ).success,
+            ).toBe(true);
+            expect(
+                (
+                    await service.updateRevisionSession(
+                        "partial",
+                        partialSession.id,
+                        { outcome: "comfortable" },
+                    )
+                ).success,
+            ).toBe(true);
+            expect(
+                (
+                    await records.saveBaseline(
+                        "partial",
+                        { hizbs: [], ranges: [], revision: 1, setup: false },
+                        "hafs",
+                    )
+                ).success,
+            ).toBe(true);
+            const correctedPartial = await service.getRevisionView("partial");
+            expect(
+                correctedPartial.sessions.find((s) => s.startAyahNumber === 3),
+            ).toBeUndefined();
+            expect(
+                correctedPartial.sessions.find((s) => s.startAyahNumber === 1)
+                    .done,
+            ).toBe(true);
+
+            // Correct a paused, already-saved next-week plan before that week starts.
+            testClock.set(new Date("2026-10-03T12:00:00Z"));
+            await db.insert(schema.user).values({
+                id: "repair",
+                name: "Repair",
+                email: "repair@example.test",
+            });
+            await db.insert(schema.learningSchedule).values({
+                userId: "repair",
+                revisionDays: [1, 2, 4, 5],
+                memorizationDays: [],
+            });
+            await records.saveBaseline(
+                "repair",
+                { hizbs: [1, 2, 3, 4, 5, 6], revision: 0, setup: true },
+                "hafs",
+            );
+            const repairSettings = { ...settings, quartersPerDay: 1 };
+            const future = await activate("repair", repairSettings);
+            expect(future.week.weekStart).toBe("2026-10-05");
+            expect(future.sessions[0].startAyahNumber).toBe(1);
+            const futurePreview = await service.previewRevisionPlan(
+                "repair",
+                repairSettings,
+            );
+            expect(
+                (
+                    await service.pauseRevisionPlan(
+                        "repair",
+                        future.plan.revision,
+                    )
+                ).success,
+            ).toBe(true);
+            await records.saveBaseline(
+                "repair",
+                { hizbs: [3, 4, 5, 6], revision: 1, setup: false },
+                "hafs",
+            );
+            const repairedRows = await db
+                .select()
+                .from(schema.revisionSession)
+                .where(orm.eq(schema.revisionSession.userId, "repair"));
+            expect(repairedRows).toHaveLength(4);
+            expect(repairedRows.every((s) => s.startAyahNumber >= 17)).toBe(
+                true,
+            );
+            expect(repairedRows.map((s) => s.scheduledDate).sort()).toEqual(
+                future.sessions.map((s) => s.scheduledDate).sort(),
+            );
+            const repaired = await service.getRevisionView("repair");
+            expect(repaired.rotation.totalAyahs).toBe(32);
+            expect(repaired.rotation.scheduledAyahs).toBe(8);
+            expect(repaired.rotation.remainingAyahs).toBe(24);
+            expect(repaired.rotation.weeks).toHaveLength(3);
+            expect(
+                repaired.rotation.weeks
+                    .flatMap((w) => w.sessions)
+                    .reduce((n, s) => n + s.ayahs, 0),
+            ).toBe(24);
+            expect(repaired.plan.enabled).toBe(false);
+            expect(
+                repaired.sessions.every((s) => s.available && !s.active),
+            ).toBe(true);
+            expect(
+                (
+                    await service.saveRevisionPlan(
+                        "repair",
+                        repairSettings,
+                        futurePreview.key,
+                    )
+                ).reason,
+            ).toBe("stale");
+            expect(
+                (
+                    await service.updateRevisionSession(
+                        "repair",
+                        future.sessions[0].id,
+                        { surahNumber: 2, ayahNumber: 1 },
+                    )
+                ).success,
+            ).toBe(false);
+            expect(
+                (await service.getRevisionView("repair")).sessions.map(
+                    (s) => s.id,
+                ),
+            ).toEqual(repaired.sessions.map((s) => s.id));
+
+            // Retain an unaffected session and its reading position while repairing a partial range.
+            const livePreview = await service.previewRevisionPlan(
+                "repair",
+                repairSettings,
+            );
+            await service.saveRevisionPlan(
+                "repair",
+                repairSettings,
+                livePreview.key,
+            );
+            testClock.set(new Date("2026-10-05T12:00:00Z"));
+            const live = await service.getRevisionView("repair");
+            const untouched = live.sessions[0];
+            expect(
+                (
+                    await service.updateRevisionSession(
+                        "repair",
+                        untouched.id,
+                        {
+                            surahNumber: 2,
+                            ayahNumber: untouched.startAyahNumber,
+                        },
+                    )
+                ).success,
+            ).toBe(true);
+            const shortened = live.sessions[1];
+            const remaining = verses
+                .filter(
+                    (v) =>
+                        v.ayahNumber >= 17 &&
+                        v.ayahNumber !== shortened.startAyahNumber,
+                )
+                .map((v) => ({
+                    surahNumber: 2,
+                    startAyahNumber: v.ayahNumber,
+                    endAyahNumber: v.ayahNumber,
+                }));
+            await records.saveBaseline(
+                "repair",
+                { hizbs: [], ranges: remaining, revision: 2, setup: false },
+                "hafs",
+            );
+            const trimmed = await service.getRevisionView("repair");
+            expect(
+                trimmed.sessions.find((s) => s.id === untouched.id)
+                    .progressAyahNumber,
+            ).toBe(untouched.startAyahNumber);
+            expect(trimmed.sessions.some((s) => s.id === shortened.id)).toBe(
+                false,
+            );
+            expect(
+                trimmed.sessions.some(
+                    (s) =>
+                        s.startAyahNumber === shortened.endAyahNumber &&
+                        s.endAyahNumber === shortened.endAyahNumber,
+                ),
+            ).toBe(true);
+            expect(trimmed.sessions.every((s) => s.available)).toBe(true);
+
+            // Old inconsistent data self-heals on read, without requiring another correction.
+            await db.insert(schema.revisionSession).values({
+                id: "legacy-invalid",
+                userId: "repair",
+                weekId: trimmed.week.id,
+                scheduledDate: "2026-10-09",
+                ordinal: 999,
+                quarters: [1],
+                startSurahNumber: 2,
+                startAyahNumber: 1,
+                endSurahNumber: 2,
+                endAyahNumber: 2,
+            });
+            expect(
+                (await service.getRevisionView("repair")).sessions.some(
+                    (s) => s.id === "legacy-invalid",
+                ),
+            ).toBe(false);
         } finally {
             await pool.end();
         }

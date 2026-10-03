@@ -146,3 +146,46 @@ test("reversed range is empty and single ayah is allowed", () => {
         randomStartPool(surahs, navigation, [], { start: point, end: point }),
     ).toHaveLength(1);
 });
+
+test("memorized ayah ranges drive recall even with no completed hizbs", () => {
+    const surahs = [
+        { number: 112, numberOfAyahs: 4 },
+        { number: 113, numberOfAyahs: 5 },
+    ];
+    const navigation = {
+        hizbs: [{ number: 60, surahNumber: 112, ayahNumber: 1 }],
+    };
+    const ranges = [
+        { surahNumber: 112, startAyahNumber: 1, endAyahNumber: 4 },
+        { surahNumber: 113, startAyahNumber: 3, endAyahNumber: 4 },
+    ];
+    const pool = randomStartPool(surahs, navigation, [], undefined, ranges);
+    expect(pool.map((p) => `${p.surahNumber}:${p.ayahNumber}`)).toEqual([
+        "112:1",
+        "112:2",
+        "112:3",
+        "112:4",
+        "113:3",
+        "113:4",
+    ]);
+    expect(
+        continuationReferences(pool, pool[2], 10, surahs).map(
+            (p) => p.ayahNumber,
+        ),
+    ).toEqual([3, 4]);
+    expect(randomStartPool(surahs, navigation, [60], undefined, [])).toEqual(
+        [],
+    );
+    expect(
+        randomStartPool(
+            surahs,
+            navigation,
+            [],
+            {
+                start: { surahNumber: 113, ayahNumber: 1 },
+                end: { surahNumber: 113, ayahNumber: 2 },
+            },
+            ranges,
+        ).map((p) => p.ayahNumber),
+    ).toEqual([1, 2]);
+});

@@ -25,7 +25,9 @@ import {
 import {
     assessmentVerses,
     calculateMemorization,
+    isMemorized,
     type MemoryCatalogue,
+    memorizedAtoms,
     type Riwayah,
 } from "@/features/memorization/progress";
 import getMemoryCatalogue from "@/features/memorization/server/get-memory-catalogue";
@@ -33,6 +35,7 @@ import {
     lockRecord,
     recordAssessment,
 } from "@/features/memorization/server/record-service";
+import { buildRevisionRotation } from "../rotation";
 import {
     dueRevisionDate,
     generateRevisionSchedule,
@@ -44,6 +47,7 @@ import {
     weekCalendar,
     weekPeerAtoms,
 } from "../schedule";
+import { reconcileRevisionPlan } from "./reconcile-plan";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 async function clock(tx: Tx) {
@@ -90,12 +94,24 @@ async function memory(
         record?.setupAt ? record.baselineRiwayah : riwayah,
         baseline.map((r) => r.hizbNumber),
         assessments,
+        record?.baselineRanges ?? [],
     )
         .filter((h) => h.total > 0 && h.percent === 100)
         .map((h) => h.number);
+    const covered = memorizedAtoms(
+        catalogue,
+        record?.setupAt ? record.baselineRiwayah : riwayah,
+        baseline.map((r) => r.hizbNumber),
+        assessments,
+        record?.baselineRanges ?? [],
+    );
     return {
         record,
         complete,
+        covered,
+        memorizedAyahs: catalogue[riwayah].filter((v) =>
+            isMemorized(v, covered),
+        ).length,
         assessments,
         history: history.map(({ session, week }) => ({
             ...session,
@@ -129,7 +145,7 @@ function sessionViews(
                 peer: coverage.peer,
                 done: coverage.done,
                 available: assessmentVerses(catalogue, session).every((v) =>
-                    state.complete.includes(v.hizb),
+                    isMemorized(v, state.covered),
                 ),
                 remaining: coverage.remaining.map(verseKey),
             };
@@ -268,6 +284,7 @@ async function makePreview(
         catalogue,
         settings,
         completedHizbs: state.complete,
+        covered: state.covered,
         assessments: state.assessments,
         history: state.history,
         weekStart,
@@ -295,9 +312,10 @@ async function makePreview(
         weekStart,
         sessions,
         completedHizbs: state.complete.length,
+        memorizedAyahs: state.memorizedAyahs,
         ready:
             Boolean(state.record?.setupAt) &&
-            state.complete.length > 0 &&
+            state.memorizedAyahs > 0 &&
             settings.days.length > 0 &&
             (!regenerate || Boolean(plan)),
         regenerate,
@@ -458,11 +476,13 @@ export async function getRevisionView(
     const catalogue = await getMemoryCatalogue();
     return db.transaction(async (tx) => {
         await lockRecord(tx, userId);
+        const now = await clock(tx);
+        // Repair older saved batches too, before rendering or opening their readers.
+        await reconcileRevisionPlan(tx, userId, now, catalogue);
         const [plan] = await tx
             .select()
             .from(revisionPlan)
             .where(eq(revisionPlan.userId, userId));
-        const now = await clock(tx);
         let week = await currentWeek(
             tx,
             userId,
@@ -497,6 +517,7 @@ export async function getRevisionView(
                           days: studyDays.revisionDays,
                       } as RevisionSettings,
                       completedHizbs: state.complete,
+                      covered: state.covered,
                       assessments: state.assessments,
                       history: state.history,
                       weekStart: calendar.weekStart,
@@ -551,6 +572,21 @@ export async function getRevisionView(
             })),
             setup: Boolean(state.record?.setupAt),
             completedHizbs: state.complete.length,
+            memorizedAyahs: state.memorizedAyahs,
+            rotation: plan
+                ? buildRevisionRotation({
+                      catalogue,
+                      settings: {
+                          ...plan,
+                          days: studyDays?.revisionDays ?? [],
+                      } as RevisionSettings,
+                      covered: state.covered,
+                      assessments: state.assessments,
+                      history: state.history,
+                      current: week ? { ...week, sessions: items } : undefined,
+                      today: weekCalendar(now, plan.timezone).today,
+                  })
+                : null,
             version: await planVersion(tx, userId, "revision"),
         };
     });
@@ -612,7 +648,7 @@ export async function updateRevisionSession(
             ...session,
             riwayah: week.riwayah,
         });
-        if (!verses.every((v) => state.complete.includes(v.hizb)))
+        if (!verses.every((v) => isMemorized(v, state.covered)))
             return { success: false as const };
         const coverage = revisionCoverage(
             catalogue,

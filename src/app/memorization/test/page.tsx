@@ -8,7 +8,7 @@ import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { auth } from "@/features/auth/auth";
 import RandomStartTest from "@/features/memorization/components/random-start-test";
-import getMemorizationProgress from "@/features/memorization/server/get-memorization-progress";
+import getMemorizationRecord from "@/features/memorization/server/get-memorization-record";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import {
@@ -23,15 +23,13 @@ export default async function RandomTestPage() {
     if (!session) redirect("/sign-in");
     const preferences = await getPreferences();
     const warsh = preferences.riwayah === "warsh";
-    const [messages, meta, chapters, navigation, completed] = await Promise.all(
-        [
-            getMessages(preferences.language),
-            getSurahsMeta(),
-            warsh ? getWarshChapters() : Promise.resolve(null),
-            warsh ? getWarshNavigationMeta() : getQuranNavigationMeta(),
-            getMemorizationProgress(session.user.id, preferences.riwayah),
-        ],
-    );
+    const [messages, meta, chapters, navigation, record] = await Promise.all([
+        getMessages(preferences.language),
+        getSurahsMeta(),
+        warsh ? getWarshChapters() : Promise.resolve(null),
+        warsh ? getWarshNavigationMeta() : getQuranNavigationMeta(),
+        getMemorizationRecord(session.user.id, preferences.riwayah),
+    ]);
     const t = createTranslator({
         locale: preferences.language,
         messages,
@@ -75,12 +73,12 @@ export default async function RandomTestPage() {
                     />
                 </div>
                 <RandomStartTest
-                    key={`${session.user.id}:${preferences.riwayah}`}
-                    storageKey={`random-start:${session.user.id}:${preferences.riwayah}`}
+                    key={`random-start:${session.user.id}:${preferences.riwayah}:${session.user.dataResetAt?.getTime() ?? "initial"}`}
+                    storageKey={`random-start:${session.user.id}:${preferences.riwayah}${session.user.dataResetAt ? `:${session.user.dataResetAt.getTime()}` : ""}`}
                     surahs={surahs}
                     navigation={navigation}
                     locale={preferences.language}
-                    completedCount={completed.length}
+                    memorizedAyahs={record.memorizedAyahs}
                 />
             </div>
         </main>

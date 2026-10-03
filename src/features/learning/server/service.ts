@@ -155,12 +155,14 @@ async function memory(
             record?.setupAt ? record.baselineRiwayah : riwayah,
             baseline.map((r) => r.hizbNumber),
             [],
+            record?.baselineRanges ?? [],
         ),
         covered: memorizedAtoms(
             catalogue,
             record?.setupAt ? record.baselineRiwayah : riwayah,
             baseline.map((r) => r.hizbNumber),
             assessments,
+            record?.baselineRanges ?? [],
         ),
     };
 }

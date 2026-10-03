@@ -23,7 +23,7 @@ import { auth } from "@/features/auth/auth";
 import { getGroupsForUser } from "@/features/groups/server/get-groups";
 import { getNextGroupMeetingForUser } from "@/features/groups/server/get-next-group-meeting";
 import { getMeetingDisplayTimezone } from "@/features/groups/server/meeting-schedule";
-import getMemorizationProgress from "@/features/memorization/server/get-memorization-progress";
+import getMemorizationRecord from "@/features/memorization/server/get-memorization-record";
 import GuideDirectory from "@/features/onboarding/guide-directory";
 import {
     getAssignedPracticeAssignments,
@@ -109,14 +109,14 @@ export default async function DashboardPage() {
         practiceAssignments,
         assignedWork,
         groups,
-        completedHizbs,
+        memoryRecord,
         nextGroupMeeting,
     ] = await Promise.all([
         getDailyWird(session.user.id, preferences.arabicEdition),
         getPracticeAssignments(session.user.id),
         getAssignedPracticeAssignments(session.user.id),
         getGroupsForUser(session.user.id),
-        getMemorizationProgress(session.user.id, preferences.riwayah),
+        getMemorizationRecord(session.user.id, preferences.riwayah),
         getNextGroupMeetingForUser(session.user.id),
     ]);
     const practiceAssignment = practiceAssignments[0] ?? null;
@@ -470,7 +470,10 @@ export default async function DashboardPage() {
                                             dir="ltr"
                                         >
                                             <strong className="text-3xl font-semibold tabular-nums">
-                                                {completedHizbs.length}
+                                                {
+                                                    memoryRecord.completedHizbs
+                                                        .length
+                                                }
                                             </strong>
                                             <span className="text-xs text-muted-foreground">
                                                 /60
@@ -478,14 +481,17 @@ export default async function DashboardPage() {
                                         </div>
                                         <p className="mt-2 text-sm leading-6 text-muted-foreground">
                                             {memorizationT(
-                                                "dashboard.description",
+                                                "overview.memorizedAyahs",
+                                                {
+                                                    count: memoryRecord.memorizedAyahs,
+                                                },
                                             )}
                                         </p>
                                         <div className="mt-2 h-1 overflow-hidden rounded-xl bg-primary/10">
                                             <div
                                                 className="h-full rounded-full bg-primary"
                                                 style={{
-                                                    width: `${Math.round((completedHizbs.length / 60) * 100)}%`,
+                                                    width: `${(memoryRecord.progressHizbs / 60) * 100}%`,
                                                 }}
                                             />
                                         </div>

@@ -15,8 +15,10 @@ import * as learning from "../src/features/learning/schedule";
 import * as capacity from "../src/features/learning/weekly-capacity";
 import * as progress from "../src/features/memorization/progress";
 import { quranReferenceSchema } from "../src/features/practice/types";
+import * as rotation from "../src/features/revision/rotation";
 import * as revision from "../src/features/revision/schedule";
 import { databaseClock } from "./helpers/database-clock.mjs";
+import { loadRevisionReconciliation } from "./helpers/load-revision-reconciliation.mjs";
 import { loadTypeScript } from "./helpers/load-typescript.mjs";
 
 const target = process.env.LEARNING_TEST_DATABASE_URL;
@@ -110,9 +112,18 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
                     luxon: { DateTime },
                 },
             );
+            const reconciliation = loadRevisionReconciliation(
+                modules,
+                async () => catalogue,
+            );
             const records = loadTypeScript(
                 "src/features/memorization/server/record-service.ts",
-                { ...modules, "../progress": progress },
+                {
+                    ...modules,
+                    "../progress": progress,
+                    "@/features/revision/server/reconcile-plan": reconciliation,
+                    "./get-memory-catalogue": async () => catalogue,
+                },
             );
             const common = {
                 ...modules,
@@ -125,6 +136,8 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
                 "@/features/memorization/server/get-memory-catalogue":
                     async () => catalogue,
                 "@/features/memorization/server/record-service": records,
+                "./reconcile-plan": reconciliation,
+                "../rotation": rotation,
             };
             const service = loadTypeScript(
                 "src/features/learning/server/service.ts",
@@ -145,6 +158,7 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
                 {
                     ...modules,
                     "../progress": progress,
+                    "@/features/revision/server/reconcile-plan": reconciliation,
                     "./get-memory-catalogue": async () => catalogue,
                 },
             ).default;
@@ -1381,6 +1395,68 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
                         ...config,
                         quartersPerWeek: 0,
                     })
+                ).success,
+            ).toBe(false);
+
+            // Starting ayah ranges appear on the map and are skipped by new memorization.
+            testClock.set(new Date("2026-10-05T12:00:00Z"));
+            await db.insert(schema.user).values({
+                id: "partial",
+                name: "Partial",
+                email: "partial@example.test",
+            });
+            const partialRange = {
+                surahNumber: 2,
+                startAyahNumber: 1,
+                endAyahNumber: 3,
+            };
+            expect(
+                (
+                    await records.saveBaseline(
+                        "partial",
+                        {
+                            hizbs: [],
+                            ranges: [partialRange],
+                            revision: 0,
+                            setup: true,
+                        },
+                        "hafs",
+                    )
+                ).success,
+            ).toBe(true);
+            await service.saveLearningSchedule("partial", days);
+            const partialMap = await recordView("partial", "hafs");
+            expect(partialMap.memorizedAyahs).toBe(3);
+            expect(partialMap.completedHizbs).toEqual([]);
+            expect(partialMap.memorizedRanges).toEqual([partialRange]);
+            expect(partialMap.hizbs[0].completed).toBe(3);
+            const partialPreview = await service.previewMemorizationPlan(
+                "partial",
+                config,
+            );
+            expect(partialPreview.ready).toBe(true);
+            expect(partialPreview.sessions.length).toBeGreaterThan(0);
+            expect(partialPreview.sessions[0].startAyahNumber).toBe(4);
+            expect(
+                partialPreview.sessions.every((s) => s.startAyahNumber >= 4),
+            ).toBe(true);
+            await records.saveBaseline(
+                "partial",
+                {
+                    hizbs: [],
+                    ranges: [{ ...partialRange, endAyahNumber: 4 }],
+                    revision: 1,
+                    setup: false,
+                },
+                "hafs",
+            );
+            expect(
+                (
+                    await service.saveMemorizationPlan(
+                        "partial",
+                        config,
+                        partialPreview.key,
+                    )
                 ).success,
             ).toBe(false);
         } finally {

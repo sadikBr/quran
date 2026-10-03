@@ -19,7 +19,7 @@ import {
     randomStartPool,
     surahEdgeStarts,
 } from "../random-start";
-import getMemorizationProgress from "./get-memorization-progress";
+import getMemorizationRecord from "./get-memorization-record";
 
 const schema = z.object({
     mode: z.enum(["random", "opening", "ending"]).optional().default("random"),
@@ -42,11 +42,11 @@ export default async function getRandomStart(input: z.input<typeof schema>) {
     try {
         const preferences = await getPreferences();
         const warsh = preferences.riwayah === "warsh";
-        const [meta, chapters, navigation, completed] = await Promise.all([
+        const [meta, chapters, navigation, record] = await Promise.all([
             getSurahsMeta(),
             warsh ? getWarshChapters() : Promise.resolve(null),
             warsh ? getWarshNavigationMeta() : getQuranNavigationMeta(),
-            getMemorizationProgress(session.user.id, preferences.riwayah),
+            getMemorizationRecord(session.user.id, preferences.riwayah),
         ]);
         const surahs = meta.map((surah) => ({
             ...surah,
@@ -78,12 +78,18 @@ export default async function getRandomStart(input: z.input<typeof schema>) {
             )
         )
             return { error: "invalid" as const };
-        const pool = randomStartPool(surahs, navigation, completed, range);
+        const pool = randomStartPool(
+            surahs,
+            navigation,
+            record.completedHizbs,
+            range,
+            record.memorizedRanges,
+        );
         if (!pool.length)
             return {
                 error: range
                     ? ("invalid" as const)
-                    : completed.length
+                    : record.memorizedAyahs
                       ? ("error" as const)
                       : ("empty" as const),
             };

@@ -16,9 +16,13 @@ const HIZB_MARKERS = Array.from({ length: 60 }, (_, i) => i + 1);
 
 export default function MemorizationOverview({
     completed,
+    memorizedAyahs,
+    progressHizbs,
     setup,
 }: {
     completed: number;
+    memorizedAyahs: number;
+    progressHizbs: number;
     setup: boolean;
 }) {
     const t = useTranslations("Memorization");
@@ -26,8 +30,8 @@ export default function MemorizationOverview({
     const number = new Intl.NumberFormat(locale);
     const percentage = new Intl.NumberFormat(locale, {
         style: "percent",
-        maximumFractionDigits: 0,
-    }).format(completed / 60);
+        maximumFractionDigits: 1,
+    }).format(progressHizbs / 60);
     const shortcuts = [
         {
             href: "/memorization/plan",
@@ -88,6 +92,11 @@ export default function MemorizationOverview({
                     </span>
                 </div>
                 <div className="mt-auto space-y-3">
+                    <p className="text-sm font-medium text-primary">
+                        {t("overview.memorizedAyahs", {
+                            count: memorizedAyahs,
+                        })}
+                    </p>
                     <div className="flex items-center justify-between gap-3 text-xs">
                         <span className="text-muted-foreground">
                             {t("progressEyebrow")}
@@ -99,10 +108,12 @@ export default function MemorizationOverview({
                     <div
                         role="progressbar"
                         aria-label={t("overview.title")}
-                        aria-valuenow={completed}
+                        aria-valuenow={progressHizbs}
                         aria-valuemin={0}
                         aria-valuemax={60}
-                        aria-valuetext={t("dashboard.title", { completed })}
+                        aria-valuetext={t("overview.memorizedAyahs", {
+                            count: memorizedAyahs,
+                        })}
                         className="grid h-4 grid-cols-[repeat(60,minmax(0,1fr))] gap-0.5 sm:gap-[3px]"
                     >
                         {HIZB_MARKERS.map((hizb) => (
@@ -110,12 +121,16 @@ export default function MemorizationOverview({
                                 key={hizb}
                                 aria-hidden="true"
                                 className={cn(
-                                    "rounded-full",
-                                    hizb <= completed
-                                        ? "bg-primary"
-                                        : "bg-primary/10",
+                                    "overflow-hidden rounded-full bg-primary/10",
                                 )}
-                            />
+                            >
+                                <span
+                                    className="block h-full bg-primary"
+                                    style={{
+                                        width: `${Math.max(0, Math.min(1, progressHizbs - hizb + 1)) * 100}%`,
+                                    }}
+                                />
+                            </span>
                         ))}
                     </div>
                     <p className="text-sm leading-6 text-muted-foreground">

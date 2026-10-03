@@ -9,6 +9,7 @@ import {
     timestamp,
     uniqueIndex,
 } from "drizzle-orm/pg-core";
+import type { BaselineRange } from "@/features/memorization/progress";
 import { user } from "./auth-schema";
 
 export const memorizationRecord = pgTable("memorization_record", {
@@ -20,9 +21,15 @@ export const memorizationRecord = pgTable("memorization_record", {
         .notNull()
         .default("hafs"),
     revision: integer("revision").notNull().default(0),
+    baselineRanges: jsonb("baseline_ranges")
+        .$type<BaselineRange[]>()
+        .notNull()
+        .default([]),
+    // Retained for historical records; corrections are now self-service.
     correctionUsedAt: timestamp("correction_used_at", { withTimezone: true }),
 });
 
+// Read-only archive of requests made before self-service corrections.
 export const memorizationCorrectionRequest = pgTable(
     "memorization_correction_request",
     {
@@ -70,8 +77,13 @@ export const memorizationBaselineChange = pgTable(
             .references(() => user.id, { onDelete: "cascade" }),
         previousHizbs: jsonb("previous_hizbs").$type<number[]>().notNull(),
         hizbs: jsonb("hizbs").$type<number[]>().notNull(),
+        previousRanges: jsonb("previous_ranges")
+            .$type<BaselineRange[]>()
+            .notNull()
+            .default([]),
+        ranges: jsonb("ranges").$type<BaselineRange[]>().notNull().default([]),
         source: text("source", {
-            enum: ["setup", "initial", "admin"],
+            enum: ["setup", "initial", "admin", "self"],
         }).notNull(),
         requestId: text("request_id").references(
             () => memorizationCorrectionRequest.id,

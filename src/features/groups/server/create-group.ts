@@ -65,7 +65,9 @@ export default async function createGroup(input: unknown) {
                 : [];
             if (
                 parsed.data.supervisorId &&
-                (!supervisor || supervisor.role !== "member")
+                (!supervisor ||
+                    supervisor.role !== "member" ||
+                    supervisor.suspendedAt)
             )
                 throw new Error("Invalid supervisor");
             await transaction.insert(memorizationGroup).values({

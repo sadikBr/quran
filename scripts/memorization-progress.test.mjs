@@ -1,9 +1,5 @@
 import { expect, test } from "bun:test";
-import {
-    CORRECTION_WINDOW_MS,
-    calculateMemorization,
-    initialCorrectionAvailable,
-} from "../src/features/memorization/progress";
+import { calculateMemorization } from "../src/features/memorization/progress";
 import { loadTypeScript } from "./helpers/load-typescript.mjs";
 
 const verse = (ayah, atoms, hizb = 1) => ({
@@ -50,26 +46,6 @@ const map = (
         events,
     );
 
-test("correction starts immediately, expires exactly at three hours, and cannot be reused", () => {
-    const start = new Date("2026-10-01T10:00:00Z");
-    expect(initialCorrectionAvailable(null, null, start)).toBe(false);
-    expect(initialCorrectionAvailable(start, null, start)).toBe(true);
-    expect(
-        initialCorrectionAvailable(
-            start,
-            null,
-            new Date(+start + CORRECTION_WINDOW_MS - 1),
-        ),
-    ).toBe(true);
-    expect(
-        initialCorrectionAvailable(
-            start,
-            null,
-            new Date(+start + CORRECTION_WINDOW_MS),
-        ),
-    ).toBe(false);
-    expect(initialCorrectionAvailable(start, start, start)).toBe(false);
-});
 test("overlapping personal and group ranges form a union, and only complete hizbs reach 100%", () => {
     const partial = map(
         [],
@@ -169,4 +145,98 @@ test("catalogue creates shared segments for merged and split verses", async () =
         calculateMemorization(c, "warsh", "hafs", [], [event("1", 1, 1)])[0]
             .completed,
     ).toBe(0);
+});
+
+test("a whole short surah gives only its own ayahs, not its entire hizb", () => {
+    const verses = [111, 112, 113].flatMap((surahNumber) =>
+        [1, 2, 3].map((ayahNumber) => ({
+            surahNumber,
+            ayahNumber,
+            hizb: 60,
+            quarter: 240,
+            page: 604,
+            atoms: [`${surahNumber}:${ayahNumber}`],
+        })),
+    );
+    const c = { hafs: verses, warsh: verses };
+    const ranges = [{ surahNumber: 112, startAyahNumber: 1, endAyahNumber: 3 }];
+    const h = calculateMemorization(c, "hafs", "hafs", [], [], ranges)[59];
+    expect(h.completed).toBe(3);
+    expect(h.baseline).toBe(3);
+    expect(h.percent).toBe(33);
+    expect(
+        calculateMemorization(c, "hafs", "hafs", [60], [], ranges)[59]
+            .completed,
+    ).toBe(9);
+});
+
+test("partial starting ranges overlap with practice without double credit", () => {
+    const ranges = [{ surahNumber: 1, startAyahNumber: 1, endAyahNumber: 1 }];
+    expect(
+        calculateMemorization(
+            catalogue,
+            "hafs",
+            "hafs",
+            [],
+            [event("1", 1, 1)],
+            ranges,
+        )[0].completed,
+    ).toBe(1);
+    expect(
+        calculateMemorization(
+            catalogue,
+            "hafs",
+            "hafs",
+            [],
+            [event("1", 2, 2)],
+            ranges,
+        )[0].percent,
+    ).toBe(100);
+    expect(
+        calculateMemorization(
+            catalogue,
+            "hafs",
+            "warsh",
+            [],
+            [],
+            [{ surahNumber: 1, startAyahNumber: 2, endAyahNumber: 2 }],
+        )[0].completed,
+    ).toBe(0);
+    expect(
+        calculateMemorization(
+            catalogue,
+            "hafs",
+            "warsh",
+            [],
+            [],
+            [{ surahNumber: 1, startAyahNumber: 2, endAyahNumber: 3 }],
+        )[0].completed,
+    ).toBe(1);
+});
+
+test("starting ranges normalize overlaps and validate against the selected reading", async () => {
+    const { normalizeBaselineRanges, validBaselineRanges, memorizedAtoms } =
+        await import("../src/features/memorization/progress");
+    const ranges = [
+        { surahNumber: 1, startAyahNumber: 3, endAyahNumber: 3 },
+        { surahNumber: 1, startAyahNumber: 1, endAyahNumber: 2 },
+        { surahNumber: 1, startAyahNumber: 2, endAyahNumber: 3 },
+    ];
+    expect(normalizeBaselineRanges(ranges)).toEqual([
+        { surahNumber: 1, startAyahNumber: 1, endAyahNumber: 3 },
+    ]);
+    expect(ranges[0].startAyahNumber).toBe(3);
+    const fourth = [{ surahNumber: 1, startAyahNumber: 4, endAyahNumber: 4 }];
+    expect(validBaselineRanges(catalogue.hafs, fourth)).toBe(false);
+    expect(validBaselineRanges(catalogue.warsh, fourth)).toBe(true);
+    for (const range of [
+        { surahNumber: 2, startAyahNumber: 1, endAyahNumber: 1 },
+        { surahNumber: 1, startAyahNumber: 3, endAyahNumber: 2 },
+        { surahNumber: 1, startAyahNumber: 0, endAyahNumber: 2 },
+        { surahNumber: 1, startAyahNumber: 1.5, endAyahNumber: 2 },
+    ])
+        expect(validBaselineRanges(catalogue.hafs, [range])).toBe(false);
+    expect(
+        [...memorizedAtoms(catalogue, "hafs", [1], [], ranges)].sort(),
+    ).toEqual(["a", "b", "c", "d"]);
 });

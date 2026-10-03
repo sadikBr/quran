@@ -232,6 +232,27 @@
             "when": 1790994249243,
             "tag": "0032_glacier_saffron_citron_themes",
             "breakpoints": true
+        },
+        {
+            "idx": 33,
+            "version": "7",
+            "when": 1791046056472,
+            "tag": "0033_memorization_surah_ranges",
+            "breakpoints": true
+        },
+        {
+            "idx": 34,
+            "version": "7",
+            "when": 1791050964501,
+            "tag": "0034_user_management",
+            "breakpoints": true
+        },
+        {
+            "idx": 35,
+            "version": "7",
+            "when": 1791052512196,
+            "tag": "0035_user_data_reset",
+            "breakpoints": true
         }
     ]
 }

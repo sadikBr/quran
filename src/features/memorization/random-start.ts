@@ -1,5 +1,6 @@
 import type { QuranReference } from "@/features/practice/types";
 import type { QuranNavigationMeta } from "@/features/quran/navigation-types";
+import type { BaselineRange } from "./progress";
 
 export function surahEdgeStarts(
     pool: QuranReference[],
@@ -89,6 +90,7 @@ export function randomStartPool(
     navigation: QuranNavigationMeta,
     completed: number[],
     range?: { start: QuranReference; end: QuranReference },
+    memorizedRanges?: BaselineRange[],
 ) {
     const pool: { surahNumber: number; ayahNumber: number; hizb: number }[] =
         [];
@@ -116,7 +118,14 @@ export function randomStartPool(
                 range
                     ? order(point) >= order(range.start) &&
                       order(point) <= order(range.end)
-                    : marked.has(point.hizb)
+                    : memorizedRanges
+                      ? memorizedRanges.some(
+                            (r) =>
+                                r.surahNumber === point.surahNumber &&
+                                point.ayahNumber >= r.startAyahNumber &&
+                                point.ayahNumber <= r.endAyahNumber,
+                        )
+                      : marked.has(point.hizb)
             )
                 pool.push(point);
         }

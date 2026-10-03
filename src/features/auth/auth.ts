@@ -6,6 +6,7 @@ import { env } from "@/data/env/server";
 import db from "@/drizzle/db";
 import { groupMember, userSettings, user as userTable } from "@/drizzle/schema";
 import { DEFAULT_PREFERENCES } from "../settings/preferences";
+import { afterSessionCreate, beforeSessionCreate } from "./session-access";
 
 export const auth = betterAuth({
     trustedOrigins: env.PRODUCTION_URLS.split(","),
@@ -15,8 +16,10 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
     },
+    session: { cookieCache: { enabled: false } },
     user: {
         additionalFields: {
+            dataResetAt: { type: "date", required: false, input: false },
             role: {
                 type: ["admin", "member"],
                 required: false,
@@ -55,6 +58,9 @@ export const auth = betterAuth({
         },
     },
     databaseHooks: {
+        session: {
+            create: { before: beforeSessionCreate, after: afterSessionCreate },
+        },
         user: {
             create: {
                 after: async (user) => {

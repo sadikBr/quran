@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
     type Assessment,
     assessmentVerses,
+    isMemorized,
     type MemoryCatalogue,
     type MemoryVerse,
     type Riwayah,
@@ -118,22 +119,39 @@ export function generateRevisionSchedule({
     catalogue,
     settings,
     completedHizbs,
+    covered,
     assessments,
     history,
     weekStart,
     fromDate,
     reviewed = new Set<string>(),
+    dailyCapacity = settings.quartersPerDay,
 }: {
     catalogue: MemoryCatalogue;
     settings: RevisionSettings;
     completedHizbs: number[];
+    covered?: Set<string>;
     assessments: Assessment[];
     history: RevisionHistory[];
     weekStart: string;
     fromDate: string;
     reviewed?: Set<string>;
+    /** Remaining slots when repairing an existing day, after retained sessions. */
+    dailyCapacity?: number;
 }): ScheduledRange[] {
     const verses = catalogue[settings.riwayah];
+    const eligibleByQuarter = new Map<number, MemoryVerse[]>();
+    for (const verse of verses) {
+        if (
+            covered
+                ? !isMemorized(verse, covered)
+                : !completedHizbs.includes(verse.hizb)
+        )
+            continue;
+        const part = eligibleByQuarter.get(verse.quarter) ?? [];
+        part.push(verse);
+        eligibleByQuarter.set(verse.quarter, part);
+    }
     const latest = new Map<string, { time: number; difficult: boolean }>();
     for (const a of [...assessments].sort(
         (a, b) => +a.createdAt - +b.createdAt || a.id.localeCompare(b.id),
@@ -161,9 +179,7 @@ export function generateRevisionSchedule({
     }
     const units = Array.from({ length: 240 }, (_, i) => i + 1)
         .map((quarter) => {
-            const part = verses.filter(
-                (v) => v.quarter === quarter && completedHizbs.includes(v.hizb),
-            );
+            const part = eligibleByQuarter.get(quarter) ?? [];
             const atoms = part.flatMap((v) => v.atoms);
             return {
                 quarter,
@@ -194,7 +210,7 @@ export function generateRevisionSchedule({
                 (day.toISODate() as string) >= fromDate,
         )
         .map((day) => day.toISODate() as string);
-    const capacity = dates.length * settings.quartersPerDay;
+    const capacity = dates.length * dailyCapacity;
     // Unfinished sessions keep their existing queue. New batches balance difficult passages and rotation.
     const quota =
         capacity === 1
@@ -211,34 +227,52 @@ export function generateRevisionSchedule({
             .slice(0, capacity - chosen.length),
     );
     const result: ScheduledRange[] = [];
+    const positions = new Map(verses.map((v, index) => [verseKey(v), index]));
     for (const [i, day] of dates.entries()) {
         const daily = chosen
-            .slice(
-                i * settings.quartersPerDay,
-                (i + 1) * settings.quartersPerDay,
-            )
+            .slice(i * dailyCapacity, (i + 1) * dailyCapacity)
             .sort((a, b) => a.quarter - b.quarter);
         for (const unit of daily) {
-            const first = unit.part[0],
-                last = unit.part[unit.part.length - 1];
-            const previous = result.at(-1);
-            if (
-                previous?.scheduledDate === day &&
-                previous.quarters.at(-1) === unit.quarter - 1
-            ) {
-                previous.quarters.push(unit.quarter);
-                previous.endSurahNumber = last.surahNumber;
-                previous.endAyahNumber = last.ayahNumber;
-            } else
-                result.push({
-                    scheduledDate: day,
-                    ordinal: result.length,
-                    quarters: [unit.quarter],
-                    startSurahNumber: first.surahNumber,
-                    startAyahNumber: first.ayahNumber,
-                    endSurahNumber: last.surahNumber,
-                    endAyahNumber: last.ayahNumber,
-                });
+            // Keep disjoint memorized passages separate, even inside the same quarter.
+            const runs: MemoryVerse[][] = [];
+            for (const verse of unit.part) {
+                const run = runs.at(-1);
+                const previousVerse = run?.at(-1);
+                if (
+                    previousVerse &&
+                    positions.get(verseKey(verse)) ===
+                        (positions.get(verseKey(previousVerse)) ?? -2) + 1
+                )
+                    run?.push(verse);
+                else runs.push([verse]);
+            }
+            for (const run of runs) {
+                const first = run[0],
+                    last = run[run.length - 1];
+                const previous = result.at(-1);
+                if (
+                    previous?.scheduledDate === day &&
+                    previous.quarters.at(-1) === unit.quarter - 1 &&
+                    positions.get(verseKey(first)) ===
+                        (positions.get(
+                            `${previous.endSurahNumber}:${previous.endAyahNumber}`,
+                        ) ?? -2) +
+                            1
+                ) {
+                    previous.quarters.push(unit.quarter);
+                    previous.endSurahNumber = last.surahNumber;
+                    previous.endAyahNumber = last.ayahNumber;
+                } else
+                    result.push({
+                        scheduledDate: day,
+                        ordinal: result.length,
+                        quarters: [unit.quarter],
+                        startSurahNumber: first.surahNumber,
+                        startAyahNumber: first.ayahNumber,
+                        endSurahNumber: last.surahNumber,
+                        endAyahNumber: last.ayahNumber,
+                    });
+            }
         }
     }
     return result;

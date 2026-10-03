@@ -8,6 +8,81 @@ export type MemoryVerse = QuranReference & {
     page: number;
 };
 export type MemoryCatalogue = Record<Riwayah, MemoryVerse[]>;
+export type BaselineRange = {
+    surahNumber: number;
+    startAyahNumber: number;
+    endAyahNumber: number;
+};
+
+/** Stable, non-overlapping ranges within each surah. Inputs are validated before saving. */
+export function normalizeBaselineRanges(ranges: BaselineRange[]) {
+    const result: BaselineRange[] = [];
+    for (const range of [...ranges].sort(
+        (a, b) =>
+            a.surahNumber - b.surahNumber ||
+            a.startAyahNumber - b.startAyahNumber,
+    )) {
+        const previous = result.at(-1);
+        if (
+            previous?.surahNumber === range.surahNumber &&
+            range.startAyahNumber <= previous.endAyahNumber + 1
+        )
+            previous.endAyahNumber = Math.max(
+                previous.endAyahNumber,
+                range.endAyahNumber,
+            );
+        else
+            result.push({
+                surahNumber: range.surahNumber,
+                startAyahNumber: range.startAyahNumber,
+                endAyahNumber: range.endAyahNumber,
+            });
+    }
+    return result;
+}
+
+export function validBaselineRanges(
+    verses: MemoryVerse[],
+    ranges: BaselineRange[],
+) {
+    const references = new Set(
+        verses.map((v) => `${v.surahNumber}:${v.ayahNumber}`),
+    );
+    return ranges.every(
+        (range) =>
+            Number.isInteger(range.surahNumber) &&
+            Number.isInteger(range.startAyahNumber) &&
+            Number.isInteger(range.endAyahNumber) &&
+            range.startAyahNumber >= 1 &&
+            range.endAyahNumber >= range.startAyahNumber &&
+            range.endAyahNumber <= 286 &&
+            Array.from(
+                { length: range.endAyahNumber - range.startAyahNumber + 1 },
+                (_, i) => range.startAyahNumber + i,
+            ).every((ayah) => references.has(`${range.surahNumber}:${ayah}`)),
+    );
+}
+
+export function baselineAtoms(
+    verses: MemoryVerse[],
+    hizbs: number[],
+    ranges: BaselineRange[] = [],
+) {
+    return new Set(
+        verses
+            .filter(
+                (v) =>
+                    hizbs.includes(v.hizb) ||
+                    ranges.some(
+                        (r) =>
+                            v.surahNumber === r.surahNumber &&
+                            v.ayahNumber >= r.startAyahNumber &&
+                            v.ayahNumber <= r.endAyahNumber,
+                    ),
+            )
+            .flatMap((v) => v.atoms),
+    );
+}
 export type Assessment = {
     id: string;
     riwayah: Riwayah;
@@ -19,18 +94,6 @@ export type Assessment = {
     endAyahNumber: number;
     createdAt: Date;
 };
-export const CORRECTION_WINDOW_MS = 3 * 60 * 60 * 1000;
-export function initialCorrectionAvailable(
-    setupAt: Date | null,
-    usedAt: Date | null,
-    now: Date,
-) {
-    return Boolean(
-        setupAt &&
-            !usedAt &&
-            now.getTime() < setupAt.getTime() + CORRECTION_WINDOW_MS,
-    );
-}
 export function assessmentVerses(
     catalogue: MemoryCatalogue,
     assessment: Omit<Assessment, "id" | "method" | "outcome" | "createdAt">,
@@ -58,12 +121,9 @@ export function calculateMemorization(
     baselineRiwayah: Riwayah,
     baseline: number[],
     assessments: Assessment[],
+    ranges: BaselineRange[] = [],
 ) {
-    const initial = new Set(
-        catalogue[baselineRiwayah]
-            .filter((v) => baseline.includes(v.hizb))
-            .flatMap((v) => v.atoms),
-    );
+    const initial = baselineAtoms(catalogue[baselineRiwayah], baseline, ranges);
     const self = new Set<string>();
     const peer = new Set<string>();
     const revision = new Set<string>();
@@ -128,12 +188,9 @@ export function memorizedAtoms(
     baselineRiwayah: Riwayah,
     baseline: number[],
     assessments: Assessment[],
+    ranges: BaselineRange[] = [],
 ) {
-    const atoms = new Set(
-        catalogue[baselineRiwayah]
-            .filter((v) => baseline.includes(v.hizb))
-            .flatMap((v) => v.atoms),
-    );
+    const atoms = baselineAtoms(catalogue[baselineRiwayah], baseline, ranges);
     for (const a of assessments.filter((a) => a.outcome === "confirmed"))
         for (const v of assessmentVerses(catalogue, a))
             for (const atom of v.atoms) atoms.add(atom);

@@ -9,6 +9,7 @@ import { auth } from "@/features/auth/auth";
 import { getMemorizationPlanView } from "@/features/learning/server/service";
 import MemorizationProgressMap from "@/features/memorization/components/memorization-progress-map";
 import getMemorizationRecord from "@/features/memorization/server/get-memorization-record";
+import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -43,7 +44,10 @@ export default async function MemorizationPage() {
                   )
             : [],
     );
-    const messages = await getMessages(preferences.language);
+    const [messages, surahs] = await Promise.all([
+        getMessages(preferences.language),
+        getSurahsMeta(),
+    ]);
     const t = createTranslator({
         locale: preferences.language,
         messages,
@@ -74,7 +78,16 @@ export default async function MemorizationPage() {
                         icon={<Sparkles />}
                     />
 
-                    <MemorizationProgressMap record={record} />
+                    <MemorizationProgressMap
+                        record={record}
+                        surahs={surahs.map((s) => ({
+                            number: s.number,
+                            name: s.name,
+                            englishName: s.englishName,
+                            numberOfAyahs:
+                                record.baselineSurahCounts[s.number - 1],
+                        }))}
+                    />
                 </section>
             </div>
         </main>

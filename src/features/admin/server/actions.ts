@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, ilike, or } from "drizzle-orm";
+import { and, eq, ilike, isNull, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import db from "@/drizzle/db";
@@ -30,6 +30,7 @@ export async function searchSupervisorCandidates(query: string) {
         .where(
             and(
                 eq(user.role, "member"),
+                isNull(user.suspendedAt),
                 or(
                     ilike(user.name, `%${search}%`),
                     ilike(user.email, `%${search}%`),
@@ -67,7 +68,7 @@ export async function replaceSupervisor(input: unknown) {
             .from(user)
             .where(eq(user.id, supervisorId))
             .for("update");
-        if (!target || target.role !== "member")
+        if (!target || target.role !== "member" || target.suspendedAt)
             return { success: false, reason: "invalid" };
         const [previous] = await tx
             .select()

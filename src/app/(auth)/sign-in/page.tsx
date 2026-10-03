@@ -59,7 +59,11 @@ export default function SignInPage() {
                     onError: (_ctx) => {
                         setLoading(false);
                         toast.error(t("signIn.errorTitle"), {
-                            description: t("signIn.errorDescription"),
+                            description: t(
+                                _ctx.error.code === "ACCOUNT_SUSPENDED"
+                                    ? "signIn.suspended"
+                                    : "signIn.errorDescription",
+                            ),
                         });
                     },
                 },

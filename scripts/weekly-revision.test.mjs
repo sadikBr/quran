@@ -232,3 +232,38 @@ test("a timezone change across the date line preserves a usable week until the n
         revisionWeekEnd("2026-09-28", "Pacific/Honolulu", "Pacific/Kiritimati"),
     ).toBe(west.end);
 });
+
+test("partial surahs are eligible without a complete hizb and never bridge unknown ayahs", () => {
+    const covered = new Set(["a1", "a3", "a4", "a6"]);
+    const rows = schedule({
+        completedHizbs: [],
+        covered,
+        settings: { ...settings, days: [1], quartersPerDay: 4 },
+    });
+    expect(rows.length).toBeGreaterThan(0);
+    const ayahs = rows.flatMap((r) =>
+        assessmentVerses(catalogue, { ...r, riwayah: "hafs" }),
+    );
+    expect(ayahs.map((v) => v.ayahNumber)).toEqual([1, 3, 4, 6]);
+    expect(ayahs.every((v) => v.atoms.every((a) => covered.has(a)))).toBe(true);
+    expect(new Set(quarters(rows)).size).toBeLessThanOrEqual(4);
+    expect(schedule({ completedHizbs: [1], covered: new Set() })).toEqual([]);
+});
+
+test("disjoint passages within one quarter stay separate within the daily amount", () => {
+    const c = {
+        hafs: catalogue.hafs.map((v) => ({ ...v, quarter: 1 })),
+        warsh: catalogue.warsh,
+    };
+    const rows = schedule({
+        catalogue: c,
+        completedHizbs: [],
+        covered: new Set(["a1", "a3"]),
+        settings: { ...settings, days: [1], quartersPerDay: 1 },
+    });
+    expect(rows.map((r) => [r.startAyahNumber, r.endAyahNumber])).toEqual([
+        [1, 1],
+        [3, 3],
+    ]);
+    expect(new Set(rows.map((r) => r.scheduledDate)).size).toBe(1);
+});

@@ -1,7 +1,6 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import {
     ArrowUpRight,
-    BookOpenCheck,
     CheckCircle2,
     ChevronDown,
     History,
@@ -18,7 +17,6 @@ import db from "@/drizzle/db";
 import {
     adminActivity,
     groupMember,
-    memorizationCorrectionRequest,
     memorizationGroup,
     user,
 } from "@/drizzle/schema";
@@ -85,21 +83,16 @@ export default async function AdminPage({
         .orderBy(desc(adminActivity.createdAt), adminActivity.id)
         .limit(21)
         .offset((activityPage - 1) * 20);
-    const [{ count: correctionCount }] = await db
+    const [{ count: userCount }] = await db
         .select({ count: sql<number>`count(*)::int` })
-        .from(memorizationCorrectionRequest)
-        .where(eq(memorizationCorrectionRequest.status, "pending"));
+        .from(user)
+        .where(eq(user.role, "member"));
     const [circleSummary] = await db
         .select({
             total: sql<number>`count(*)::int`,
             active: sql<number>`count(*) filter (where ${memorizationGroup.isActive})::int`,
         })
         .from(memorizationGroup);
-    const memoryT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Memorization.admin",
-    });
     const singleCircleLayout = circles.length === 1;
     return (
         <AdminWorkspace
@@ -143,38 +136,35 @@ export default async function AdminPage({
                 <article className="admin-stat-card group">
                     <div className="flex items-center justify-between gap-3">
                         <span className="text-sm text-muted-foreground">
-                            {t("pendingReviews")}
+                            {t("users.total")}
                         </span>
                         <span className="admin-stat-icon admin-stat-icon-review">
-                            <BookOpenCheck
-                                aria-hidden="true"
-                                className="size-4"
-                            />
+                            <UserRound aria-hidden="true" className="size-4" />
                         </span>
                     </div>
                     <p className="mt-3 text-2xl font-semibold tracking-tight tabular-nums">
-                        {Number(correctionCount)}
+                        {Number(userCount)}
                     </p>
                 </article>
             </section>
             <Link
-                href="/admin/memorization"
+                href="/admin/users"
                 className="admin-feature-card app-card group flex min-w-0 items-center gap-3 p-4 outline-none transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring sm:gap-4 sm:p-5"
             >
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <BookOpenCheck aria-hidden="true" className="size-5" />
+                    <UserRound aria-hidden="true" className="size-5" />
                 </span>
                 <span className="min-w-0 flex-1">
                     <span className="block font-semibold">
-                        {memoryT("title")}
+                        {t("users.title")}
                     </span>
                     <span className="mt-1 block text-sm leading-6 text-muted-foreground">
-                        {memoryT("description")}
+                        {t("users.description")}
                     </span>
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
                     <span className="rounded-full bg-primary/10 px-3 py-1.5 text-sm text-primary">
-                        {memoryT("count", { count: correctionCount })}
+                        {t("users.results", { count: userCount })}
                     </span>
                     <ArrowUpRight
                         aria-hidden="true"
@@ -245,7 +235,8 @@ export default async function AdminPage({
                         {circles.slice(0, 20).map((circle) => (
                             <article
                                 key={circle.id}
-                                className="admin-circle-card app-card flex min-w-0 flex-col overflow-hidden"
+                                id={`circle-${circle.id}`}
+                                className="admin-circle-card app-card flex min-w-0 scroll-mt-24 flex-col overflow-hidden"
                             >
                                 <div className="flex items-start gap-3 p-4 sm:p-5">
                                     <span

@@ -4,13 +4,18 @@ import db from "@/drizzle/db";
 import {
     memorizationAssessment,
     memorizationBaselineChange,
-    memorizationCorrectionRequest,
     memorizationRecord,
     practiceAssignment,
-    user,
     userMemorizedHizb,
 } from "@/drizzle/schema";
-import { initialCorrectionAvailable, type Riwayah } from "../progress";
+import { reconcileRevisionPlan } from "@/features/revision/server/reconcile-plan";
+import {
+    type BaselineRange,
+    normalizeBaselineRanges,
+    type Riwayah,
+    validBaselineRanges,
+} from "../progress";
+import getMemoryCatalogue from "./get-memory-catalogue";
 
 type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export async function lockRecord(tx: Transaction, userId: string) {
@@ -33,9 +38,15 @@ async function databaseNow(tx: Transaction) {
 }
 export async function saveBaseline(
     userId: string,
-    input: { hizbs: number[]; revision: number; setup: boolean },
+    input: {
+        hizbs: number[];
+        ranges?: BaselineRange[];
+        revision: number;
+        setup: boolean;
+    },
     riwayah: Riwayah,
 ) {
+    const catalogue = input.ranges?.length ? await getMemoryCatalogue() : null;
     return db.transaction(async (tx) => {
         const record = await lockRecord(tx, userId);
         if (
@@ -50,27 +61,26 @@ export async function saveBaseline(
             .orderBy(asc(userMemorizedHizb.hizbNumber));
         const previous = rows.map((row) => row.hizbNumber);
         const hizbs = [...new Set(input.hizbs)].sort((a, b) => a - b);
-        if (!input.setup && JSON.stringify(previous) === JSON.stringify(hizbs))
+        // Older open clients do not submit ranges; preserve any already saved passages.
+        const ranges = normalizeBaselineRanges(
+            input.ranges ?? record.baselineRanges,
+        );
+        if (
+            catalogue &&
+            !validBaselineRanges(
+                catalogue[record.setupAt ? record.baselineRiwayah : riwayah],
+                input.ranges ?? [],
+            )
+        )
+            return { success: false as const, reason: "invalid" as const };
+        if (
+            !input.setup &&
+            JSON.stringify(previous) === JSON.stringify(hizbs) &&
+            JSON.stringify(normalizeBaselineRanges(record.baselineRanges)) ===
+                JSON.stringify(ranges)
+        )
             return { success: true as const, changed: false };
         const now = await databaseNow(tx);
-        const initial = initialCorrectionAvailable(
-            record.setupAt,
-            record.correctionUsedAt,
-            now,
-        );
-        const [grant] = await tx
-            .select()
-            .from(memorizationCorrectionRequest)
-            .where(
-                and(
-                    eq(memorizationCorrectionRequest.userId, userId),
-                    eq(memorizationCorrectionRequest.status, "approved"),
-                ),
-            )
-            .for("update");
-        if (!input.setup && !initial && !grant)
-            return { success: false as const, reason: "locked" as const };
-        const source = input.setup ? "setup" : initial ? "initial" : "admin";
         await tx
             .delete(userMemorizedHizb)
             .where(eq(userMemorizedHizb.userId, userId));
@@ -83,8 +93,9 @@ export async function saveBaseline(
             userId,
             previousHizbs: previous,
             hizbs,
-            source,
-            requestId: source === "admin" ? grant.id : null,
+            previousRanges: record.baselineRanges,
+            ranges,
+            source: input.setup ? "setup" : "self",
         });
         await tx
             .update(memorizationRecord)
@@ -92,78 +103,13 @@ export async function saveBaseline(
                 setupAt: input.setup ? now : record.setupAt,
                 baselineRiwayah: input.setup ? riwayah : record.baselineRiwayah,
                 revision: record.revision + 1,
-                correctionUsedAt:
-                    source === "initial" ? now : record.correctionUsedAt,
+                baselineRanges: ranges,
             })
             .where(eq(memorizationRecord.userId, userId));
-        if (source === "admin")
-            await tx
-                .update(memorizationCorrectionRequest)
-                .set({ status: "used", usedAt: now })
-                .where(eq(memorizationCorrectionRequest.id, grant.id));
+        await reconcileRevisionPlan(tx, userId, now, catalogue ?? undefined);
         return { success: true as const, changed: true };
     });
 }
-export async function requestCorrection(userId: string, reason: string) {
-    return db.transaction(async (tx) => {
-        const record = await lockRecord(tx, userId);
-        const now = await databaseNow(tx);
-        if (
-            !record.setupAt ||
-            initialCorrectionAvailable(
-                record.setupAt,
-                record.correctionUsedAt,
-                now,
-            )
-        )
-            return { success: false as const };
-        const inserted = await tx
-            .insert(memorizationCorrectionRequest)
-            .values({ id: crypto.randomUUID(), userId, reason })
-            .onConflictDoNothing()
-            .returning({ id: memorizationCorrectionRequest.id });
-        return { success: inserted.length > 0 };
-    });
-}
-export async function reviewCorrection(
-    adminId: string,
-    requestId: string,
-    decision: "approved" | "declined",
-    note: string,
-) {
-    return db.transaction(async (tx) => {
-        // Role is checked again in the transaction, not trusted from the client or a stale session.
-        const [admin] = await tx
-            .select({ role: user.role })
-            .from(user)
-            .where(eq(user.id, adminId))
-            .for("share");
-        if (admin?.role !== "admin") return { success: false as const };
-        const [request] = await tx
-            .select()
-            .from(memorizationCorrectionRequest)
-            .where(eq(memorizationCorrectionRequest.id, requestId));
-        if (!request) return { success: false as const };
-        await lockRecord(tx, request.userId);
-        const updated = await tx
-            .update(memorizationCorrectionRequest)
-            .set({
-                status: decision,
-                reviewNote: note || null,
-                reviewerId: adminId,
-                reviewedAt: await databaseNow(tx),
-            })
-            .where(
-                and(
-                    eq(memorizationCorrectionRequest.id, requestId),
-                    eq(memorizationCorrectionRequest.status, "pending"),
-                ),
-            )
-            .returning({ id: memorizationCorrectionRequest.id });
-        return { success: updated.length > 0 };
-    });
-}
-
 type RangeSnapshot = Pick<
     typeof practiceAssignment.$inferSelect,
     | "id"

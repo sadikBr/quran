@@ -37,13 +37,13 @@ export default function RandomStartTest({
     surahs,
     navigation,
     locale,
-    completedCount,
+    memorizedAyahs,
     storageKey,
 }: {
     surahs: SurahOption[];
     navigation: QuranNavigationMeta;
     locale: string;
-    completedCount: number;
+    memorizedAyahs: number;
     storageKey: string;
 }) {
     const t = useTranslations("Memorization.test");
@@ -264,7 +264,7 @@ export default function RandomStartTest({
                             ? t("edgeHint")
                             : custom
                               ? t("customHint")
-                              : t("marked", { count: completedCount })}
+                              : t("marked", { count: memorizedAyahs })}
                     </p>
                     {custom && mode !== "random" && (
                         <div className="mb-5 max-w-lg">
@@ -420,7 +420,7 @@ export default function RandomStartTest({
                             </div>
                         )}
                     </div>
-                    {!custom && completedCount === 0 && (
+                    {!custom && memorizedAyahs === 0 && (
                         <p className="mb-4 text-sm text-muted-foreground">
                             {t("empty")}
                         </p>
@@ -439,7 +439,7 @@ export default function RandomStartTest({
                         disabled={
                             !ready ||
                             pending ||
-                            (!custom && completedCount === 0)
+                            (!custom && memorizedAyahs === 0)
                         }
                         data-tour="test-start"
                         onClick={() => draw()}

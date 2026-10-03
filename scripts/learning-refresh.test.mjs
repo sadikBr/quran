@@ -54,6 +54,7 @@ function mount(path, initialProps, imports = {}) {
             useLocale: () => "en",
             useTranslations: () => (key) => key,
         },
+        "./revision-rotation": "Rotation",
         sonner: { toast: { success() {}, error() {} } },
         "@/components/ui/button": { Button: "Button" },
         "@/lib/utils": { cn: (...values) => values.filter(Boolean).join(" ") },

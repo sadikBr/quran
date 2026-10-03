@@ -9,12 +9,13 @@ import pg from "pg";
 import { z } from "zod";
 import * as schema from "../src/drizzle/schema";
 import * as progress from "../src/features/memorization/progress";
+import { loadRevisionReconciliation } from "./helpers/load-revision-reconciliation.mjs";
 import { loadTypeScript } from "./helpers/load-typescript.mjs";
 
 // Never loads the app's .env; requires an empty disposable database.
 const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
 (target ? test : test.skip)(
-    "database: setup, corrections, grants, personal practice, audit and migration",
+    "database: self-service corrections, legacy requests, concurrency, practice, audit and migration",
     async () => {
         if (!new URL(target).pathname.endsWith("_memorization_tests"))
             throw new Error(
@@ -69,7 +70,36 @@ const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
                     status: "completed",
                 }),
             ]);
+            // Upgrade an existing hizb-only record and audit without losing their history.
+            const throughPrevious = JSON.parse(
+                await readFile(
+                    "src/drizzle/migrations/meta/_journal.json",
+                    "utf8",
+                ),
+            );
+            throughPrevious.entries = throughPrevious.entries.filter(
+                (entry) => entry.idx < 33,
+            );
+            await writeFile(journalPath, JSON.stringify(throughPrevious));
+            await migrate(db, { migrationsFolder: folder });
+            await pool.query(
+                "insert into memorization_record (user_id, setup_at, revision) values ('legacy', now(), 1)",
+            );
+            await pool.query(
+                "insert into memorization_baseline_change (id, user_id, previous_hizbs, hizbs, source) values ('legacy-history','legacy','[]','[5]','setup')",
+            );
             await migrate(db, { migrationsFolder: "src/drizzle/migrations" });
+            const legacyRecord = (
+                await db.select().from(schema.memorizationRecord)
+            )[0];
+            expect(legacyRecord.revision).toBe(1);
+            expect(legacyRecord.baselineRanges).toEqual([]);
+            const legacyHistory = (
+                await db.select().from(schema.memorizationBaselineChange)
+            )[0];
+            expect(legacyHistory.hizbs).toEqual([5]);
+            expect(legacyHistory.ranges).toEqual([]);
+            expect(legacyHistory.previousRanges).toEqual([]);
             expect(
                 (await db.select().from(schema.memorizationAssessment)).map(
                     (a) => a.assignmentId,
@@ -81,14 +111,37 @@ const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
             ).toBe(5);
             expect(
                 await db.select().from(schema.memorizationRecord),
-            ).toHaveLength(0);
+            ).toHaveLength(1);
             const modules = {
                 "server-only": {},
                 "drizzle-orm": orm,
                 "@/drizzle/db": db,
                 "@/drizzle/schema": schema,
                 "../progress": progress,
+                "./get-memory-catalogue": async () => ({
+                    hafs: Array.from({ length: 7 }, (_, i) => ({
+                        surahNumber: 1,
+                        ayahNumber: i + 1,
+                        hizb: 1,
+                        quarter: 1,
+                        page: 1,
+                        atoms: [String(i)],
+                    })),
+                    warsh: Array.from({ length: 8 }, (_, i) => ({
+                        surahNumber: 1,
+                        ayahNumber: i + 1,
+                        hizb: 1,
+                        quarter: 1,
+                        page: 1,
+                        atoms: [String(i)],
+                    })),
+                }),
             };
+            modules["@/features/revision/server/reconcile-plan"] =
+                loadRevisionReconciliation(
+                    modules,
+                    modules["./get-memory-catalogue"],
+                );
             const service = loadTypeScript(
                 "src/features/memorization/server/record-service.ts",
                 modules,
@@ -149,24 +202,15 @@ const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
             );
             expect(setup.filter((r) => r.success)).toHaveLength(1);
             expect((await records("other")).revision).toBe(1);
+            // An unchanged save does not create a new revision or audit entry.
             expect(
-                (
-                    await service.requestCorrection(
-                        "solo",
-                        "Fix my original selection",
-                    )
-                ).success,
-            ).toBe(false);
-            expect(
-                (
-                    await service.saveBaseline(
-                        "solo",
-                        { hizbs: [], revision: 1, setup: false },
-                        "hafs",
-                    )
-                ).changed,
-            ).toBe(false);
-            expect((await records("solo")).correctionUsedAt).toBeNull();
+                await service.saveBaseline(
+                    "solo",
+                    { hizbs: [], revision: 1, setup: false },
+                    "hafs",
+                ),
+            ).toEqual({ success: true, changed: false });
+            expect((await records("solo")).revision).toBe(1);
             const corrected = await Promise.all(
                 [1, 2].map((n) =>
                     service.saveBaseline(
@@ -177,27 +221,60 @@ const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
                 ),
             );
             expect(corrected.filter((r) => r.success)).toHaveLength(1);
-            expect((await records("solo")).correctionUsedAt).not.toBeNull();
+            expect(corrected.find((r) => !r.success).reason).toBe("stale");
+            const firstCorrection = await baseline("solo");
             expect((await records("solo")).baselineRiwayah).toBe("warsh");
+
+            // Corrections can be repeated without a request or a one-use grant.
             expect(
                 (
                     await service.saveBaseline(
                         "solo",
-                        { hizbs: [3], revision: 2, setup: false },
+                        { hizbs: [3, 3], revision: 2, setup: false },
                         "hafs",
                     )
-                ).reason,
-            ).toBe("locked");
+                ).success,
+            ).toBe(true);
+            expect(await baseline("solo")).toEqual([3]);
+            expect((await records("solo")).revision).toBe(3);
             expect(
                 (
                     await service.saveBaseline(
                         "solo",
-                        { hizbs: [3], revision: 0, setup: true },
+                        { hizbs: [4], revision: 2, setup: false },
                         "hafs",
                     )
                 ).reason,
             ).toBe("stale");
-            // Expiration is decided by the database clock, not a supplied client time.
+            expect(
+                (
+                    await service.saveBaseline(
+                        "solo",
+                        { hizbs: [], revision: 0, setup: true },
+                        "hafs",
+                    )
+                ).reason,
+            ).toBe("stale");
+            expect(await baseline("solo")).toEqual([3]);
+            expect(await requests("solo")).toHaveLength(0);
+            const changes = await db
+                .select()
+                .from(schema.memorizationBaselineChange)
+                .where(orm.eq(schema.memorizationBaselineChange.userId, "solo"))
+                .orderBy(orm.asc(schema.memorizationBaselineChange.createdAt));
+            expect(changes).toHaveLength(3);
+            expect(changes.map((c) => c.source)).toEqual([
+                "setup",
+                "self",
+                "self",
+            ]);
+            expect(changes[1].previousHizbs).toEqual([]);
+            expect(changes[1].hizbs).toEqual(firstCorrection);
+            expect(changes[2].previousHizbs).toEqual(firstCorrection);
+            expect(changes[2].hizbs).toEqual([3]);
+            expect(changes.every((c) => c.requestId === null)).toBe(true);
+
+            // Old records with an expired window and a used correction are editable too.
             expect(
                 (
                     await service.saveBaseline(
@@ -212,130 +289,77 @@ const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
                 ).success,
             ).toBe(true);
             await pool.query(
-                "update memorization_record set setup_at=clock_timestamp()-interval '3 hours' where user_id='expired'",
+                "update memorization_record set setup_at=clock_timestamp()-interval '20 days', correction_used_at=clock_timestamp()-interval '19 days' where user_id='expired'",
             );
+            const previousRecord = await records("expired");
             expect(
                 (
                     await service.saveBaseline(
                         "expired",
                         { hizbs: [], revision: 1, setup: false },
-                        "hafs",
-                    )
-                ).reason,
-            ).toBe("locked");
-            const sent = await Promise.all(
-                [1, 2].map(() =>
-                    service.requestCorrection(
-                        "solo",
-                        "I selected the wrong hizb.",
-                    ),
-                ),
-            );
-            expect(sent.filter((r) => r.success)).toHaveLength(1);
-            const request = (await requests("solo"))[0];
-            expect(
-                (
-                    await service.reviewCorrection(
-                        "other",
-                        request.id,
-                        "approved",
-                        "",
+                        "warsh",
                     )
                 ).success,
-            ).toBe(false);
-            const reviews = await Promise.all(
-                [1, 2].map(() =>
-                    service.reviewCorrection(
-                        "admin",
-                        request.id,
-                        "approved",
-                        "Please check before saving.",
-                    ),
-                ),
-            );
-            expect(reviews.filter((r) => r.success)).toHaveLength(1);
-            await pool.query(
-                "update memorization_correction_request set reviewed_at=clock_timestamp()-interval '20 days' where id=$1",
-                [request.id],
-            );
-            expect(
-                (
-                    await service.requestCorrection(
-                        "solo",
-                        "Another request while approved",
-                    )
-                ).success,
-            ).toBe(false);
+            ).toBe(true);
             expect(
                 (
                     await service.saveBaseline(
-                        "solo",
-                        {
-                            hizbs: await baseline("solo"),
-                            revision: 2,
-                            setup: false,
-                        },
-                        "hafs",
-                    )
-                ).changed,
-            ).toBe(false);
-            expect((await requests("solo"))[0].status).toBe("approved");
-            const grant = await Promise.all(
-                [3, 4].map((n) =>
-                    service.saveBaseline(
-                        "solo",
-                        { hizbs: [n], revision: 2, setup: false },
-                        "hafs",
-                    ),
-                ),
-            );
-            expect(grant.filter((r) => r.success)).toHaveLength(1);
-            expect((await requests("solo"))[0].status).toBe("used");
-            const changes = await db
-                .select()
-                .from(schema.memorizationBaselineChange)
-                .where(
-                    orm.eq(schema.memorizationBaselineChange.userId, "solo"),
-                );
-            expect(changes).toHaveLength(3);
-            expect(changes.find((c) => c.source === "admin").requestId).toBe(
-                request.id,
-            );
-            expect(
-                (
-                    await service.requestCorrection(
-                        "solo",
-                        "I need a later correction",
-                    )
-                ).success,
-            ).toBe(true);
-            const later = (await requests("solo"))[0];
-            expect(
-                (
-                    await service.reviewCorrection(
-                        "admin",
-                        later.id,
-                        "declined",
-                        "Explain the missing hizbs.",
-                    )
-                ).success,
-            ).toBe(true);
-            expect(
-                (
-                    await service.requestCorrection(
-                        "solo",
-                        "The missing hizb is number 20",
-                    )
-                ).success,
-            ).toBe(true);
-            expect(
-                (
-                    await service.requestCorrection(
                         "expired",
-                        "An expired window correction",
+                        { hizbs: [60], revision: 2, setup: false },
+                        "warsh",
                     )
                 ).success,
             ).toBe(true);
+            expect((await records("expired")).setupAt).toEqual(
+                previousRecord.setupAt,
+            );
+            expect((await records("expired")).correctionUsedAt).toEqual(
+                previousRecord.correctionUsedAt,
+            );
+            expect((await records("expired")).baselineRiwayah).toBe("hafs");
+
+            // Legacy requests are historical data, regardless of their last status.
+            for (const status of ["pending", "approved", "declined", "used"]) {
+                const id = `legacy-${status}`;
+                await db.insert(schema.user).values({
+                    id,
+                    name: id,
+                    email: `${id}@example.test`,
+                    role: "member",
+                });
+                await service.saveBaseline(
+                    id,
+                    { hizbs: [1], revision: 0, setup: true },
+                    "hafs",
+                );
+                await db.insert(schema.memorizationCorrectionRequest).values({
+                    id,
+                    userId: id,
+                    reason: "An earlier correction request",
+                    status,
+                    reviewNote: "Historical note",
+                });
+                const before = await requests(id);
+                expect(
+                    (
+                        await service.saveBaseline(
+                            id,
+                            { hizbs: [2], revision: 1, setup: false },
+                            "hafs",
+                        )
+                    ).success,
+                ).toBe(true);
+                expect(
+                    (
+                        await service.saveBaseline(
+                            id,
+                            { hizbs: [], revision: 2, setup: false },
+                            "hafs",
+                        )
+                    ).success,
+                ).toBe(true);
+                expect(await requests(id)).toEqual(before);
+            }
 
             // Personal practice works without group membership. Reaching the end alone earns nothing.
             await db
@@ -396,8 +420,6 @@ const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
             expect((await events("solo"))[0].method).toBe("self");
             expect((await events("solo"))[0].endAyahNumber).toBe(7);
             const preserved = (await events("solo"))[0].id;
-            const latest = (await requests("solo"))[0];
-            await service.reviewCorrection("admin", latest.id, "approved", "");
             await service.saveBaseline(
                 "solo",
                 { hizbs: [], revision: 3, setup: false },
@@ -460,7 +482,7 @@ const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
             ).rejects.toThrow("rollback");
             expect(await events("solo")).toHaveLength(2);
 
-            // Public actions require a session, explicit confirmation, valid input and an admin role.
+            // Public actions require a session, explicit confirmation and valid input. The session determines ownership.
             let userId = null;
             const actions = loadTypeScript(
                 "src/features/memorization/server/record-actions.ts",
@@ -476,10 +498,6 @@ const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
                                     userId ? { user: { id: userId } } : null,
                             },
                         },
-                    },
-                    "@/features/auth/permissions": {
-                        getPlatformAdmin: async () =>
-                            userId === "admin" ? { id: "admin" } : null,
                     },
                     "@/features/settings/server/get-preferences": async () => ({
                         riwayah: "hafs",
@@ -525,15 +543,174 @@ const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
                     })
                 ).success,
             ).toBe(false);
+            const soloBefore = await baseline("solo");
             expect(
-                (await actions.askMemorizationCorrection({ reason: "short" }))
-                    .success,
+                (
+                    await actions.saveMemorizationBaseline({
+                        userId: "solo",
+                        hizbs: [9],
+                        revision: 1,
+                        setup: false,
+                        confirmed: true,
+                    })
+                ).success,
+            ).toBe(true);
+            expect(await baseline("other")).toEqual([9]);
+            expect(await baseline("solo")).toEqual(soloBefore);
+
+            // Corrections never delete personal confirmations or circle assessments.
+            const assessmentsBefore = await events("solo");
+            expect(
+                (
+                    await service.saveBaseline(
+                        "solo",
+                        { hizbs: [6], revision: 4, setup: false },
+                        "hafs",
+                    )
+                ).success,
+            ).toBe(true);
+            expect(
+                (
+                    await service.saveBaseline(
+                        "solo",
+                        { hizbs: [], revision: 5, setup: false },
+                        "hafs",
+                    )
+                ).success,
+            ).toBe(true);
+            expect(await events("solo")).toEqual(assessmentsBefore);
+            // A learner can start with only part of a surah, correct it, and retain a complete audit.
+            await db.insert(schema.user).values({
+                id: "partial",
+                name: "Partial learner",
+                email: "partial@example.test",
+            });
+            const passage = {
+                surahNumber: 1,
+                startAyahNumber: 1,
+                endAyahNumber: 3,
+            };
+            expect(
+                (
+                    await service.saveBaseline(
+                        "partial",
+                        {
+                            hizbs: [],
+                            ranges: [passage],
+                            setup: true,
+                            revision: 0,
+                        },
+                        "hafs",
+                    )
+                ).success,
+            ).toBe(true);
+            expect(await baseline("partial")).toEqual([]);
+            expect((await records("partial")).baselineRanges).toEqual([
+                passage,
+            ]);
+            // Equivalent, overlapping submissions normalize without another save.
+            expect(
+                (
+                    await service.saveBaseline(
+                        "partial",
+                        {
+                            hizbs: [],
+                            ranges: [
+                                passage,
+                                { ...passage, startAyahNumber: 2 },
+                            ],
+                            setup: false,
+                            revision: 1,
+                        },
+                        "hafs",
+                    )
+                ).changed,
+            ).toBe(false);
+            // The stored reading wins over a subsequently changed preference.
+            expect(
+                (
+                    await service.saveBaseline(
+                        "partial",
+                        {
+                            hizbs: [],
+                            ranges: [{ ...passage, endAyahNumber: 8 }],
+                            setup: false,
+                            revision: 1,
+                        },
+                        "warsh",
+                    )
+                ).reason,
+            ).toBe("invalid");
+            expect((await records("partial")).revision).toBe(1);
+            // Older open clients cannot erase passages they do not know about.
+            expect(
+                (
+                    await service.saveBaseline(
+                        "partial",
+                        { hizbs: [2], setup: false, revision: 1 },
+                        "hafs",
+                    )
+                ).success,
+            ).toBe(true);
+            expect((await records("partial")).baselineRanges).toEqual([
+                passage,
+            ]);
+            expect(
+                (
+                    await service.saveBaseline(
+                        "partial",
+                        { hizbs: [], ranges: [], setup: false, revision: 2 },
+                        "hafs",
+                    )
+                ).success,
+            ).toBe(true);
+            const audit = await db
+                .select()
+                .from(schema.memorizationBaselineChange)
+                .where(
+                    orm.eq(schema.memorizationBaselineChange.userId, "partial"),
+                )
+                .orderBy(orm.asc(schema.memorizationBaselineChange.createdAt));
+            expect(audit.map((c) => c.ranges)).toEqual([
+                [passage],
+                [passage],
+                [],
+            ]);
+            expect(audit.at(-1).previousRanges).toEqual([passage]);
+            expect(
+                (
+                    await service.saveBaseline(
+                        "partial",
+                        {
+                            hizbs: [],
+                            ranges: [passage],
+                            setup: false,
+                            revision: 2,
+                        },
+                        "hafs",
+                    )
+                ).reason,
+            ).toBe("stale");
+            userId = "partial";
+            expect(
+                (
+                    await actions.saveMemorizationBaseline({
+                        hizbs: [],
+                        ranges: [{ ...passage, startAyahNumber: 4 }],
+                        setup: false,
+                        revision: 3,
+                        confirmed: true,
+                    })
+                ).success,
             ).toBe(false);
             expect(
                 (
-                    await actions.reviewMemorizationCorrection({
-                        requestId: request.id,
-                        decision: "approved",
+                    await actions.saveMemorizationBaseline({
+                        hizbs: [],
+                        ranges: [{ ...passage, surahNumber: 115 }],
+                        setup: false,
+                        revision: 3,
+                        confirmed: true,
                     })
                 ).success,
             ).toBe(false);

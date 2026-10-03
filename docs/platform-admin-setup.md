@@ -48,4 +48,19 @@ For an existing installation, run `bun run db:migrate` before using optional sup
 - Test separate sessions for admin, supervisor and member: only admin can create/delete/reassign circles; only the appointed supervisor can manage a circle; a supervisor remains an ordinary member elsewhere.
 - Check meeting host transfer, notification recipients, member invitation, and supervisor self-assignment after setup.
 
+## User management
+
+`/admin/users` replaces the retired correction-request entry point. The directory supports name/email search, active/suspended/supervisor filters and pagination. Account pages show join date, memberships, saved-record counts and a paginated administration history. Counts are records, not memorized ayahs.
+
+- **Reset app data** previews the affected categories and requires the account email and a reason. It clears personal memorization/assessments and correction history, all learning plans and sessions, received assignments, reading/wird/khatmah records, bookmarks/collections, attendance and circle membership, onboarding, reminders and login sessions. Account preferences return to defaults. Name, email, password and account identity remain. Assignments/reviews belonging to other learners and the minimal administration log remain.
+- Resetting a suspended account does not reactivate it. Supervisors must hand over their circles before reset or suspension. Platform admins cannot be targeted. Reset and audit writes are atomic; stale or repeated submissions fail without clearing data again.
+- **Suspend access** preserves learning data, revokes sessions and notification subscriptions, and blocks sign-in. **Reactivate access** allows a new sign-in. Suspended users cannot be appointed as supervisors.
+- **Sign out all devices** revokes existing sessions and notification subscriptions. It is blocked while the user hosts a live meeting. Session-creation hooks also reject sessions that race with a reset, suspension or sign-out. Cookie session caching is disabled.
+- Account-scoped recall-test settings and wird drafts are invalidated by a reset and removed from browser storage when the user returns. Shared offline Quran downloads and device-only counters remain on the device.
+- Every action requires a short reason, recorded with the administrator, target and timestamp. The log does not retain erased learning content. Permanent account deletion and selective resets are not part of these support controls.
+
+Apply additive migrations `0034_user_management` and `0035_user_data_reset` with `bun run db:migrate` before serving this version. Test with `USER_MANAGEMENT_TEST_DATABASE_URL=postgresql://.../empty_user_management_tests bun test scripts/user-management.integration.test.mjs`. This opt-in suite migrates its own empty disposable database, refuses nonempty databases, and exercises real authentication, data isolation, transaction rollback, suspension, revocation and the audit log. Browser-storage reset coverage is in `scripts/reset-local-data.test.mjs`.
+
 Nothing in this implementation deletes the old test database or deploys to Vercel automatically.
+
+The `data_reset_at` field is introduced by migration `0035_user_data_reset`, separately from `0034_user_management`, so databases that already applied the original user-management migration upgrade correctly. The new migration also accepts an already-present field without losing reset dates. Upgrade regression: `USER_MIGRATION_TEST_DATABASE_URL=postgresql://.../empty_migration_tests bun test scripts/user-management-migration.integration.test.mjs`. Never add a new schema change to an already-applied migration; add a subsequent migration.

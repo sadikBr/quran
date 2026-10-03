@@ -56,7 +56,15 @@ Theme thumbnails use the actual palette tokens. Migration
 
 ## Automatic memorization tracking
 
-Learners review and lock their starting hizbs at `/memorization`. Existing manual selections are prefilled; an empty starting record is valid. One changed correction is allowed immediately after setup, until three hours have elapsed. Cancelling, saving an unchanged selection, and failed saves do not consume it. Later requests appear in the administrator’s `/admin/memorization` inbox. Approval grants one saved correction, available until used.
+Learners review and save their starting memorization at `/memorization`. Existing manual selections are prefilled; an empty starting record is valid. Learners can correct this self-reported starting record at any time, with a preview of additions and removals before saving. There is no correction limit, countdown, or administrator approval. Each changed save records the previous and new selections; unchanged saves do not create history. Concurrent or stale edits cannot overwrite newer selections. Removing a starting hizb preserves any overlapping confirmed practice and circle-review coverage.
+
+Previous correction requests and their historical decisions remain stored for compatibility, but no longer gate editing or require administrator action. The retired `/admin/memorization` route redirects to `/admin/users`. New corrections use the `self` source.
+
+Platform admins manage accounts at `/admin/users`: search and filter learners, view account details and memberships, reset personal app data with an email confirmation, suspend/reactivate access, sign out all devices, and review a reasoned administration log. Reset preserves login credentials and other learners’ work; current supervisors must hand over their circles first. See [user-management behavior and verification](docs/platform-admin-setup.md#user-management). Apply the additive `0034_user_management` and `0035_user_data_reset` migrations before serving this version.
+
+Starting memorization can include complete surahs, ayah ranges within a surah, and whole hizbs. Surah names are searchable; ayah limits follow the record’s saved Hafs/Warsh reading. Overlapping ranges are merged and all overlapping coverage counts once. Partial hizbs appear on the map and in progress totals, and the default recall test draws from memorized ayahs only. New memorization plans skip these ayahs. Revision plans can start with a single memorized passage and split at unknown gaps, including gaps within a quarter. Existing whole-hizb selections remain intact.
+
+Apply migration `0033_memorization_surah_ranges` with `bun run db:migrate` before running this version. It adds starting ranges and their before/after history with empty defaults for existing records. Older open clients that omit ranges preserve saved passages.
 
 Progress combines the starting record with confirmed personal practice and successful circle reviews. Reaching a reading position or playing audio alone does not add memorization. Personal practice requires an explicit confirmation after reaching the range’s end and works without circle membership. Coverage accumulates by ayah without counting overlaps twice; a hizb is complete only when its entire range is covered. Hafs and Warsh share Quranpedia’s verse correspondence, including split verses. Revision feedback flags a range without deleting earned progress.
 
@@ -223,13 +231,11 @@ and planned versus completed grid coverage.
 
 ## Weekly memorization revision
 
-After locking their starting memorization record, members can opt in at
+After saving their starting memorization record, members can opt in at
 `/memorization/revision`, use their saved study days and choose a daily amount (a quarter,
-half, or full hizb), and preview the ranges before enabling the plan. Only fully
-memorized hizbs are eligible. The schedule uses native Hafs/Warsh quarter boundaries,
+half, or full hizb), and preview the ranges before enabling the plan. Only memorized ayahs are eligible, including partial surahs and hizbs. The schedule uses native Hafs/Warsh quarter boundaries,
 rotates through older passages, and reserves part of new schedules for difficult
-passages. Each quarter appears at most once in a saved schedule; small memorization
-records leave extra days free.
+passages. Each quarter is allocated to at most one day per saved schedule. Disjoint memorized passages within a quarter become separate sessions on that day; small memorization records leave extra days free.
 
 Saved daily portions form a queue. Missed portions move to the next selected study
 day, shifting later portions without increasing the daily workload. The original
@@ -239,6 +245,22 @@ schedule replaces it until its eligible portions are finished; superseded histor
 snapshots do not create a backlog. Amount and reading changes apply to the next
 generated schedule. Saved study days immediately reflow the pending dates, and
 reminder changes take effect immediately. Pausing retains all results.
+Corrections to starting memorization repair the saved revision batch in the same
+transaction, including an upcoming or paused batch. Completed sessions and valid
+sessions keep their IDs and reading positions. Partly eligible sessions are split
+at unmemorized gaps, retaining progress within the remaining passages. Freed slots
+are filled from other eligible quarters without duplicating retained passages or
+exceeding the original daily amount; otherwise those slots are removed. New IDs
+invalidate readers for replaced sessions, and plan versions invalidate old previews.
+Existing inconsistent batches are repaired when read. An empty batch shows that
+memorization is needed and can be populated again when a learner adds memorization.
+The revision page also shows a complete rotation forecast: memorized ayah counts
+for each hizb, the ayahs already in the saved batch, and the remaining passages
+across future weeks. Partial hizbs are included in full. The forecast preserves
+the saved batch and the configured daily amount, excludes its already-scheduled
+ayahs, and assigns every remaining memorized ayah once. Forecast dates are estimates
+that adjust after missed days, corrections, and review results; only the active
+saved batch has reader links. Session cards display actual ayah counts.
 Confirmed circle reviews since the saved schedule began count toward matching ayahs, and
 personal review results are stored in the existing memorization history. Difficult
 reviews flag passages for more practice without removing memorization.
