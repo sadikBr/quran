@@ -36,6 +36,7 @@ import {
 import {
     isMemorized,
     type LearningSchedule,
+    MEMORIZATION_SEQUENCE_VERSION,
     type MemorizationSettings,
     memorizedAtoms,
 } from "../schedule";
@@ -424,6 +425,7 @@ async function insertWeek(
         quartersPerWeek: settings.quartersPerWeek,
         direction: settings.direction,
         baselineRevision: record?.revision ?? 0,
+        sequenceVersion: MEMORIZATION_SEQUENCE_VERSION,
     });
     if (sessions.length)
         await tx.insert(memorizationSession).values(

@@ -103,19 +103,18 @@ test("completion moves the next week's target forward; missed passages remain el
         ).map((v) => v.ayahNumber),
     ).toEqual([1, 2, 3, 4, 5, 6, 7]);
 });
-test("backward plans preserve verse order within each quarter and never cross reversed boundaries", () => {
+test("a backward plan starts a long surah at its beginning, even across hizbs", () => {
     const result = schedule({
         settings: {
             ...settings,
-
             quartersPerWeek: 2,
             direction: "backward",
         },
         days: [1],
     });
-    expect(result.map((r) => r.quarters)).toEqual([[8], [7]]);
+    expect(result.map((r) => r.quarters)).toEqual([[1, 2]]);
     expect(scheduledVerses(result).map((v) => v.ayahNumber)).toEqual([
-        50, 51, 52, 53, 54, 55, 56, 43, 44, 45, 46, 47, 48, 49,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
     ]);
 });
 test("late activation redistributes only across remaining days and bounds at Quran end", () => {
@@ -184,7 +183,7 @@ test("the grid chooses the earliest missing ayahs, ignoring a legacy manual star
         ),
     ).toEqual([2]);
 });
-test("reverse plans choose the last missing surah, with normal ayah order and no known gaps", () => {
+test("backward plans read surahs forward within a hizb without spanning known gaps", () => {
     const tail = [112, 113, 114].flatMap((surahNumber) =>
         Array.from({ length: 4 }, (_, i) => ({
             ...verses[0],
@@ -212,9 +211,8 @@ test("reverse plans choose the last missing surah, with normal ayah order and no
             s.endAyahNumber,
         ]),
     ).toEqual([
-        [113, 1, 113, 1],
+        [112, 1, 113, 1],
         [113, 3, 113, 4],
-        [112, 1, 112, 4],
     ]);
 });
 test("saved days allow overlapping activities, deduplicate weekdays, validate amount and timezone", () => {

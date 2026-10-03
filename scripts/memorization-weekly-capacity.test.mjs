@@ -256,7 +256,7 @@ test("the cap also holds for reverse order, exhausted material and empty study d
     };
     expect(
         generateMemorizationSchedule(args).flatMap((s) => s.quarters),
-    ).toEqual([2]);
+    ).toEqual([1]);
     expect(generate([], { days: [] }).sessions).toEqual([]);
     const all = [event(1, 24, "2026-10-05T12:00:00Z")];
     expect(generate(all).sessions).toEqual([]);

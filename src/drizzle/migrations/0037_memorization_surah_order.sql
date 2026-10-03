@@ -1,0 +1,1 @@
+ALTER TABLE "memorization_week" ADD COLUMN "sequence_version" integer DEFAULT 1 NOT NULL;

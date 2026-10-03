@@ -19,6 +19,7 @@ import {
 } from "@/features/memorization/progress";
 import getMemoryCatalogue from "@/features/memorization/server/get-memory-catalogue";
 import { reconcileMemorizationSessions } from "../reconcile";
+import { MEMORIZATION_SEQUENCE_VERSION } from "../schedule";
 import {
     generateLimitedMemorizationSchedule,
     memorizationUsage,
@@ -49,7 +50,11 @@ export async function reconcileMemorizationPlan(
         .select()
         .from(memorizationRecord)
         .where(eq(memorizationRecord.userId, userId));
-    if (!record?.setupAt || record.revision === week.baselineRevision)
+    if (
+        !record?.setupAt ||
+        (record.revision === week.baselineRevision &&
+            week.sequenceVersion === MEMORIZATION_SEQUENCE_VERSION)
+    )
         return false;
     const [baseline, assessments, sessions, [schedule]] = await Promise.all([
         tx
@@ -118,7 +123,10 @@ export async function reconcileMemorizationPlan(
     if (finishedHistory) {
         await tx
             .update(memorizationWeek)
-            .set({ baselineRevision: record.revision })
+            .set({
+                baselineRevision: record.revision,
+                sequenceVersion: MEMORIZATION_SEQUENCE_VERSION,
+            })
             .where(eq(memorizationWeek.id, week.id));
         return false;
     }
@@ -153,7 +161,10 @@ export async function reconcileMemorizationPlan(
         );
     await tx
         .update(memorizationWeek)
-        .set({ baselineRevision: record.revision })
+        .set({
+            baselineRevision: record.revision,
+            sequenceVersion: MEMORIZATION_SEQUENCE_VERSION,
+        })
         .where(eq(memorizationWeek.id, week.id));
     if (repair)
         await tx

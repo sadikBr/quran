@@ -260,6 +260,13 @@
             "when": 1791053456817,
             "tag": "0036_automatic_memorization_start",
             "breakpoints": true
+        },
+        {
+            "idx": 37,
+            "version": "7",
+            "when": 1791055404065,
+            "tag": "0037_memorization_surah_order",
+            "breakpoints": true
         }
     ]
 }

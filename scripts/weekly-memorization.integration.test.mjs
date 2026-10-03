@@ -1629,7 +1629,14 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
             expect(auto.sessions.find((s) => s.id === completed.id)?.done).toBe(
                 true,
             );
-            expect(pendingAyahs(auto)).toEqual([13, 14, 15, 16]);
+            // Earlier missing ayahs take precedence even when a later quarter
+            // has already consumed this week's allowance.
+            expect(pendingAyahs(auto)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+            expect(
+                auto.sessions
+                    .filter((s) => !s.done)
+                    .every((s) => s.scheduledDate >= "2026-11-09"),
+            ).toBe(true);
             expect(await events("auto-forward")).toEqual(confirmedBefore);
             // Mark the rest of this quarter known: a fresh quarter must wait,
             // even if the corrected baseline now includes the confirmed work.
@@ -1662,9 +1669,7 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
             ).toBe(auto.plan.revision);
 
             let reverse = await seedAuto("auto-backward", [2], "backward");
-            expect(pendingAyahs(reverse)).toEqual([
-                25, 26, 27, 28, 29, 30, 31, 32,
-            ]);
+            expect(pendingAyahs(reverse)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
             await service.pauseMemorizationPlan(
                 "auto-backward",
                 reverse.plan.revision,
@@ -1676,21 +1681,19 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
             );
             expect(reverse.plan.enabled).toBe(false);
             expect(reverse.sessions.every((s) => !s.active)).toBe(true);
-            expect(pendingAyahs(reverse)).toEqual([
-                57, 58, 59, 60, 61, 62, 63, 64,
-            ]);
+            expect(pendingAyahs(reverse)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
             await correct("auto-backward", [1, 2]);
             expect(
                 (await service.getMemorizationPlanView("auto-backward", "hafs"))
                     .sessions,
             ).toEqual([]);
-            await correct("auto-backward", [], [nativeRange(57, 64)]);
+            await correct("auto-backward", [], [nativeRange(1, 8)]);
             reverse = await service.getMemorizationPlanView(
                 "auto-backward",
                 "hafs",
             );
             expect(pendingAyahs(reverse)).toEqual([
-                49, 50, 51, 52, 53, 54, 55, 56,
+                9, 10, 11, 12, 13, 14, 15, 16,
             ]);
             await service.saveLearningSchedule("auto-backward", {
                 ...days,
@@ -1702,9 +1705,7 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
                 "auto-backward",
                 "hafs",
             );
-            expect(pendingAyahs(reverse)).toEqual([
-                57, 58, 59, 60, 61, 62, 63, 64,
-            ]);
+            expect(pendingAyahs(reverse)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
             expect(
                 reverse.sessions.every((s) => s.scheduledDate === null),
             ).toBe(true);
@@ -1712,7 +1713,7 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
             await db
                 .update(schema.memorizationRecord)
                 .set({
-                    baselineRanges: [nativeRange(57, 64)],
+                    baselineRanges: [nativeRange(1, 8)],
                     revision: orm.sql`${schema.memorizationRecord.revision} + 1`,
                 })
                 .where(
@@ -1723,7 +1724,7 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
                 "hafs",
             );
             expect(pendingAyahs(reverse)).toEqual([
-                49, 50, 51, 52, 53, 54, 55, 56,
+                9, 10, 11, 12, 13, 14, 15, 16,
             ]);
             // Completed historical work must use the latest target for the next
             // batch, including completion through a circle rather than this reader.

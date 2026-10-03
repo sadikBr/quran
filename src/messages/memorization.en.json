@@ -349,8 +349,8 @@
             "target": "Weekly target (quarter hizbs)",
             "targetHint": "{hizbs} hizb per week. 1 = quarter hizb, 2 = half hizb, 4 = one hizb.",
             "direction": "Memorization direction",
-            "forward": "From Al-Fatihah toward An-Nas",
-            "backward": "From An-Nas toward Al-Fatihah",
+            "forward": "From the first hizb toward the last",
+            "backward": "From the last hizb toward the first",
             "splitHint": "Whole ayahs are spread across the remaining study days, skipping memorized ayahs. Each quarter with new memorization confirmed this week uses one weekly slot, including a carried-over portion or new circle-confirmed memorization. New quarters wait when the limit is reached. Amount, direction and reading changes apply to the next schedule.",
             "empty": "No passages to schedule for this week: there may be no days left, or the passages in this direction are already memorized.",
             "done": "Memorized",
@@ -370,11 +370,11 @@
             "sessionHint": "Learn this passage, then confirm your memorization in the reader.",
             "scheduleSaved": "Study days saved.",
             "scheduleStale": "Your study days changed elsewhere. Review the latest selection and save again.",
-            "editorSummaryHint": "Your starting passage is chosen automatically from your grid. Completed memorization is kept when you correct it.",
+            "editorSummaryHint": "Your grid chooses the starting passage. Every surah progresses from beginning to end, even when it crosses hizb boundaries.",
             "readerTitle": "Record this memorization",
             "readerHint": "Learn the whole passage, hide the text and recite it from memory, then check it. Reach the last ayah before confirming your memorization.",
             "coveredHint": "This passage is included in your memorized progress. Overlapping ayahs count only once.",
-            "automaticStartHint": "Your memorization grid chooses the first missing passage. From the end, surahs are studied in reverse order within each quarter, with ayahs always read in their normal order. Grid corrections automatically update unfinished sessions."
+            "automaticStartHint": "Each surah is learned from its first unmemorized ayah to its end. If a hizb begins mid-surah, the plan includes its earlier unmemorized ayahs first. Longer surahs continue across weeks within your weekly amount. Grid corrections update unfinished sessions automatically."
         },
         "plans": {
             "navigation": "Weekly study plans",

@@ -32,7 +32,34 @@ export const memorizationSettingsSchema = z.object({
 export type MemorizationSettings = z.infer<typeof memorizationSettingsSchema>;
 export type LearningSchedule = z.infer<typeof learningScheduleSchema>;
 
-// Select native quarter boundaries, then distribute their unmemorized ayahs across days.
+export const MEMORIZATION_SEQUENCE_VERSION = 2;
+
+function orderedVerses(
+    verses: MemoryVerse[],
+    direction: MemorizationSettings["direction"],
+) {
+    if (direction === "forward") return verses;
+    const surahs = new Map<number, MemoryVerse[]>();
+    for (const verse of verses) {
+        const surah = surahs.get(verse.surahNumber) ?? [];
+        surah.push(verse);
+        surahs.set(verse.surahNumber, surah);
+    }
+    // Visit hizbs from last to first, reading forward inside each one. A surah
+    // spanning a hizb boundary belongs to the last hizb it touches, so its earlier
+    // ayahs are learned first and it cannot be split across reversed visits.
+    // This order is independent of coverage: learning its tail elsewhere must
+    // not push its missing beginning behind the next surah.
+    return [...surahs.values()]
+        .sort(
+            (a, b) =>
+                b[b.length - 1].hizb - a[a.length - 1].hizb ||
+                a[0].surahNumber - b[0].surahNumber,
+        )
+        .flat();
+}
+
+// Follow the surah sequence within the weekly quarter budget, then distribute ayahs.
 // Never credit a planned verse, split an ayah, or span already-memorized gaps.
 export function generateMemorizationSchedule({
     catalogue,
@@ -64,32 +91,21 @@ export function generateMemorizationSchedule({
         )
         .map((d) => d.toISODate() as string);
     if (!dates.length) return [];
-    const quarters = Array.from({ length: 240 }, (_, i) => i + 1);
-    if (settings.direction === "backward") quarters.reverse();
     const allocated = new Set(usedQuarters);
     if (allocated.size > settings.quartersPerWeek) return [];
-    const selected = quarters.filter((q) => {
-        if (!verses.some((v) => v.quarter === q && !isMemorized(v, covered)))
-            return false;
-        if (!allocated.has(q) && allocated.size >= settings.quartersPerWeek)
-            return false;
-        allocated.add(q);
-        return true;
-    });
-    const pending = selected.flatMap((q) => {
-        const missing = verses.filter(
-            (v) => v.quarter === q && !isMemorized(v, covered),
-        );
-        // From the end, study the last surah first, but always recite its ayahs
-        // in their normal order. Long surahs advance by quarters in reverse.
-        return settings.direction === "backward"
-            ? missing.sort(
-                  (a, b) =>
-                      b.surahNumber - a.surahNumber ||
-                      a.ayahNumber - b.ayahNumber,
-              )
-            : missing;
-    });
+    const pending: MemoryVerse[] = [];
+    for (const verse of orderedVerses(verses, settings.direction)) {
+        if (isMemorized(verse, covered)) continue;
+        // Stop at the first quarter that cannot fit. Skipping ahead to an already
+        // budgeted later quarter would teach the surah's ending before its start.
+        if (
+            !allocated.has(verse.quarter) &&
+            allocated.size >= settings.quartersPerWeek
+        )
+            break;
+        allocated.add(verse.quarter);
+        pending.push(verse);
+    }
     const index = new Map(verses.map((v, i) => [v, i]));
     const result: ScheduledRange[] = [];
     let cursor = 0;

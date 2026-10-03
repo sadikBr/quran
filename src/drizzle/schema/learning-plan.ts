@@ -58,6 +58,7 @@ export const memorizationWeek = pgTable(
             .notNull()
             .default("forward"),
         baselineRevision: integer("baseline_revision").notNull().default(-1),
+        sequenceVersion: integer("sequence_version").notNull().default(1),
     },
     (t) => [
         uniqueIndex("memorization_week_user_date_idx").on(

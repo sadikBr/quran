@@ -11,7 +11,7 @@ import { loadMemorizationReconciliation } from "./helpers/load-memorization-reco
 
 const target = process.env.AUTO_PLAN_TEST_DATABASE_URL;
 (target ? test : test.skip)(
-    "database: upgrade manual plans to automatic starts without losing direction or completed history",
+    "database: upgrade manual and automatic plans to forward surah order without losing completed history",
     async () => {
         if (!new URL(target).pathname.endsWith("_auto_plan_tests"))
             throw new Error(
@@ -100,10 +100,27 @@ const target = process.env.AUTO_PLAN_TEST_DATABASE_URL;
                 endAyahNumber: 40,
                 createdAt: new Date("2026-11-02T10:00:00Z"),
             });
+            // First upgrade to the previous automatic-start release and mark its
+            // baseline as current. The sequence migration must still repair it.
+            const previousJournal = JSON.parse(
+                await readFile(
+                    "src/drizzle/migrations/meta/_journal.json",
+                    "utf8",
+                ),
+            );
+            previousJournal.entries = previousJournal.entries.filter(
+                (entry) => entry.idx < 37,
+            );
+            await writeFile(path, JSON.stringify(previousJournal));
+            await migrate(db, { migrationsFolder: folder });
+            await pool.query(
+                "update memorization_week set baseline_revision = 1",
+            );
             await migrate(db, { migrationsFolder: "src/drizzle/migrations" });
             const [week] = await db.select().from(schema.memorizationWeek);
             expect(week.direction).toBe("backward");
-            expect(week.baselineRevision).toBe(-1);
+            expect(week.baselineRevision).toBe(1);
+            expect(week.sequenceVersion).toBe(1);
             expect(
                 await db.select().from(schema.memorizationSession),
             ).toHaveLength(2);
@@ -157,7 +174,11 @@ const target = process.env.AUTO_PLAN_TEST_DATABASE_URL;
             expect(sessions[0].completedAt.toISOString()).toBe(
                 "2026-11-02T10:00:00.000Z",
             );
-            expect(sessions[1].startAyahNumber).toBe(57);
+            expect(sessions[1].startAyahNumber).toBe(1);
+            expect(
+                (await db.select().from(schema.memorizationWeek))[0]
+                    .sequenceVersion,
+            ).toBe(2);
             expect(sessions[1].scheduledDate).toBe("2026-11-09");
             expect(sessions.some((s) => s.id === "manual-start")).toBe(false);
             expect(
