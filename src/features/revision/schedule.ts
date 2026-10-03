@@ -8,6 +8,7 @@ import {
     type MemoryVerse,
     type Riwayah,
 } from "@/features/memorization/progress";
+import type { FollowUp } from "@/features/retention/activity";
 
 export const revisionSettingsSchema = z.object({
     days: z
@@ -36,6 +37,7 @@ export type ScheduledRange = RevisionRange & {
     scheduledDate: string;
     quarters: number[];
     ordinal: number;
+    reviewAfter?: string | null;
 };
 export type RevisionHistory = ScheduledRange & {
     riwayah: Riwayah;
@@ -82,6 +84,7 @@ export function weekPeerAtoms(
     weekStart: string,
     timezone: string,
     through?: Date,
+    reviewAfter?: string | null,
 ) {
     const { start, end } = weekBounds(weekStart, timezone);
     const creditEnd = Math.max(end, through ? +through + 1 : end);
@@ -91,7 +94,17 @@ export function weekPeerAtoms(
                 (a) =>
                     a.method === "peer" &&
                     a.outcome === "confirmed" &&
-                    +a.createdAt >= start &&
+                    +a.createdAt >=
+                        Math.max(
+                            start,
+                            reviewAfter
+                                ? DateTime.fromISO(reviewAfter, {
+                                      zone: timezone,
+                                  })
+                                      .startOf("day")
+                                      .toMillis()
+                                : start,
+                        ) &&
                     +a.createdAt < creditEnd,
             )
             .flatMap((a) =>
@@ -126,6 +139,8 @@ export function generateRevisionSchedule({
     fromDate,
     reviewed = new Set<string>(),
     dailyCapacity = settings.quartersPerDay,
+    followUps,
+    followUpCapacity,
 }: {
     catalogue: MemoryCatalogue;
     settings: RevisionSettings;
@@ -138,6 +153,8 @@ export function generateRevisionSchedule({
     reviewed?: Set<string>;
     /** Remaining slots when repairing an existing day, after retained sessions. */
     dailyCapacity?: number;
+    followUps?: Map<string, FollowUp>;
+    followUpCapacity?: number;
 }): ScheduledRange[] {
     const verses = catalogue[settings.riwayah];
     const eligibleByQuarter = new Map<number, MemoryVerse[]>();
@@ -184,6 +201,10 @@ export function generateRevisionSchedule({
             return {
                 quarter,
                 part,
+                due: atoms
+                    .map((atom) => followUps?.get(atom)?.due)
+                    .filter((date): date is string => Boolean(date))
+                    .sort()[0],
                 urgent: atoms.some((a) => latest.get(a)?.difficult),
                 last: Math.max(
                     Math.min(...atoms.map((a) => latest.get(a)?.time ?? 0)),
@@ -195,9 +216,10 @@ export function generateRevisionSchedule({
         .filter(
             (u) =>
                 u.part.length > 0 &&
-                !u.part.every((v) =>
-                    v.atoms.every((atom) => reviewed.has(atom)),
-                ),
+                (Boolean(u.due) ||
+                    !u.part.every((v) =>
+                        v.atoms.every((atom) => reviewed.has(atom)),
+                    )),
         );
     const dates = Array.from({ length: 7 }, (_, i) =>
         DateTime.fromISO(weekStart, { zone: settings.timezone }).plus({
@@ -227,12 +249,77 @@ export function generateRevisionSchedule({
             .slice(0, capacity - chosen.length),
     );
     const result: ScheduledRange[] = [];
+    const rotationOrder = followUps
+        ? [
+              ...chosen,
+              ...ranked.filter(
+                  (u) => !chosen.some((c) => c.quarter === u.quarter),
+              ),
+          ]
+        : chosen;
     const positions = new Map(verses.map((v, index) => [verseKey(v), index]));
+    const assigned = new Set<number>();
+    let followUpSlots =
+        followUpCapacity ??
+        (capacity === 1
+            ? DateTime.fromISO(weekStart).weekNumber % 2
+            : Math.floor(capacity / 2));
     for (const [i, day] of dates.entries()) {
-        const daily = chosen
-            .slice(i * dailyCapacity, (i + 1) * dailyCapacity)
-            .sort((a, b) => a.quarter - b.quarter);
+        const hasRotation = ranked.some(
+            (u) =>
+                !u.due &&
+                !assigned.has(u.quarter) &&
+                !u.part.every((v) =>
+                    v.atoms.every((atom) => reviewed.has(atom)),
+                ),
+        );
+        const due = followUps
+            ? ranked
+                  .filter(
+                      (u) => u.due && u.due <= day && !assigned.has(u.quarter),
+                  )
+                  .sort(
+                      (a, b) =>
+                          (a.due as string).localeCompare(b.due as string) ||
+                          a.quarter - b.quarter,
+                  )
+                  .slice(
+                      0,
+                      Math.min(
+                          dailyCapacity,
+                          hasRotation
+                              ? Math.max(0, followUpSlots)
+                              : dailyCapacity,
+                      ),
+                  )
+            : [];
+        followUpSlots -= due.length;
+        const followUpQuarters = new Set(due.map((u) => u.quarter));
+        const daily = (
+            followUps
+                ? [
+                      ...due,
+                      ...rotationOrder
+                          .filter(
+                              (u) =>
+                                  !assigned.has(u.quarter) &&
+                                  !followUpQuarters.has(u.quarter) &&
+                                  !u.part.every((v) =>
+                                      v.atoms.every((atom) =>
+                                          reviewed.has(atom),
+                                      ),
+                                  ) &&
+                                  // Do not fill rotation slots with a follow-up before it is due.
+                                  (!u.due || u.due <= day),
+                          )
+                          .slice(0, dailyCapacity - due.length),
+                  ]
+                : chosen.slice(i * dailyCapacity, (i + 1) * dailyCapacity)
+        ).sort((a, b) => a.quarter - b.quarter);
         for (const unit of daily) {
+            assigned.add(unit.quarter);
+            const reviewAfter =
+                followUps && unit.due && unit.due <= day ? unit.due : undefined;
             // Keep disjoint memorized passages separate, even inside the same quarter.
             const runs: MemoryVerse[][] = [];
             for (const verse of unit.part) {
@@ -252,6 +339,7 @@ export function generateRevisionSchedule({
                 const previous = result.at(-1);
                 if (
                     previous?.scheduledDate === day &&
+                    previous.reviewAfter === reviewAfter &&
                     previous.quarters.at(-1) === unit.quarter - 1 &&
                     positions.get(verseKey(first)) ===
                         (positions.get(
@@ -266,6 +354,7 @@ export function generateRevisionSchedule({
                     result.push({
                         scheduledDate: day,
                         ordinal: result.length,
+                        ...(reviewAfter ? { reviewAfter } : {}),
                         quarters: [unit.quarter],
                         startSurahNumber: first.surahNumber,
                         startAyahNumber: first.ayahNumber,

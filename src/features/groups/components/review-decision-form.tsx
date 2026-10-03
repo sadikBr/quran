@@ -8,6 +8,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import MistakeEditor, {
+    type ReferenceOption,
+} from "@/features/retention/components/mistake-editor";
+import type { MistakeInput } from "@/features/retention/types";
 import getRevisionAvailability from "../server/get-revision-availability";
 import { getMeetingDisplayTimezone } from "../server/meeting-schedule";
 import reviewMemberAssignment from "../server/review-member-assignment";
@@ -21,6 +25,7 @@ export default function ReviewDecisionForm({
     onSaved,
     onStale,
     onBusyChange,
+    references = [],
 }: {
     groupId: string;
     assignmentId: string;
@@ -30,9 +35,12 @@ export default function ReviewDecisionForm({
     onSaved?: (nextAssignmentId: string | null) => Promise<void>;
     onStale?: () => void;
     onBusyChange?: (busy: boolean) => void;
+    references?: ReferenceOption[];
 }) {
     const t = useTranslations("Groups.review");
     const flow = useTranslations("Groups.flow");
+    const retention = useTranslations("Memorization.retention");
+    const [mistakes, setMistakes] = useState<MistakeInput[]>([]);
     const locale = useLocale();
     const [schedule, setSchedule] = useState<Awaited<
         ReturnType<typeof getRevisionAvailability>
@@ -92,6 +100,7 @@ export default function ReviewDecisionForm({
                 decision,
                 note,
                 reviewNext,
+                mistakes: decision === "not_completed" ? [] : mistakes,
             });
 
             if (!result.success) {
@@ -199,6 +208,56 @@ export default function ReviewDecisionForm({
                     );
                 })}
             </fieldset>
+            {decision !== "not_completed" && references.length > 0 && (
+                <div className="mt-6 space-y-3 rounded-2xl border border-border/60 bg-background/60 p-4">
+                    <p className="text-xs leading-6 text-muted-foreground">
+                        {retention("reviewerHint")}
+                    </p>
+                    {mistakes.map((m, i) => (
+                        <div
+                            key={`${m.surahNumber}:${m.ayahNumber}:${m.kind}`}
+                            className="flex items-center justify-between gap-2 text-sm"
+                        >
+                            <span>
+                                {m.surahNumber}:{m.ayahNumber} ·{" "}
+                                {retention(`kinds.${m.kind}`)}
+                            </span>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                disabled={pending}
+                                className="min-h-11 shrink-0"
+                                onClick={() =>
+                                    setMistakes(
+                                        mistakes.filter((_, n) => n !== i),
+                                    )
+                                }
+                            >
+                                {retention("remove")}
+                            </Button>
+                        </div>
+                    ))}
+                    <MistakeEditor
+                        references={references}
+                        disabled={pending || mistakes.length >= 20}
+                        onAdd={(value) => {
+                            setMistakes((items) => [
+                                ...items.filter(
+                                    (m) =>
+                                        !(
+                                            m.surahNumber ===
+                                                value.surahNumber &&
+                                            m.ayahNumber === value.ayahNumber &&
+                                            m.kind === value.kind
+                                        ),
+                                ),
+                                value,
+                            ]);
+                            return true;
+                        }}
+                    />
+                </div>
+            )}
             <div className="mt-6">
                 <Label htmlFor="review-note">{t("note")}</Label>
                 <Textarea

@@ -75,6 +75,8 @@ export const revisionSession = pgTable(
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
         scheduledDate: date("scheduled_date", { mode: "string" }).notNull(),
+        // Follow-up credit must be earned on/after this local date, not earlier in the week.
+        reviewAfter: date("review_after", { mode: "string" }),
         ordinal: integer("ordinal").notNull(),
         quarters: jsonb("quarters").$type<number[]>().notNull(),
         startSurahNumber: integer("start_surah_number").notNull(),

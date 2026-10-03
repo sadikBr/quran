@@ -27,6 +27,9 @@ import GuidedReader, {
     GuidedReaderVerse,
 } from "@/features/quran/components/guided-reader";
 import getAyahAudioStreams from "@/features/quran/helpers/get-ayah-audio-streams";
+import ConnectingPassage from "@/features/retention/components/connecting-passage";
+import RecordMistake from "@/features/retention/components/record-mistake";
+import type { ExerciseVerse } from "@/features/retention/types";
 import {
     finishWeeklyRevision,
     saveWeeklyRevisionProgress,
@@ -48,12 +51,14 @@ export default function PracticeReader({
     showTranslation,
     continuousRecitation,
     weeklyOutcome,
+    connecting = [],
 }: {
     assignment: PracticeAssignment;
     groups: PracticeReaderGroup[];
     showTranslation: boolean;
     continuousRecitation: boolean;
     weeklyOutcome?: "comfortable" | "difficult" | null;
+    connecting?: ExerciseVerse[];
 }) {
     const weeklyMemorization =
         assignment.source === "weekly" && assignment.kind === "memorization";
@@ -137,7 +142,9 @@ export default function PracticeReader({
     useEffect(() => {
         if (!next) return;
         const target = document.getElementById(
-            `practice-${next.surahNumber}-${next.ayah.numberInSurah}`,
+            connecting.length && progressIndex < 0
+                ? "connecting-passage"
+                : `practice-${next.surahNumber}-${next.ayah.numberInSurah}`,
         );
         if (!target) return;
 
@@ -145,7 +152,7 @@ export default function PracticeReader({
             target.scrollIntoView({ block: "center", behavior: "auto" });
         });
         return () => window.cancelAnimationFrame(frame);
-    }, [next]);
+    }, [next, connecting.length, progressIndex]);
 
     function handleInactivePlan(result: {
         success: boolean;
@@ -402,6 +409,10 @@ export default function PracticeReader({
                 </section>
             )}
 
+            <ConnectingPassage
+                verses={connecting}
+                riwayah={assignment.riwayah}
+            />
             <div className="mt-7 space-y-12">
                 {groups.map((group) => {
                     const translationByAyah = new Map(
@@ -567,6 +578,16 @@ export default function PracticeReader({
                                                         : t("markReached")}
                                                 </Button>
                                             </div>
+                                            <RecordMistake
+                                                surahNumber={
+                                                    reference.surahNumber
+                                                }
+                                                ayahNumber={
+                                                    reference.ayahNumber
+                                                }
+                                                label={surahName}
+                                                riwayah={assignment.riwayah}
+                                            />
                                         </GuidedReaderVerse>
                                     );
                                 })}

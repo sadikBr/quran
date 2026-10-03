@@ -51,6 +51,7 @@ export default function WeeklyRevision({
         failed: common("failed"),
     });
     const settings = { ...editor.settings, days: revisionDays };
+    const retention = useTranslations("Memorization.retention");
     const { range } = usePlanFormatting(surahs);
     const eligible = view.sessions.filter((s) => s.available || s.done);
     const items: PlanSessionItem[] = view.sessions.map((item) => ({
@@ -71,7 +72,7 @@ export default function WeeklyRevision({
                 ? "continue"
                 : "open",
         ),
-        amount: t("ayahCount", { count: item.total }),
+        amount: `${t("ayahCount", { count: item.total })}${item.reviewAfter ? ` · ${retention("followUpLabel")}` : ""}`,
         state: item.done
             ? item.outcome === "difficult"
                 ? "difficult"
@@ -119,6 +120,14 @@ export default function WeeklyRevision({
     }
     return (
         <div className="mt-6 space-y-6">
+            <aside className="rounded-2xl border border-primary/15 bg-primary/[0.04] p-4 sm:p-5">
+                <h2 className="text-sm font-semibold text-primary">
+                    {retention("followUps")}
+                </h2>
+                <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                    {retention("followUpDescription")}
+                </p>
+            </aside>
             {!view.setup ? (
                 <PlanSetupNotice />
             ) : (

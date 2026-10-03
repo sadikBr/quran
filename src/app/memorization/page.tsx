@@ -10,6 +10,7 @@ import { getMemorizationPlanView } from "@/features/learning/server/service";
 import MemorizationProgressMap from "@/features/memorization/components/memorization-progress-map";
 import getMemorizationRecord from "@/features/memorization/server/get-memorization-record";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
+import ToolNavigation from "@/features/retention/components/tool-navigation";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -78,6 +79,7 @@ export default async function MemorizationPage() {
                         icon={<Sparkles />}
                     />
 
+                    <ToolNavigation cards />
                     <MemorizationProgressMap
                         record={record}
                         surahs={surahs.map((s) => ({

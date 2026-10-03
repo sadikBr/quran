@@ -84,6 +84,7 @@ async function mount(
         "@/components/ui/button": { Button: "Button" },
         "@/components/ui/label": { Label: "Label" },
         "@/components/ui/textarea": { Textarea: "Textarea" },
+        "@/features/retention/components/mistake-editor": () => null,
         "../server/review-member-assignment": async (input) => {
             calls.push(["save", input]);
             return action(input);

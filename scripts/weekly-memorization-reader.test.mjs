@@ -90,6 +90,13 @@ function loadPage(
         exports,
         require(name) {
             if (name === "react/jsx-runtime") return jsx;
+            if (
+                name === "@/features/retention/components/connecting-passage" ||
+                name === "@/features/retention/components/record-mistake"
+            )
+                return () => null;
+            if (name === "@/features/retention/server/connecting")
+                return { getConnectingPassage: async () => [] };
             if (!(name in modules))
                 throw new Error(`Unexpected import: ${name}`);
             return modules[name];

@@ -19,6 +19,7 @@ import * as rotation from "../src/features/revision/rotation";
 import * as revision from "../src/features/revision/schedule";
 import { databaseClock } from "./helpers/database-clock.mjs";
 import { loadMemorizationReconciliation } from "./helpers/load-memorization-reconciliation.mjs";
+import { loadRetention } from "./helpers/load-retention.mjs";
 import { loadRevisionReconciliation } from "./helpers/load-revision-reconciliation.mjs";
 import { loadTypeScript } from "./helpers/load-typescript.mjs";
 
@@ -158,7 +159,11 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
             );
             const revisions = loadTypeScript(
                 "src/features/revision/server/service.ts",
-                { ...common, "../schedule": revision },
+                {
+                    ...common,
+                    ...loadRetention(modules),
+                    "../schedule": revision,
+                },
             );
             const recordView = loadTypeScript(
                 "src/features/memorization/server/get-memorization-record.ts",

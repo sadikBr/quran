@@ -5,6 +5,7 @@ import PracticeReader from "@/features/practice/components/practice-reader";
 import PracticeReaderShell from "@/features/practice/components/practice-reader-shell";
 import getPracticeAssignment from "@/features/practice/server/get-practice-assignment";
 import getPracticeReaderData from "@/features/practice/server/get-practice-reader-data";
+import { getConnectingPassage } from "@/features/retention/server/connecting";
 import getPreferences from "@/features/settings/server/get-preferences";
 
 export default async function PracticeReaderPage({
@@ -23,6 +24,14 @@ export default async function PracticeReaderPage({
     if (!assignment) redirect("/practice");
 
     const groups = await getPracticeReaderData(assignment, preferences);
+    const connecting =
+        assignment.kind === "memorization"
+            ? await getConnectingPassage(
+                  session.user.id,
+                  assignment.riwayah,
+                  assignment.start,
+              )
+            : [];
 
     return (
         <PracticeReaderShell language={preferences.language}>
@@ -30,6 +39,7 @@ export default async function PracticeReaderPage({
                 key={assignment.id}
                 assignment={assignment}
                 groups={groups}
+                connecting={connecting}
                 showTranslation={preferences.showTranslation}
                 continuousRecitation={preferences.continuousRecitation}
             />

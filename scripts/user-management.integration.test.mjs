@@ -217,6 +217,21 @@ run(
             });
             for (const u of [alice, bob]) {
                 const id = u.id;
+                await db.insert(s.memorizationMistake).values({
+                    id: `mistake-${id}`,
+                    userId: id,
+                    riwayah: "hafs",
+                    surahNumber: 1,
+                    ayahNumber: 2,
+                    kind: "word",
+                    reportedById: bob.id,
+                });
+                await db.insert(s.memorizationMistakeEvent).values({
+                    id: `mistake-event-${id}`,
+                    userId: id,
+                    mistakeId: `mistake-${id}`,
+                    action: "noticed",
+                });
                 await db.insert(s.memorizationRecord).values({
                     userId: id,
                     setupAt: new Date(),

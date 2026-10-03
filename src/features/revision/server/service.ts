@@ -35,6 +35,8 @@ import {
     lockRecord,
     recordAssessment,
 } from "@/features/memorization/server/record-service";
+import { reconcileFollowUpPlan } from "@/features/retention/server/follow-up-plan";
+import { retentionState } from "@/features/retention/server/state";
 import { buildRevisionRotation } from "../rotation";
 import {
     dueRevisionDate,
@@ -137,7 +139,20 @@ function sessionViews(
     return state.history
         .filter((session) => session.weekId === week.id)
         .map((session) => {
-            const coverage = revisionCoverage(catalogue, session, peer);
+            const coverage = revisionCoverage(
+                catalogue,
+                session,
+                session.reviewAfter
+                    ? weekPeerAtoms(
+                          catalogue,
+                          state.assessments,
+                          week.weekStart,
+                          week.timezone,
+                          now,
+                          session.reviewAfter,
+                      )
+                    : peer,
+            );
             return {
                 ...session,
                 completedAt: session.completedAt?.toISOString() ?? null,
@@ -280,6 +295,9 @@ async function makePreview(
                 for (const atom of verse.atoms) reviewed.add(atom);
         }
     const sessions = generateRevisionSchedule({
+        followUps: (
+            await retentionState(userId, catalogue, settings.timezone, now, tx)
+        ).followUps,
         reviewed,
         catalogue,
         settings,
@@ -479,6 +497,7 @@ export async function getRevisionView(
         const now = await clock(tx);
         // Repair older saved batches too, before rendering or opening their readers.
         await reconcileRevisionPlan(tx, userId, now, catalogue);
+        await reconcileFollowUpPlan(tx, userId, now, catalogue);
         const [plan] = await tx
             .select()
             .from(revisionPlan)
@@ -511,6 +530,15 @@ export async function getRevisionView(
             );
             const schedule = state.record?.setupAt
                 ? generateRevisionSchedule({
+                      followUps: (
+                          await retentionState(
+                              userId,
+                              catalogue,
+                              plan.timezone,
+                              now,
+                              tx,
+                          )
+                      ).followUps,
                       catalogue,
                       settings: {
                           ...plan,
@@ -604,6 +632,8 @@ export async function updateRevisionSession(
     const catalogue = await getMemoryCatalogue();
     return db.transaction(async (tx) => {
         await lockRecord(tx, userId);
+        await reconcileRevisionPlan(tx, userId, await clock(tx), catalogue);
+        await reconcileFollowUpPlan(tx, userId, await clock(tx), catalogue);
         const [plan] = await tx
             .select()
             .from(revisionPlan)
@@ -659,6 +689,7 @@ export async function updateRevisionSession(
                 week.weekStart,
                 week.timezone,
                 now,
+                session.reviewAfter,
             ),
         );
         if (coverage.done) return { success: true as const, completed: true };

@@ -57,8 +57,18 @@ export function reconcileRevisionSessions({
     for (const session of sessions) {
         const range = { ...session, riwayah: week.riwayah };
         const verses = assessmentVerses(catalogue, range);
+        const credit = session.reviewAfter
+            ? weekPeerAtoms(
+                  catalogue,
+                  assessments,
+                  week.weekStart,
+                  week.timezone,
+                  now,
+                  session.reviewAfter,
+              )
+            : peer;
         if (
-            revisionCoverage(catalogue, range, peer).done ||
+            revisionCoverage(catalogue, range, credit).done ||
             verses.every((verse) => isMemorized(verse, covered))
         ) {
             retained.push(session);
@@ -87,6 +97,7 @@ export function reconcileRevisionSessions({
             );
             const replacement = {
                 scheduledDate: session.scheduledDate,
+                reviewAfter: session.reviewAfter,
                 ordinal: 0,
                 quarters: [...new Set(segment.map((verse) => verse.quarter))],
                 startSurahNumber: start.surahNumber,

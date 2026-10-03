@@ -80,6 +80,8 @@ export const personalData = [
     {
         key: "memorization",
         tables: [
+            s.memorizationMistakeEvent,
+            s.memorizationMistake,
             s.memorizationBaselineChange,
             s.memorizationAssessment,
             s.userMemorizedHizb,

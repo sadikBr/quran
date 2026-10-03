@@ -107,6 +107,16 @@ export default function AssignmentReview({
                             onSaved={onSaved}
                             onStale={onStale}
                             onBusyChange={onBusyChange}
+                            references={readerGroups.flatMap((g) =>
+                                g.ayahs.map((a) => ({
+                                    surahNumber: g.surah.number,
+                                    ayahNumber: a.numberInSurah,
+                                    label:
+                                        locale === "ar"
+                                            ? g.surah.name
+                                            : g.surah.englishName,
+                                })),
+                            )}
                         />
                     </div>
                 ) : (

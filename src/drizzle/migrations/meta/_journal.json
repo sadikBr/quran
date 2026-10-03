@@ -267,6 +267,13 @@
             "when": 1791055404065,
             "tag": "0037_memorization_surah_order",
             "breakpoints": true
+        },
+        {
+            "idx": 38,
+            "version": "7",
+            "when": 1791058644450,
+            "tag": "0038_memorization_retention",
+            "breakpoints": true
         }
     ]
 }

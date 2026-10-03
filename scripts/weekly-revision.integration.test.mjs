@@ -14,6 +14,7 @@ import * as rotation from "../src/features/revision/rotation";
 import * as schedule from "../src/features/revision/schedule";
 import { databaseClock } from "./helpers/database-clock.mjs";
 import { loadMemorizationReconciliation } from "./helpers/load-memorization-reconciliation.mjs";
+import { loadRetention } from "./helpers/load-retention.mjs";
 import { loadRevisionReconciliation } from "./helpers/load-revision-reconciliation.mjs";
 import { loadTypeScript } from "./helpers/load-typescript.mjs";
 
@@ -104,6 +105,7 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                 "src/features/revision/server/service.ts",
                 {
                     ...modules,
+                    ...loadRetention(modules),
                     "node:crypto": { createHash },
                     luxon: { DateTime },
                     "@/features/memorization/progress": progress,
@@ -532,21 +534,36 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
             expect(credited.sessions[0].remaining).not.toContain("2:1");
             expect(credited.sessions[0].remaining).not.toContain("2:2");
             let studyDay = DateTime.utc();
-            for (const row of credited.sessions) {
+            // Unstarted portions may adapt after a review introduces a follow-up.
+            // Re-open the day's current queue, as the reader does, before saving.
+            for (const _ of new Set(
+                credited.sessions.map((s) => s.scheduledDate),
+            )) {
                 testClock.set(studyDay.toJSDate());
-                await service.updateRevisionSession("rollover", row.id, {
-                    surahNumber: row.endSurahNumber,
-                    ayahNumber: row.endAyahNumber,
-                });
-                expect(
-                    (
-                        await service.updateRevisionSession(
-                            "rollover",
-                            row.id,
-                            { outcome: "comfortable" },
-                        )
-                    ).success,
-                ).toBe(true);
+                const daily = await service.getRevisionView("rollover");
+                for (const row of daily.sessions.filter((s) => s.active)) {
+                    expect(
+                        (
+                            await service.updateRevisionSession(
+                                "rollover",
+                                row.id,
+                                {
+                                    surahNumber: row.endSurahNumber,
+                                    ayahNumber: row.endAyahNumber,
+                                },
+                            )
+                        ).success,
+                    ).toBe(true);
+                    expect(
+                        (
+                            await service.updateRevisionSession(
+                                "rollover",
+                                row.id,
+                                { outcome: "comfortable" },
+                            )
+                        ).success,
+                    ).toBe(true);
+                }
                 studyDay = studyDay.plus({ days: 1 });
             }
             const nextQueue = await service.previewRevisionPlan(

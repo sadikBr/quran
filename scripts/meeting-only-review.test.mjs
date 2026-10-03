@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
 import { z } from "zod";
+import { mistakeSchema } from "../src/features/retention/types";
 
 const file = (path) => readFileSync(`src/${path}`, "utf8");
 const compiled = ts.transpileModule(
@@ -33,7 +34,18 @@ function setup(options = {}) {
                         return Promise.resolve(
                             options.absentMember
                                 ? []
-                                : [{ dueAt: new Date("2026-10-01") }],
+                                : [
+                                      {
+                                          id: "assignment",
+                                          assigneeId: "learner",
+                                          riwayah: "hafs",
+                                          startSurahNumber: 2,
+                                          startAyahNumber: 1,
+                                          endSurahNumber: 2,
+                                          endAyahNumber: 2,
+                                          dueAt: new Date("2026-10-01"),
+                                      },
+                                  ],
                         );
                     },
                 }),
@@ -65,6 +77,16 @@ function setup(options = {}) {
         "next/headers": { headers: async () => ({}) },
         "next/server": { after: () => {} },
         zod: { z },
+        "@/features/retention/types": { mistakeSchema },
+        "@/features/memorization/server/get-memory-catalogue": async () => ({
+            hafs: [
+                { surahNumber: 2, ayahNumber: 1 },
+                { surahNumber: 2, ayahNumber: 2 },
+            ],
+        }),
+        "@/features/retention/server/mistakes": {
+            recordMistake: async (...args) => calls.push(["mistake", ...args]),
+        },
         "@/drizzle/db": { transaction: async (fn) => fn(tx) },
         "@/drizzle/schema": {
             practiceAssignment: column,
@@ -124,6 +146,41 @@ test("no live attended session means no evaluation", async () => {
     const { action, calls } = setup({ noLiveContext: true });
     expect((await action(input)).reason).toBe("meeting_required");
     expect(calls.some(([name]) => name === "save")).toBe(false);
+});
+test("reviewers can record only real ayahs inside the reviewed assignment", async () => {
+    const { action, calls } = setup();
+    const mistake = {
+        surahNumber: 2,
+        ayahNumber: 1,
+        kind: "word",
+        note: "repeat",
+    };
+    expect(
+        (await action({ ...input, mistakes: [{ ...mistake, ayahNumber: 3 }] }))
+            .reason,
+    ).toBe("invalid");
+    expect(calls.some(([name]) => name === "save")).toBe(false);
+    expect((await action({ ...input, mistakes: [mistake] })).success).toBe(
+        true,
+    );
+    const recorded = calls.find(([name]) => name === "mistake");
+    expect(recorded[2]).toBe("learner");
+    expect(recorded[3]).toBe("supervisor");
+});
+test("not-completed evaluations cannot invent an observed mistake", async () => {
+    const { action, calls } = setup();
+    expect(
+        (
+            await action({
+                ...input,
+                decision: "not_completed",
+                mistakes: [
+                    { surahNumber: 2, ayahNumber: 1, kind: "transition" },
+                ],
+            })
+        ).reason,
+    ).toBe("invalid");
+    expect(calls).toEqual([]);
 });
 test("missing meeting identity rejects old standalone clients", async () => {
     const { action, calls } = setup();

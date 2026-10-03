@@ -8,6 +8,7 @@ import { getMemorizationPlanView } from "@/features/learning/server/service";
 import PracticeReader from "@/features/practice/components/practice-reader";
 import PracticeReaderShell from "@/features/practice/components/practice-reader-shell";
 import getPracticeReaderData from "@/features/practice/server/get-practice-reader-data";
+import { getConnectingPassage } from "@/features/retention/server/connecting";
 import getPreferences from "@/features/settings/server/get-preferences";
 
 export default async function WeeklyMemorizationReader({
@@ -32,12 +33,20 @@ export default async function WeeklyMemorizationReader({
     let groups = await getPracticeReaderData(assignment, preferences);
     if (!item.done && item.completed > 0)
         groups = remainingReaderGroups(assignment, groups, item.remaining);
+    const first = groups[0]?.ayahs[0];
+    const connecting = first
+        ? await getConnectingPassage(session.user.id, assignment.riwayah, {
+              surahNumber: groups[0].surah.number,
+              ayahNumber: first.numberInSurah,
+          })
+        : [];
     return (
         <PracticeReaderShell language={preferences.language}>
             <PracticeReader
                 key={`${item.id}:${item.completed}:${item.completedAt ?? ""}`}
                 assignment={assignment}
                 groups={groups}
+                connecting={connecting}
                 showTranslation={preferences.showTranslation}
                 continuousRecitation={preferences.continuousRecitation}
             />

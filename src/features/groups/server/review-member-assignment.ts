@@ -12,8 +12,11 @@ import {
     practiceAssignment,
 } from "@/drizzle/schema";
 import { auth } from "@/features/auth/auth";
+import getMemoryCatalogue from "@/features/memorization/server/get-memory-catalogue";
 import { recordAssessment } from "@/features/memorization/server/record-service";
 import { sendAssignmentNotification } from "@/features/notifications/server/assignment-notifications";
+import { recordMistake } from "@/features/retention/server/mistakes";
+import { mistakeSchema } from "@/features/retention/types";
 import { assignmentReviewPermission } from "./assignment-review-permission";
 import { getGroupMeetingForUser } from "./get-group-meeting";
 import getReviewQueue from "./get-review-queue";
@@ -30,6 +33,7 @@ const inputSchema = z.object({
     decision: z.enum(["completed", "needs_revision", "not_completed"]),
     note: z.string().trim().max(1000).optional(),
     reviewNext: z.boolean().optional(),
+    mistakes: z.array(mistakeSchema).max(20).default([]),
 });
 
 export default async function reviewMemberAssignment(input: unknown) {
@@ -38,6 +42,9 @@ export default async function reviewMemberAssignment(input: unknown) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) return { success: false as const, reason: "unauthorized" };
     const data = parsed.data;
+    if (data.decision === "not_completed" && data.mistakes.length)
+        return { success: false as const, reason: "invalid" };
+    const catalogue = data.mistakes.length ? await getMemoryCatalogue() : null;
     const meeting = await getGroupMeetingForUser(data.groupId, session.user.id);
     const reschedule = data.decision !== "completed";
     const result = await db.transaction(async (tx) => {
@@ -69,15 +76,33 @@ export default async function reviewMemberAssignment(input: unknown) {
             attendedAssignment(context.id, context.startsAt),
         );
         const [assignment] = await tx
-            .select({
-                dueAt: practiceAssignment.dueAt,
-                assigneeId: practiceAssignment.assigneeId,
-            })
+            .select()
             .from(practiceAssignment)
             .where(conditions)
             .for("update");
         if (!assignment)
             return { success: false as const, reason: "not_submitted" };
+        const riwayah = assignment.riwayah;
+        if (riwayah !== "hafs" && riwayah !== "warsh")
+            return { success: false as const, reason: "invalid" };
+        if (
+            catalogue &&
+            data.mistakes.some(
+                (m) =>
+                    !catalogue[riwayah].some(
+                        (v) =>
+                            v.surahNumber === m.surahNumber &&
+                            v.ayahNumber === m.ayahNumber,
+                    ) ||
+                    m.surahNumber * 1000 + m.ayahNumber <
+                        assignment.startSurahNumber * 1000 +
+                            assignment.startAyahNumber ||
+                    m.surahNumber * 1000 + m.ayahNumber >
+                        assignment.endSurahNumber * 1000 +
+                            assignment.endAyahNumber,
+            )
+        )
+            return { success: false as const, reason: "invalid" };
         // Carried-over work must go after THIS meeting, not its old deadline.
         const next = reschedule
             ? getRevisionMeetingDate(meeting, context.startsAt)
@@ -109,6 +134,17 @@ export default async function reviewMemberAssignment(input: unknown) {
             )
             .returning();
         if (updated[0] && data.decision !== "not_completed") {
+            if (catalogue)
+                for (const mistake of data.mistakes)
+                    await recordMistake(
+                        tx,
+                        assignment.assigneeId,
+                        session.user.id,
+                        riwayah,
+                        mistake,
+                        `peer:${assignment.id}:${data.occurrence}:${mistake.surahNumber}:${mistake.ayahNumber}:${mistake.kind}`,
+                        catalogue,
+                    );
             await recordAssessment(tx, updated[0], {
                 method: "peer",
                 outcome:
@@ -143,6 +179,8 @@ export default async function reviewMemberAssignment(input: unknown) {
     revalidatePath("/dashboard");
     revalidatePath("/memorization");
     revalidatePath("/memorization/test");
+    revalidatePath("/memorization/mistakes");
+    revalidatePath("/memorization/report");
     const queue = data.reviewNext
         ? await getReviewQueue(data.groupId, session.user.id, data.occurrence)
         : [];
