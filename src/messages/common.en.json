@@ -9,6 +9,7 @@
             "description": "Read the Quran, listen to recitations, and keep your place."
         },
         "navigation": {
+            "weeklyPlanning": "Weekly planning",
             "guide": "User guide",
             "adhkar": "Adhkar",
             "admin": "Platform administration",

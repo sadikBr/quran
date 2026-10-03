@@ -5,6 +5,7 @@ import {
     Bookmark,
     BookOpen,
     CalendarCheck2,
+    CalendarDays,
     Home,
     LayoutDashboard,
     LoaderCircle,
@@ -32,6 +33,12 @@ import { cn } from "@/lib/utils";
 import useAccountMenuActions from "./use-account-menu-actions";
 
 const destinations = [
+    {
+        href: "/weekly",
+        label: "weeklyPlanning",
+        icon: CalendarDays,
+        matches: (path: string) => path === "/weekly",
+    },
     {
         href: "/guide",
         label: "guide",
@@ -181,6 +188,7 @@ export default function AppPrimaryNav() {
                             "/wird",
                             "/azkar",
                             "/practice",
+                            "/weekly",
                             "/memorization",
                         ]
                       : ["/quran", "/quran/search", "/azkar"],

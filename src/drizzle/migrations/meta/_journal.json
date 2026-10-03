@@ -281,6 +281,13 @@
             "when": 1791062048564,
             "tag": "0039_porcelain_seaglass_orchid_inkstone_themes",
             "breakpoints": true
+        },
+        {
+            "idx": 40,
+            "version": "7",
+            "when": 1791063443546,
+            "tag": "0040_weekly_planning_view",
+            "breakpoints": true
         }
     ]
 }

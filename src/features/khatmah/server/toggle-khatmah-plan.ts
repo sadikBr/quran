@@ -25,7 +25,7 @@ export default async function toggleKhatmahPlan(isActive: boolean) {
     } catch {
         return { success: false as const };
     }
-    for (const path of ["/", "/wird", "/wird/read", "/dashboard"])
+    for (const path of ["/", "/wird", "/wird/read", "/dashboard", "/weekly"])
         revalidatePath(path);
     return { success: true as const };
 }

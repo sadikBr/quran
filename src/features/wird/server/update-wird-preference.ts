@@ -90,6 +90,7 @@ export default async function updateWirdPreference(input: unknown) {
         return { success: false as const, message: "Could not save Wird." };
     }
 
+    revalidatePath("/weekly");
     revalidatePath("/wird");
     revalidatePath("/wird/read");
     revalidatePath("/dashboard");

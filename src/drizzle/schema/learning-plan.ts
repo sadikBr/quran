@@ -78,6 +78,7 @@ export const memorizationSession = pgTable(
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
         scheduledDate: date("scheduled_date", { mode: "string" }).notNull(),
+        plannedDate: date("planned_date", { mode: "string" }),
         ordinal: integer("ordinal").notNull(),
         quarters: jsonb("quarters").$type<number[]>().notNull(),
         startSurahNumber: integer("start_surah_number").notNull(),

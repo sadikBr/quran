@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 
 type Session = {
     scheduledDate: string;
+    plannedDate?: string | null;
     completedAt: Date | string | null;
     done: boolean;
     available?: boolean;
@@ -68,18 +69,30 @@ export function carryForwardSessions<T extends Session>(
     ].sort();
     for (const originalDate of batchDates) {
         const batch = sessions.filter((s) => s.scheduledDate === originalDate);
+        const plannedDate = batch.find(
+            (s) => !s.done && s.available !== false,
+        )?.plannedDate;
         let scheduledDate: string | null = originalDate;
         if (batch.some((s) => !s.done && s.available !== false)) {
             if (!selected.size) scheduledDate = null;
             else {
                 let day = DateTime.fromISO(
-                    [today, cursor, ...(daysChanged ? [] : [originalDate])]
+                    [
+                        today,
+                        cursor,
+                        ...(plannedDate
+                            ? [plannedDate]
+                            : daysChanged
+                              ? []
+                              : [originalDate]),
+                    ]
                         .sort()
                         .at(-1) as string,
                     { zone: timezone },
                 );
                 while (
-                    !selected.has(day.weekday) ||
+                    (!selected.has(day.weekday) &&
+                        day.toISODate() !== plannedDate) ||
                     [...(occupied.get(day.toISODate() as string) ?? [])].some(
                         (date) => date !== originalDate,
                     ) ||

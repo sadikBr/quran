@@ -75,6 +75,7 @@ export const revisionSession = pgTable(
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
         scheduledDate: date("scheduled_date", { mode: "string" }).notNull(),
+        plannedDate: date("planned_date", { mode: "string" }),
         // Follow-up credit must be earned on/after this local date, not earlier in the week.
         reviewAfter: date("review_after", { mode: "string" }),
         ordinal: integer("ordinal").notNull(),

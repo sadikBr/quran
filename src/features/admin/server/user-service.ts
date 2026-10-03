@@ -99,6 +99,7 @@ export const personalData = [
             s.revisionWeek,
             s.revisionPlan,
             s.learningSchedule,
+            s.weeklyPlanning,
         ],
     },
     {

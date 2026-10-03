@@ -11,6 +11,7 @@ import {
     memorizationSession,
     memorizationWeek,
     revisionPlan,
+    revisionSession,
     userMemorizedHizb,
 } from "@/drizzle/schema";
 import {
@@ -88,6 +89,17 @@ export async function saveLearningSchedule(
                 target: learningSchedule.userId,
                 set: value,
             });
+        // A recurring-day edit supersedes one-off placements from the weekly planner.
+        for (const [field, table] of [
+            ["memorizationDays", memorizationSession],
+            ["revisionDays", revisionSession],
+        ] as const) {
+            if ((old?.[field] ?? []).join(",") !== input[field].join(","))
+                await tx
+                    .update(table)
+                    .set({ plannedDate: null })
+                    .where(eq(table.userId, userId));
+        }
         // Saved study days drive pending dates; historical snapshots keep the original allocation.
         if (
             (old?.revisionDays ?? []).join(",") !== input.revisionDays.join(",")

@@ -1,5 +1,7 @@
 {
     "Practice": {
+        "planWeek": "خطّط لأسبوعك",
+        "plannedFor": "مخطّط ليوم {date}",
         "header": "التدريب على القرآن",
         "personalTitle": "مقاطع تدريبك",
         "personalDescription": "مقاطع اخترتها لنفسك للحفظ والمراجعة، مستقلة عن تكاليف الحلقة.",

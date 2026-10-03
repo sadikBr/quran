@@ -17,5 +17,6 @@ export * from "./schema/revision-plan";
 export * from "./schema/saved-ayah";
 export * from "./schema/settings";
 export * from "./schema/user-admin-activity";
+export * from "./schema/weekly-planning";
 export * from "./schema/wird";
 export * from "./schema/wird-history";

@@ -1,5 +1,7 @@
 {
     "Practice": {
+        "planWeek": "Plan your week",
+        "plannedFor": "Planned for {date}",
         "header": "Quran practice",
         "personalTitle": "Your practice ranges",
         "personalDescription": "Ranges you chose for memorization and revision, separate from your circle assignments.",

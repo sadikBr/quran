@@ -2,6 +2,7 @@ import {
     ArrowRight,
     BookMarked,
     CalendarCheck2,
+    CalendarDays,
     ChevronDown,
     RefreshCcw,
 } from "lucide-react";
@@ -124,6 +125,14 @@ export default async function PracticePage({
                         title={t("title")}
                         description={t("description")}
                         icon={<BookMarked />}
+                        actions={
+                            <Button asChild variant="outline">
+                                <Link href="/weekly">
+                                    <CalendarDays className="size-4" />
+                                    {t("planWeek")}
+                                </Link>
+                            </Button>
+                        }
                     />
 
                     {assignedWork.length > 0 && (
@@ -177,6 +186,27 @@ export default async function PracticePage({
                                                 {t(`kinds.${assignment.kind}`)}
                                             </div>
                                             <h3 className="mt-3 text-base font-semibold leading-7 sm:text-lg">
+                                                {assignment.plannedDate && (
+                                                    <span className="mb-2 block text-xs font-medium text-division">
+                                                        {t("plannedFor", {
+                                                            date: new Intl.DateTimeFormat(
+                                                                preferences.language,
+                                                                {
+                                                                    weekday:
+                                                                        "short",
+                                                                    month: "short",
+                                                                    day: "numeric",
+                                                                    timeZone:
+                                                                        "UTC",
+                                                                },
+                                                            ).format(
+                                                                new Date(
+                                                                    `${assignment.plannedDate}T12:00:00Z`,
+                                                                ),
+                                                            ),
+                                                        })}
+                                                    </span>
+                                                )}
                                                 {t("range", {
                                                     startSurah:
                                                         surahName(

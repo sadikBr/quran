@@ -165,6 +165,41 @@ Wird and sends a notification that opens `/wird/read`. Two once-daily UTC cron
 entries cover Morocco's seasonal UTC offset; the endpoint sends only during the
 local 11 PM hour and records each delivery to prevent duplicates.
 
+## Weekly planning
+
+At `/weekly`, learners plan memorization, revision, personal practice, circle
+preparation and the daily wird together. The navigation and Practice page both link to the planner.
+Choose days, adjust task estimates and set a daily time budget; the workload chart
+updates immediately and flags overloaded days. “Suggest a balance” previews a
+distribution. Changes stay in a draft until “Commit week”; overloaded plans need
+an explicit acknowledgment before saving.
+
+The current week and next three weeks are available. Automatic portions appear
+once their batch exists, stay in order within their projected week and keep the
+existing weekly memorization limit. One-off dates affect Practice availability
+without changing recurring weekdays. Missed portions still carry forward, and
+changing recurring weekdays clears that activity’s one-off placements. Circle
+preparation can move before a deadline without changing the deadline itself.
+Completed work stays fixed and remains included in workload totals. Stale drafts
+cannot overwrite newer progress or schedules.
+
+Daily wird cards follow the existing Casablanca reading calendar. Completed
+portions appear on their actual completion dates; an unfinished portion appears
+once on its due date or today when carried over. Upcoming portions are explicitly
+marked as forecasts, assuming daily completion and following saved goal changes
+or adaptive khatmah settings. Forecasting never advances the reader or records
+completion. Wird dates stay fixed, but their time estimates can be edited and
+are included in overload warnings and balancing. Today’s unfinished card opens
+the wird reader. The week refreshes when reading goals or completion change.
+
+Apply migration `0040_weekly_planning_view` with `bun run db:migrate` before
+deploying. Run `bun test scripts/weekly-planning.test.mjs` for planning checks.
+The database test uses `PLANNING_TEST_DATABASE_URL` pointing to an **empty
+disposable PostgreSQL database ending in `_planning_tests`**:
+`bun test scripts/weekly-planning.integration.test.mjs`. It applies migrations
+and verifies ownership, actual date changes, rollback, overload handling and
+concurrent saves; it never loads the app’s database environment.
+
 ## Study days and weekly memorization
 
 Members save revision and memorization weekdays in Settings or either weekly plan.

@@ -1192,6 +1192,25 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
     background: color-mix(in oklab, var(--muted-foreground) 35%, transparent);
 }
 
+#weekly-day-board {
+    scrollbar-color: color-mix(
+            in oklab,
+            var(--muted-foreground) 35%,
+            transparent
+        )
+        transparent;
+}
+
+#weekly-day-board::-webkit-scrollbar {
+    display: block;
+    height: 6px;
+}
+
+#weekly-day-board::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--muted-foreground) 35%, transparent);
+}
+
 .arabic-ui :is(h1, h2, h3) {
     letter-spacing: 0;
     line-height: 1.4;

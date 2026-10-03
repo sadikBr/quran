@@ -174,6 +174,7 @@ export default async function completeDailyWird(input: unknown) {
         };
     }
 
+    revalidatePath("/weekly");
     revalidatePath("/wird");
     revalidatePath("/wird/read");
     revalidatePath("/dashboard");

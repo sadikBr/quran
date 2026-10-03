@@ -1,4 +1,11 @@
-import { index, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+    date,
+    index,
+    integer,
+    pgTable,
+    text,
+    timestamp,
+} from "drizzle-orm/pg-core";
 import { createdAt, id, updatedAt } from "../helpers";
 import { user } from "./auth-schema";
 import { memorizationGroup } from "./memorization-group";
@@ -27,6 +34,7 @@ export const practiceAssignment = pgTable(
         status: text("status").notNull().default("in_progress"),
         instructions: text("instructions"),
         dueAt: timestamp("due_at", { withTimezone: true }),
+        plannedDate: date("planned_date", { mode: "string" }),
         reviewNote: text("review_note"),
         reviewedById: text("reviewed_by_id").references(() => user.id, {
             onDelete: "set null",
