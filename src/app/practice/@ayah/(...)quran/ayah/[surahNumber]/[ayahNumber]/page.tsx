@@ -11,16 +11,17 @@ export default async function PracticeAyahActionsModalPage({
     searchParams,
 }: {
     params: Promise<{ surahNumber: string; ayahNumber: string }>;
-    searchParams: Promise<{ practice?: string }>;
+    searchParams: Promise<{ practice?: string; riwayah?: string }>;
 }) {
     const { surahNumber, ayahNumber } = await params;
     const surah = Number(surahNumber);
     const ayah = Number(ayahNumber);
-    const { practice } = await searchParams;
+    const { practice, riwayah } = await searchParams;
     const session = await auth.api.getSession({ headers: await headers() });
-    const assignment = session
-        ? await getPracticeAssignment(session.user.id, practice)
-        : null;
+    const assignment =
+        session && practice
+            ? await getPracticeAssignment(session.user.id, practice)
+            : null;
 
     if (
         !Number.isInteger(surah) ||
@@ -38,7 +39,12 @@ export default async function PracticeAyahActionsModalPage({
                 surahNumber={surah}
                 ayahNumber={ayah}
                 closeOnCopy
-                riwayah={assignment?.riwayah}
+                riwayah={
+                    assignment?.riwayah ??
+                    (riwayah === "hafs" || riwayah === "warsh"
+                        ? riwayah
+                        : undefined)
+                }
             />
         </AyahActionsModal>
     );

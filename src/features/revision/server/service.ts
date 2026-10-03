@@ -4,6 +4,7 @@ import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { DateTime } from "luxon";
 import db from "@/drizzle/db";
 import {
+    learningSchedule,
     memorizationAssessment,
     memorizationRecord,
     revisionPlan,
@@ -11,6 +12,16 @@ import {
     revisionWeek,
     userMemorizedHizb,
 } from "@/drizzle/schema";
+import {
+    carryForwardSessions,
+    isActivePlanSession,
+    nextPlanStart,
+} from "@/features/learning/carry-forward";
+import {
+    clearPlanSchedule,
+    planVersion,
+    regenerationCalendar,
+} from "@/features/learning/server/plan-lifecycle";
 import {
     assessmentVerses,
     calculateMemorization,
@@ -27,7 +38,6 @@ import {
     generateRevisionSchedule,
     type RevisionSettings,
     revisionCoverage,
-    revisionWeekEnd,
     type ScheduledRange,
     verseKey,
     weekBounds,
@@ -43,7 +53,7 @@ async function clock(tx: Tx) {
     return new Date(result.rows[0].now);
 }
 async function memory(
-    tx: Tx,
+    tx: Pick<Tx, "select">,
     userId: string,
     riwayah: Riwayah,
     catalogue: MemoryCatalogue,
@@ -95,6 +105,54 @@ async function memory(
         })),
     };
 }
+function sessionViews(
+    state: Awaited<ReturnType<typeof memory>>,
+    week: typeof revisionWeek.$inferSelect,
+    catalogue: MemoryCatalogue,
+    now: Date,
+) {
+    const peer = weekPeerAtoms(
+        catalogue,
+        state.assessments,
+        week.weekStart,
+        week.timezone,
+        now,
+    );
+    return state.history
+        .filter((session) => session.weekId === week.id)
+        .map((session) => {
+            const coverage = revisionCoverage(catalogue, session, peer);
+            return {
+                ...session,
+                completedAt: session.completedAt?.toISOString() ?? null,
+                total: coverage.total,
+                peer: coverage.peer,
+                done: coverage.done,
+                available: assessmentVerses(catalogue, session).every((v) =>
+                    state.complete.includes(v.hizb),
+                ),
+                remaining: coverage.remaining.map(verseKey),
+            };
+        });
+}
+function newScheduleFromDate(
+    state: Awaited<ReturnType<typeof memory>>,
+    today: string,
+    timezone: string,
+) {
+    return state.history.some(
+        (session) =>
+            session.completedAt &&
+            weekCalendar(session.completedAt, timezone).today === today,
+    ) ||
+        state.assessments.some(
+            (a) =>
+                a.sourceKey?.startsWith("weekly:") &&
+                weekCalendar(a.createdAt, timezone).today === today,
+        )
+        ? (DateTime.fromISO(today).plus({ days: 1 }).toISODate() as string)
+        : today;
+}
 async function insertWeek(
     tx: Tx,
     userId: string,
@@ -122,12 +180,25 @@ async function insertWeek(
             })),
         );
 }
+async function sharedSettings(
+    tx: Pick<Tx, "select">,
+    userId: string,
+    settings: RevisionSettings,
+) {
+    const [studyDays] = await tx
+        .select()
+        .from(learningSchedule)
+        .where(eq(learningSchedule.userId, userId));
+    return { ...settings, days: studyDays?.revisionDays ?? [] };
+}
 async function makePreview(
     tx: Tx,
     userId: string,
     settings: RevisionSettings,
     catalogue: MemoryCatalogue,
+    regenerate = false,
 ) {
+    settings = await sharedSettings(tx, userId, settings);
     const [plan] = await tx
         .select()
         .from(revisionPlan)
@@ -141,26 +212,74 @@ async function makePreview(
         plan?.timezone ?? settings.timezone,
     );
     const calendar = weekCalendar(now, settings.timezone);
-    const weekStart = current
-        ? (DateTime.fromISO(current.weekStart)
-              .plus({ weeks: 1 })
-              .toISODate() as string)
-        : calendar.weekStart;
     const state = await memory(tx, userId, settings.riwayah, catalogue);
+    const currentState =
+        current && current.riwayah !== settings.riwayah
+            ? await memory(tx, userId, current.riwayah, catalogue)
+            : state;
+    let fromDate =
+        current && !regenerate
+            ? nextPlanStart(
+                  current.weekStart,
+                  carryForwardSessions(
+                      sessionViews(currentState, current, catalogue, now),
+                      weekCalendar(now, current.timezone).today,
+                      settings.days,
+                      current.timezone,
+                      current.days,
+                  ),
+                  current.timezone,
+              )
+            : newScheduleFromDate(state, calendar.today, settings.timezone);
+    let weekStart =
+        current && !regenerate
+            ? (DateTime.fromISO(fromDate, { zone: settings.timezone })
+                  .startOf("week")
+                  .toISODate() as string)
+            : calendar.weekStart;
+    if (regenerate || !current)
+        ({ fromDate, weekStart } = regenerationCalendar(
+            fromDate,
+            settings.days,
+            settings.timezone,
+        ));
+    const reviewed = new Set<string>();
+    if (regenerate)
+        for (const assessment of state.assessments) {
+            if (
+                +assessment.createdAt <
+                    weekBounds(weekStart, settings.timezone).start ||
+                +assessment.createdAt > +now
+            )
+                continue;
+            if (
+                !(
+                    assessment.sourceKey?.startsWith("weekly:") ||
+                    (assessment.method === "peer" &&
+                        assessment.outcome === "confirmed")
+                )
+            )
+                continue;
+            for (const verse of assessmentVerses(catalogue, assessment))
+                for (const atom of verse.atoms) reviewed.add(atom);
+        }
     const sessions = generateRevisionSchedule({
+        reviewed,
         catalogue,
         settings,
         completedHizbs: state.complete,
         assessments: state.assessments,
         history: state.history,
         weekStart,
-        fromDate: current ? weekStart : calendar.today,
+        fromDate,
     });
     const revision = plan?.revision ?? 0;
     const key = createHash("sha256")
         .update(
             JSON.stringify({
                 settings,
+                regenerate,
+                version: await planVersion(tx, userId, "revision"),
                 revision,
                 setup: state.record?.revision,
                 complete: state.complete,
@@ -176,8 +295,13 @@ async function makePreview(
         weekStart,
         sessions,
         completedHizbs: state.complete.length,
-        ready: Boolean(state.record?.setupAt) && state.complete.length > 0,
-        nextWeek: Boolean(current),
+        ready:
+            Boolean(state.record?.setupAt) &&
+            state.complete.length > 0 &&
+            settings.days.length > 0 &&
+            (!regenerate || Boolean(plan)),
+        regenerate,
+        nextWeek: Boolean(current) && !regenerate,
     };
 }
 async function currentWeek(
@@ -193,15 +317,31 @@ async function currentWeek(
         .where(eq(revisionWeek.userId, userId))
         .orderBy(desc(revisionWeek.weekStart))
         .limit(3);
-    return (
+    const current =
         weeks.find((week) => {
             const b = weekBounds(week.weekStart, week.timezone);
             return +now >= b.start && +now < b.end;
         }) ??
         weeks.find(
             (week) => week.weekStart === weekCalendar(now, timezone).weekStart,
+        );
+    if (current) return current;
+    // Keep the latest unfinished batch across calendar weeks, with the same IDs and reading.
+    // Older superseded snapshots are history, not an additional backlog.
+    const latest = weeks[0];
+    if (latest && +now < weekBounds(latest.weekStart, latest.timezone).start)
+        return latest;
+    if (latest && +now >= weekBounds(latest.weekStart, latest.timezone).end) {
+        const catalogue = await getMemoryCatalogue();
+        const state = await memory(tx, userId, latest.riwayah, catalogue);
+        if (
+            sessionViews(state, latest, catalogue, now).some(
+                (s) => s.available && !s.done,
+            )
         )
-    );
+            return latest;
+    }
+    return undefined;
 }
 export async function getRevisionReminderDate(
     userId: string,
@@ -215,10 +355,11 @@ export async function getRevisionReminderDate(
 export async function previewRevisionPlan(
     userId: string,
     settings: RevisionSettings,
+    regenerate = false,
 ) {
     const catalogue = await getMemoryCatalogue();
     return db.transaction(
-        (tx) => makePreview(tx, userId, settings, catalogue),
+        (tx) => makePreview(tx, userId, settings, catalogue, regenerate),
         { isolationLevel: "repeatable read", accessMode: "read only" },
     );
 }
@@ -226,23 +367,37 @@ export async function saveRevisionPlan(
     userId: string,
     settings: RevisionSettings,
     expectedKey: string,
+    regenerate = false,
 ) {
     const catalogue = await getMemoryCatalogue();
     return db.transaction(async (tx) => {
         await lockRecord(tx, userId);
-        const preview = await makePreview(tx, userId, settings, catalogue);
+        settings = await sharedSettings(tx, userId, settings);
+        const preview = await makePreview(
+            tx,
+            userId,
+            settings,
+            catalogue,
+            regenerate,
+        );
         if (preview.key !== expectedKey)
             return { success: false as const, reason: "stale" as const };
-        if (!preview.ready)
+        if (!preview.ready || (regenerate && !preview.sessions.length))
             return { success: false as const, reason: "empty" as const };
+        const [existing] = await tx
+            .select()
+            .from(revisionPlan)
+            .where(eq(revisionPlan.userId, userId));
+        if (regenerate) await clearPlanSchedule(tx, userId, "revision");
+        const enabled = regenerate ? existing.enabled : true;
         await tx
             .insert(revisionPlan)
-            .values({ ...settings, userId, enabled: true, revision: 1 })
+            .values({ ...settings, userId, enabled, revision: 1 })
             .onConflictDoUpdate({
                 target: revisionPlan.userId,
                 set: {
                     ...settings,
-                    enabled: true,
+                    enabled,
                     revision: preview.revision + 1,
                     updatedAt: await clock(tx),
                 },
@@ -255,6 +410,24 @@ export async function saveRevisionPlan(
                 preview.weekStart,
                 preview.sessions,
             );
+        return { success: true as const };
+    });
+}
+export async function deleteRevisionPlan(
+    userId: string,
+    expectedVersion: string,
+) {
+    return db.transaction(async (tx) => {
+        await lockRecord(tx, userId);
+        if ((await planVersion(tx, userId, "revision")) !== expectedVersion)
+            return { success: false as const, reason: "stale" };
+        const deleted = await tx
+            .delete(revisionPlan)
+            .where(eq(revisionPlan.userId, userId))
+            .returning();
+        if (!deleted.length)
+            return { success: false as const, reason: "stale" };
+        await clearPlanSchedule(tx, userId, "revision");
         return { success: true as const };
     });
 }
@@ -302,23 +475,38 @@ export async function getRevisionView(
             week?.riwayah ?? plan?.riwayah ?? preferredRiwayah,
             catalogue,
         );
-        if (plan?.enabled && !week) {
-            const calendar = weekCalendar(now, plan.timezone);
+        const [studyDays] = await tx
+            .select()
+            .from(learningSchedule)
+            .where(eq(learningSchedule.userId, userId));
+        if (plan?.enabled && !week && studyDays?.revisionDays.length) {
+            const calendar = regenerationCalendar(
+                newScheduleFromDate(
+                    state,
+                    weekCalendar(now, plan.timezone).today,
+                    plan.timezone,
+                ),
+                studyDays.revisionDays,
+                plan.timezone,
+            );
             const schedule = state.record?.setupAt
                 ? generateRevisionSchedule({
                       catalogue,
-                      settings: plan as RevisionSettings,
+                      settings: {
+                          ...plan,
+                          days: studyDays.revisionDays,
+                      } as RevisionSettings,
                       completedHizbs: state.complete,
                       assessments: state.assessments,
                       history: state.history,
                       weekStart: calendar.weekStart,
-                      fromDate: calendar.today,
+                      fromDate: calendar.fromDate,
                   })
                 : [];
             await insertWeek(
                 tx,
                 userId,
-                plan as RevisionSettings,
+                { ...plan, days: studyDays.revisionDays } as RevisionSettings,
                 calendar.weekStart,
                 schedule,
             );
@@ -334,43 +522,17 @@ export async function getRevisionView(
             now,
             week?.timezone ?? plan?.timezone ?? "Africa/Casablanca",
         ).today;
-        const sessions = week
-            ? await tx
-                  .select()
-                  .from(revisionSession)
-                  .where(eq(revisionSession.weekId, week.id))
-                  .orderBy(asc(revisionSession.ordinal))
-            : [];
-        const peer = week
-            ? weekPeerAtoms(
-                  catalogue,
-                  state.assessments,
-                  week.weekStart,
+        const items = week
+            ? carryForwardSessions(
+                  sessionViews(state, week, catalogue, now).sort(
+                      (a, b) => a.ordinal - b.ordinal,
+                  ),
+                  today,
+                  studyDays?.revisionDays ?? [],
                   week.timezone,
+                  week.days,
               )
-            : new Set<string>();
-        const items = sessions.map((session) => {
-            const riwayah = week?.riwayah ?? "hafs";
-            const coverage = revisionCoverage(
-                catalogue,
-                { ...session, riwayah },
-                peer,
-            );
-            const available = assessmentVerses(catalogue, {
-                ...session,
-                riwayah,
-            }).every((v) => state.complete.includes(v.hizb));
-            return {
-                ...session,
-                completedAt: session.completedAt?.toISOString() ?? null,
-                riwayah,
-                total: coverage.total,
-                peer: coverage.peer,
-                done: coverage.done,
-                available,
-                remaining: coverage.remaining.map(verseKey),
-            };
-        });
+            : [];
         return {
             plan: plan
                 ? { ...plan, updatedAt: plan.updatedAt.toISOString() }
@@ -379,9 +541,17 @@ export async function getRevisionView(
                 ? { ...week, createdAt: week.createdAt.toISOString() }
                 : null,
             today,
-            sessions: items,
+            sessions: items.map((item) => ({
+                ...item,
+                active: isActivePlanSession(
+                    item,
+                    today,
+                    Boolean(plan?.enabled),
+                ),
+            })),
             setup: Boolean(state.record?.setupAt),
             completedHizbs: state.complete.length,
+            version: await planVersion(tx, userId, "revision"),
         };
     });
 }
@@ -416,18 +586,28 @@ export async function updateRevisionSession(
                 ),
             )
             .for("update", { of: revisionSession });
-        if (!row || !plan?.enabled) return { success: false as const };
+        if (!row || !plan?.enabled)
+            return { success: false as const, reason: "inactive" as const };
         const { session, week } = row;
         const now = await clock(tx);
-        const bounds = weekBounds(week.weekStart, week.timezone);
-        if (
-            +now < bounds.start ||
-            +now >=
-                revisionWeekEnd(week.weekStart, week.timezone, plan.timezone) ||
-            session.completedAt
-        )
-            return { success: false as const };
+        const active = await currentWeek(tx, userId, now, plan.timezone);
+        if (active?.id !== week.id || session.completedAt)
+            return { success: false as const, reason: "inactive" as const };
         const state = await memory(tx, userId, week.riwayah, catalogue);
+        const today = weekCalendar(now, week.timezone).today;
+        const [schedule] = await tx
+            .select()
+            .from(learningSchedule)
+            .where(eq(learningSchedule.userId, userId));
+        const projected = carryForwardSessions(
+            sessionViews(state, week, catalogue, now),
+            today,
+            schedule?.revisionDays ?? [],
+            week.timezone,
+            week.days,
+        ).find((item) => item.id === sessionId);
+        if (!projected || !isActivePlanSession(projected, today, plan.enabled))
+            return { success: false as const, reason: "inactive" as const };
         const verses = assessmentVerses(catalogue, {
             ...session,
             riwayah: week.riwayah,
@@ -442,6 +622,7 @@ export async function updateRevisionSession(
                 state.assessments,
                 week.weekStart,
                 week.timezone,
+                now,
             ),
         );
         if (coverage.done) return { success: true as const, completed: true };

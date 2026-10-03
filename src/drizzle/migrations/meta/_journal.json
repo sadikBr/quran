@@ -211,6 +211,27 @@
             "when": 1790979929010,
             "tag": "0029_midnight_bloom_theme",
             "breakpoints": true
+        },
+        {
+            "idx": 30,
+            "version": "7",
+            "when": 1790981553528,
+            "tag": "0030_learning_plans",
+            "breakpoints": true
+        },
+        {
+            "idx": 31,
+            "version": "7",
+            "when": 1790985781242,
+            "tag": "0031_memorization_reading_progress",
+            "breakpoints": true
+        },
+        {
+            "idx": 32,
+            "version": "7",
+            "when": 1790994249243,
+            "tag": "0032_glacier_saffron_citron_themes",
+            "breakpoints": true
         }
     ]
 }

@@ -122,3 +122,23 @@ export function calculateMemorization(
     });
 }
 export type HizbProgress = ReturnType<typeof calculateMemorization>[number];
+
+export function memorizedAtoms(
+    catalogue: MemoryCatalogue,
+    baselineRiwayah: Riwayah,
+    baseline: number[],
+    assessments: Assessment[],
+) {
+    const atoms = new Set(
+        catalogue[baselineRiwayah]
+            .filter((v) => baseline.includes(v.hizb))
+            .flatMap((v) => v.atoms),
+    );
+    for (const a of assessments.filter((a) => a.outcome === "confirmed"))
+        for (const v of assessmentVerses(catalogue, a))
+            for (const atom of v.atoms) atoms.add(atom);
+    return atoms;
+}
+export function isMemorized(verse: MemoryVerse, atoms: Set<string>) {
+    return verse.atoms.every((a) => atoms.has(a));
+}

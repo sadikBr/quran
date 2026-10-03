@@ -358,6 +358,9 @@ export default function MemorizationProgressMap({
                 <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
                     <span>{t("legendComplete")}</span>
                     <span>{t("record.partial")}</span>
+                    <span className="text-sky-600 dark:text-sky-400">
+                        {t("learning.upcoming")}
+                    </span>
                     <span>{t("record.needsRevision")}</span>
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -437,6 +440,16 @@ export default function MemorizationProgressMap({
                                                     </span>
                                                 )
                                             )}
+                                            {!editing && hizb.upcoming > 0 && (
+                                                <span className="relative text-xs text-sky-600 dark:text-sky-400">
+                                                    {t(
+                                                        "learning.upcomingCount",
+                                                        {
+                                                            count: hizb.upcoming,
+                                                        },
+                                                    )}
+                                                </span>
+                                            )}
                                             {!editing && hizb.needsRevision && (
                                                 <span
                                                     role="img"
@@ -503,6 +516,32 @@ export default function MemorizationProgressMap({
                                     peer: detail.peer,
                                 })}
                             </p>
+                            {detail.upcoming > 0 && (
+                                <div className="space-y-2 rounded-xl border border-sky-500/30 bg-sky-500/5 p-4">
+                                    <p className="text-sm font-medium">
+                                        {t("learning.upcomingCount", {
+                                            count: detail.upcoming,
+                                        })}
+                                    </p>
+                                    {detail.planned.map((p, i) => (
+                                        <p
+                                            key={`${p.scheduledDate}:${i}`}
+                                            className="text-xs leading-6"
+                                        >
+                                            {p.scheduledDate} ·{" "}
+                                            {p.startSurahNumber}:
+                                            {p.startAyahNumber} –{" "}
+                                            {p.endSurahNumber}:{p.endAyahNumber}
+                                        </p>
+                                    ))}
+                                    <Link
+                                        href="/memorization/plan"
+                                        className="inline-block text-sm text-primary underline underline-offset-4"
+                                    >
+                                        {t("learning.openPlan")}
+                                    </Link>
+                                </div>
+                            )}
                             {detail.needsRevision && (
                                 <p className="text-sm text-amber-700 dark:text-amber-400">
                                     {t("record.needsRevision")}

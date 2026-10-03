@@ -4,6 +4,7 @@ export * from "./schema/auth-schema";
 export * from "./schema/bookmark-collection";
 export * from "./schema/khatmah-history";
 export * from "./schema/khatmah-plan";
+export * from "./schema/learning-plan";
 export * from "./schema/memorization-group";
 export * from "./schema/memorization-progress";
 export * from "./schema/memorization-record";

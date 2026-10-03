@@ -9,12 +9,17 @@ import {
     MapPin,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import ConfirmationDialog from "@/components/ui/confirmation-dialog";
 import ReviewMethodLabel from "@/features/groups/components/review-method-label";
+import {
+    completeWeeklyMemorization,
+    saveWeeklyMemorizationProgress,
+} from "@/features/learning/server/actions";
 import { confirmPersonalMemorization } from "@/features/memorization/server/record-actions";
 import Ayah from "@/features/quran/components/ayah";
 import GuidedReader, {
@@ -34,6 +39,9 @@ import updatePracticeProgress from "../server/update-practice-progress";
 import type { PracticeAssignment, QuranReference } from "../types";
 import { referenceOrder } from "../types";
 
+const completionPanelClass =
+    "mt-6 space-y-4 rounded-3xl border border-primary/20 bg-primary/[0.04] p-5 sm:p-6";
+
 export default function PracticeReader({
     assignment,
     groups,
@@ -47,10 +55,16 @@ export default function PracticeReader({
     continuousRecitation: boolean;
     weeklyOutcome?: "comfortable" | "difficult" | null;
 }) {
+    const weeklyMemorization =
+        assignment.source === "weekly" && assignment.kind === "memorization";
+    const weeklyRevision =
+        assignment.source === "weekly" && assignment.kind === "revision";
     const locale = useLocale();
+    const router = useRouter();
     const t = useTranslations("Practice.reader");
     const flow = useTranslations("Groups.flow");
     const weeklyT = useTranslations("Memorization.weekly");
+    const learningT = useTranslations("Memorization.learning");
     const [weeklyConfirm, setWeeklyConfirm] = useState<
         "comfortable" | "difficult" | null
     >(null);
@@ -60,6 +74,7 @@ export default function PracticeReader({
     const [confirmReady, setConfirmReady] = useState(false);
     const [progress, setProgress] = useState(assignment.progress);
     const [status, setStatus] = useState(assignment.status);
+    const [selfConfirmed, setSelfConfirmed] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const mutationInFlight = useRef(false);
     const [savingReference, setSavingReference] =
@@ -132,19 +147,34 @@ export default function PracticeReader({
         return () => window.cancelAnimationFrame(frame);
     }, [next]);
 
+    function handleInactivePlan(result: {
+        success: boolean;
+        reason?: unknown;
+    }) {
+        if (result.reason !== "inactive") return false;
+        toast.error(t("inactivePlan"));
+        router.replace("/practice");
+        router.refresh();
+        return true;
+    }
+
     async function saveProgress(reference: QuranReference) {
         if (mutationInFlight.current || status === "completed") return;
         mutationInFlight.current = true;
         setSavingReference(reference);
         try {
-            const result = await (assignment.source === "weekly"
-                ? saveWeeklyRevisionProgress
-                : updatePracticeProgress)({
+            const save = weeklyMemorization
+                ? saveWeeklyMemorizationProgress
+                : weeklyRevision
+                  ? saveWeeklyRevisionProgress
+                  : updatePracticeProgress;
+            const result = await save({
                 assignmentId: assignment.id,
                 ...reference,
             });
 
             if (!result.success) {
+                if (handleInactivePlan(result)) return;
                 toast.error(t("saveError"));
                 return;
             }
@@ -188,20 +218,27 @@ export default function PracticeReader({
         mutationInFlight.current = true;
         setIsSubmitting(true);
         try {
-            const result = await confirmPersonalMemorization({
-                assignmentId: assignment.id,
-                riwayah: assignment.riwayah,
-                startSurahNumber: assignment.start.surahNumber,
-                startAyahNumber: assignment.start.ayahNumber,
-                endSurahNumber: assignment.end.surahNumber,
-                endAyahNumber: assignment.end.ayahNumber,
-                confirmed: true,
-            });
+            const result = weeklyMemorization
+                ? await completeWeeklyMemorization({
+                      sessionId: assignment.id,
+                      confirmed: true,
+                  })
+                : await confirmPersonalMemorization({
+                      assignmentId: assignment.id,
+                      riwayah: assignment.riwayah,
+                      startSurahNumber: assignment.start.surahNumber,
+                      startAyahNumber: assignment.start.ayahNumber,
+                      endSurahNumber: assignment.end.surahNumber,
+                      endAyahNumber: assignment.end.ayahNumber,
+                      confirmed: true,
+                  });
             if (!result.success) {
+                if (handleInactivePlan(result)) return;
                 toast.error(memoryT("failed"));
                 return;
             }
             setStatus("completed");
+            setSelfConfirmed(true);
             setConfirmMemory(false);
             toast.success(memoryT("saved"));
         } catch {
@@ -224,6 +261,7 @@ export default function PracticeReader({
                 confirmed: true,
             });
             if (!result.success) {
+                if (handleInactivePlan(result)) return;
                 toast.error(weeklyT("readerFailed"));
                 return;
             }
@@ -304,7 +342,8 @@ export default function PracticeReader({
             />
             <ReviewMethodLabel
                 method={
-                    status === "completed" && assignment.source === "personal"
+                    status === "completed" &&
+                    (assignment.source === "personal" || selfConfirmed)
                         ? "self"
                         : assignment.reviewMethod
                 }
@@ -536,18 +575,31 @@ export default function PracticeReader({
                     );
                 })}
             </div>
-            {assignment.source === "personal" && (
-                <section className="mt-6 space-y-3 rounded-2xl bg-primary/8 p-5 ring-1 ring-primary/15">
+            {(assignment.source === "personal" || weeklyMemorization) && (
+                <section className={completionPanelClass}>
                     <h2 className="font-semibold">
-                        {memoryT(status === "completed" ? "saved" : "title")}
+                        {weeklyMemorization && status !== "completed"
+                            ? learningT("readerTitle")
+                            : memoryT(
+                                  status === "completed" ? "saved" : "title",
+                              )}
                     </h2>
                     <p className="text-sm leading-7 text-muted-foreground">
-                        {memoryT(
-                            status === "completed" ? "completedHint" : "hint",
-                        )}
+                        {weeklyMemorization
+                            ? learningT(
+                                  status === "completed"
+                                      ? "coveredHint"
+                                      : "readerHint",
+                              )
+                            : memoryT(
+                                  status === "completed"
+                                      ? "completedHint"
+                                      : "hint",
+                              )}
                     </p>
                     {status !== "completed" && (
                         <Button
+                            className="min-h-11 h-auto whitespace-normal text-start"
                             disabled={
                                 !reachedEnd ||
                                 isSubmitting ||
@@ -558,16 +610,22 @@ export default function PracticeReader({
                             {memoryT("confirm")}
                         </Button>
                     )}
-                    <Link
-                        href="/memorization"
-                        className="block text-sm font-medium text-primary underline underline-offset-4"
-                    >
-                        {memoryT("map")}
-                    </Link>
+                    {weeklyMemorization ? (
+                        <Button asChild variant="ghost" className="min-h-11">
+                            <Link href="/practice">{t("back")}</Link>
+                        </Button>
+                    ) : (
+                        <Link
+                            href="/memorization"
+                            className="block text-sm font-medium text-primary underline underline-offset-4"
+                        >
+                            {memoryT("map")}
+                        </Link>
+                    )}
                 </section>
             )}
-            {assignment.source === "weekly" && (
-                <section className="mt-6 space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-5">
+            {weeklyRevision && (
+                <section className={completionPanelClass}>
                     <h2 className="font-semibold">
                         {weeklyT(
                             status === "completed" ? "recorded" : "readerTitle",
@@ -587,6 +645,7 @@ export default function PracticeReader({
                     {status !== "completed" && (
                         <div className="flex flex-wrap gap-2">
                             <Button
+                                className="min-h-11 h-auto whitespace-normal text-start"
                                 disabled={
                                     !reachedEnd ||
                                     isSubmitting ||
@@ -598,6 +657,7 @@ export default function PracticeReader({
                             </Button>
                             <Button
                                 variant="outline"
+                                className="min-h-11 h-auto whitespace-normal text-start"
                                 disabled={
                                     !reachedEnd ||
                                     isSubmitting ||
@@ -609,10 +669,8 @@ export default function PracticeReader({
                             </Button>
                         </div>
                     )}
-                    <Button asChild variant="ghost">
-                        <Link href="/memorization/revision">
-                            {weeklyT("backToWeek")}
-                        </Link>
+                    <Button asChild variant="ghost" className="min-h-11">
+                        <Link href="/practice">{t("back")}</Link>
                     </Button>
                     <ConfirmationDialog
                         open={weeklyConfirm !== null}

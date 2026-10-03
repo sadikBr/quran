@@ -93,7 +93,7 @@
     }
 }
 
-@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *, .ruby *, .obsidian *, .lagoon *, .copper *, .midnight *));
+@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *, .ruby *, .obsidian *, .lagoon *, .copper *, .midnight *, .citron *));
 
 /* Shared with the halaqa cards. Keep reading typography and theme colors local. */
 @utility app-card {
@@ -375,7 +375,9 @@
     --radius-4xl: calc(var(--radius) + 16px);
 }
 
-:root {
+:root,
+.theme-preview.light,
+.theme-preview.system {
     color-scheme: light;
     --card: oklch(0.9686 0.0091 78.2818);
     --card-foreground: oklch(0.366 0.0251 49.6085);
@@ -447,6 +449,7 @@
 }
 
 .dark,
+.citron,
 .midnight,
 .copper,
 .emerald,
@@ -1638,6 +1641,159 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
     }
 }
 
+/* Glacier: clear ceramic surfaces, cobalt ink and a cool sea-glass accent. */
+.glacier {
+    color-scheme: light;
+    --background: #eef5fb;
+    --foreground: #182e43;
+    --card: #ffffff;
+    --popover: #ffffff;
+    --primary: #124fc5;
+    --primary-foreground: #ffffff;
+    --secondary: #dae8f5;
+    --secondary-foreground: #243f5a;
+    --muted: #e2edf6;
+    --muted-foreground: #52697d;
+    --accent: #d7eeed;
+    --accent-foreground: #215f63;
+    --destructive: #b12e46;
+    --destructive-foreground: #ffffff;
+    --border: #bacdde;
+    --input: #718ea8;
+    --ring: #124fc5;
+    --division: #9a4932;
+    --chart-1: #124fc5;
+    --chart-2: #24727b;
+    --chart-3: #9a4932;
+    --chart-4: #7552a6;
+    --chart-5: #527036;
+    --sidebar: #dae8f5;
+    --sidebar-border: #a9c1d7;
+    --landscape-tint: #99bddd;
+    --theme-shadow: 24 46 67;
+}
+
+/* Saffron: sunlit yellow paper, espresso ink and vermilion division marks. */
+.saffron {
+    color-scheme: light;
+    --background: #f3dda0;
+    --foreground: #352b17;
+    --card: #fff4cf;
+    --popover: #fff8e3;
+    --primary: #49351a;
+    --primary-foreground: #fff5d6;
+    --secondary: #e7c773;
+    --secondary-foreground: #463618;
+    --muted: #ebd293;
+    --muted-foreground: #645028;
+    --accent: #ffddbe;
+    --accent-foreground: #873b23;
+    --destructive: #a32b35;
+    --destructive-foreground: #ffffff;
+    --border: #c4a65a;
+    --input: #92743c;
+    --ring: #873b23;
+    --division: #9b3c26;
+    --chart-1: #49351a;
+    --chart-2: #9b3c26;
+    --chart-3: #34676e;
+    --chart-4: #6b4b83;
+    --chart-5: #516438;
+    --sidebar: #e9cb77;
+    --sidebar-border: #b79542;
+    --landscape-tint: #d4ab40;
+    --theme-shadow: 73 53 26;
+}
+
+/* Citron: olive-black architecture, luminous lime and restrained fig accents. */
+.citron {
+    color-scheme: dark;
+    --background: #171b12;
+    --foreground: #f0f4e4;
+    --card: #22291a;
+    --popover: #2b3421;
+    --primary: #d1ee6b;
+    --primary-foreground: #20280c;
+    --secondary: #323e23;
+    --secondary-foreground: #e7edce;
+    --muted: #252e1c;
+    --muted-foreground: #b1bca0;
+    --accent: #3b3046;
+    --accent-foreground: #e6cbed;
+    --destructive: #ffa58e;
+    --destructive-foreground: #37180f;
+    --border: #455238;
+    --input: #6e815d;
+    --ring: #d1ee6b;
+    --division: #d8b4ef;
+    --chart-1: #d1ee6b;
+    --chart-2: #d8b4ef;
+    --chart-3: #9ebfe5;
+    --chart-4: #f3ac83;
+    --chart-5: #91d7bd;
+    --sidebar: #11170d;
+    --sidebar-border: #455238;
+    --landscape-tint: #75864b;
+    --theme-shadow: 0 0 0;
+}
+
+:is(.glacier, .saffron, .citron) {
+    --card-foreground: var(--foreground);
+    --popover-foreground: var(--foreground);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-ring: var(--ring);
+    --shadow-2xs: 0 1px 2px rgb(var(--theme-shadow) / 3%);
+    --shadow-xs: 0 1px 3px rgb(var(--theme-shadow) / 5%);
+    --shadow-sm: 0 2px 6px rgb(var(--theme-shadow) / 6%);
+    --shadow: 0 3px 10px rgb(var(--theme-shadow) / 8%);
+    --shadow-md: 0 6px 18px -4px rgb(var(--theme-shadow) / 10%);
+    --shadow-lg: 0 12px 30px -8px rgb(var(--theme-shadow) / 14%);
+    --shadow-xl: 0 20px 44px -12px rgb(var(--theme-shadow) / 18%);
+    --shadow-2xl: 0 28px 64px -16px rgb(var(--theme-shadow) / 24%);
+}
+
+:is(.glacier, .saffron) .home-landscape-light,
+.citron .home-landscape {
+    background-color: var(--landscape-tint);
+    background-blend-mode: luminosity;
+}
+
+:is(.glacier, .saffron) .home-landscape-light-shade,
+.citron .home-landscape-shade {
+    background-image: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--background) 96%, transparent),
+        color-mix(in srgb, var(--background) 64%, transparent) 48%,
+        color-mix(in srgb, var(--background) 12%, transparent)
+    );
+}
+
+:is(.glacier, .saffron, .citron) .home-session-shade {
+    background: transparent;
+}
+
+/* Keep destructive controls legible against the dark theme's bright warning. */
+.citron [data-slot="button"][data-variant="destructive"] {
+    background-color: var(--destructive);
+    color: var(--destructive-foreground);
+}
+.citron [data-slot="button"][data-variant="destructive"]:hover {
+    background-color: color-mix(
+        in srgb,
+        var(--destructive) 90%,
+        var(--background)
+    );
+}
+
+/* Swatches inherit each real palette, including surfaces and selected accents. */
+.theme-preview.system {
+    background-image: linear-gradient(120deg, #fcfaf6 50%, #1b1917 50%);
+}
+
 /* Keep the left-hand landmark in frame without changing theme overlays. */
 @media (width >= 64rem) {
     .home-landscape-frame .home-landscape,
@@ -1765,6 +1921,7 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
     --tajweed-color: #8c2672;
 }
 .dark [data-tajweed],
+.citron [data-tajweed],
 .midnight [data-tajweed] {
     color: color-mix(in srgb, var(--tajweed-color) 55%, white);
 }

@@ -6,6 +6,7 @@ import PageBackground from "@/components/page-background";
 import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { auth } from "@/features/auth/auth";
+import { getMemorizationPlanView } from "@/features/learning/server/service";
 import MemorizationProgressMap from "@/features/memorization/components/memorization-progress-map";
 import getMemorizationRecord from "@/features/memorization/server/get-memorization-record";
 import getPreferences from "@/features/settings/server/get-preferences";
@@ -17,9 +18,30 @@ export default async function MemorizationPage() {
     if (!session) redirect("/sign-in");
 
     const preferences = await getPreferences();
+    const plan = await getMemorizationPlanView(
+        session.user.id,
+        preferences.riwayah,
+    );
     const record = await getMemorizationRecord(
         session.user.id,
         preferences.riwayah,
+        plan.plan?.enabled && plan.week
+            ? plan.sessions
+                  .filter((s) => !s.done)
+                  .flatMap((s) =>
+                      s.scheduledDate
+                          ? [
+                                {
+                                    ...s,
+                                    scheduledDate: s.scheduledDate,
+                                    riwayah:
+                                        plan.week?.riwayah ??
+                                        preferences.riwayah,
+                                },
+                            ]
+                          : [],
+                  )
+            : [],
     );
     const messages = await getMessages(preferences.language);
     const t = createTranslator({

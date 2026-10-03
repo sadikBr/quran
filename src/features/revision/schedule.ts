@@ -80,8 +80,10 @@ export function weekPeerAtoms(
     assessments: Assessment[],
     weekStart: string,
     timezone: string,
+    through?: Date,
 ) {
     const { start, end } = weekBounds(weekStart, timezone);
+    const creditEnd = Math.max(end, through ? +through + 1 : end);
     return new Set(
         assessments
             .filter(
@@ -89,7 +91,7 @@ export function weekPeerAtoms(
                     a.method === "peer" &&
                     a.outcome === "confirmed" &&
                     +a.createdAt >= start &&
-                    +a.createdAt < end,
+                    +a.createdAt < creditEnd,
             )
             .flatMap((a) =>
                 assessmentVerses(catalogue, a).flatMap((v) => v.atoms),
@@ -120,6 +122,7 @@ export function generateRevisionSchedule({
     history,
     weekStart,
     fromDate,
+    reviewed = new Set<string>(),
 }: {
     catalogue: MemoryCatalogue;
     settings: RevisionSettings;
@@ -128,6 +131,7 @@ export function generateRevisionSchedule({
     history: RevisionHistory[];
     weekStart: string;
     fromDate: string;
+    reviewed?: Set<string>;
 }): ScheduledRange[] {
     const verses = catalogue[settings.riwayah];
     const latest = new Map<string, { time: number; difficult: boolean }>();
@@ -141,40 +145,19 @@ export function generateRevisionSchedule({
                     difficult: a.outcome === "needs_revision",
                 });
     }
-    const scheduled = new Map<string, { time: number; missed: boolean }>();
-    const peerCache = new Map<string, Set<string>>();
+    const scheduled = new Map<string, number>();
     for (const old of [...history].sort((a, b) =>
         a.scheduledDate.localeCompare(b.scheduledDate),
     )) {
         if (old.weekStart >= weekStart) continue;
-        const key = `${old.weekStart}:${old.timezone}`;
-        if (!peerCache.has(key))
-            peerCache.set(
-                key,
-                weekPeerAtoms(
-                    catalogue,
-                    assessments,
-                    old.weekStart,
-                    old.timezone,
-                ),
-            );
-        const covered = revisionCoverage(
-            catalogue,
-            old,
-            peerCache.get(key) as Set<string>,
-        );
         for (const v of assessmentVerses(catalogue, old))
             for (const atom of v.atoms)
-                scheduled.set(atom, {
-                    time: DateTime.fromISO(old.scheduledDate, {
+                scheduled.set(
+                    atom,
+                    DateTime.fromISO(old.scheduledDate, {
                         zone: old.timezone,
                     }).toMillis(),
-                    missed:
-                        !covered.done &&
-                        covered.remaining.some(
-                            (remaining) => verseKey(remaining) === verseKey(v),
-                        ),
-                });
+                );
     }
     const units = Array.from({ length: 240 }, (_, i) => i + 1)
         .map((quarter) => {
@@ -185,17 +168,21 @@ export function generateRevisionSchedule({
             return {
                 quarter,
                 part,
-                urgent: atoms.some(
-                    (a) => latest.get(a)?.difficult || scheduled.get(a)?.missed,
-                ),
+                urgent: atoms.some((a) => latest.get(a)?.difficult),
                 last: Math.max(
                     Math.min(...atoms.map((a) => latest.get(a)?.time ?? 0)),
                     0,
-                    ...atoms.map((a) => scheduled.get(a)?.time ?? 0),
+                    ...atoms.map((a) => scheduled.get(a) ?? 0),
                 ),
             };
         })
-        .filter((u) => u.part.length > 0);
+        .filter(
+            (u) =>
+                u.part.length > 0 &&
+                !u.part.every((v) =>
+                    v.atoms.every((atom) => reviewed.has(atom)),
+                ),
+        );
     const dates = Array.from({ length: 7 }, (_, i) =>
         DateTime.fromISO(weekStart, { zone: settings.timezone }).plus({
             days: i,
@@ -208,7 +195,7 @@ export function generateRevisionSchedule({
         )
         .map((day) => day.toISODate() as string);
     const capacity = dates.length * settings.quartersPerDay;
-    // Reserve at most half the week for difficult/missed passages; the rest keeps rotating.
+    // Unfinished sessions keep their existing queue. New batches balance difficult passages and rotation.
     const quota =
         capacity === 1
             ? DateTime.fromISO(weekStart).weekNumber % 2

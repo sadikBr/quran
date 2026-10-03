@@ -18,6 +18,9 @@ export const THEMES = [
     "copper",
     "celadon",
     "midnight",
+    "glacier",
+    "saffron",
+    "citron",
 ] as const;
 export const LANGUAGES = ["en", "ar"] as const;
 export const READING_MODES = ["page", "surah"] as const;

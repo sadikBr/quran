@@ -30,6 +30,14 @@ export default function MemorizationOverview({
     }).format(completed / 60);
     const shortcuts = [
         {
+            href: "/memorization/plan",
+            icon: CalendarDays,
+            title: t("learning.title"),
+            description: t("learning.intro"),
+            action: t("learning.openPlan"),
+            featured: true,
+        },
+        {
             href: "/memorization/revision",
             icon: CalendarDays,
             title: t("weekly.title"),

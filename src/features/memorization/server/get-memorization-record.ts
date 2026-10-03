@@ -9,8 +9,12 @@ import {
     userMemorizedHizb,
 } from "@/drizzle/schema";
 import {
+    type Assessment,
+    assessmentVerses,
     CORRECTION_WINDOW_MS,
     calculateMemorization,
+    isMemorized,
+    memorizedAtoms,
     type Riwayah,
 } from "../progress";
 import getMemoryCatalogue from "./get-memory-catalogue";
@@ -18,6 +22,9 @@ import getMemoryCatalogue from "./get-memory-catalogue";
 export default async function getMemorizationRecord(
     userId: string,
     riwayah: Riwayah,
+    planned: (Omit<Assessment, "id" | "method" | "outcome" | "createdAt"> & {
+        scheduledDate: string;
+    })[] = [],
 ) {
     const [
         [records, baseline, assessments, requests, changes, clock],
@@ -72,6 +79,21 @@ export default async function getMemorizationRecord(
         baselineHizbs,
         assessments,
     );
+    const covered = memorizedAtoms(
+        catalogue,
+        record?.setupAt ? record.baselineRiwayah : riwayah,
+        baselineHizbs,
+        assessments,
+    );
+    const upcoming = planned.map((range) => ({
+        range,
+        atoms: new Set(
+            assessmentVerses(catalogue, range)
+                .filter((v) => !isMemorized(v, covered))
+                .flatMap((v) => v.atoms),
+        ),
+    }));
+    const upcomingAtoms = new Set(upcoming.flatMap((p) => [...p.atoms]));
     return {
         revision: record?.revision ?? 0,
         setupAt: record?.setupAt?.toISOString() ?? null,
@@ -84,7 +106,24 @@ export default async function getMemorizationRecord(
             : null,
         serverNow: new Date(clock.rows[0].now).toISOString(),
         baselineHizbs,
-        hizbs,
+        hizbs: hizbs.map((h) => ({
+            ...h,
+            upcoming: catalogue[riwayah].filter(
+                (v) =>
+                    v.hizb === h.number &&
+                    !isMemorized(v, covered) &&
+                    v.atoms.some((a) => upcomingAtoms.has(a)),
+            ).length,
+            planned: upcoming
+                .filter((p) =>
+                    catalogue[riwayah].some(
+                        (v) =>
+                            v.hizb === h.number &&
+                            v.atoms.some((a) => p.atoms.has(a)),
+                    ),
+                )
+                .map((p) => p.range),
+        })),
         completedHizbs: hizbs
             .filter((hizb) => hizb.total > 0 && hizb.completed === hizb.total)
             .map((hizb) => hizb.number),

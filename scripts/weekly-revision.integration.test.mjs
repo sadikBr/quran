@@ -7,14 +7,16 @@ import { DateTime } from "luxon";
 import pg from "pg";
 import { z } from "zod";
 import * as schema from "../src/drizzle/schema";
+import * as carry from "../src/features/learning/carry-forward";
 import * as progress from "../src/features/memorization/progress";
 import { quranReferenceSchema } from "../src/features/practice/types";
 import * as schedule from "../src/features/revision/schedule";
+import { databaseClock } from "./helpers/database-clock.mjs";
 import { loadTypeScript } from "./helpers/load-typescript.mjs";
 
 const target = process.env.REVISION_TEST_DATABASE_URL;
 (target ? test : test.skip)(
-    "database: opt-in, stable weeks, isolated progress, peer coverage, corrections, rollover and reminders",
+    "database: opt-in, carried schedules, isolated progress, peer coverage, corrections, rollover and reminders",
     async () => {
         if (!new URL(target).pathname.endsWith("_revision_tests"))
             throw new Error(
@@ -37,6 +39,7 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                 "new",
                 "correct",
                 "rollover",
+                "carry",
                 "notify",
                 "admin",
             ];
@@ -60,12 +63,21 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                 hafs: verses,
                 warsh: verses.map((v) => ({ ...v })),
             };
+            const testClock = databaseClock();
             const modules = {
                 "server-only": {},
-                "drizzle-orm": orm,
+                "drizzle-orm": { ...orm, sql: testClock.sql },
                 "@/drizzle/db": db,
                 "@/drizzle/schema": schema,
             };
+            const lifecycle = loadTypeScript(
+                "src/features/learning/server/plan-lifecycle.ts",
+                {
+                    ...modules,
+                    "node:crypto": { createHash },
+                    luxon: { DateTime },
+                },
+            );
             const records = loadTypeScript(
                 "src/features/memorization/server/record-service.ts",
                 { ...modules, "../progress": progress },
@@ -77,11 +89,20 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                     "node:crypto": { createHash },
                     luxon: { DateTime },
                     "@/features/memorization/progress": progress,
+                    "@/features/learning/carry-forward": carry,
+                    "@/features/learning/server/plan-lifecycle": lifecycle,
                     "@/features/memorization/server/get-memory-catalogue":
                         async () => catalogue,
                     "@/features/memorization/server/record-service": records,
                     "../schedule": schedule,
                 },
+            );
+            await db.insert(schema.learningSchedule).values(
+                ids.map((userId) => ({
+                    userId,
+                    revisionDays: [1, 2, 3, 4, 5, 6, 7],
+                    memorizationDays: [1, 3, 5],
+                })),
             );
             const settings = {
                 days: [1, 2, 3, 4, 5, 6, 7],
@@ -140,6 +161,35 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
             expect(solo.sessions).toHaveLength(preview.sessions.length);
             expect(await db.select().from(schema.revisionWeek)).toHaveLength(1);
             const first = solo.sessions[0];
+            // A valid owned session still cannot be opened or written before its study day.
+            testClock.set(
+                DateTime.fromISO(first.scheduledDate, { zone: "UTC" })
+                    .minus({ days: 1 })
+                    .set({ hour: 12 })
+                    .toJSDate(),
+            );
+            expect(
+                (await service.getRevisionView("solo")).sessions.every(
+                    (s) => !s.active,
+                ),
+            ).toBe(true);
+            expect(
+                (
+                    await service.updateRevisionSession("solo", first.id, {
+                        surahNumber: first.endSurahNumber,
+                        ayahNumber: first.endAyahNumber,
+                    })
+                ).reason,
+            ).toBe("inactive");
+            expect(
+                (
+                    await service.updateRevisionSession("solo", first.id, {
+                        outcome: "comfortable",
+                    })
+                ).reason,
+            ).toBe("inactive");
+            testClock.set(null);
+
             const initialIds = solo.sessions.map((s) => s.id);
             const changed = {
                 ...settings,
@@ -308,7 +358,7 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                         { outcome: "comfortable" },
                     )
                 ).success,
-            ).toBe(true);
+            ).toBe(false);
             expect(await events("other")).toHaveLength(1);
 
             // A baseline correction invalidates unrevised ranges and stale previews.
@@ -338,7 +388,72 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                 ).success,
             ).toBe(false);
 
-            // Lazy rollover makes only the current week, with no accumulated daily workload.
+            // Missed daily portions move together, preserving IDs and partial circle credit.
+            const carried = await activate("carry");
+            const carriedFirst = carried.sessions[0];
+            if (carried.sessions.length === 1) {
+                await db.insert(schema.revisionSession).values({
+                    id: "carry-later",
+                    userId: "carry",
+                    weekId: carried.week.id,
+                    scheduledDate: DateTime.fromISO(carriedFirst.scheduledDate)
+                        .plus({ days: 1 })
+                        .toISODate(),
+                    ordinal: 1,
+                    quarters: [9, 10, 11, 12],
+                    startSurahNumber: 2,
+                    startAyahNumber: 17,
+                    endSurahNumber: 2,
+                    endAyahNumber: 24,
+                });
+            }
+            await pool.query(
+                "update revision_session set scheduled_date=scheduled_date-1 where user_id='carry'",
+            );
+            await db
+                .insert(schema.memorizationAssessment)
+                .values(
+                    assessment(
+                        carriedFirst.startAyahNumber,
+                        carriedFirst.startAyahNumber,
+                        { userId: "carry" },
+                    ),
+                );
+            await service.updateRevisionSession("carry", carriedFirst.id, {
+                surahNumber: carriedFirst.startSurahNumber,
+                ayahNumber: carriedFirst.startAyahNumber + 1,
+            });
+            const shifted = await service.getRevisionView("carry");
+            expect(shifted.sessions[0].id).toBe(carriedFirst.id);
+            expect(shifted.sessions[0].scheduledDate).toBe(shifted.today);
+            expect(
+                shifted.sessions[0].originalScheduledDate < shifted.today,
+            ).toBe(true);
+            expect(shifted.sessions[0].peer).toBe(1);
+            expect(shifted.sessions[0].progressAyahNumber).toBe(
+                carriedFirst.startAyahNumber + 1,
+            );
+            expect(shifted.sessions[1].scheduledDate).toBe(
+                DateTime.fromISO(shifted.today).plus({ days: 1 }).toISODate(),
+            );
+            await service.updateRevisionSession("carry", carriedFirst.id, {
+                surahNumber: carriedFirst.endSurahNumber,
+                ayahNumber: carriedFirst.endAyahNumber,
+            });
+            await service.updateRevisionSession("carry", carriedFirst.id, {
+                outcome: "comfortable",
+            });
+            const afterFinish = await service.getRevisionView("carry");
+            expect(afterFinish.sessions[1].scheduledDate).toBe(
+                shifted.sessions[1].scheduledDate,
+            );
+            expect(
+                afterFinish.sessions.filter(
+                    (s) => s.scheduledDate === afterFinish.today && !s.done,
+                ),
+            ).toHaveLength(0);
+
+            // The latest unfinished queue crosses weeks without replacement or accumulated workload.
             const old = await activate("rollover");
             await pool.query(
                 "update revision_week set week_start=week_start-28 where user_id='rollover'",
@@ -350,7 +465,11 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                 [1, 2].map(() => service.getRevisionView("rollover")),
             );
             expect(rolled[0].week.id).toBe(rolled[1].week.id);
-            expect(rolled[0].week.id).not.toBe(old.week.id);
+            expect(rolled[0].week.id).toBe(old.week.id);
+            expect(rolled[0].sessions.map((s) => s.id)).toEqual(
+                old.sessions.map((s) => s.id),
+            );
+            expect(rolled[0].sessions[0].scheduledDate).toBe(rolled[0].today);
             expect(
                 rolled[0].sessions.flatMap((s) => s.quarters).length,
             ).toBeLessThanOrEqual(7 * 4);
@@ -359,7 +478,77 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                     .select()
                     .from(schema.revisionWeek)
                     .where(orm.eq(schema.revisionWeek.userId, "rollover")),
-            ).toHaveLength(2);
+            ).toHaveLength(1);
+            expect(
+                (
+                    await service.updateRevisionSession(
+                        "rollover",
+                        old.sessions[0].id,
+                        { surahNumber: 2, ayahNumber: 8 },
+                    )
+                ).success,
+            ).toBe(true);
+            // Circle credit from the original week and a later week both remain attached.
+            const originalCreditDate = DateTime.fromISO(
+                rolled[0].week.weekStart,
+                { zone: "UTC" },
+            )
+                .plus({ days: 1 })
+                .toJSDate();
+            await db.insert(schema.memorizationAssessment).values([
+                assessment(1, 1, {
+                    userId: "rollover",
+                    createdAt: originalCreditDate,
+                }),
+                assessment(2, 2, { userId: "rollover" }),
+            ]);
+            const credited = await service.getRevisionView("rollover");
+            expect(credited.sessions[0].peer).toBe(2);
+            expect(credited.sessions[0].progressAyahNumber).toBe(8);
+            expect(credited.sessions[0].remaining).not.toContain("2:1");
+            expect(credited.sessions[0].remaining).not.toContain("2:2");
+            let studyDay = DateTime.utc();
+            for (const row of credited.sessions) {
+                testClock.set(studyDay.toJSDate());
+                await service.updateRevisionSession("rollover", row.id, {
+                    surahNumber: row.endSurahNumber,
+                    ayahNumber: row.endAyahNumber,
+                });
+                expect(
+                    (
+                        await service.updateRevisionSession(
+                            "rollover",
+                            row.id,
+                            { outcome: "comfortable" },
+                        )
+                    ).success,
+                ).toBe(true);
+                studyDay = studyDay.plus({ days: 1 });
+            }
+            const nextQueue = await service.previewRevisionPlan(
+                "rollover",
+                settings,
+            );
+            expect(nextQueue.nextWeek).toBe(false);
+            expect(
+                nextQueue.sessions.every(
+                    (s) => s.scheduledDate > credited.today,
+                ),
+            ).toBe(true);
+            expect(
+                (
+                    await service.saveRevisionPlan(
+                        "rollover",
+                        settings,
+                        nextQueue.key,
+                    )
+                ).success,
+            ).toBe(true);
+            const renewed = await service.getRevisionView("rollover");
+            expect(renewed.week.id).not.toBe(old.week.id);
+            expect(
+                renewed.sessions.every((s) => s.scheduledDate > renewed.today),
+            ).toBe(true);
             expect(
                 (
                     await service.updateRevisionSession(
@@ -371,6 +560,7 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
             ).toBe(false);
 
             // Authenticated actions reject missing consent, malformed input and administrative accounts.
+            testClock.set(null);
             let userId = null;
             const actions = loadTypeScript(
                 "src/features/revision/server/actions.ts",
@@ -398,6 +588,14 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                 (await actions.previewWeeklyRevision(settings)).success,
             ).toBe(false);
             userId = "admin";
+            expect(
+                (
+                    await actions.deleteWeeklyRevision({
+                        version: "a".repeat(64),
+                        confirmed: true,
+                    })
+                ).success,
+            ).toBe(false);
             expect(
                 (await actions.previewWeeklyRevision(settings)).success,
             ).toBe(false);
@@ -454,14 +652,37 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                     "@/features/notifications/server/web-push": {
                         isExpiredPushSubscription: () => false,
                         sendPushNotification: async (_sub, payload) => {
-                            expect(JSON.parse(payload).url).toBe(
-                                "/memorization/revision",
-                            );
+                            expect(JSON.parse(payload).url).toBe("/practice");
                             sent++;
                         },
                     },
                 },
             );
+            // Removing today from saved days must suppress today's reminder even
+            // while the original week still contains a session dated today.
+            await db
+                .update(schema.learningSchedule)
+                .set({
+                    revisionDays: [notificationTime.plus({ days: 1 }).weekday],
+                })
+                .where(orm.eq(schema.learningSchedule.userId, "notify"));
+            await reminders.sendRevisionReminders(notificationTime.toJSDate());
+            expect(sent).toBe(0);
+            expect(
+                (await service.getRevisionView("notify")).sessions.every(
+                    (s) => s.scheduledDate > notificationTime.toISODate(),
+                ),
+            ).toBe(true);
+            await db
+                .update(schema.learningSchedule)
+                .set({ revisionDays: [] })
+                .where(orm.eq(schema.learningSchedule.userId, "notify"));
+            await reminders.sendRevisionReminders(notificationTime.toJSDate());
+            expect(sent).toBe(0);
+            await db
+                .update(schema.learningSchedule)
+                .set({ revisionDays: settings.days })
+                .where(orm.eq(schema.learningSchedule.userId, "notify"));
             await Promise.all(
                 [1, 2].map(() =>
                     reminders.sendRevisionReminders(
@@ -491,6 +712,26 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                         userId: "notify",
                     }),
                 );
+            await reminders.sendRevisionReminders(notificationTime.toJSDate());
+            expect(sent).toBe(1);
+            const deleteNotify = await service.getRevisionView("notify");
+            userId = "notify";
+            expect(
+                (
+                    await actions.deleteWeeklyRevision({
+                        version: deleteNotify.version,
+                    })
+                ).success,
+            ).toBe(false);
+            expect(
+                (
+                    await actions.deleteWeeklyRevision({
+                        version: deleteNotify.version,
+                        confirmed: true,
+                    })
+                ).success,
+            ).toBe(true);
+            expect((await service.getRevisionView("notify")).plan).toBeNull();
             await reminders.sendRevisionReminders(notificationTime.toJSDate());
             expect(sent).toBe(1);
         } finally {

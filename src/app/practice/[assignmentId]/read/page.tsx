@@ -1,14 +1,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import AppLogo from "@/components/app-logo";
-import AppPrimaryNav from "@/components/app-primary-nav";
 import { auth } from "@/features/auth/auth";
 import PracticeReader from "@/features/practice/components/practice-reader";
+import PracticeReaderShell from "@/features/practice/components/practice-reader-shell";
 import getPracticeAssignment from "@/features/practice/server/get-practice-assignment";
 import getPracticeReaderData from "@/features/practice/server/get-practice-reader-data";
 import getPreferences from "@/features/settings/server/get-preferences";
-import { getTextDirection } from "@/i18n/config";
-import { cn } from "@/lib/utils";
 
 export default async function PracticeReaderPage({
     params,
@@ -26,25 +23,9 @@ export default async function PracticeReaderPage({
     if (!assignment) redirect("/practice");
 
     const groups = await getPracticeReaderData(assignment, preferences);
-    const isArabic = preferences.language === "ar";
 
     return (
-        <main
-            data-quran-scroll-container
-            lang={preferences.language}
-            dir={getTextDirection(preferences.language)}
-            className={cn(
-                "h-dvh overflow-y-auto bg-background",
-                isArabic && "arabic-ui",
-            )}
-        >
-            <header className="sticky top-0 z-30 bg-background/92 backdrop-blur-xl">
-                <div className="app-container flex h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] items-center justify-between gap-4">
-                    <AppPrimaryNav />
-                    <AppLogo />
-                </div>
-            </header>
-
+        <PracticeReaderShell language={preferences.language}>
             <PracticeReader
                 key={assignment.id}
                 assignment={assignment}
@@ -52,6 +33,6 @@ export default async function PracticeReaderPage({
                 showTranslation={preferences.showTranslation}
                 continuousRecitation={preferences.continuousRecitation}
             />
-        </main>
+        </PracticeReaderShell>
     );
 }

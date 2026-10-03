@@ -15,6 +15,9 @@ import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/features/auth/auth";
+import TodayPlanPractice from "@/features/learning/components/today-plan-practice";
+import { getMemorizationPlanView } from "@/features/learning/server/service";
+import { todayPlanSessions } from "@/features/learning/today-practice";
 import getMemoryCatalogue from "@/features/memorization/server/get-memory-catalogue";
 import DeletePracticeButton from "@/features/practice/components/delete-practice-button";
 import PracticeRangeForm from "@/features/practice/components/practice-range-form";
@@ -28,6 +31,7 @@ import {
     getWarshChapters,
     getWarshNavigationMeta,
 } from "@/features/quran/server/get-warsh-mushaf";
+import { getRevisionView } from "@/features/revision/server/service";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -46,14 +50,18 @@ export default async function PracticePage({
         getAssignedPracticeAssignments(session.user.id),
         getSurahsMeta(),
     ]);
-    const [warshChapters, navigation] = await Promise.all([
-        preferences.riwayah === "warsh"
-            ? getWarshChapters()
-            : Promise.resolve([]),
-        preferences.riwayah === "warsh"
-            ? getWarshNavigationMeta()
-            : getQuranNavigationMeta(),
-    ]);
+    const [warshChapters, navigation, memorization, revision] =
+        await Promise.all([
+            preferences.riwayah === "warsh"
+                ? getWarshChapters()
+                : Promise.resolve([]),
+            preferences.riwayah === "warsh"
+                ? getWarshNavigationMeta()
+                : getQuranNavigationMeta(),
+            getMemorizationPlanView(session.user.id, preferences.riwayah),
+            getRevisionView(session.user.id),
+        ]);
+    const planSessions = todayPlanSessions(memorization, revision);
     const warshCounts = new Map(
         warshChapters.map((chapter) => [chapter.id, chapter.verses.length]),
     );
@@ -129,6 +137,11 @@ export default async function PracticePage({
                             description={t("assignedWork.description")}
                         />
                     )}
+
+                    <TodayPlanPractice
+                        sessions={planSessions}
+                        surahs={surahs}
+                    />
 
                     {assignments.length > 0 && (
                         <section
@@ -224,7 +237,11 @@ export default async function PracticePage({
 
                     <details
                         id="practice-range"
-                        open={Boolean(initialRange) || assignments.length === 0}
+                        open={
+                            Boolean(initialRange) ||
+                            (assignments.length === 0 &&
+                                planSessions.length === 0)
+                        }
                         className="app-card group mt-6 overflow-hidden"
                     >
                         <summary className="flex min-h-20 cursor-pointer list-none items-center gap-3 p-4 transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:p-5 [&::-webkit-details-marker]:hidden">

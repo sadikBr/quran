@@ -5,8 +5,8 @@
         "personalDescription": "Ranges you chose for memorization and revision, separate from your circle assignments.",
         "back": "Back to dashboard",
         "eyebrow": "YOUR PRACTICE RANGE",
-        "title": "Personal practice",
-        "description": "Choose a passage to memorize or revise, and return to your saved place.",
+        "title": "Practice",
+        "description": "Practice today’s memorization and revision sessions, or continue a range you chose.",
         "kinds": {
             "memorization": "Memorization",
             "revision": "Revision"
@@ -95,7 +95,8 @@
             "awaitingReview": "This assignment is now ready for review.",
             "submitError": "We couldn’t submit this assignment. Please try again.",
             "feedbackTitle": "Review feedback",
-            "saveError": "We could not save your practice place."
+            "saveError": "We could not save your practice place.",
+            "inactivePlan": "This session is no longer available today. Check Practice for your current sessions."
         },
         "dashboard": {
             "eyebrow": "Memorization practice",
@@ -111,6 +112,14 @@
         "assignedWork": {
             "title": "Circle assignments ({count, number})",
             "description": "View your assigned passages, meeting dates, and review feedback."
+        },
+        "plans": {
+            "title": "Today’s plan sessions",
+            "description": "Only unfinished sessions scheduled for today are available here, according to each plan’s time zone.",
+            "today": "Today",
+            "empty": "No plan sessions are available today. You can view your schedule or create a plan using the links above.",
+            "memorized": "{count, number} of {total, number} ayahs already memorized.",
+            "peerCredit": "{count, number} of {total, number} ayahs already reviewed in your circle."
         }
     }
 }

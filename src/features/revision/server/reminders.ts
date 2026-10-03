@@ -145,9 +145,9 @@ export async function sendRevisionReminders(now = new Date()) {
                             ? "حان وقت مراجعة محفوظك"
                             : "Time to revise your memorization",
                         body: ar
-                            ? "جلسة مراجعة اليوم بانتظارك. افتح خطتك للمتابعة."
-                            : "Your revision session for today is ready. Open your plan to continue.",
-                        url: "/memorization/revision",
+                            ? "جلسة مراجعة اليوم بانتظارك. افتح صفحة التدريب للمتابعة."
+                            : "Your revision session for today is ready. Open Practice to continue.",
+                        url: "/practice",
                         tag: `revision-${date}`,
                     }),
                     { TTL: 30 * 60, urgency: "normal", timeout: 10000 },

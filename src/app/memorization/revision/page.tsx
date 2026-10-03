@@ -7,6 +7,9 @@ import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
+import StudySchedule from "@/features/learning/components/study-schedule";
+import { PlanNavigation } from "@/features/learning/components/weekly-plan-ui";
+import { getLearningSchedule } from "@/features/learning/server/service";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import WeeklyRevision from "@/features/revision/components/weekly-revision";
 import { getRevisionView } from "@/features/revision/server/service";
@@ -18,10 +21,11 @@ export default async function RevisionPage() {
     if (!session) redirect("/sign-in");
     if (await isPlatformAdmin(session.user.id)) redirect("/admin");
     const preferences = await getPreferences();
-    const [view, surahs, messages] = await Promise.all([
+    const [view, surahs, messages, schedule] = await Promise.all([
         getRevisionView(session.user.id, preferences.riwayah),
         getSurahsMeta(),
         getMessages(preferences.language),
+        getLearningSchedule(session.user.id),
     ]);
     const t = createTranslator({
         locale: preferences.language,
@@ -49,7 +53,10 @@ export default async function RevisionPage() {
                         description={t("intro")}
                         icon={<CalendarDays />}
                     />
+                    <PlanNavigation active="revision" />
+                    <StudySchedule schedule={schedule} />
                     <WeeklyRevision
+                        revisionDays={schedule.revisionDays}
                         view={view}
                         defaultTimezone={preferences.adhkarTimezone}
                         defaultRiwayah={preferences.riwayah}

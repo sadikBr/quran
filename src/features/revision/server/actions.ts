@@ -7,6 +7,7 @@ import { isPlatformAdmin } from "@/features/auth/permissions";
 import { quranReferenceSchema } from "@/features/practice/types";
 import { revisionSettingsSchema } from "../schedule";
 import {
+    deleteRevisionPlan,
     pauseRevisionPlan,
     previewRevisionPlan,
     saveRevisionPlan,
@@ -24,17 +25,22 @@ function refresh() {
         "/memorization",
         "/memorization/revision",
         "/dashboard",
+        "/practice",
     ])
         revalidatePath(path);
 }
-export async function previewWeeklyRevision(input: unknown) {
+export async function previewWeeklyRevision(
+    input: unknown,
+    regenerate: unknown = false,
+) {
     const data = revisionSettingsSchema.safeParse(input),
         userId = await owner();
-    if (!data.success || !userId) return { success: false as const };
+    if (!data.success || !userId || typeof regenerate !== "boolean")
+        return { success: false as const };
     try {
         return {
             success: true as const,
-            preview: await previewRevisionPlan(userId, data.data),
+            preview: await previewRevisionPlan(userId, data.data, regenerate),
         };
     } catch {
         return { success: false as const };
@@ -45,6 +51,7 @@ export async function saveWeeklyRevision(input: unknown) {
             .object({
                 settings: revisionSettingsSchema,
                 key: z.string().length(64),
+                regenerate: z.boolean().default(false),
                 confirmed: z.literal(true),
             })
             .safeParse(input),
@@ -56,8 +63,30 @@ export async function saveWeeklyRevision(input: unknown) {
             userId,
             data.data.settings,
             data.data.key,
+            data.data.regenerate,
         );
         refresh();
+        if (data.data.regenerate)
+            revalidatePath("/practice/revision", "layout");
+        return result;
+    } catch {
+        return { success: false as const, reason: "failed" };
+    }
+}
+export async function deleteWeeklyRevision(input: unknown) {
+    const data = z
+            .object({
+                version: z.string().length(64),
+                confirmed: z.literal(true),
+            })
+            .safeParse(input),
+        userId = await owner();
+    if (!data.success || !userId)
+        return { success: false as const, reason: "invalid" };
+    try {
+        const result = await deleteRevisionPlan(userId, data.data.version);
+        refresh();
+        revalidatePath("/practice/revision", "layout");
         return result;
     } catch {
         return { success: false as const, reason: "failed" };
@@ -110,7 +139,7 @@ export async function finishWeeklyRevision(input: unknown) {
             { outcome: data.data.outcome },
         );
         refresh();
-        revalidatePath(`/memorization/revision/${data.data.sessionId}`);
+        revalidatePath(`/practice/revision/${data.data.sessionId}/read`);
         return result;
     } catch {
         return { success: false as const };

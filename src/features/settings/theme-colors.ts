@@ -1,5 +1,10 @@
 // Hex colors are understood by browser chrome and installed-app status bars.
+import type { Theme } from "./preferences";
+
 export const THEME_COLORS = {
+    glacier: "#eef5fb",
+    saffron: "#f3dda0",
+    citron: "#171b12",
     midnight: "#171b24",
     copper: "#241b18",
     celadon: "#f0f6f1",
@@ -16,4 +21,4 @@ export const THEME_COLORS = {
     wisteria: "#f6f3fc",
     apricot: "#fff5ed",
     pearl: "#faf6ed",
-} as const;
+} as const satisfies Record<Exclude<Theme, "system">, string>;

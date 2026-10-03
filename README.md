@@ -46,6 +46,14 @@ Choose **Midnight Bloom** (أزهار منتصف الليل) in Settings → App
 
 Run `bun run db:migrate` before deploying to an existing database. Migration `0029_midnight_bloom_theme` adds the theme to the saved-preference enum.
 
+Three more themes are available in the same picker: **Glacier** (الجليد الأزرق)
+uses white surfaces and cobalt accents; **Saffron** (الزعفران) pairs golden paper
+with dark ink; **Citron** (الأترج) uses olive-black surfaces, lime controls and fig
+accents. Each includes coordinated reader, chart, navigation and browser colors.
+Theme thumbnails use the actual palette tokens. Migration
+`0032_glacier_saffron_citron_themes` enables saving these choices; apply it with
+`bun run db:migrate` when deploying to an existing database.
+
 ## Automatic memorization tracking
 
 Learners review and lock their starting hizbs at `/memorization`. Existing manual selections are prefilled; an empty starting record is valid. One changed correction is allowed immediately after setup, until three hours have elapsed. Cancelling, saving an unchanged selection, and failed saves do not consume it. Later requests appear in the administrator’s `/admin/memorization` inbox. Approval grants one saved correction, available until used.
@@ -139,20 +147,99 @@ Wird and sends a notification that opens `/wird/read`. Two once-daily UTC cron
 entries cover Morocco's seasonal UTC offset; the endpoint sends only during the
 local 11 PM hour and records each delivery to prevent duplicates.
 
+## Study days and weekly memorization
+
+Members save revision and memorization weekdays in Settings or either weekly plan.
+The same day can serve both activities. Existing revision weekdays migrate into this
+shared schedule; memorization days remain unset until the member chooses them.
+Saving weekdays immediately reschedules unfinished daily portions using the latest
+days for each activity. Session IDs, passages, reading positions, completed work and
+circle credit are kept. Clearing an activity's days leaves its pending portions
+undated until days are selected again; reminders follow the recalculated dates.
+
+At `/memorization/plan`, members preview and enable a weekly target of 1–28 quarter
+hizbs (1 = quarter hizb, 2 = half, 4 = one hizb), choose a starting passage, and
+memorize forward or backward through quarters. Unmemorized ayahs in the selected
+quarters are split as evenly as possible across the remaining saved memorization
+days, without splitting ayahs or spanning already-memorized gaps. A partially
+memorized quarter schedules its remaining ayahs. Unfinished daily portions carry
+forward on the saved study days, including across weeks, before a new batch is
+generated. Daily portions are not combined to catch up. Carried-over and new
+memorization share a calendar-week limit in the plan's time zone. Each native
+quarter with newly confirmed memorization uses one slot that week, including a
+partially completed quarter and new circle-confirmed coverage. Further portions
+of that same quarter share its slot; baseline coverage and repeated revision do
+not use slots. Once the allowance is full, new quarters wait until the next week.
+Missed weekly targets do not accumulate. Previews, regeneration, automatic
+scheduling and reader writes enforce the same allowance; deleting or rebuilding a
+plan does not reset confirmed work. Target and reading changes apply to the next
+batch; completed passages are skipped.
+
+Both weekly plans share the same settings, preview, progress and session layout.
+Cancel restores the saved settings; pause keeps results, and resume requires a
+preview. These pages manage plans and display their schedules. Today’s active
+cards open the Practice reader directly; future, completed and paused cards are
+informational. `/practice` also shows each enabled plan’s unfinished portions for today
+in that plan’s time zone, including missed portions carried to today. Only these
+portions can open at `/practice/memorization/[sessionId]/read` or
+`/practice/revision/[sessionId]/read`; reader access and progress/completion writes
+enforce the same current-day rule. Reader routes, layouts and ayah interception
+live under Practice.
+Completed, future, paused and unscheduled sessions cannot be opened.
+Both readers return to Practice, persist the last reached ayah and skip coverage already credited elsewhere.
+They share an intercepted ayah-actions overlay, loading state and audio provider;
+closing or going back returns to the same reader, and direct ayah links remain
+standalone pages.
+
+Both plans offer **Regenerate plan** with a preview and explicit **Replace
+schedule** action. It rebuilds sessions from the saved weekdays and chosen amount,
+starting on the next available study day and using the remaining days in that
+week. If no selected days remain this week, it starts next week. The preview shows
+the actual session and study-day counts; available passages may limit capacity.
+Replacing a schedule resets unfinished reading positions; confirmed memorization
+and review assessments remain, and paused plans stay paused. A changed reading
+position, completion, plan setting or study schedule invalidates an old preview.
+
+**Delete plan** requires confirmation and removes only that activity's plan,
+schedule snapshots and sessions. Recorded memorization, review assessments, shared
+study weekdays and the other plan remain. Deleted plans do not restart on refresh,
+and old session links cannot update them. Confirmation tokens are tied to the saved
+plan state so an older dialog cannot delete a newly created replacement.
+
+The memorization grid shows upcoming ayahs separately from actual progress.
+Open passage uses the existing memorization reader, bounded to the session’s
+remaining ayahs and saved riwayah. Scheduling or reading a passage does not grant credit. Explicit completion and
+confirmed circle reviews share the existing memorization assessment history;
+overlapping coverage is counted once. Pausing retains existing results.
+
+Apply migrations `0030_learning_plans` and `0031_memorization_reading_progress`
+with `bun run db:migrate` before running the
+updated app. Run `bun test scripts/weekly-memorization.test.mjs scripts/weekly-memorization-reader.test.mjs scripts/weekly-reader-routes.test.mjs scripts/learning-refresh.test.mjs`. Database tests use
+`LEARNING_TEST_DATABASE_URL` pointing to an empty disposable PostgreSQL database
+whose name ends in `_learning_tests`; run
+`bun test scripts/weekly-memorization.integration.test.mjs`. These tests also verify
+migration of existing revision days, stable snapshots, ownership, concurrency,
+and planned versus completed grid coverage.
+
 ## Weekly memorization revision
 
 After locking their starting memorization record, members can opt in at
-`/memorization/revision`, choose their revision days and daily amount (a quarter,
+`/memorization/revision`, use their saved study days and choose a daily amount (a quarter,
 half, or full hizb), and preview the ranges before enabling the plan. Only fully
 memorized hizbs are eligible. The schedule uses native Hafs/Warsh quarter boundaries,
-rotates through older passages, and reserves part of the workload for difficult or
-missed passages. Each quarter appears at most once per week; small memorization
+rotates through older passages, and reserves part of new schedules for difficult
+passages. Each quarter appears at most once in a saved schedule; small memorization
 records leave extra days free.
 
-The current week is saved as a snapshot. Schedule changes apply the following week;
-pausing retains all results. New weeks are created on the next visit or reminder run,
-starting with the remaining selected days. Missed weeks do not create a backlog.
-Confirmed circle reviews in the same local week count toward matching ayahs, and
+Saved daily portions form a queue. Missed portions move to the next selected study
+day, shifting later portions without increasing the daily workload. The original
+date is shown on moved cards. The latest unfinished schedule continues across week
+boundaries with the same session IDs, reading positions and circle credit. No new
+schedule replaces it until its eligible portions are finished; superseded historical
+snapshots do not create a backlog. Amount and reading changes apply to the next
+generated schedule. Saved study days immediately reflow the pending dates, and
+reminder changes take effect immediately. Pausing retains all results.
+Confirmed circle reviews since the saved schedule began count toward matching ayahs, and
 personal review results are stored in the existing memorization history. Difficult
 reviews flag passages for more practice without removing memorization.
 
@@ -163,9 +250,9 @@ also require device notifications, VAPID configuration, and `CRON_SECRET`. The
 the hosting plan must support that frequency (or use an external scheduler). Each
 device receives at most one reminder per local day, only for outstanding sessions
 within 30 minutes of its chosen time. Reminder changes apply immediately using the
-current week's timezone. Reminders are disabled by default.
+current schedule's timezone. Reminders are disabled by default.
 
-Run scheduler tests with `bun test scripts/weekly-revision.test.mjs`. Database tests
+Run scheduler tests with `bun test scripts/weekly-revision.test.mjs scripts/learning-carry-forward.test.mjs`. Database tests
 use `REVISION_TEST_DATABASE_URL` pointing to an empty disposable PostgreSQL database
 whose name ends in `_revision_tests`; they migrate and populate that database only.
 

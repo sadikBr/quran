@@ -37,6 +37,9 @@
             }
         },
         "theme": {
+            "glacier": "Glacier",
+            "saffron": "Saffron",
+            "citron": "Citron",
             "midnight": "Midnight Bloom",
             "copper": "Copper Night",
             "celadon": "Celadon",

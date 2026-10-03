@@ -10,6 +10,8 @@ import AdminPreferences from "@/features/admin/components/admin-preferences";
 import AdminWorkspace from "@/features/admin/components/admin-workspace";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
+import StudySchedule from "@/features/learning/components/study-schedule";
+import { getLearningSchedule } from "@/features/learning/server/service";
 import getAvailableReciters from "@/features/quran/server/get-available-reciter";
 import getAvailableQuranEditions from "@/features/quran/server/get-quran-edition";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
@@ -115,6 +117,7 @@ export default async function SettingsPage() {
             edition.type === "quran",
     );
 
+    const studySchedule = await getLearningSchedule(session.user.id);
     const localizedReciters = addArabicReciterNames(reciters, editions);
 
     const translationEditions = editions.filter(
@@ -149,6 +152,7 @@ export default async function SettingsPage() {
                         description={t("page.description")}
                     />
 
+                    <StudySchedule schedule={studySchedule} />
                     <SettingsForm
                         surahs={surahs}
                         preferences={preferences}
