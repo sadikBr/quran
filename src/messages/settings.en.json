@@ -37,6 +37,10 @@
             }
         },
         "theme": {
+            "porcelain": "Porcelain Ink",
+            "seaglass": "Sea Glass",
+            "orchid": "Velvet Orchid",
+            "inkstone": "Inkstone",
             "glacier": "Glacier",
             "saffron": "Saffron",
             "citron": "Citron",

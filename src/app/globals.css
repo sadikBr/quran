@@ -93,7 +93,18 @@
     }
 }
 
-@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *, .ruby *, .obsidian *, .lagoon *, .copper *, .midnight *, .citron *));
+@custom-variant dark (&:is(.dark *, .emerald *, .sapphire *, .aurora *, .ruby *, .obsidian *, .lagoon *, .copper *, .midnight *, .citron *, .orchid *, .inkstone *));
+
+.page-background {
+    background-image: var(
+        --theme-page-wash,
+        radial-gradient(
+            ellipse 80% 45% at 50% 0%,
+            color-mix(in oklab, var(--primary) 8%, transparent),
+            transparent 70%
+        )
+    );
+}
 
 /* Shared with the halaqa cards. Keep reading typography and theme colors local. */
 @utility app-card {
@@ -449,6 +460,8 @@
 }
 
 .dark,
+.orchid,
+.inkstone,
 .citron,
 .midnight,
 .copper,
@@ -1789,6 +1802,204 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
     );
 }
 
+/* Porcelain Ink: white glazed surfaces, blue-black ink and red seal accents. */
+.porcelain {
+    color-scheme: light;
+    --background: #f8f8f5;
+    --foreground: #222b3c;
+    --card: #ffffff;
+    --popover: #ffffff;
+    --primary: #293e68;
+    --primary-foreground: #ffffff;
+    --secondary: #e6e9ef;
+    --secondary-foreground: #2f3d58;
+    --muted: #eeefed;
+    --muted-foreground: #606674;
+    --accent: #f4e3df;
+    --accent-foreground: #913e37;
+    --destructive: #ae303c;
+    --destructive-foreground: #ffffff;
+    --border: #c9cdd3;
+    --input: #858c99;
+    --ring: #293e68;
+    --division: #a13e35;
+    --chart-1: #293e68;
+    --chart-2: #a13e35;
+    --chart-3: #42716d;
+    --chart-4: #75618e;
+    --chart-5: #8a672e;
+    --sidebar: #e7eaf0;
+    --sidebar-border: #bcc3cf;
+    --landscape-tint: #b5bdca;
+    --theme-shadow: 34 43 60;
+    --radius: 0.35rem;
+    --theme-page-wash:
+        radial-gradient(ellipse 65% 32% at 100% 0%, #293e680d, transparent 72%),
+        linear-gradient(180deg, #ffffff80, transparent 24rem);
+}
+
+/* Sea Glass: luminous aquamarine, deep teal and a periwinkle counterpoint. */
+.seaglass {
+    color-scheme: light;
+    --background: #edf9f6;
+    --foreground: #173e3b;
+    --card: #fafffd;
+    --popover: #ffffff;
+    --primary: #086c65;
+    --primary-foreground: #ffffff;
+    --secondary: #d0ede6;
+    --secondary-foreground: #22574f;
+    --muted: #deefea;
+    --muted-foreground: #4c6a66;
+    --accent: #e9e4f7;
+    --accent-foreground: #60448a;
+    --destructive: #af354b;
+    --destructive-foreground: #ffffff;
+    --border: #a9d1c8;
+    --input: #659b90;
+    --ring: #086c65;
+    --division: #6c4d99;
+    --chart-1: #086c65;
+    --chart-2: #6c4d99;
+    --chart-3: #a54d3c;
+    --chart-4: #356b98;
+    --chart-5: #727022;
+    --sidebar: #c9e9e1;
+    --sidebar-border: #9dc7bc;
+    --landscape-tint: #8acdc3;
+    --theme-shadow: 16 93 82;
+    --radius: 0.85rem;
+    --theme-page-wash:
+        radial-gradient(ellipse 70% 40% at 0% 0%, #7cd9c533, transparent 72%),
+        radial-gradient(ellipse 55% 32% at 100% 8%, #c5b7ec26, transparent 72%);
+}
+
+/* Velvet Orchid: saturated plum, luminous orchid petals and pale citron silk. */
+.orchid {
+    color-scheme: dark;
+    --background: #25132e;
+    --foreground: #faedf8;
+    --card: #341c40;
+    --popover: #3d234a;
+    --primary: #efa7e3;
+    --primary-foreground: #35183d;
+    --secondary: #4b2b55;
+    --secondary-foreground: #f5dcf0;
+    --muted: #3a2145;
+    --muted-foreground: #cbb0d0;
+    --accent: #454028;
+    --accent-foreground: #eee2a4;
+    --destructive: #ffacb8;
+    --destructive-foreground: #451525;
+    --border: #694471;
+    --input: #a074a8;
+    --ring: #efa7e3;
+    --division: #eee2a4;
+    --chart-1: #efa7e3;
+    --chart-2: #eee2a4;
+    --chart-3: #a5d5d0;
+    --chart-4: #b9b7fa;
+    --chart-5: #f5b69c;
+    --sidebar: #2e1638;
+    --sidebar-border: #694471;
+    --landscape-tint: #91619b;
+    --theme-shadow: 12 3 20;
+    --radius: 0.7rem;
+    --theme-page-wash:
+        radial-gradient(ellipse 70% 35% at 85% 0%, #d76dcc1a, transparent 72%),
+        radial-gradient(ellipse 50% 30% at 5% 18%, #a998ee0f, transparent 70%);
+}
+
+/* Inkstone: a neutral charcoal and chalk palette with silver-edged surfaces. */
+.inkstone {
+    color-scheme: dark;
+    --background: #141414;
+    --foreground: #efefeb;
+    --card: #202020;
+    --popover: #282828;
+    --primary: #e2e2dc;
+    --primary-foreground: #202020;
+    --secondary: #333333;
+    --secondary-foreground: #e7e7e2;
+    --muted: #292929;
+    --muted-foreground: #b2b2ad;
+    --accent: #30353b;
+    --accent-foreground: #d2dbe4;
+    --destructive: #ffb1b1;
+    --destructive-foreground: #431c1c;
+    --border: #4b4b49;
+    --input: #777772;
+    --ring: #e2e2dc;
+    --division: #bac9d8;
+    --chart-1: #eeeeea;
+    --chart-2: #c2d0df;
+    --chart-3: #aaaabf;
+    --chart-4: #b6c5bb;
+    --chart-5: #cdbca7;
+    --sidebar: #191919;
+    --sidebar-border: #4b4b49;
+    --landscape-tint: #898989;
+    --theme-shadow: 0 0 0;
+    --radius: 0.3rem;
+    --theme-page-wash: linear-gradient(150deg, #ffffff08, transparent 30rem);
+}
+
+:is(.porcelain, .seaglass, .orchid, .inkstone) {
+    --card-foreground: var(--foreground);
+    --popover-foreground: var(--foreground);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-ring: var(--ring);
+    --shadow-2xs: 0 1px 2px rgb(var(--theme-shadow) / 4%);
+    --shadow-xs: 0 2px 4px rgb(var(--theme-shadow) / 6%);
+    --shadow-sm: 0 3px 12px -3px rgb(var(--theme-shadow) / 10%);
+    --shadow: 0 4px 16px -4px rgb(var(--theme-shadow) / 12%);
+    --shadow-md: 0 8px 24px -6px rgb(var(--theme-shadow) / 16%);
+    --shadow-lg: 0 16px 40px -10px rgb(var(--theme-shadow) / 20%);
+    --shadow-xl: 0 24px 56px -14px rgb(var(--theme-shadow) / 24%);
+    --shadow-2xl: 0 32px 72px -18px rgb(var(--theme-shadow) / 30%);
+}
+
+:is(.porcelain, .seaglass) .home-landscape-light,
+:is(.orchid, .inkstone) .home-landscape {
+    background-color: var(--landscape-tint);
+    background-blend-mode: luminosity;
+}
+
+:is(.porcelain, .seaglass) .home-landscape-light-shade,
+:is(.orchid, .inkstone) .home-landscape-shade {
+    background-image: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--background) 96%, transparent),
+        color-mix(in srgb, var(--background) 64%, transparent) 48%,
+        color-mix(in srgb, var(--background) 12%, transparent)
+    );
+}
+
+:is(.porcelain, .seaglass, .orchid, .inkstone) .home-session-shade {
+    background: transparent;
+}
+
+:is(.orchid, .inkstone) [data-slot="button"][data-variant="destructive"] {
+    background-color: var(--destructive);
+    color: var(--destructive-foreground);
+}
+
+:is(.orchid, .inkstone) [data-slot="button"][data-variant="destructive"]:hover {
+    background-color: color-mix(
+        in srgb,
+        var(--destructive) 90%,
+        var(--background)
+    );
+}
+
+.theme-preview:is(.porcelain, .seaglass, .orchid, .inkstone) {
+    background-image: var(--theme-page-wash);
+}
+
 /* Swatches inherit each real palette, including surfaces and selected accents. */
 .theme-preview.system {
     background-image: linear-gradient(120deg, #fcfaf6 50%, #1b1917 50%);
@@ -1921,6 +2132,8 @@ body[data-audio-player="visible"] [data-quran-scroll-container] {
     --tajweed-color: #8c2672;
 }
 .dark [data-tajweed],
+.orchid [data-tajweed],
+.inkstone [data-tajweed],
 .citron [data-tajweed],
 .midnight [data-tajweed] {
     color: color-mix(in srgb, var(--tajweed-color) 55%, white);

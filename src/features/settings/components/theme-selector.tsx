@@ -3,12 +3,16 @@
 import {
     Check,
     Citrus,
+    Flower2,
+    Gem,
     type LucideIcon,
     Monitor,
     Moon,
+    PenTool,
     Snowflake,
     Sparkles,
     Sun,
+    Waves,
     Wheat,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -16,6 +20,10 @@ import { useId } from "react";
 import { THEMES, type Theme } from "../preferences";
 
 const icons = {
+    porcelain: Gem,
+    seaglass: Waves,
+    orchid: Flower2,
+    inkstone: PenTool,
     glacier: Snowflake,
     saffron: Wheat,
     citron: Citrus,

@@ -54,6 +54,16 @@ Theme thumbnails use the actual palette tokens. Migration
 `0032_glacier_saffron_citron_themes` enables saving these choices; apply it with
 `bun run db:migrate` when deploying to an existing database.
 
+Four additional themes offer distinct finishes: **Porcelain Ink** (حبر الخزف)
+pairs white porcelain with blue-black ink and red seal accents; **Sea Glass**
+(زجاج البحر) combines aquamarine, teal and periwinkle; **Velvet Orchid**
+(الأوركيد المخملي) uses deep plum, orchid pink and pale citron; **Inkstone**
+(حجر الحبر) pairs neutral charcoal with chalk and silver. They include matching
+surfaces, shadows, home imagery, browser colors and English/Arabic picker labels.
+The two dark themes brighten tajweed annotations for comfortable reading.
+Apply migration `0039_porcelain_seaglass_orchid_inkstone_themes` with
+`bun run db:migrate` before deploying so signed-in users can save these choices.
+
 ## Automatic memorization tracking
 
 Learners review and save their starting memorization at `/memorization`. Existing manual selections are prefilled; an empty starting record is valid. Learners can correct this self-reported starting record at any time, with a preview of additions and removals before saving. There is no correction limit, countdown, or administrator approval. Each changed save records the previous and new selections; unchanged saves do not create history. Concurrent or stale edits cannot overwrite newer selections. Removing a starting hizb preserves any overlapping confirmed practice and circle-review coverage.

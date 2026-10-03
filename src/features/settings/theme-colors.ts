@@ -2,6 +2,10 @@
 import type { Theme } from "./preferences";
 
 export const THEME_COLORS = {
+    porcelain: "#f8f8f5",
+    seaglass: "#edf9f6",
+    orchid: "#25132e",
+    inkstone: "#141414",
     glacier: "#eef5fb",
     saffron: "#f3dda0",
     citron: "#171b12",

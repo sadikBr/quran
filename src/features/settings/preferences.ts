@@ -21,6 +21,10 @@ export const THEMES = [
     "glacier",
     "saffron",
     "citron",
+    "porcelain",
+    "seaglass",
+    "orchid",
+    "inkstone",
 ] as const;
 export const LANGUAGES = ["en", "ar"] as const;
 export const READING_MODES = ["page", "surah"] as const;
