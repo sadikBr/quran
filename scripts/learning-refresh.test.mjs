@@ -190,7 +190,7 @@ for (const kind of ["revision", "memorization"]) {
                 days: [1, 3],
                 quartersPerDay: 2,
                 quartersPerWeek: 2,
-                startQuarter: 1,
+
                 direction: "forward",
                 timezone: "UTC",
                 riwayah: "hafs",
@@ -201,8 +201,6 @@ for (const kind of ["revision", "memorization"]) {
             setup: true,
             completedHizbs: 1,
             sessions: [],
-            quarterStarts: { hafs: [], warsh: [] },
-            firstUnmemorizedQuarter: 1,
         },
         revisionDays: [1, 3],
         memorizationDays: [1, 3],

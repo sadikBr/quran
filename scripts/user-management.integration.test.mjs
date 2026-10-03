@@ -278,7 +278,6 @@ run(
                 await db.insert(s.memorizationPlan).values({
                     userId: id,
                     quartersPerWeek: 1,
-                    startQuarter: 1,
                     direction: "forward",
                     timezone: "Africa/Casablanca",
                     riwayah: "hafs",

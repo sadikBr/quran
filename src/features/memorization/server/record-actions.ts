@@ -49,8 +49,10 @@ export async function saveMemorizationBaseline(input: unknown) {
             preferences.riwayah,
         );
         refresh();
-        if (result.success && result.changed)
+        if (result.success && result.changed) {
             revalidatePath("/practice/revision", "layout");
+            revalidatePath("/practice/memorization", "layout");
+        }
         return result;
     } catch {
         return { success: false as const, reason: "failed" as const };

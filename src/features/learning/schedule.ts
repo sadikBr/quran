@@ -21,7 +21,6 @@ export const learningScheduleSchema = z.object({
 });
 export const memorizationSettingsSchema = z.object({
     quartersPerWeek: z.number().int().min(1).max(28),
-    startQuarter: z.number().int().min(1).max(240),
     direction: z.enum(["forward", "backward"]),
     timezone: z
         .string()
@@ -65,11 +64,7 @@ export function generateMemorizationSchedule({
         )
         .map((d) => d.toISODate() as string);
     if (!dates.length) return [];
-    const quarters = Array.from({ length: 240 }, (_, i) => i + 1).filter((q) =>
-        settings.direction === "forward"
-            ? q >= settings.startQuarter
-            : q <= settings.startQuarter,
-    );
+    const quarters = Array.from({ length: 240 }, (_, i) => i + 1);
     if (settings.direction === "backward") quarters.reverse();
     const allocated = new Set(usedQuarters);
     if (allocated.size > settings.quartersPerWeek) return [];
@@ -81,9 +76,20 @@ export function generateMemorizationSchedule({
         allocated.add(q);
         return true;
     });
-    const pending = selected.flatMap((q) =>
-        verses.filter((v) => v.quarter === q && !isMemorized(v, covered)),
-    );
+    const pending = selected.flatMap((q) => {
+        const missing = verses.filter(
+            (v) => v.quarter === q && !isMemorized(v, covered),
+        );
+        // From the end, study the last surah first, but always recite its ayahs
+        // in their normal order. Long surahs advance by quarters in reverse.
+        return settings.direction === "backward"
+            ? missing.sort(
+                  (a, b) =>
+                      b.surahNumber - a.surahNumber ||
+                      a.ayahNumber - b.ayahNumber,
+              )
+            : missing;
+    });
     const index = new Map(verses.map((v, i) => [v, i]));
     const result: ScheduledRange[] = [];
     let cursor = 0;

@@ -13,6 +13,7 @@ import { quranReferenceSchema } from "../src/features/practice/types";
 import * as rotation from "../src/features/revision/rotation";
 import * as schedule from "../src/features/revision/schedule";
 import { databaseClock } from "./helpers/database-clock.mjs";
+import { loadMemorizationReconciliation } from "./helpers/load-memorization-reconciliation.mjs";
 import { loadRevisionReconciliation } from "./helpers/load-revision-reconciliation.mjs";
 import { loadTypeScript } from "./helpers/load-typescript.mjs";
 
@@ -84,11 +85,17 @@ const target = process.env.REVISION_TEST_DATABASE_URL;
                 modules,
                 async () => catalogue,
             );
+            const memorizationReconciliation = loadMemorizationReconciliation(
+                modules,
+                async () => catalogue,
+            );
             const records = loadTypeScript(
                 "src/features/memorization/server/record-service.ts",
                 {
                     ...modules,
                     "../progress": progress,
+                    "@/features/learning/server/reconcile-plan":
+                        memorizationReconciliation,
                     "@/features/revision/server/reconcile-plan": reconciliation,
                     "./get-memory-catalogue": async () => catalogue,
                 },

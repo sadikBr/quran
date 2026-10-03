@@ -21,7 +21,6 @@ const verses = Array.from({ length: 24 }, (_, i) => ({
 const catalogue = { hafs: verses, warsh: verses };
 const settings = {
     quartersPerWeek: 1,
-    startQuarter: 1,
     direction: "forward",
     timezone: "Africa/Casablanca",
     riwayah: "hafs",
@@ -95,6 +94,30 @@ test("a partially confirmed quarter can finish this week without opening another
         endAyahNumber: 8,
         scheduledDate: "2026-10-08",
     });
+});
+test("grid corrections cannot refund weekly confirmations, even after deleting the plan", () => {
+    const initialCovered = new Set(verses.slice(0, 8).flatMap((v) => v.atoms));
+    const assessment = event(1, 8, "2026-10-05T12:00:00Z", {
+        sourceKey: "memorization-weekly:old-session:0",
+    });
+    const usage = memorizationUsage(
+        catalogue,
+        "hafs",
+        settings.timezone,
+        initialCovered,
+        [assessment],
+    );
+    expect([...usage.get("2026-10-05")]).toEqual([1]);
+    const next = generateLimitedMemorizationSchedule({
+        catalogue,
+        settings,
+        days: [1, 4],
+        covered: initialCovered,
+        fromDate: "2026-10-06",
+        usage,
+    });
+    expect(next.weekStart).toBe("2026-10-12");
+    expect(next.sessions[0].startAyahNumber).toBe(9);
 });
 
 test("baseline and repeated revision do not consume slots; new circle coverage does", () => {
@@ -223,7 +246,6 @@ test("the cap also holds for reverse order, exhausted material and empty study d
         settings: {
             ...settings,
             direction: "backward",
-            startQuarter: 3,
             quartersPerWeek: 2,
         },
         days: [1],

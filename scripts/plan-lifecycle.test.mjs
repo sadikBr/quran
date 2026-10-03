@@ -56,7 +56,6 @@ test("regeneration after the screenshot's Saturday rebuilds four sessions on the
         catalogue,
         settings: {
             quartersPerWeek: 1,
-            startQuarter: 1,
             direction: "forward",
             timezone: "Africa/Casablanca",
             riwayah: "hafs",

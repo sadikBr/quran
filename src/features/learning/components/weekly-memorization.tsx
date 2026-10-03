@@ -43,7 +43,6 @@ export default function WeeklyMemorization({
     const editor = usePlanEditor<MemorizationSettings, MemorizationPreview>({
         savedSettings: view.plan ?? {
             quartersPerWeek: 1,
-            startQuarter: view.firstUnmemorizedQuarter,
             direction: "forward",
             timezone: defaultTimezone,
             riwayah: defaultRiwayah,
@@ -162,8 +161,6 @@ export default function WeeklyMemorization({
                             <MemorizationPlanSettings
                                 settings={editor.settings}
                                 days={memorizationDays}
-                                quarterStarts={view.quarterStarts}
-                                surahs={surahs}
                                 pending={editor.pending}
                                 hasPlan={Boolean(view.plan)}
                                 regenerating={editor.regenerating}

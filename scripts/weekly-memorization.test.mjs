@@ -18,7 +18,6 @@ const verses = Array.from({ length: 56 }, (_, i) => ({
 const catalogue = { hafs: verses, warsh: verses.map((v) => ({ ...v })) };
 const settings = {
     quartersPerWeek: 1,
-    startQuarter: 1,
     direction: "forward",
     timezone: "Africa/Casablanca",
     riwayah: "hafs",
@@ -108,7 +107,7 @@ test("backward plans preserve verse order within each quarter and never cross re
     const result = schedule({
         settings: {
             ...settings,
-            startQuarter: 8,
+
             quartersPerWeek: 2,
             direction: "backward",
         },
@@ -128,7 +127,8 @@ test("late activation redistributes only across remaining days and bounds at Qur
     expect(
         scheduledVerses(
             schedule({
-                settings: { ...settings, startQuarter: 8, quartersPerWeek: 28 },
+                settings: { ...settings, quartersPerWeek: 28 },
+                covered: new Set(verses.slice(0, 49).flatMap((v) => v.atoms)),
             }),
         ),
     ).toHaveLength(7);
@@ -160,6 +160,62 @@ test("reading-specific atoms require complete verse coverage", () => {
             fromDate: "2026-09-28",
         }),
     ).toHaveLength(1);
+});
+test("the grid chooses the earliest missing ayahs, ignoring a legacy manual start", () => {
+    const parsed = memorizationSettingsSchema.parse({
+        ...settings,
+        startQuarter: 8,
+    });
+    expect(parsed).not.toHaveProperty("startQuarter");
+    const covered = new Set(
+        verses
+            .filter((v) => v.ayahNumber <= 9 || v.ayahNumber === 12)
+            .flatMap((v) => v.atoms),
+    );
+    expect(
+        scheduledVerses(schedule({ settings: parsed, covered })).map(
+            (v) => v.ayahNumber,
+        ),
+    ).toEqual([10, 11, 13, 14]);
+    covered.delete("a2");
+    expect(
+        scheduledVerses(schedule({ settings: parsed, covered })).map(
+            (v) => v.ayahNumber,
+        ),
+    ).toEqual([2]);
+});
+test("reverse plans choose the last missing surah, with normal ayah order and no known gaps", () => {
+    const tail = [112, 113, 114].flatMap((surahNumber) =>
+        Array.from({ length: 4 }, (_, i) => ({
+            ...verses[0],
+            surahNumber,
+            ayahNumber: i + 1,
+            quarter: 240,
+            hizb: 60,
+            atoms: [`${surahNumber}:${i + 1}`],
+        })),
+    );
+    const tailCatalogue = { hafs: tail, warsh: tail };
+    const rows = generateMemorizationSchedule({
+        catalogue: tailCatalogue,
+        settings: { ...settings, direction: "backward" },
+        days: [1],
+        weekStart: "2026-10-05",
+        fromDate: "2026-10-05",
+        covered: new Set(["114:1", "114:2", "114:3", "114:4", "113:2"]),
+    });
+    expect(
+        rows.map((s) => [
+            s.startSurahNumber,
+            s.startAyahNumber,
+            s.endSurahNumber,
+            s.endAyahNumber,
+        ]),
+    ).toEqual([
+        [113, 1, 113, 1],
+        [113, 3, 113, 4],
+        [112, 1, 112, 4],
+    ]);
 });
 test("saved days allow overlapping activities, deduplicate weekdays, validate amount and timezone", () => {
     expect(

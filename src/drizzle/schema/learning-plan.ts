@@ -28,7 +28,6 @@ export const memorizationPlan = pgTable(
             .references(() => user.id, { onDelete: "cascade" }),
         enabled: boolean("enabled").notNull().default(true),
         quartersPerWeek: integer("quarters_per_week").notNull(),
-        startQuarter: integer("start_quarter").notNull(),
         direction: text("direction", {
             enum: ["forward", "backward"],
         }).notNull(),
@@ -40,10 +39,6 @@ export const memorizationPlan = pgTable(
         check(
             "memorization_plan_amount_check",
             sql`${t.quartersPerWeek} between 1 and 28`,
-        ),
-        check(
-            "memorization_plan_start_check",
-            sql`${t.startQuarter} between 1 and 240`,
         ),
     ],
 );
@@ -59,6 +54,10 @@ export const memorizationWeek = pgTable(
         riwayah: text("riwayah", { enum: ["hafs", "warsh"] }).notNull(),
         days: jsonb("days").$type<number[]>().notNull(),
         quartersPerWeek: integer("quarters_per_week").notNull(),
+        direction: text("direction", { enum: ["forward", "backward"] })
+            .notNull()
+            .default("forward"),
+        baselineRevision: integer("baseline_revision").notNull().default(-1),
     },
     (t) => [
         uniqueIndex("memorization_week_user_date_idx").on(

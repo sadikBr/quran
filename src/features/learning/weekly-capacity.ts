@@ -75,19 +75,24 @@ export function memorizationUsage(
     riwayah: Riwayah,
     timezone: string,
     initialCovered: Set<string>,
-    assessments: Assessment[],
+    assessments: (Assessment & { sourceKey?: string })[],
 ): MemorizationUsage {
     const covered = new Set(initialCovered);
+    const confirmed = new Set<string>();
     const usage: MemorizationUsage = new Map();
     for (const assessment of [...assessments].sort(
         (a, b) => +a.createdAt - +b.createdAt || a.id.localeCompare(b.id),
     )) {
         if (assessment.outcome !== "confirmed") continue;
         const added = new Set<string>();
+        const weekly = assessment.sourceKey?.startsWith("memorization-weekly:");
         for (const verse of assessmentVerses(catalogue, assessment)) {
             for (const atom of verse.atoms) {
-                if (!covered.has(atom)) added.add(atom);
+                // Weekly confirmations contain only newly learned ayahs. Later
+                // baseline corrections cannot refund this week's completed work.
+                if (!(weekly ? confirmed : covered).has(atom)) added.add(atom);
                 covered.add(atom);
+                confirmed.add(atom);
             }
         }
         if (!added.size) continue;

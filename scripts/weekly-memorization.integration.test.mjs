@@ -18,6 +18,7 @@ import { quranReferenceSchema } from "../src/features/practice/types";
 import * as rotation from "../src/features/revision/rotation";
 import * as revision from "../src/features/revision/schedule";
 import { databaseClock } from "./helpers/database-clock.mjs";
+import { loadMemorizationReconciliation } from "./helpers/load-memorization-reconciliation.mjs";
 import { loadRevisionReconciliation } from "./helpers/load-revision-reconciliation.mjs";
 import { loadTypeScript } from "./helpers/load-typescript.mjs";
 
@@ -44,11 +45,10 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
             journal.entries = journal.entries.filter((e) => e.idx < 30);
             await writeFile(journalPath, JSON.stringify(journal));
             await migrate(db, { migrationsFolder: folder });
-            await db.insert(schema.user).values({
-                id: "legacy",
-                name: "legacy",
-                email: "legacy@example.test",
-            });
+            // Seed the old schema with its own columns before testing the upgrade.
+            await pool.query(
+                `insert into "user" (id, name, email) values ('legacy', 'legacy', 'legacy@example.test')`,
+            );
             await db.insert(schema.revisionPlan).values({
                 userId: "legacy",
                 enabled: true,
@@ -116,11 +116,17 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
                 modules,
                 async () => catalogue,
             );
+            const memorizationReconciliation = loadMemorizationReconciliation(
+                modules,
+                async () => catalogue,
+            );
             const records = loadTypeScript(
                 "src/features/memorization/server/record-service.ts",
                 {
                     ...modules,
                     "../progress": progress,
+                    "@/features/learning/server/reconcile-plan":
+                        memorizationReconciliation,
                     "@/features/revision/server/reconcile-plan": reconciliation,
                     "./get-memory-catalogue": async () => catalogue,
                 },
@@ -147,6 +153,7 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
                     "../carry-forward": carry,
                     "../schedule": learning,
                     "../weekly-capacity": capacity,
+                    "./reconcile-plan": memorizationReconciliation,
                 },
             );
             const revisions = loadTypeScript(
@@ -164,7 +171,6 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
             ).default;
             const config = {
                 quartersPerWeek: 1,
-                startQuarter: 1,
                 direction: "forward",
                 timezone: "UTC",
                 riwayah: "hafs",
@@ -1459,6 +1465,310 @@ const target = process.env.LEARNING_TEST_DATABASE_URL;
                     )
                 ).success,
             ).toBe(false);
+            // Grid corrections repair saved plans transactionally, including paused
+            // plans and readers opened before the correction.
+            testClock.set(new Date("2026-11-02T12:00:00Z"));
+            const seedAuto = async (id, baseline, direction = "forward") => {
+                await db
+                    .insert(schema.user)
+                    .values({ id, name: id, email: `${id}@example.test` });
+                await records.saveBaseline(
+                    id,
+                    { hizbs: baseline, revision: 0, setup: true },
+                    "hafs",
+                );
+                await service.saveLearningSchedule(id, {
+                    ...days,
+                    memorizationDays: [1, 4],
+                });
+                const settings = { ...config, direction };
+                const preview = await service.previewMemorizationPlan(
+                    id,
+                    settings,
+                );
+                expect(
+                    (
+                        await service.saveMemorizationPlan(
+                            id,
+                            settings,
+                            preview.key,
+                        )
+                    ).success,
+                ).toBe(true);
+                return service.getMemorizationPlanView(id, "hafs");
+            };
+            const correct = async (id, hizbs, ranges = []) => {
+                const [record] = await db
+                    .select()
+                    .from(schema.memorizationRecord)
+                    .where(orm.eq(schema.memorizationRecord.userId, id));
+                expect(
+                    (
+                        await records.saveBaseline(
+                            id,
+                            {
+                                hizbs,
+                                ranges,
+                                revision: record.revision,
+                                setup: false,
+                            },
+                            "hafs",
+                        )
+                    ).success,
+                ).toBe(true);
+            };
+            const nativeRange = (start, end) => ({
+                surahNumber: 2,
+                startAyahNumber: start,
+                endAyahNumber: end,
+            });
+            const pendingAyahs = (view) =>
+                view.sessions
+                    .filter((s) => !s.done)
+                    .flatMap((s) =>
+                        progress
+                            .assessmentVerses(catalogue, {
+                                ...s,
+                                riwayah: view.week.riwayah,
+                            })
+                            .map((v) => v.ayahNumber),
+                    );
+            let auto = await seedAuto("auto-forward", [1]);
+            expect(pendingAyahs(auto)).toEqual([
+                33, 34, 35, 36, 37, 38, 39, 40,
+            ]);
+            const oldId = auto.sessions[0].id;
+            await service.saveMemorizationProgress("auto-forward", oldId, {
+                surahNumber: 2,
+                ayahNumber: 35,
+            });
+            await correct("auto-forward", [1], [nativeRange(49, 50)]);
+            auto = await service.getMemorizationPlanView(
+                "auto-forward",
+                "hafs",
+            );
+            expect(auto.sessions[0].id).toBe(oldId);
+            expect(auto.sessions[0].progressAyahNumber).toBe(35);
+            const stalePreview = await service.previewMemorizationPlan(
+                "auto-forward",
+                config,
+            );
+            await correct("auto-forward", [], [nativeRange(49, 50)]);
+            // Inspect storage before any plan read: repair committed with the correction.
+            const repairedRows = await db
+                .select()
+                .from(schema.memorizationSession)
+                .where(
+                    orm.eq(schema.memorizationSession.userId, "auto-forward"),
+                )
+                .orderBy(orm.asc(schema.memorizationSession.ordinal));
+            expect(repairedRows[0].startAyahNumber).toBe(1);
+            expect(repairedRows[0].progressAyahNumber).toBeNull();
+            expect(
+                (await service.finishMemorizationSession("auto-forward", oldId))
+                    .success,
+            ).toBe(false);
+            expect(
+                (
+                    await service.saveMemorizationProgress(
+                        "auto-forward",
+                        oldId,
+                        { surahNumber: 2, ayahNumber: 36 },
+                    )
+                ).success,
+            ).toBe(false);
+            expect(
+                (
+                    await service.saveMemorizationPlan(
+                        "auto-forward",
+                        config,
+                        stalePreview.key,
+                    )
+                ).reason,
+            ).toBe("stale");
+            await correct(
+                "auto-forward",
+                [],
+                [nativeRange(1, 3), nativeRange(6, 6)],
+            );
+            auto = await service.getMemorizationPlanView(
+                "auto-forward",
+                "hafs",
+            );
+            expect(pendingAyahs(auto)).toEqual([4, 5, 7, 8]);
+            await correct("auto-forward", [], [nativeRange(1, 8)]);
+            auto = await service.getMemorizationPlanView(
+                "auto-forward",
+                "hafs",
+            );
+            const completed = auto.sessions[0];
+            expect(completed.startAyahNumber).toBe(9);
+            expect(
+                (
+                    await service.saveMemorizationProgress(
+                        "auto-forward",
+                        completed.id,
+                        { surahNumber: 2, ayahNumber: completed.endAyahNumber },
+                    )
+                ).success,
+            ).toBe(true);
+            expect(
+                (
+                    await service.finishMemorizationSession(
+                        "auto-forward",
+                        completed.id,
+                    )
+                ).success,
+            ).toBe(true);
+            const confirmedBefore = await events("auto-forward");
+            await correct("auto-forward", []);
+            auto = await service.getMemorizationPlanView(
+                "auto-forward",
+                "hafs",
+            );
+            expect(auto.sessions.find((s) => s.id === completed.id)?.done).toBe(
+                true,
+            );
+            expect(pendingAyahs(auto)).toEqual([13, 14, 15, 16]);
+            expect(await events("auto-forward")).toEqual(confirmedBefore);
+            // Mark the rest of this quarter known: a fresh quarter must wait,
+            // even if the corrected baseline now includes the confirmed work.
+            await correct("auto-forward", [], [nativeRange(9, 16)]);
+            auto = await service.getMemorizationPlanView(
+                "auto-forward",
+                "hafs",
+            );
+            expect(pendingAyahs(auto)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+            expect(
+                auto.sessions
+                    .filter((s) => !s.done)
+                    .every((s) => s.scheduledDate >= "2026-11-09"),
+            ).toBe(true);
+            expect(auto.sessions.find((s) => s.id === completed.id)?.done).toBe(
+                true,
+            );
+            const stableIds = auto.sessions.map((s) => s.id);
+            expect(
+                (
+                    await service.getMemorizationPlanView(
+                        "auto-forward",
+                        "hafs",
+                    )
+                ).sessions.map((s) => s.id),
+            ).toEqual(stableIds);
+            expect(
+                (await service.getMemorizationPlanView("auto-forward", "hafs"))
+                    .plan.revision,
+            ).toBe(auto.plan.revision);
+
+            let reverse = await seedAuto("auto-backward", [2], "backward");
+            expect(pendingAyahs(reverse)).toEqual([
+                25, 26, 27, 28, 29, 30, 31, 32,
+            ]);
+            await service.pauseMemorizationPlan(
+                "auto-backward",
+                reverse.plan.revision,
+            );
+            await correct("auto-backward", []);
+            reverse = await service.getMemorizationPlanView(
+                "auto-backward",
+                "hafs",
+            );
+            expect(reverse.plan.enabled).toBe(false);
+            expect(reverse.sessions.every((s) => !s.active)).toBe(true);
+            expect(pendingAyahs(reverse)).toEqual([
+                57, 58, 59, 60, 61, 62, 63, 64,
+            ]);
+            await correct("auto-backward", [1, 2]);
+            expect(
+                (await service.getMemorizationPlanView("auto-backward", "hafs"))
+                    .sessions,
+            ).toEqual([]);
+            await correct("auto-backward", [], [nativeRange(57, 64)]);
+            reverse = await service.getMemorizationPlanView(
+                "auto-backward",
+                "hafs",
+            );
+            expect(pendingAyahs(reverse)).toEqual([
+                49, 50, 51, 52, 53, 54, 55, 56,
+            ]);
+            await service.saveLearningSchedule("auto-backward", {
+                ...days,
+                memorizationDays: [],
+                revision: 1,
+            });
+            await correct("auto-backward", []);
+            reverse = await service.getMemorizationPlanView(
+                "auto-backward",
+                "hafs",
+            );
+            expect(pendingAyahs(reverse)).toEqual([
+                57, 58, 59, 60, 61, 62, 63, 64,
+            ]);
+            expect(
+                reverse.sessions.every((s) => s.scheduledDate === null),
+            ).toBe(true);
+            // A missed repair (or a plan created before this feature) is healed on read.
+            await db
+                .update(schema.memorizationRecord)
+                .set({
+                    baselineRanges: [nativeRange(57, 64)],
+                    revision: orm.sql`${schema.memorizationRecord.revision} + 1`,
+                })
+                .where(
+                    orm.eq(schema.memorizationRecord.userId, "auto-backward"),
+                );
+            reverse = await service.getMemorizationPlanView(
+                "auto-backward",
+                "hafs",
+            );
+            expect(pendingAyahs(reverse)).toEqual([
+                49, 50, 51, 52, 53, 54, 55, 56,
+            ]);
+            // Completed historical work must use the latest target for the next
+            // batch, including completion through a circle rather than this reader.
+            const historical = await seedAuto("auto-history", [1]);
+            await db.insert(schema.memorizationAssessment).values({
+                id: "history-circle-credit",
+                userId: "auto-history",
+                assignmentId: "circle",
+                sourceKey: "peer:auto-history",
+                reviewerId: "other",
+                method: "peer",
+                outcome: "confirmed",
+                riwayah: "hafs",
+                startSurahNumber: 2,
+                startAyahNumber: 33,
+                endSurahNumber: 2,
+                endAyahNumber: 40,
+                createdAt: new Date("2026-11-02T12:00:00Z"),
+            });
+            const nextTarget = { ...config, quartersPerWeek: 2 };
+            const targetPreview = await service.previewMemorizationPlan(
+                "auto-history",
+                nextTarget,
+            );
+            expect(
+                (
+                    await service.saveMemorizationPlan(
+                        "auto-history",
+                        nextTarget,
+                        targetPreview.key,
+                    )
+                ).success,
+            ).toBe(true);
+            testClock.set(new Date("2026-11-09T12:00:00Z"));
+            await correct("auto-history", []);
+            const historicalNext = await service.getMemorizationPlanView(
+                "auto-history",
+                "hafs",
+            );
+            expect(historicalNext.week.id).not.toBe(historical.week.id);
+            expect(historicalNext.week.quartersPerWeek).toBe(2);
+            expect(pendingAyahs(historicalNext)).toEqual(
+                Array.from({ length: 16 }, (_, i) => i + 1),
+            );
+            testClock.set(null);
         } finally {
             await pool.end();
             await rm(folder, { recursive: true, force: true });

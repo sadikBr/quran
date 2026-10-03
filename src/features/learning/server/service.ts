@@ -16,7 +16,6 @@ import {
 import {
     assessmentVerses,
     type MemoryCatalogue,
-    type MemoryVerse,
     type Riwayah,
 } from "@/features/memorization/progress";
 import getMemoryCatalogue from "@/features/memorization/server/get-memory-catalogue";
@@ -48,22 +47,8 @@ import {
 } from "../weekly-capacity";
 
 import { clearPlanSchedule, planVersion } from "./plan-lifecycle";
+import { reconcileMemorizationPlan } from "./reconcile-plan";
 
-function quarterStarts(verses: MemoryVerse[]) {
-    const seen = new Set<number>();
-    return verses
-        .filter((v) => {
-            if (seen.has(v.quarter)) return false;
-            seen.add(v.quarter);
-            return true;
-        })
-        .map((v) => ({
-            quarter: v.quarter,
-            hizb: v.hizb,
-            surahNumber: v.surahNumber,
-            ayahNumber: v.ayahNumber,
-        }));
-}
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export async function getLearningSchedule(userId: string) {
     const [row] = await db
@@ -425,6 +410,10 @@ async function insertWeek(
     sessions: ScheduledRange[],
 ) {
     const id = crypto.randomUUID();
+    const [record] = await tx
+        .select()
+        .from(memorizationRecord)
+        .where(eq(memorizationRecord.userId, userId));
     await tx.insert(memorizationWeek).values({
         id,
         userId,
@@ -433,6 +422,8 @@ async function insertWeek(
         riwayah: settings.riwayah,
         days,
         quartersPerWeek: settings.quartersPerWeek,
+        direction: settings.direction,
+        baselineRevision: record?.revision ?? 0,
     });
     if (sessions.length)
         await tx.insert(memorizationSession).values(
@@ -545,6 +536,7 @@ export async function getMemorizationPlanView(
     const catalogue = await getMemoryCatalogue();
     return db.transaction(async (tx) => {
         await lockRecord(tx, userId);
+        await reconcileMemorizationPlan(tx, userId, await clock(tx), catalogue);
         const [plan] = await tx
             .select()
             .from(memorizationPlan)
@@ -620,13 +612,6 @@ export async function getMemorizationPlanView(
             : [];
         return {
             version: await planVersion(tx, userId, "memorization"),
-            quarterStarts: {
-                hafs: quarterStarts(catalogue.hafs),
-                warsh: quarterStarts(catalogue.warsh),
-            },
-            firstUnmemorizedQuarter:
-                catalogue[riwayah].find((v) => !isMemorized(v, state.covered))
-                    ?.quarter ?? 1,
             plan: plan ?? null,
             week: week ?? null,
             setup: Boolean(state.record?.setupAt),
@@ -663,6 +648,7 @@ async function updateMemorizationSession(
     const catalogue = await getMemoryCatalogue();
     return db.transaction(async (tx) => {
         await lockRecord(tx, userId);
+        await reconcileMemorizationPlan(tx, userId, await clock(tx), catalogue);
         const [plan] = await tx
             .select()
             .from(memorizationPlan)

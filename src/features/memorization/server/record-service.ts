@@ -8,6 +8,7 @@ import {
     practiceAssignment,
     userMemorizedHizb,
 } from "@/drizzle/schema";
+import { reconcileMemorizationPlan } from "@/features/learning/server/reconcile-plan";
 import { reconcileRevisionPlan } from "@/features/revision/server/reconcile-plan";
 import {
     type BaselineRange,
@@ -107,6 +108,12 @@ export async function saveBaseline(
             })
             .where(eq(memorizationRecord.userId, userId));
         await reconcileRevisionPlan(tx, userId, now, catalogue ?? undefined);
+        await reconcileMemorizationPlan(
+            tx,
+            userId,
+            now,
+            catalogue ?? undefined,
+        );
         return { success: true as const, changed: true };
     });
 }

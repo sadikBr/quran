@@ -3,20 +3,16 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import type { MemorizationSettings } from "../schedule";
-import type { MemorizationPlanView } from "../server/service";
 import {
     PlanAmountChoices,
     PlanEditor,
     PlanReadingFields,
-    type PlanSurah,
     planInputClass,
 } from "./weekly-plan-ui";
 
 export default function MemorizationPlanSettings({
     settings,
     days,
-    quarterStarts,
-    surahs,
     pending,
     hasPlan,
     regenerating = false,
@@ -26,8 +22,6 @@ export default function MemorizationPlanSettings({
 }: {
     settings: MemorizationSettings;
     days: number[];
-    quarterStarts: MemorizationPlanView["quarterStarts"];
-    surahs: PlanSurah[];
     pending: boolean;
     hasPlan: boolean;
     regenerating?: boolean;
@@ -100,68 +94,40 @@ export default function MemorizationPlanSettings({
                     })}
                 </p>
             </fieldset>
-            <div className="space-y-5 border-t border-border/35 pt-5">
-                <div>
-                    <label
-                        htmlFor="memorization-start"
-                        className="mb-2.5 block text-sm font-medium"
-                    >
-                        {t("startQuarter")}
-                    </label>
-                    <select
-                        id="memorization-start"
-                        className={planInputClass}
-                        value={settings.startQuarter}
-                        onChange={(e) =>
-                            onChange({ startQuarter: Number(e.target.value) })
-                        }
-                    >
-                        {quarterStarts[settings.riwayah].map((q) => (
-                            <option key={q.quarter} value={q.quarter}>
-                                {t("quarterOption", {
-                                    hizb: q.hizb,
-                                    quarter: ((q.quarter - 1) % 4) + 1,
-                                    surah:
-                                        surahs.find(
-                                            (s) => s.number === q.surahNumber,
-                                        )?.[
-                                            locale === "ar"
-                                                ? "name"
-                                                : "englishName"
-                                        ] ?? q.surahNumber,
-                                    ayah: q.ayahNumber,
-                                })}
-                            </option>
-                        ))}
-                    </select>
-                    <p className="mt-2 text-xs leading-6 text-muted-foreground">
-                        {t("quarterHint")}
-                    </p>
+            <fieldset
+                className="border-t border-border/35 pt-5"
+                aria-describedby="memorization-auto-start"
+            >
+                <legend className="mb-3 text-sm font-medium">
+                    {t("direction")}
+                </legend>
+                <div className="grid gap-3 sm:grid-cols-2">
+                    {(["forward", "backward"] as const).map((direction) => (
+                        <label
+                            key={direction}
+                            className="min-w-0 cursor-pointer"
+                        >
+                            <input
+                                type="radio"
+                                name="memorization-direction"
+                                value={direction}
+                                checked={settings.direction === direction}
+                                onChange={() => onChange({ direction })}
+                                className="peer sr-only"
+                            />
+                            <span className="flex h-full min-h-20 items-center justify-center rounded-2xl border border-border/40 bg-background/30 p-4 text-center text-sm leading-6 text-muted-foreground transition-colors hover:border-primary/30 peer-checked:border-primary/40 peer-checked:bg-primary/[0.08] peer-checked:font-semibold peer-checked:text-primary peer-focus-visible:ring-2 peer-focus-visible:ring-ring">
+                                {t(direction)}
+                            </span>
+                        </label>
+                    ))}
                 </div>
-                <div>
-                    <label
-                        htmlFor="memorization-direction"
-                        className="mb-2.5 block text-sm font-medium"
-                    >
-                        {t("direction")}
-                    </label>
-                    <select
-                        id="memorization-direction"
-                        className={planInputClass}
-                        value={settings.direction}
-                        onChange={(e) =>
-                            onChange({
-                                direction: e.target.value as
-                                    | "forward"
-                                    | "backward",
-                            })
-                        }
-                    >
-                        <option value="forward">{t("forward")}</option>
-                        <option value="backward">{t("backward")}</option>
-                    </select>
-                </div>
-            </div>
+                <p
+                    id="memorization-auto-start"
+                    className="mt-3 text-xs leading-6 text-muted-foreground"
+                >
+                    {t("automaticStartHint")}
+                </p>
+            </fieldset>
             <PlanReadingFields
                 kind="memorization"
                 riwayah={settings.riwayah}

@@ -9,6 +9,7 @@ import pg from "pg";
 import { z } from "zod";
 import * as schema from "../src/drizzle/schema";
 import * as progress from "../src/features/memorization/progress";
+import { loadMemorizationReconciliation } from "./helpers/load-memorization-reconciliation.mjs";
 import { loadRevisionReconciliation } from "./helpers/load-revision-reconciliation.mjs";
 import { loadTypeScript } from "./helpers/load-typescript.mjs";
 
@@ -38,14 +39,17 @@ const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
             journal.entries = journal.entries.filter((e) => e.idx < 27);
             await writeFile(journalPath, JSON.stringify(journal));
             await migrate(db, { migrationsFolder: folder });
-            await db.insert(schema.user).values(
-                ["solo", "other", "expired", "admin", "legacy"].map((id) => ({
-                    id,
-                    name: id,
-                    email: `${id}@example.test`,
-                    role: id === "admin" ? "admin" : "member",
-                })),
-            );
+            // Before the upgrade, seed only columns that exist in that schema.
+            for (const id of ["solo", "other", "expired", "admin", "legacy"])
+                await pool.query(
+                    'insert into "user" (id, name, email, role) values ($1, $2, $3, $4)',
+                    [
+                        id,
+                        id,
+                        `${id}@example.test`,
+                        id === "admin" ? "admin" : "member",
+                    ],
+                );
             const assignment = (id, userId, extra = {}) => ({
                 id,
                 assigneeId: userId,
@@ -139,6 +143,11 @@ const target = process.env.MEMORIZATION_TEST_DATABASE_URL;
             };
             modules["@/features/revision/server/reconcile-plan"] =
                 loadRevisionReconciliation(
+                    modules,
+                    modules["./get-memory-catalogue"],
+                );
+            modules["@/features/learning/server/reconcile-plan"] =
+                loadMemorizationReconciliation(
                     modules,
                     modules["./get-memory-catalogue"],
                 );
