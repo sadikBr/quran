@@ -14,10 +14,12 @@ import { useEffect } from "react";
 import { ADHKAR } from "@/features/adhkar/catalog";
 import {
     type DailyChecklistState,
+    groupTodayChecklist,
     type TodayTask,
     visibleTodayTasks,
 } from "../daily-checklist";
 import { todayActivityHref } from "../navigation";
+import AdhkarChecklistCard from "./adhkar-checklist-card";
 import ChecklistCustomization from "./checklist-customization";
 import ChecklistMark from "./checklist-mark";
 import OccurrenceActions from "./occurrence-actions";
@@ -121,9 +123,16 @@ export default function TodayTasks({
                   )
                   .join(" · "));
     const selected = visibleTodayTasks(tasks, checklist.settings);
-    const visible = compact ? selected.slice(0, 4) : selected;
-    const wird = visible.find((task) => task.kind === "wird");
-    const activities = visible.filter((task) => task.kind !== "wird");
+    const cards = groupTodayChecklist(selected);
+    const visible = compact ? cards.slice(0, 4) : cards;
+    const wirdCard = visible.find(
+        (card) => card.type === "task" && card.task.kind === "wird",
+    );
+    const wird = wirdCard?.type === "task" ? wirdCard.task : undefined;
+    const activities = visible.filter(
+        (card) => card.type === "task" && card !== wirdCard,
+    );
+    const adhkarCard = visible.find((card) => card.type === "adhkar");
     const hidden = selected.length < tasks.length;
     const date = new Intl.DateTimeFormat(locale, {
         weekday: "long",
@@ -258,7 +267,7 @@ export default function TodayTasks({
                             </div>
                         </li>
                     )}
-                    {activities.length > 0 && (
+                    {(activities.length > 0 || adhkarCard) && (
                         <li>
                             {!compact && (
                                 <h3 className="mb-3 text-sm font-semibold text-muted-foreground">
@@ -268,63 +277,81 @@ export default function TodayTasks({
                             <ul
                                 className={`grid gap-3 ${compact ? "" : "md:grid-cols-2"}`}
                             >
-                                {activities.map((task) => (
-                                    <li
-                                        key={task.id}
-                                        className="flex items-center gap-2 rounded-xl border border-border/65 bg-card p-3 sm:gap-3 sm:p-4"
-                                    >
-                                        <ChecklistMark
-                                            task={task}
-                                            name={title(task)}
-                                        />
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-5 text-muted-foreground">
-                                                <span>
-                                                    {task.adhkar
-                                                        ? t("checklist.adhkar")
-                                                        : kind(task.kind)}
-                                                </span>
-                                                {task.done && (
-                                                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/8 px-2 text-primary">
-                                                        {t(
-                                                            task.skipped
-                                                                ? "skipped"
-                                                                : task.submitted
-                                                                  ? "checklist.submitted"
-                                                                  : "completed",
-                                                        )}
+                                {activities.map((card) => {
+                                    if (card.type !== "task") return null;
+                                    const task = card.task;
+                                    return (
+                                        <li
+                                            key={task.id}
+                                            className="flex items-center gap-2 rounded-xl border border-border/65 bg-card p-3 sm:gap-3 sm:p-4"
+                                        >
+                                            <ChecklistMark
+                                                task={task}
+                                                name={title(task)}
+                                            />
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-5 text-muted-foreground">
+                                                    <span>
+                                                        {task.adhkar
+                                                            ? t(
+                                                                  "checklist.adhkar",
+                                                              )
+                                                            : kind(task.kind)}
                                                     </span>
+                                                    {task.done && (
+                                                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/8 px-2 text-primary">
+                                                            {t(
+                                                                task.skipped
+                                                                    ? "skipped"
+                                                                    : task.submitted
+                                                                      ? "checklist.submitted"
+                                                                      : "completed",
+                                                            )}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <h4 className="mt-0.5 break-words text-sm font-semibold leading-6">
+                                                    <bdi>{title(task)}</bdi>
+                                                </h4>
+                                                {task.notes && (
+                                                    <p className="mt-1 whitespace-pre-wrap break-words text-xs leading-6 text-muted-foreground">
+                                                        {task.notes}
+                                                    </p>
+                                                )}
+                                                {task.groupName && (
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        {task.groupName}
+                                                    </p>
+                                                )}
+                                                {task.submitted && (
+                                                    <p className="mt-1 text-xs leading-6 text-muted-foreground">
+                                                        {t(
+                                                            "checklist.submittedHint",
+                                                        )}
+                                                    </p>
                                                 )}
                                             </div>
-                                            <h4 className="mt-0.5 break-words text-sm font-semibold leading-6">
-                                                <bdi>{title(task)}</bdi>
-                                            </h4>
-                                            {task.notes && (
-                                                <p className="mt-1 whitespace-pre-wrap break-words text-xs leading-6 text-muted-foreground">
-                                                    {task.notes}
-                                                </p>
+                                            {(task.href ||
+                                                task.resourceHref ||
+                                                task.recurring?.status ===
+                                                    "pending") && (
+                                                <ActivityLinks task={task} />
                                             )}
-                                            {task.groupName && (
-                                                <p className="mt-1 text-xs text-muted-foreground">
-                                                    {task.groupName}
-                                                </p>
-                                            )}
-                                            {task.submitted && (
-                                                <p className="mt-1 text-xs leading-6 text-muted-foreground">
-                                                    {t(
-                                                        "checklist.submittedHint",
-                                                    )}
-                                                </p>
-                                            )}
-                                        </div>
-                                        {(task.href ||
-                                            task.resourceHref ||
-                                            task.recurring?.status ===
-                                                "pending") && (
-                                            <ActivityLinks task={task} />
-                                        )}
+                                        </li>
+                                    );
+                                })}
+                                {adhkarCard && (
+                                    <li
+                                        className={
+                                            compact ? "" : "md:col-span-2"
+                                        }
+                                    >
+                                        <AdhkarChecklistCard
+                                            items={adhkarCard.items}
+                                            horizontal={!compact}
+                                        />
                                     </li>
-                                ))}
+                                )}
                             </ul>
                         </li>
                     )}

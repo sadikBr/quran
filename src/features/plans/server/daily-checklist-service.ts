@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import db from "@/drizzle/db";
 import {
     dailyAdhkarCompletion,
@@ -7,6 +7,7 @@ import {
     user,
     userSettings,
 } from "@/drizzle/schema";
+import { weekDates } from "@/features/planning/planner";
 import { DEFAULT_PREFERENCES } from "@/features/settings/preferences";
 import {
     CHECKLIST_CHOICES,
@@ -15,6 +16,7 @@ import {
     type DailyAdhkarCompletion,
     type DailyChecklistState,
     localChecklistDate,
+    type WeeklyAdhkarState,
 } from "../daily-checklist";
 
 type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -38,12 +40,7 @@ async function lockOwner(
     );
 }
 
-export async function getDailyChecklistState(
-    userId: string,
-    timezone: string,
-    now = new Date(),
-): Promise<DailyChecklistState> {
-    const date = localChecklistDate(timezone, now);
+async function readChecklistRange(userId: string, from: string, to: string) {
     const [[settings], completions, [account]] = await Promise.all([
         db
             .select()
@@ -55,7 +52,8 @@ export async function getDailyChecklistState(
             .where(
                 and(
                     eq(dailyAdhkarCompletion.userId, userId),
-                    eq(dailyAdhkarCompletion.localDate, date),
+                    gte(dailyAdhkarCompletion.localDate, from),
+                    lte(dailyAdhkarCompletion.localDate, to),
                 ),
             ),
         db
@@ -65,24 +63,67 @@ export async function getDailyChecklistState(
     ]);
     const resetAt = account?.resetAt?.toISOString() ?? null;
     return {
-        date,
-        timezone,
+        completions,
         settings: {
             visible: settings?.visible ?? [...CHECKLIST_CHOICES],
             revision: settings?.revision ?? 0,
             resetAt,
         },
-        adhkar: DAILY_ADHKAR.map((category) => {
-            const saved = completions.find((row) => row.category === category);
-            return {
-                category,
-                date,
-                timezone,
-                completed: saved?.completed ?? false,
-                revision: saved?.revision ?? 0,
-                resetAt,
-            };
-        }),
+    };
+}
+
+function adhkarForDate(
+    state: Awaited<ReturnType<typeof readChecklistRange>>,
+    date: string,
+    timezone: string,
+) {
+    return DAILY_ADHKAR.map((category) => {
+        const saved = state.completions.find(
+            (row) => row.localDate === date && row.category === category,
+        );
+        return {
+            category,
+            date,
+            timezone,
+            completed: saved?.completed ?? false,
+            revision: saved?.revision ?? 0,
+            resetAt: state.settings.resetAt,
+        };
+    });
+}
+
+export async function getDailyChecklistState(
+    userId: string,
+    timezone: string,
+    now = new Date(),
+): Promise<DailyChecklistState> {
+    const date = localChecklistDate(timezone, now);
+    const state = await readChecklistRange(userId, date, date);
+    return {
+        date,
+        timezone,
+        settings: state.settings,
+        adhkar: adhkarForDate(state, date, timezone),
+    };
+}
+
+export async function getWeeklyAdhkarState(
+    userId: string,
+    weekStart: string,
+    timezone: string,
+    now = new Date(),
+): Promise<WeeklyAdhkarState> {
+    const dates = weekDates(weekStart);
+    const state = await readChecklistRange(userId, dates[0], dates[6]);
+    return {
+        today: localChecklistDate(timezone, now),
+        timezone,
+        days: dates.map((date) => ({
+            date,
+            items: adhkarForDate(state, date, timezone).filter((item) =>
+                state.settings.visible.includes(`adhkar.${item.category}`),
+            ),
+        })),
     };
 }
 

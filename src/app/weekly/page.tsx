@@ -9,6 +9,7 @@ import { auth } from "@/features/auth/auth";
 import WeeklyPlanner from "@/features/planning/components/weekly-planner";
 import { getPlanningView } from "@/features/planning/server/service";
 import PlansNavigation from "@/features/plans/components/plans-navigation";
+import { getWeeklyAdhkarState } from "@/features/plans/server/daily-checklist-service";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
@@ -35,6 +36,11 @@ export default async function WeeklyPage({
         messages,
         namespace: "Planning",
     });
+    const adhkar = await getWeeklyAdhkarState(
+        session.user.id,
+        view.weekStart,
+        view.timezone,
+    );
     return (
         <main
             lang={preferences.language}
@@ -60,6 +66,7 @@ export default async function WeeklyPage({
                     <WeeklyPlanner
                         key={`${view.weekStart}:${view.version}`}
                         view={view}
+                        adhkar={adhkar}
                         surahs={surahs}
                     />
                 </div>

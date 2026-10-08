@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import type { DailyAdhkarCompletion, TodayTask } from "../daily-checklist";
+import type { TodayTask } from "../daily-checklist";
 import { setPersonalOccurrence } from "../server/actions";
-import useAdhkarCompletion from "./use-adhkar-completion";
 
 function Mark({
     checked,
@@ -53,35 +52,6 @@ function Mark({
                 aria-hidden="true"
             />
         </span>
-    );
-}
-
-export function AdhkarMark({
-    completion,
-    name,
-}: {
-    completion: DailyAdhkarCompletion;
-    name: string;
-}) {
-    const t = useTranslations("Plans.checklist");
-    const { completed, pending, error, save } = useAdhkarCompletion(completion);
-    return (
-        <div className="shrink-0">
-            <Mark
-                checked={completed}
-                pending={pending}
-                label={t(completed ? "uncheck" : "check", { name })}
-                onChange={() => save(!completed)}
-            />
-            {error && (
-                <span
-                    role="alert"
-                    className="mt-2 block max-w-44 text-xs text-destructive"
-                >
-                    {t(`errors.${error}`)}
-                </span>
-            )}
-        </div>
     );
 }
 
@@ -134,7 +104,6 @@ export default function ChecklistMark({
     name: string;
 }) {
     const t = useTranslations("Plans");
-    if (task.adhkar) return <AdhkarMark completion={task.adhkar} name={name} />;
     if (task.recurring) return <RecurringMark task={task} name={name} />;
     return (
         <Mark

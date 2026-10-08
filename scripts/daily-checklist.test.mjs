@@ -2,12 +2,49 @@ import { expect, test } from "bun:test";
 import {
     adhkarCompletionSchema,
     checklistSettingsSchema,
+    groupTodayChecklist,
     localChecklistDate,
     visibleTodayTasks,
 } from "../src/features/plans/daily-checklist";
 import { practiceChecklistState } from "../src/features/plans/today-practice";
 
 const settings = { visible: [], revision: 0, resetAt: null };
+test("adhkar form one complete card before the Dashboard limit, with a stable row order", () => {
+    const tasks = [
+        { id: "wird", kind: "wird", done: true },
+        { id: "revision", kind: "revision", done: false },
+        { id: "practice", kind: "practice", done: false },
+        ...["sleep", "evening", "morning"].map((category) => ({
+            id: category,
+            kind: "adhkar",
+            done: category === "morning",
+            adhkar: { category, completed: category === "morning" },
+        })),
+    ];
+    const cards = groupTodayChecklist(tasks).slice(0, 4);
+    expect(cards.map((card) => card.id)).toEqual([
+        "wird",
+        "revision",
+        "practice",
+        "adhkar",
+    ]);
+    expect(cards[3].items.map((item) => item.category)).toEqual([
+        "morning",
+        "evening",
+        "sleep",
+    ]);
+    expect(cards[3].done).toBe(false);
+    const onlyMorning = groupTodayChecklist(
+        visibleTodayTasks(tasks, {
+            ...settings,
+            visible: ["wird", "adhkar.morning"],
+        }),
+    );
+    expect(onlyMorning.map((card) => card.id)).toEqual(["wird", "adhkar"]);
+    expect(onlyMorning[1].items).toHaveLength(1);
+    expect(onlyMorning[1].done).toBe(true);
+    expect(groupTodayChecklist(visibleTodayTasks(tasks, settings))).toEqual([]);
+});
 test("checklist choices allow hiding everything, normalize duplicates, and reject unknown choices", () => {
     expect(checklistSettingsSchema.parse(settings).visible).toEqual([]);
     expect(

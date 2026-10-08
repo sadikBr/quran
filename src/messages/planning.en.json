@@ -12,7 +12,7 @@
         "roomLeft": "Room to spare",
         "capacityLine": "Daily time budget",
         "loadDescription": "{day}: {minutes} minutes planned, {capacity} minutes available",
-        "estimatesHint": "Time estimates are a starting point, not a pace to keep. Adjust each task to fit your reading and study rhythm. Totals include completed work.",
+        "estimatesHint": "Time estimates are a starting point, not a pace to keep. Adjust each task to fit your reading and study rhythm. Totals include completed work. Adhkar checkboxes are separate from planned minutes.",
         "editWeek": "Edit your weekly plan",
         "yourWeek": "Make space for your study",
         "moveHint": "Choose a day for each task and set the time you have available.",

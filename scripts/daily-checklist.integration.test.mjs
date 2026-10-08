@@ -5,6 +5,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import * as luxon from "luxon";
 import pg from "pg";
 import * as schema from "../src/drizzle/schema";
+import * as planner from "../src/features/planning/planner";
 import * as checklist from "../src/features/plans/daily-checklist";
 import * as preferences from "../src/features/settings/preferences";
 import { databaseClock } from "./helpers/database-clock.mjs";
@@ -58,6 +59,7 @@ const target = process.env.CHECKLIST_TEST_DATABASE_URL;
                     ...modules,
                     "@/features/settings/preferences": preferences,
                     "../daily-checklist": checklist,
+                    "@/features/planning/planner": planner,
                 },
             );
             const read = (user = "owner", zone = "Africa/Casablanca") =>
@@ -95,6 +97,46 @@ const target = process.env.CHECKLIST_TEST_DATABASE_URL;
             expect((await read()).adhkar[0].completed).toBe(true);
             expect((await read("other")).adhkar[0].completed).toBe(false);
             expect((await read()).adhkar[1].completed).toBe(false);
+            const week = await service.getWeeklyAdhkarState(
+                "owner",
+                "2026-10-05",
+                "Africa/Casablanca",
+                now,
+            );
+            // Visibility may have been hidden by the concurrent preference change.
+            await service.saveChecklistSettings("owner", {
+                ...(await read()).settings,
+                visible: [...checklist.CHECKLIST_CHOICES],
+            });
+            const visibleWeek = await service.getWeeklyAdhkarState(
+                "owner",
+                "2026-10-05",
+                "Africa/Casablanca",
+                now,
+            );
+            expect(week.days).toHaveLength(7);
+            expect(visibleWeek.today).toBe("2026-10-08");
+            expect(visibleWeek.days.map((day) => day.date)).toEqual(
+                planner.weekDates("2026-10-05"),
+            );
+            expect(
+                visibleWeek.days.every((day) => day.items.length === 3),
+            ).toBe(true);
+            expect(
+                visibleWeek.days.find((day) => day.date === "2026-10-08")
+                    .items[0].completed,
+            ).toBe(true);
+            const otherWeek = await service.getWeeklyAdhkarState(
+                "other",
+                "2026-10-05",
+                "Africa/Casablanca",
+                now,
+            );
+            expect(
+                otherWeek.days.every((day) =>
+                    day.items.every((item) => !item.completed),
+                ),
+            ).toBe(true);
             expect(
                 (await service.recordDailyAdhkar("owner", completion)).reason,
             ).toBe("stale");
@@ -108,6 +150,16 @@ const target = process.env.CHECKLIST_TEST_DATABASE_URL;
                 ).success,
             ).toBe(true);
             expect((await read()).adhkar[0].completed).toBe(true);
+            expect(
+                (
+                    await service.getWeeklyAdhkarState(
+                        "owner",
+                        "2026-10-05",
+                        "Africa/Casablanca",
+                        now,
+                    )
+                ).days.every((day) => day.items.length === 0),
+            ).toBe(true);
             expect(
                 (
                     await service.recordDailyAdhkar("owner", {
@@ -132,6 +184,16 @@ const target = process.env.CHECKLIST_TEST_DATABASE_URL;
                 ).toBe(false);
             }
             // Advancing across Casablanca midnight creates a fresh daily checklist.
+            expect(
+                (
+                    await service.recordDailyAdhkar("owner", {
+                        ...(
+                            await read()
+                        ).adhkar[2],
+                        completed: true,
+                    })
+                ).success,
+            ).toBe(true);
             const yesterday = (await read()).adhkar[0];
             now = new Date("2026-10-08T23:30:00Z");
             clock.set(now);
@@ -164,6 +226,57 @@ const target = process.env.CHECKLIST_TEST_DATABASE_URL;
                         completed: true,
                     })
                 ).success,
+            ).toBe(true);
+            await service.saveChecklistSettings("owner", {
+                ...(await read()).settings,
+                visible: ["adhkar.morning", "adhkar.sleep"],
+            });
+            const nextDayWeek = await service.getWeeklyAdhkarState(
+                "owner",
+                "2026-10-05",
+                "Africa/Casablanca",
+                now,
+            );
+            expect(nextDayWeek.today).toBe("2026-10-09");
+            expect(
+                nextDayWeek.days.every(
+                    (day) =>
+                        day.items.map((item) => item.category).join() ===
+                        "morning,sleep",
+                ),
+            ).toBe(true);
+            expect(
+                nextDayWeek.days.find((day) => day.date === "2026-10-09")
+                    .items[0].completed,
+            ).toBe(true);
+            expect(
+                nextDayWeek.days.find((day) => day.date === "2026-10-08")
+                    .items[0].completed,
+            ).toBe(false);
+            expect(
+                nextDayWeek.days.find((day) => day.date === "2026-10-08")
+                    .items[1].completed,
+            ).toBe(true);
+            expect(
+                nextDayWeek.days.find((day) => day.date === "2026-10-09")
+                    .items[1].completed,
+            ).toBe(false);
+            expect(
+                nextDayWeek.days.find((day) => day.date === "2026-10-10")
+                    .items[0].completed,
+            ).toBe(false);
+            const nextWeek = await service.getWeeklyAdhkarState(
+                "owner",
+                "2026-10-12",
+                "Africa/Casablanca",
+                now,
+            );
+            expect(
+                nextWeek.days.every((day) =>
+                    day.items.every(
+                        (item) => !item.completed && item.revision === 0,
+                    ),
+                ),
             ).toBe(true);
             // An administrative data reset must invalidate forms from earlier tabs.
             await db.transaction(async (tx) => {

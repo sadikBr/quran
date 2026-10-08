@@ -100,7 +100,7 @@
         "readingPlanHint": "Manage your daily wird, khatmah, and reading history. Start your next session from Today.",
         "checklist": {
             "customize": "Choose what appears",
-            "customizeHint": "Choose the activities you want in Today. These choices also apply to your Dashboard. Your plans and reminders keep their current settings.",
+            "customizeHint": "Choose the activities you want in Today and your Dashboard. Adhkar choices also apply to Week. Your plans and reminders keep their current settings.",
             "privacyHint": "Your checklist is personal. There are no scores, rankings, or comparisons.",
             "intro": "Reading, practice, and remembrance, at your own pace.",
             "label": "Today’s checklist",
@@ -148,7 +148,16 @@
             "wirdHint": "A little time with the Quran, every day.",
             "wirdCompleted": "Today’s wird is complete",
             "wirdCompletedHint": "You’ve finished today’s portion. May Allah accept it.",
-            "readingPlan": "View reading plan"
+            "readingPlan": "View reading plan",
+            "adhkarLabels": {
+                "morning": "Morning",
+                "evening": "Evening",
+                "sleep": "Before sleep"
+            },
+            "readAdhkar": "Read {name}",
+            "adhkarPast": "Saved for this day.",
+            "adhkarFuture": "You can check these off on this day.",
+            "adhkarSaveWeek": "Save or discard your weekly changes before checking off adhkar."
         }
     }
 }

@@ -20,7 +20,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import AdhkarChecklistCard from "@/features/plans/components/adhkar-checklist-card";
 import OccurrenceActions from "@/features/plans/components/occurrence-actions";
+import type { WeeklyAdhkarState } from "@/features/plans/daily-checklist";
 import { todayActivityHref } from "@/features/plans/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -60,8 +62,10 @@ function scrollToDay(
 export default function WeeklyPlanner({
     view,
     surahs,
+    adhkar,
 }: {
     view: PlanningView;
+    adhkar: WeeklyAdhkarState;
     surahs: { number: number; name: string; englishName: string }[];
 }) {
     const t = useTranslations("Planning");
@@ -79,6 +83,9 @@ export default function WeeklyPlanner({
     const overloaded = loads.filter((day) => day.over > 0);
     const unplaced = draft.tasks.filter((task) => !task.date);
     const invalid = validatePlacements(view, draft);
+    const adhkarByDate = new Map(
+        adhkar.days.map((day) => [day.date, day.items]),
+    );
     const number = (value: number) =>
         new Intl.NumberFormat(locale).format(value);
     const formatDate = (
@@ -131,6 +138,21 @@ export default function WeeklyPlanner({
     useEffect(() => {
         scrollToDay(boardRef.current, view.today, "instant");
     }, [view.today]);
+
+    useEffect(() => {
+        if (dirty || pending) return;
+        const refresh = () => {
+            if (document.visibilityState === "visible") router.refresh();
+        };
+        const timer = window.setInterval(refresh, 60_000);
+        window.addEventListener("focus", refresh);
+        document.addEventListener("visibilitychange", refresh);
+        return () => {
+            window.clearInterval(timer);
+            window.removeEventListener("focus", refresh);
+            document.removeEventListener("visibilitychange", refresh);
+        };
+    }, [dirty, pending, router]);
 
     function updateTask(
         id: string,
@@ -656,12 +678,29 @@ export default function WeeklyPlanner({
                                                 (item) => item.id === task.id,
                                             )?.date === day.date,
                                     )
+                                    .sort(
+                                        (a, b) =>
+                                            Number(b.kind === "wird") -
+                                            Number(a.kind === "wird"),
+                                    )
                                     .map(taskCard)}
-                                {day.count === 0 && (
-                                    <p className="px-2 py-8 text-center text-xs leading-6 text-muted-foreground">
-                                        {t("openDay")}
-                                    </p>
-                                )}
+                                <AdhkarChecklistCard
+                                    items={adhkarByDate.get(day.date) ?? []}
+                                    mode={
+                                        day.date === adhkar.today
+                                            ? "today"
+                                            : day.date < adhkar.today
+                                              ? "past"
+                                              : "future"
+                                    }
+                                    disabled={dirty || pending}
+                                />
+                                {day.count === 0 &&
+                                    !adhkarByDate.get(day.date)?.length && (
+                                        <p className="px-2 py-8 text-center text-xs leading-6 text-muted-foreground">
+                                            {t("openDay")}
+                                        </p>
+                                    )}
                             </div>
                         </section>
                     ))}

@@ -13,7 +13,7 @@ import {
 } from "./daily-checklist-service";
 
 function refresh() {
-    for (const route of ["/plans/today", "/dashboard", "/azkar"])
+    for (const route of ["/plans/today", "/dashboard", "/azkar", "/weekly"])
         revalidatePath(route);
 }
 

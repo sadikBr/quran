@@ -179,6 +179,12 @@ Quran reading and Memorization progress remain separate destinations.
 Today is a personal checklist with morning, evening, and sleep adhkar alongside
 scheduled activities. **Choose what appears** saves visibility choices per account
 for Today and its Dashboard preview, without pausing plans or changing reminders.
+Adhkar appear together in one card with separate morning, evening, and bedtime
+checkboxes. The same card appears on each day in Week and follows the selected
+adhkar visibility choices. Today's checkboxes sync across views and the reader;
+past days show saved completion, while future days are read-only. Adhkar stays
+fixed to its day and does not add an invented duration to the weekly time budget.
+Save or discard any weekly planning draft before updating that day's adhkar.
 Completed reading and practice remain checked for their relevant day; submitted
 circle work is labeled separately from supervisor approval. Adhkar can be checked
 or undone directly, and finishing its reader also completes it on Today. The

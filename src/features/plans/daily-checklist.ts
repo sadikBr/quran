@@ -47,6 +47,49 @@ export type DailyChecklistState = {
     date: string;
     timezone: string;
 };
+export type WeeklyAdhkarState = {
+    today: string;
+    timezone: string;
+    days: { date: string; items: DailyAdhkarCompletion[] }[];
+};
+export type TodayChecklistCard =
+    | { type: "task"; id: string; done: boolean; task: TodayTask }
+    | {
+          type: "adhkar";
+          id: "adhkar";
+          done: boolean;
+          items: DailyAdhkarCompletion[];
+      };
+
+/** Group before limiting the Dashboard preview, so a collection never loses a row. */
+export function groupTodayChecklist(tasks: TodayTask[]): TodayChecklistCard[] {
+    const cards: TodayChecklistCard[] = tasks
+        .filter((task) => !task.adhkar)
+        .map((task) => ({
+            type: "task",
+            id: task.id,
+            done: task.done,
+            task,
+        }));
+    const items = DAILY_ADHKAR.flatMap((category) => {
+        const task = tasks.find((task) => task.adhkar?.category === category);
+        return task?.adhkar ? [task.adhkar] : [];
+    });
+    if (items.length)
+        cards.push({
+            type: "adhkar",
+            id: "adhkar",
+            done: items.every((item) => item.completed),
+            items,
+        });
+    const isWird = (card: TodayChecklistCard) =>
+        card.type === "task" && card.task.kind === "wird";
+    return cards.sort(
+        (a, b) =>
+            Number(isWird(b)) - Number(isWird(a)) ||
+            Number(a.done) - Number(b.done),
+    );
+}
 
 export function checklistChoice(task: TodayTask): ChecklistChoice {
     return task.adhkar
