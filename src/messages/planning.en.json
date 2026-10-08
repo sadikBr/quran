@@ -30,7 +30,8 @@
             "revision": "Revision",
             "practice": "Personal practice",
             "circle": "Circle preparation",
-            "wird": "Daily wird"
+            "wird": "Daily wird",
+            "recurring": "Recurring activity"
         },
         "dailyRoutine": "Part of your daily reading routine",
         "wirdForecast": "Expected portion · updates with your reading progress",
@@ -68,6 +69,7 @@
             "order": "Keep memorization and revision portions in order, with one daily portion of each kind per day.",
             "overload": "Review and acknowledge the overloaded days before committing.",
             "failed": "We could not save your week. Your draft is still here. Please try again."
-        }
+        },
+        "skipped": "Skipped"
     }
 }

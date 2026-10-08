@@ -1,7 +1,7 @@
 "use client";
 import {
     BarChart3,
-    BookOpenCheck,
+    CalendarDays,
     NotebookPen,
     Repeat2,
     Sparkles,
@@ -13,13 +13,14 @@ import { cn } from "@/lib/utils";
 
 export default function ToolNavigation({ cards = false }: { cards?: boolean }) {
     const t = useTranslations("Memorization.retention");
+    const plansT = useTranslations("Plans");
     const path = usePathname();
     const tools = [
         { href: "/memorization", key: "map", icon: Sparkles },
         {
-            href: "/memorization/revision",
+            href: "/plans",
             key: "followUps",
-            icon: BookOpenCheck,
+            icon: CalendarDays,
         },
         { href: "/memorization/mistakes", key: "notebook", icon: NotebookPen },
         { href: "/memorization/similar", key: "similar", icon: Repeat2 },
@@ -55,11 +56,13 @@ export default function ToolNavigation({ cards = false }: { cards?: boolean }) {
                                 className="size-4 shrink-0 text-primary"
                                 aria-hidden="true"
                             />
-                            {t(key)}
+                            {key === "followUps" ? plansT("myPlans") : t(key)}
                         </span>
                         {cards && (
                             <p className="mt-2 text-xs leading-6 text-muted-foreground">
-                                {t(`${key}Hint`)}
+                                {key === "followUps"
+                                    ? plansT("manageHint")
+                                    : t(`${key}Hint`)}
                             </p>
                         )}
                     </Link>

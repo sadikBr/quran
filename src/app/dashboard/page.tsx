@@ -1,12 +1,10 @@
 import {
     ArrowRight,
-    BookMarked,
     BookOpen,
     CalendarCheck2,
     CalendarClock,
-    Check,
+    CalendarDays,
     type LucideIcon,
-    MoonStar,
     Sparkles,
     UsersRound,
     Video,
@@ -25,14 +23,12 @@ import { getNextGroupMeetingForUser } from "@/features/groups/server/get-next-gr
 import { getMeetingDisplayTimezone } from "@/features/groups/server/meeting-schedule";
 import getMemorizationRecord from "@/features/memorization/server/get-memorization-record";
 import GuideDirectory from "@/features/onboarding/guide-directory";
-import {
-    getAssignedPracticeAssignments,
-    getPracticeAssignments,
-} from "@/features/practice/server/get-practice-assignment";
+import TodayTasks from "@/features/plans/components/today-tasks";
+import { getTodayPlanTasks } from "@/features/plans/server/today";
+import { getAssignedPracticeAssignments } from "@/features/practice/server/get-practice-assignment";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
-import getDailyWird from "@/features/wird/server/get-daily-wird";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
@@ -104,37 +100,24 @@ export default async function DashboardPage() {
         getReadingProgress(),
         getSurahsMeta().catch(() => []),
     ]);
-    const [
-        dailyWird,
-        practiceAssignments,
-        assignedWork,
-        groups,
-        memoryRecord,
-        nextGroupMeeting,
-    ] = await Promise.all([
-        getDailyWird(session.user.id, preferences.arabicEdition),
-        getPracticeAssignments(session.user.id),
-        getAssignedPracticeAssignments(session.user.id),
-        getGroupsForUser(session.user.id),
-        getMemorizationRecord(session.user.id, preferences.riwayah),
-        getNextGroupMeetingForUser(session.user.id),
-    ]);
-    const practiceAssignment = practiceAssignments[0] ?? null;
+    const [assignedWork, groups, memoryRecord, nextGroupMeeting] =
+        await Promise.all([
+            getAssignedPracticeAssignments(session.user.id),
+            getGroupsForUser(session.user.id),
+            getMemorizationRecord(session.user.id, preferences.riwayah),
+            getNextGroupMeetingForUser(session.user.id),
+        ]);
+    const todayTasks = await getTodayPlanTasks(session.user.id, preferences);
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
         messages,
         namespace: "Dashboard",
     });
-    const wirdT = createTranslator({
+    const plansT = createTranslator({
         locale: preferences.language,
         messages,
-        namespace: "Wird",
-    });
-    const practiceT = createTranslator({
-        locale: preferences.language,
-        messages,
-        namespace: "Practice",
+        namespace: "Plans",
     });
     const groupsT = createTranslator({
         locale: preferences.language,
@@ -166,69 +149,6 @@ export default async function DashboardPage() {
                   ),
               }).format(new Date(nextGroupMeeting.startsAt))
             : null;
-    const localizedSurahName = (surahNumber: number) => {
-        const surah = surahs.find((item) => item.number === surahNumber);
-        return (
-            surah?.[preferences.language === "ar" ? "name" : "englishName"] ??
-            ""
-        );
-    };
-    const assignmentRange = (assignment: (typeof assignedWork)[number]) =>
-        practiceT("range", {
-            startSurah: localizedSurahName(assignment.start.surahNumber),
-            startAyah: assignment.start.ayahNumber,
-            endSurah: localizedSurahName(assignment.end.surahNumber),
-            endAyah: assignment.end.ayahNumber,
-        });
-    const focusAssignment = assignedWork[0] ?? null;
-    const focusIsAssignment = Boolean(focusAssignment);
-    const FocusIcon = focusIsAssignment ? CalendarCheck2 : MoonStar;
-    const focusHref = focusAssignment
-        ? focusAssignment.status === "submitted"
-            ? "/assignments"
-            : `/practice/${focusAssignment.id}/read`
-        : dailyWird?.completed || dailyWird?.scheduledForFuture || !dailyWird
-          ? "/wird"
-          : "/wird/read";
-    const focusEyebrow = focusAssignment
-        ? focusAssignment.groupName
-            ? assignmentsT("card.fromGroup", {
-                  group: focusAssignment.groupName,
-              })
-            : assignmentsT("dashboard.eyebrow")
-        : wirdT("dashboard.eyebrow");
-    const focusTitle = focusAssignment
-        ? assignmentsT(`card.kinds.${focusAssignment.kind}`)
-        : dailyWird
-          ? wirdT("today.goal", {
-                amount: dailyWird.amount,
-                unit: wirdT(`units.${dailyWird.unit}`),
-            })
-          : wirdT("dashboard.emptyTitle");
-    const focusDescription = focusAssignment
-        ? assignmentRange(focusAssignment)
-        : dailyWird
-          ? dailyWird.completed
-              ? wirdT("dashboard.completed")
-              : dailyWird.scheduledForFuture
-                ? wirdT("dashboard.scheduled", { date: dailyWird.targetDate })
-                : wirdT("dashboard.pending")
-          : wirdT("dashboard.emptyDescription");
-    const focusAction = focusAssignment
-        ? focusAssignment.status === "submitted"
-            ? assignmentsT("card.reviewPending")
-            : focusAssignment.progress
-              ? assignmentsT("card.continue")
-              : assignmentsT("card.start")
-        : !dailyWird
-          ? wirdT("dashboard.setup")
-          : dailyWird.scheduledForFuture
-            ? wirdT("dashboard.viewPlan")
-            : dailyWird.completed
-              ? wirdT("dashboard.open")
-              : dailyWird.progressGlobalAyah
-                ? wirdT("today.continueReading")
-                : wirdT("today.startReading");
     const savedNumber =
         preferences.readingMode === "page"
             ? readingProgress.lastPageNumber
@@ -350,6 +270,14 @@ export default async function DashboardPage() {
                         </Link>
                     )}
 
+                    <div className="mt-8">
+                        <TodayTasks
+                            tasks={todayTasks}
+                            surahs={surahs}
+                            compact
+                        />
+                    </div>
+
                     <section
                         className={cn(
                             "overflow-hidden app-card",
@@ -360,20 +288,20 @@ export default async function DashboardPage() {
                             <div className="min-w-0 bg-primary/[0.035] px-4 py-5 sm:col-span-2 sm:px-6 sm:py-6 lg:col-span-1">
                                 <div className="flex min-w-0 items-start gap-3 sm:gap-4">
                                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                        <FocusIcon
+                                        <CalendarDays
                                             aria-hidden="true"
                                             className="size-5"
                                         />
                                     </span>
                                     <div className="min-w-0">
                                         <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                            {focusEyebrow}
+                                            {plansT("title")}
                                         </p>
                                         <h2 className="mt-2 break-words text-xl font-semibold leading-relaxed tracking-tight sm:text-2xl">
-                                            {focusTitle}
+                                            {plansT("myPlans")}
                                         </h2>
                                         <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-                                            {focusDescription}
+                                            {plansT("manageHint")}
                                         </p>
                                     </div>
                                 </div>
@@ -382,8 +310,8 @@ export default async function DashboardPage() {
                                         asChild
                                         className="min-h-11 w-full rounded-xl px-5 shadow-sm shadow-primary/15 sm:w-auto"
                                     >
-                                        <Link href={focusHref}>
-                                            {focusAction}
+                                        <Link href="/plans">
+                                            {plansT("myPlans")}
                                             <ArrowRight
                                                 aria-hidden="true"
                                                 className={cn(
@@ -393,20 +321,6 @@ export default async function DashboardPage() {
                                             />
                                         </Link>
                                     </Button>
-                                    {focusAssignment &&
-                                        assignedWork.length > 1 && (
-                                            <Button
-                                                asChild
-                                                variant="ghost"
-                                                className="min-h-11 w-full rounded-xl px-4 sm:w-auto"
-                                            >
-                                                <Link href="/assignments">
-                                                    {assignmentsT(
-                                                        "dashboard.open",
-                                                    )}
-                                                </Link>
-                                            </Button>
-                                        )}
                                 </div>
                             </div>
 
@@ -512,52 +426,7 @@ export default async function DashboardPage() {
                             {t("tools.title")}
                         </h2>
 
-                        <div
-                            className={cn(
-                                "mt-4 grid gap-3 sm:grid-cols-2",
-                                !focusIsAssignment && "lg:grid-cols-3",
-                            )}
-                        >
-                            {focusIsAssignment && (
-                                <DashboardShortcut
-                                    href="/wird"
-                                    icon={
-                                        dailyWird?.completed ? Check : MoonStar
-                                    }
-                                    eyebrow={wirdT("dashboard.eyebrow")}
-                                    title={
-                                        dailyWird
-                                            ? wirdT("today.goal", {
-                                                  amount: dailyWird.amount,
-                                                  unit: wirdT(
-                                                      `units.${dailyWird.unit}`,
-                                                  ),
-                                              })
-                                            : wirdT("dashboard.emptyTitle")
-                                    }
-                                    description={
-                                        dailyWird
-                                            ? dailyWird.completed
-                                                ? wirdT("dashboard.completed")
-                                                : dailyWird.scheduledForFuture
-                                                  ? wirdT(
-                                                        "dashboard.scheduled",
-                                                        {
-                                                            date: dailyWird.targetDate,
-                                                        },
-                                                    )
-                                                  : wirdT("dashboard.pending")
-                                            : wirdT(
-                                                  "dashboard.emptyDescription",
-                                              )
-                                    }
-                                    isArabic={preferences.language === "ar"}
-                                    emphasized={Boolean(
-                                        dailyWird && !dailyWird.completed,
-                                    )}
-                                />
-                            )}
-
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
                             <DashboardShortcut
                                 href={continueReadingHref}
                                 icon={BookOpen}
@@ -569,28 +438,6 @@ export default async function DashboardPage() {
                                         : t("reading.startDescription")
                                 }
                                 isArabic={preferences.language === "ar"}
-                            />
-
-                            <DashboardShortcut
-                                href="/practice"
-                                icon={BookMarked}
-                                eyebrow={practiceT("dashboard.eyebrow")}
-                                title={
-                                    practiceAssignment
-                                        ? practiceT(
-                                              `kinds.${practiceAssignment.kind}`,
-                                          )
-                                        : practiceT("dashboard.emptyTitle")
-                                }
-                                description={
-                                    practiceAssignment
-                                        ? assignmentRange(practiceAssignment)
-                                        : practiceT(
-                                              "dashboard.emptyDescription",
-                                          )
-                                }
-                                isArabic={preferences.language === "ar"}
-                                emphasized={Boolean(practiceAssignment)}
                             />
 
                             <DashboardShortcut

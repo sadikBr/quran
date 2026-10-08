@@ -70,6 +70,7 @@ export default function PracticeRangeForm({
         }
 
         toast.success(t("success"));
+        router.push("/plans/today");
         router.refresh();
     }
 

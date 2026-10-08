@@ -32,6 +32,8 @@ export async function savePlanningWeek(
                 "/memorization/plan",
                 "/memorization/revision",
                 "/dashboard",
+                "/plans",
+                "/plans/today",
                 "/assignments",
             ])
                 revalidatePath(path);

@@ -8,6 +8,7 @@ import englishHomeMessages from "@/messages/en.json";
 import englishGroupsMessages from "@/messages/groups.en.json";
 import englishMemorizationMessages from "@/messages/memorization.en.json";
 import englishPlanningMessages from "@/messages/planning.en.json";
+import englishPlansMessages from "@/messages/plans.en.json";
 import englishPracticeMessages from "@/messages/practice.en.json";
 import englishProfileMessages from "@/messages/profile.en.json";
 import englishReaderMessages from "@/messages/reader.en.json";
@@ -25,6 +26,7 @@ const englishMessages = {
     ...englishProfileMessages,
     ...englishPracticeMessages,
     ...englishPlanningMessages,
+    ...englishPlansMessages,
     ...englishReaderMessages,
     ...englishSettingsMessages,
     ...englishWirdMessages,
@@ -54,6 +56,7 @@ const messageLoaders: Record<
             assignments,
             admin,
             planning,
+            plans,
         ] = await Promise.all([
             import("@/messages/auth.ar.json"),
             import("@/messages/common.ar.json"),
@@ -69,6 +72,7 @@ const messageLoaders: Record<
             import("@/messages/assignments.ar.json"),
             import("@/messages/admin.ar.json"),
             import("@/messages/planning.ar.json"),
+            import("@/messages/plans.ar.json"),
         ]);
 
         return {
@@ -87,6 +91,7 @@ const messageLoaders: Record<
                 ...assignments.default,
                 ...admin.default,
                 ...planning.default,
+                ...plans.default,
             },
         };
     },

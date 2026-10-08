@@ -8,6 +8,6 @@ export default async function PracticeReaderPage() {
     if (!session) redirect("/sign-in");
 
     const assignment = await getPracticeAssignment(session.user.id);
-    if (!assignment) redirect("/practice");
+    if (!assignment) redirect("/plans/today");
     redirect(`/practice/${assignment.id}/read`);
 }

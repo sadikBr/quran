@@ -103,6 +103,8 @@ export default async function savePracticeAssignment(input: unknown) {
         return { success: false as const, message: "Could not save range." };
     }
 
+    revalidatePath("/plans/today");
+    revalidatePath("/weekly");
     revalidatePath("/practice");
     revalidatePath("/practice/read");
     revalidatePath("/dashboard");

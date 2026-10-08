@@ -79,6 +79,8 @@ export default async function updatePracticeProgress(input: unknown) {
         .returning({ id: practiceAssignment.id });
     if (!updated.length) return { success: false as const };
 
+    revalidatePath("/plans/today");
+    revalidatePath("/weekly");
     revalidatePath("/practice");
     revalidatePath("/assignments");
     revalidatePath("/practice/read");

@@ -1,0 +1,102 @@
+{
+    "Plans": {
+        "title": "Plans",
+        "description": "Make room for reading, memorization, revision, and the routines that matter to you.",
+        "navigation": "Plan views",
+        "today": "Today",
+        "week": "Week",
+        "myPlans": "My plans",
+        "create": "Create plan",
+        "viewAll": "View all",
+        "types": {
+            "reading": "Reading",
+            "memorization": "Memorization",
+            "revision": "Revision",
+            "custom": "Custom activity"
+        },
+        "typeHints": {
+            "reading": "Your daily wird and khatmah settings.",
+            "memorization": "Learn new passages at your own pace.",
+            "revision": "Keep your memorized passages fresh."
+        },
+        "templatesTitle": "Start with a routine",
+        "templates": {
+            "kahf": {
+                "title": "Read Al-Kahf",
+                "hint": "Every Friday"
+            },
+            "mulk": {
+                "title": "Read Al-Mulk",
+                "hint": "Every night · choose your reminder time"
+            },
+            "tafsir": {
+                "title": "Study tafsir",
+                "hint": "Every Saturday · 30 minutes"
+            }
+        },
+        "chooseType": "Choose what you want to make time for. Existing guided plans open their settings.",
+        "continuousReading": "Daily wird or khatmah",
+        "repeatSurah": "Repeat a surah",
+        "back": "Back",
+        "formHint": "Choose your days and an optional reminder. Each session starts fresh; missed sessions do not pile up.",
+        "name": "Plan name",
+        "notes": "Notes (optional)",
+        "repeat": "Repeat on",
+        "everyDay": "Every day",
+        "duration": "Estimated minutes",
+        "reminder": "Reminder time (optional)",
+        "timezone": "Time zone",
+        "reminderHint": "Times follow this time zone. Reminders require notifications enabled on this device.",
+        "notificationSettings": "Notification settings",
+        "surah": "Surah to read (optional)",
+        "noSurah": "No surah selected",
+        "resource": "Resource link (optional)",
+        "resourceHint": "Add a link to a lesson, book, or other study resource.",
+        "save": "Save plan",
+        "saving": "Saving…",
+        "saved": "Your plan is saved.",
+        "cancel": "Cancel",
+        "close": "Close",
+        "edit": "Edit plan",
+        "active": "Active",
+        "paused": "Paused",
+        "pause": "Pause",
+        "resume": "Resume",
+        "archive": "Archive",
+        "archived": "Archived plans",
+        "archiveTitle": "Archive “{title}”?",
+        "archiveHint": "Future sessions will stop. Your completion history will remain available.",
+        "manage": "Manage plan",
+        "empty": "Create your first plan or choose a routine below.",
+        "memorizationProgress": "View memorization progress",
+        "history": "Activity history",
+        "historyEmpty": "Your completed and skipped recurring sessions will appear here.",
+        "historyHint": "The latest 100 recorded recurring sessions. Guided plans keep their own progress history.",
+        "complete": "Mark complete",
+        "skip": "Skip today",
+        "undo": "Undo",
+        "completed": "Completed",
+        "skipped": "Skipped",
+        "minutes": "{count, number} min",
+        "open": "Open",
+        "openResource": "Open resource",
+        "todayEmpty": "A little room in your day",
+        "todayEmptyHint": "No activities are due right now. Create a plan or explore your week.",
+        "errors": {
+            "invalid": "Check the name, selected days, duration, time zone, and optional link.",
+            "failed": "We could not save this change. Please try again.",
+            "stale": "This plan changed elsewhere. Reload the page before trying again.",
+            "date": "This session is no longer due today. Reload to see your current activities.",
+            "limit": "You can have up to 40 recurring plans. Archive one before adding another."
+        },
+        "backToToday": "Back to Today",
+        "backToMyPlans": "Back to My plans",
+        "goToToday": "Go to Today",
+        "manageHint": "Create and adjust your plans here. Open Today when you are ready to begin.",
+        "todayHint": "Start your activities here. Create or adjust their schedules in My plans.",
+        "personalPractice": "Personal practice",
+        "personalPracticeHint": "Choose or change a passage for an individual practice session.",
+        "readingPlan": "Reading plan",
+        "readingPlanHint": "Manage your daily wird, khatmah, and reading history. Start your next session from Today."
+    }
+}

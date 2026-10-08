@@ -9,11 +9,11 @@ import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
 import StudySchedule from "@/features/learning/components/study-schedule";
 import WeeklyMemorization from "@/features/learning/components/weekly-memorization";
-import { PlanNavigation } from "@/features/learning/components/weekly-plan-ui";
 import {
     getLearningSchedule,
     getMemorizationPlanView,
 } from "@/features/learning/server/service";
+import PlanManagementNavigation from "@/features/plans/components/plan-management-navigation";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
@@ -50,12 +50,12 @@ export default async function MemorizationPlanPage() {
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
                 />
                 <section className="pb-12 pt-5 sm:pt-8">
+                    <PlanManagementNavigation />
                     <PageHeading
                         title={t("title")}
                         description={t("intro")}
                         icon={<CalendarDays />}
                     />
-                    <PlanNavigation active="memorization" />
                     <StudySchedule schedule={schedule} />
                     <WeeklyMemorization
                         memorizationDays={schedule.memorizationDays}

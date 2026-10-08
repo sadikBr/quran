@@ -8,6 +8,7 @@ import StickyAppHeader from "@/components/sticky-app-header";
 import { auth } from "@/features/auth/auth";
 import WeeklyPlanner from "@/features/planning/components/weekly-planner";
 import { getPlanningView } from "@/features/planning/server/service";
+import PlansNavigation from "@/features/plans/components/plans-navigation";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getPreferences from "@/features/settings/server/get-preferences";
 import { getMessages, getTextDirection } from "@/i18n/config";
@@ -55,6 +56,7 @@ export default async function WeeklyPage({
                         description={t("description")}
                         icon={<CalendarDays />}
                     />
+                    <PlansNavigation />
                     <WeeklyPlanner
                         key={`${view.weekStart}:${view.version}`}
                         view={view}

@@ -737,6 +737,7 @@ export function PlanSessions({
     emptyMessage: string;
 }) {
     const t = useTranslations("Memorization.plans");
+    const plansT = useTranslations("Plans");
     const { date } = usePlanFormatting([]);
     const canOpen = (item: PlanSessionItem) =>
         item.state === "ready" &&
@@ -814,7 +815,7 @@ export function PlanSessions({
                                         : item.state === "paused"
                                           ? Pause
                                           : BookOpen;
-                                    const action = item.action ?? t("open");
+                                    const action = plansT("goToToday");
                                     return (
                                         <li key={item.id}>
                                             <article
@@ -875,9 +876,7 @@ export function PlanSessions({
                                                                 {active &&
                                                                 item.href ? (
                                                                     <Link
-                                                                        href={
-                                                                            item.href
-                                                                        }
+                                                                        href="/plans/today"
                                                                         className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring focus-visible:after:ring-offset-2 focus-visible:after:ring-offset-background"
                                                                     >
                                                                         {

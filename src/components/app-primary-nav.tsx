@@ -1,7 +1,6 @@
 "use client";
 
 import {
-    BookMarked,
     Bookmark,
     BookOpen,
     CalendarCheck2,
@@ -29,15 +28,16 @@ import {
     useIsAuthenticated,
     useIsPlatformAdmin,
 } from "@/features/auth/account-role-provider";
+import { plansView } from "@/features/plans/navigation";
 import { cn } from "@/lib/utils";
 import useAccountMenuActions from "./use-account-menu-actions";
 
 const destinations = [
     {
-        href: "/weekly",
-        label: "weeklyPlanning",
+        href: "/plans/today",
+        label: "plans",
         icon: CalendarDays,
-        matches: (path: string) => path === "/weekly",
+        matches: (path: string) => plansView(path) !== null,
     },
     {
         href: "/guide",
@@ -59,22 +59,11 @@ const destinations = [
         matches: (path: string) => path === "/",
     },
     {
-        href: "/wird",
-        label: "wird",
-        icon: MoonStar,
-        matches: (path: string) => path.startsWith("/wird"),
-    },
-    {
-        href: "/practice",
-        label: "practice",
-        icon: BookMarked,
-        matches: (path: string) => path.startsWith("/practice"),
-    },
-    {
         href: "/memorization",
         label: "memorization",
         icon: Sparkles,
-        matches: (path: string) => path.startsWith("/memorization"),
+        matches: (path: string) =>
+            path.startsWith("/memorization") && plansView(path) === null,
     },
     {
         href: "/dashboard",
@@ -185,10 +174,8 @@ export default function AppPrimaryNav() {
                             "/quran",
                             "/quran/search",
                             "/bookmarks",
-                            "/wird",
                             "/azkar",
-                            "/practice",
-                            "/weekly",
+                            "/plans/today",
                             "/memorization",
                         ]
                       : ["/quran", "/quran/search", "/azkar"],

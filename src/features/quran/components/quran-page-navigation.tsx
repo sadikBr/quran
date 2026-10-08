@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ArrowRight, LoaderCircle } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
     ComboboxTrigger,
 } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
+import { todayActivityHref } from "@/features/plans/navigation";
 import type { ReadingMode } from "@/features/settings/preferences";
 import { getArabicNumber } from "@/lib/arabic-numbers";
 import QuranInfo from "@/lib/quran-info";
@@ -76,6 +77,7 @@ export default function QuranPageNavigation({
     const isNavigatingRef = useRef(false);
     const lastTouchAt = useRef(0);
     const router = useRouter();
+    const fromToday = useSearchParams().get("from") === "today";
     const t = useTranslations("Reader");
     const locale = useLocale();
     const { min, max } = navigationDetails[readingMode];
@@ -92,7 +94,11 @@ export default function QuranPageNavigation({
     function navigateTo(number: number) {
         setIsNavigating(true);
         isNavigatingRef.current = true;
-        router.push(`/quran/${readingMode}/${number}`);
+        router.push(
+            fromToday
+                ? todayActivityHref(`/quran/${readingMode}/${number}`)
+                : `/quran/${readingMode}/${number}`,
+        );
     }
 
     useEffect(() => {
@@ -121,21 +127,33 @@ export default function QuranPageNavigation({
                 event.preventDefault();
                 setIsNavigating(true);
                 isNavigatingRef.current = true;
-                router.push(`/quran/${readingMode}/${currentNumber - 1}`);
+                router.push(
+                    fromToday
+                        ? todayActivityHref(
+                              `/quran/${readingMode}/${currentNumber - 1}`,
+                          )
+                        : `/quran/${readingMode}/${currentNumber - 1}`,
+                );
             }
 
             if (event.key === "ArrowLeft" && currentNumber < max) {
                 event.preventDefault();
                 setIsNavigating(true);
                 isNavigatingRef.current = true;
-                router.push(`/quran/${readingMode}/${currentNumber + 1}`);
+                router.push(
+                    fromToday
+                        ? todayActivityHref(
+                              `/quran/${readingMode}/${currentNumber + 1}`,
+                          )
+                        : `/quran/${readingMode}/${currentNumber + 1}`,
+                );
             }
         }
 
         window.addEventListener("keydown", handleKeyDown);
 
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [currentNumber, max, min, readingMode, router]);
+    }, [currentNumber, max, min, readingMode, router, fromToday]);
 
     useEffect(() => {
         const prefersReducedMotion = window.matchMedia(
@@ -301,7 +319,11 @@ export default function QuranPageNavigation({
 
             setIsNavigating(true);
             isNavigatingRef.current = true;
-            router.push(`/quran/${readingMode}/${targetNumber}`);
+            router.push(
+                fromToday
+                    ? todayActivityHref(`/quran/${readingMode}/${targetNumber}`)
+                    : `/quran/${readingMode}/${targetNumber}`,
+            );
 
             clearMotionResetTimer();
             motionResetTimer.current = window.setTimeout(() => {
@@ -408,20 +430,34 @@ export default function QuranPageNavigation({
             resetTouchState();
             clearMotionResetTimer();
         };
-    }, [currentNumber, max, min, readingMode, router]);
+    }, [currentNumber, max, min, readingMode, router, fromToday]);
 
     useEffect(() => {
         if (currentNumber > min) {
-            router.prefetch(`/quran/${readingMode}/${currentNumber - 1}`);
+            router.prefetch(
+                fromToday
+                    ? todayActivityHref(
+                          `/quran/${readingMode}/${currentNumber - 1}`,
+                      )
+                    : `/quran/${readingMode}/${currentNumber - 1}`,
+            );
         }
 
         if (currentNumber < max) {
-            router.prefetch(`/quran/${readingMode}/${currentNumber + 1}`);
+            router.prefetch(
+                fromToday
+                    ? todayActivityHref(
+                          `/quran/${readingMode}/${currentNumber + 1}`,
+                      )
+                    : `/quran/${readingMode}/${currentNumber + 1}`,
+            );
         }
-    }, [currentNumber, max, min, readingMode, router]);
+    }, [currentNumber, max, min, readingMode, router, fromToday]);
 
     function getHref(number: number) {
-        return `/quran/${readingMode}/${number}`;
+        return fromToday
+            ? todayActivityHref(`/quran/${readingMode}/${number}`)
+            : `/quran/${readingMode}/${number}`;
     }
 
     function submitForm(event: FormEvent<HTMLFormElement>) {

@@ -8,8 +8,8 @@ import StickyAppHeader from "@/components/sticky-app-header";
 import { auth } from "@/features/auth/auth";
 import { isPlatformAdmin } from "@/features/auth/permissions";
 import StudySchedule from "@/features/learning/components/study-schedule";
-import { PlanNavigation } from "@/features/learning/components/weekly-plan-ui";
 import { getLearningSchedule } from "@/features/learning/server/service";
+import PlanManagementNavigation from "@/features/plans/components/plan-management-navigation";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import WeeklyRevision from "@/features/revision/components/weekly-revision";
 import { getRevisionView } from "@/features/revision/server/service";
@@ -48,12 +48,12 @@ export default async function RevisionPage() {
                     className="-mx-4 px-4 sm:-mx-6 sm:px-6"
                 />
                 <section className="pb-12 pt-5 sm:pt-8">
+                    <PlanManagementNavigation />
                     <PageHeading
                         title={t("title")}
                         description={t("intro")}
                         icon={<CalendarDays />}
                     />
-                    <PlanNavigation active="revision" />
                     <StudySchedule schedule={schedule} />
                     <WeeklyRevision
                         revisionDays={schedule.revisionDays}

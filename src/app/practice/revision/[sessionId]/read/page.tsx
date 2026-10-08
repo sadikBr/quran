@@ -23,7 +23,7 @@ export default async function WeeklyRevisionReader({
         params,
     ]);
     const item = view.sessions.find((s) => s.id === sessionId);
-    if (!item?.active) redirect("/practice");
+    if (!item?.active) redirect("/plans/today");
     const assignment: PracticeAssignment = {
         id: item.id,
         source: "weekly",

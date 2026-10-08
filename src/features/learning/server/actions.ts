@@ -31,6 +31,8 @@ function refresh() {
         "/memorization/plan",
         "/memorization/revision",
         "/dashboard",
+        "/plans",
+        "/plans/today",
         "/practice",
         "/settings",
     ])

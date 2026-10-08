@@ -6,7 +6,8 @@ export type PlanningKind =
     | "revision"
     | "practice"
     | "circle"
-    | "wird";
+    | "wird"
+    | "recurring";
 export type PlanningRange = {
     startSurahNumber: number;
     startAyahNumber: number;
@@ -16,6 +17,17 @@ export type PlanningRange = {
 export type PlanningTask = {
     id: string;
     kind: PlanningKind;
+    title?: string;
+    notes?: string;
+    resourceHref?: string | null;
+    skipped?: boolean;
+    recurring?: {
+        planId: string;
+        revision: number;
+        date: string;
+        status: "pending" | "completed" | "skipped";
+        actionable: boolean;
+    };
     ranges: PlanningRange[];
     date: string | null;
     minutes: number;
@@ -56,11 +68,19 @@ export const planningDraftSchema = z.object({
     capacities: z.array(z.number().int().min(0).max(480)).length(7),
     tasks: z
         .array(
-            z.object({
-                id: z.string().min(1).max(200),
-                date: dateSchema.nullable(),
-                minutes: z.number().int().min(5).max(480),
-            }),
+            z
+                .object({
+                    id: z.string().min(1).max(200),
+                    date: dateSchema.nullable(),
+                    minutes: z.union([
+                        z.literal(0),
+                        z.number().int().min(5).max(480),
+                    ]),
+                })
+                .refine(
+                    (task) =>
+                        task.minutes >= 5 || task.id.startsWith("recurring:"),
+                ),
         )
         .max(500),
 });
@@ -114,6 +134,7 @@ export function validatePlacements(view: PlanningView, draft: PlanningDraft) {
     for (const task of view.tasks) {
         const proposed = byId.get(task.id);
         if (!proposed) return "invalid" as const;
+        if (proposed.minutes < 5 && !task.skipped) return "invalid" as const;
         if (!task.movable && proposed.date !== task.date)
             return "locked" as const;
         if (

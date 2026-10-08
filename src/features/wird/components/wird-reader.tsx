@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import TodayReturnLink from "@/features/plans/components/today-return-link";
 import Ayah from "@/features/quran/components/ayah";
 import GuidedReader, {
     GuidedReaderSurah,
@@ -428,6 +429,7 @@ export default function WirdReader({
                 </p>
                 <div className="mt-5">
                     <CompleteWirdButton
+                        returnToToday
                         disabled={pending !== null}
                         portion={{
                             targetDate,
@@ -438,6 +440,9 @@ export default function WirdReader({
                     />
                 </div>
             </section>
+            <div className="mt-6">
+                <TodayReturnLink />
+            </div>
         </GuidedReader>
     );
 }

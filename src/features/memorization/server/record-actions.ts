@@ -14,6 +14,8 @@ function refresh() {
         "/memorization/revision",
         "/dashboard",
         "/practice",
+        "/plans/today",
+        "/weekly",
     ])
         revalidatePath(path);
 }

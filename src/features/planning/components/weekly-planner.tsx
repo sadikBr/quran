@@ -20,6 +20,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import OccurrenceActions from "@/features/plans/components/occurrence-actions";
+import { todayActivityHref } from "@/features/plans/navigation";
 import { cn } from "@/lib/utils";
 import {
     balanceWeek,
@@ -63,6 +65,7 @@ export default function WeeklyPlanner({
     surahs: { number: number; name: string; englishName: string }[];
 }) {
     const t = useTranslations("Planning");
+    const plansT = useTranslations("Plans");
     const locale = useLocale();
     const router = useRouter();
     const [draft, setDraft] = useState(() => initialDraft(view));
@@ -90,6 +93,7 @@ export default function WeeklyPlanner({
         );
     const dayName = (date: string) => formatDate(date, { weekday: "short" });
     const range = (task: PlanningTask) =>
+        task.title ??
         task.ranges
             .map((item) => {
                 const name = (n: number) => {
@@ -181,7 +185,7 @@ export default function WeeklyPlanner({
                     {task.done ? (
                         <Check
                             className="size-3.5 text-primary"
-                            aria-label={t("done")}
+                            aria-label={t(task.skipped ? "skipped" : "done")}
                         />
                     ) : task.kind === "wird" ? (
                         <CalendarDays
@@ -281,13 +285,31 @@ export default function WeeklyPlanner({
                     </div>
                 ) : (
                     <p className="mt-3 text-[11px] text-muted-foreground">
-                        {task.done ? t("done") : t("fixed")} ·{" "}
-                        {t("minutes", { count: placed.minutes })}
+                        {task.done
+                            ? t(task.skipped ? "skipped" : "done")
+                            : t("fixed")}{" "}
+                        · {t("minutes", { count: placed.minutes })}
                     </p>
+                )}
+                {task.recurring && (
+                    <div className="mt-3">
+                        <OccurrenceActions
+                            occurrence={task.recurring}
+                            disabled={dirty || pending}
+                        />
+                    </div>
                 )}
                 {task.href && (
                     <Link
-                        href={task.href}
+                        href={todayActivityHref(task.href)}
+                        target={
+                            task.href.startsWith("http") ? "_blank" : undefined
+                        }
+                        rel={
+                            task.href.startsWith("http")
+                                ? "noopener noreferrer"
+                                : undefined
+                        }
                         className="mt-3 inline-flex min-h-9 items-center gap-1 text-xs font-semibold text-primary hover:underline"
                     >
                         {t("openTask")}
@@ -680,12 +702,12 @@ export default function WeeklyPlanner({
                         </p>
                         <div className="mt-5 flex flex-wrap justify-center gap-3">
                             <Button asChild variant="outline">
-                                <Link href="/practice">{t("addPractice")}</Link>
+                                <Link href="/plans?create=1">
+                                    {plansT("create")}
+                                </Link>
                             </Button>
                             <Button asChild>
-                                <Link href="/memorization/plan">
-                                    {t("setUpPlan")}
-                                </Link>
+                                <Link href="/plans">{plansT("myPlans")}</Link>
                             </Button>
                         </div>
                     </section>

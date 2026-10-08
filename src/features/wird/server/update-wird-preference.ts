@@ -94,5 +94,7 @@ export default async function updateWirdPreference(input: unknown) {
     revalidatePath("/wird");
     revalidatePath("/wird/read");
     revalidatePath("/dashboard");
+    revalidatePath("/plans");
+    revalidatePath("/plans/today");
     return { success: true as const };
 }

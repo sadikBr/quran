@@ -38,7 +38,8 @@
             "appearance": "Appearance",
             "signOut": "Sign out",
             "signIn": "Sign in",
-            "signUp": "Create account"
+            "signUp": "Create account",
+            "plans": "Plans"
         },
         "loading": {
             "page": "Loading your page…",

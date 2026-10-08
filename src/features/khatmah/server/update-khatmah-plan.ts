@@ -177,7 +177,15 @@ export default async function updateKhatmahPlan(input: unknown) {
     } catch {
         return { success: false as const };
     }
-    for (const path of ["/", "/wird", "/wird/read", "/dashboard", "/weekly"])
+    for (const path of [
+        "/",
+        "/wird",
+        "/wird/read",
+        "/dashboard",
+        "/weekly",
+        "/plans",
+        "/plans/today",
+    ])
         revalidatePath(path);
     return { success: true as const };
 }

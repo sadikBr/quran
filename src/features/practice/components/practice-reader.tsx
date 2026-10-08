@@ -21,6 +21,7 @@ import {
     saveWeeklyMemorizationProgress,
 } from "@/features/learning/server/actions";
 import { confirmPersonalMemorization } from "@/features/memorization/server/record-actions";
+import TodayReturnLink from "@/features/plans/components/today-return-link";
 import Ayah from "@/features/quran/components/ayah";
 import GuidedReader, {
     GuidedReaderSurah,
@@ -160,7 +161,7 @@ export default function PracticeReader({
     }) {
         if (result.reason !== "inactive") return false;
         toast.error(t("inactivePlan"));
-        router.replace("/practice");
+        router.replace("/plans/today");
         router.refresh();
         return true;
     }
@@ -631,11 +632,7 @@ export default function PracticeReader({
                             {memoryT("confirm")}
                         </Button>
                     )}
-                    {weeklyMemorization ? (
-                        <Button asChild variant="ghost" className="min-h-11">
-                            <Link href="/practice">{t("back")}</Link>
-                        </Button>
-                    ) : (
+                    {!weeklyMemorization && (
                         <Link
                             href="/memorization"
                             className="block text-sm font-medium text-primary underline underline-offset-4"
@@ -690,9 +687,6 @@ export default function PracticeReader({
                             </Button>
                         </div>
                     )}
-                    <Button asChild variant="ghost" className="min-h-11">
-                        <Link href="/practice">{t("back")}</Link>
-                    </Button>
                     <ConfirmationDialog
                         open={weeklyConfirm !== null}
                         onOpenChange={(open) => {
@@ -711,6 +705,9 @@ export default function PracticeReader({
                     />
                 </section>
             )}
+            <div className="mt-6">
+                <TodayReturnLink />
+            </div>
         </GuidedReader>
     );
 }

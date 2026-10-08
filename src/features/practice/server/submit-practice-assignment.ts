@@ -48,6 +48,8 @@ export default async function submitPracticeAssignment(input: unknown) {
         });
     if (!assignment) return { success: false as const };
 
+    revalidatePath("/plans/today");
+    revalidatePath("/weekly");
     revalidatePath("/practice");
     revalidatePath("/assignments");
     revalidatePath(`/practice/${assignment.id}/read`);

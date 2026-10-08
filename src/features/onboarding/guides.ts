@@ -6,22 +6,22 @@ export const guides = {
             {
                 target: "wird-page",
                 text: [
-                    "Your daily wird lives here. Set a daily amount first; if you already have a plan, this page shows today’s reading.",
-                    "هنا تجد وردك اليومي. حدّد مقدار القراءة إن لم تضبطه بعد، أو تابع ورد اليوم إن كانت لديك خطة.",
+                    "Manage your daily wird here through My plans. Set your reading amount and review your history.",
+                    "أدر وردك اليومي هنا من خلال «خططي». حدّد مقدار القراءة وراجع سجلّك.",
                 ],
             },
             {
                 target: "wird-read",
                 text: [
-                    "Use the reading button to open your wird. Your saved position lets you continue where you stopped.",
-                    "افتح الورد من زر القراءة. يُحفظ موضعك لتكمل من حيث توقفت.",
+                    "Go to Today to start your wird alongside your other activities. Your saved position lets you continue where you stopped.",
+                    "انتقل إلى «اليوم» لبدء وردك مع بقية أنشطتك. يُحفظ موضعك لتكمل من حيث توقفت.",
                 ],
             },
             {
                 target: "wird-history",
                 text: [
-                    "After reading, mark the wird complete. Your history below helps you follow your consistency. This tour does not change your progress.",
-                    "بعد القراءة، سجّل إتمام الورد. يعرض السجل أدناه متابعتك اليومية. هذه الجولة لا تغيّر تقدّمك.",
+                    "Mark your wird complete in the reader to return to Today. Your history below helps you follow your consistency. This tour does not change your progress.",
+                    "سجّل إتمام الورد في القارئ للعودة إلى «اليوم». يعرض السجل أدناه متابعتك اليومية. هذه الجولة لا تغيّر تقدّمك.",
                 ],
             },
         ],

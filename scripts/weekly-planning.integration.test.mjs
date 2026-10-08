@@ -10,6 +10,7 @@ import { carryForwardSessions } from "../src/features/learning/carry-forward";
 import * as progress from "../src/features/memorization/progress";
 import * as planner from "../src/features/planning/planner";
 import * as wirdTasks from "../src/features/planning/wird-tasks";
+import * as recurrence from "../src/features/plans/recurrence";
 import getWirdDate from "../src/features/wird/server/wird-date";
 import { loadTypeScript } from "./helpers/load-typescript.mjs";
 
@@ -203,12 +204,22 @@ const target = process.env.PLANNING_TEST_DATABASE_URL;
                     version: await lifecycle.planVersion(db, userId, kind),
                 };
             };
+            const recurring = loadTypeScript(
+                "src/features/plans/server/service.ts",
+                {
+                    ...modules,
+                    "@/features/memorization/server/record-service": records,
+                    "../recurrence": recurrence,
+                },
+            );
             const service = loadTypeScript(
                 "src/features/planning/server/service.ts",
                 {
                     ...modules,
                     "../planner": planner,
                     "../wird-tasks": wirdTasks,
+                    "@/features/plans/server/service": recurring,
+                    "@/features/plans/recurrence": recurrence,
                     "@/features/wird/server/wird-date": getWirdDate,
                     "@/features/quran/server/get-quran-navigation-meta":
                         async () => ({
@@ -444,6 +455,77 @@ const target = process.env.PLANNING_TEST_DATABASE_URL;
             expect(
                 (await service.commitPlanningWeek("owner", draft)).reason,
             ).toBe("stale");
+            const recurringId = crypto.randomUUID();
+            view = await service.getPlanningView("owner", weekStart);
+            const beforeRecurring = planner.initialDraft(view);
+            expect(
+                (
+                    await recurring.saveRecurringPlan(
+                        "owner",
+                        recurringId,
+                        null,
+                        {
+                            title: "Friday reading",
+                            notes: "",
+                            days: [5],
+                            timezone: "UTC",
+                            minutes: 20,
+                            reminderTime: null,
+                            surahNumber: 18,
+                            resourceUrl: null,
+                        },
+                    )
+                ).success,
+            ).toBe(true);
+            expect(
+                (await service.commitPlanningWeek("owner", beforeRecurring))
+                    .reason,
+            ).toBe("stale");
+            view = await service.getPlanningView("owner", weekStart);
+            const recurringTask = view.tasks.find(
+                (task) => task.kind === "recurring",
+            );
+            expect(recurringTask.date).toBe(dates[4]);
+            expect(recurringTask.title).toBe("Friday reading");
+            draft = planner.initialDraft(view);
+            draft.tasks.find((task) => task.id === recurringTask.id).date =
+                dates[5];
+            expect(
+                (await service.commitPlanningWeek("owner", draft)).reason,
+            ).toBe("locked");
+            draft = planner.initialDraft(view);
+            draft.tasks.find((task) => task.id === recurringTask.id).minutes =
+                25;
+            expect(
+                (await service.commitPlanningWeek("owner", draft, true))
+                    .success,
+            ).toBe(true);
+            expect(
+                (await service.getPlanningView("owner", weekStart)).tasks.find(
+                    (task) => task.id === recurringTask.id,
+                ).minutes,
+            ).toBe(25);
+            draft = planner.initialDraft(
+                await service.getPlanningView("owner", weekStart),
+            );
+            expect(
+                (
+                    await recurring.changeRecurringPlan(
+                        "owner",
+                        recurringId,
+                        1,
+                        "pause",
+                    )
+                ).success,
+            ).toBe(true);
+            expect(
+                (await service.commitPlanningWeek("owner", draft, true)).reason,
+            ).toBe("stale");
+            expect(
+                (await service.getPlanningView("owner", weekStart)).tasks.some(
+                    (task) => task.kind === "recurring",
+                ),
+            ).toBe(false);
         } finally {
             await pool.end();
         }

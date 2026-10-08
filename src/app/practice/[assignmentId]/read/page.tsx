@@ -21,7 +21,7 @@ export default async function PracticeReaderPage({
         getPreferences(),
         getPracticeAssignment(session.user.id, assignmentId),
     ]);
-    if (!assignment) redirect("/practice");
+    if (!assignment) redirect("/plans/today");
 
     const groups = await getPracticeReaderData(assignment, preferences);
     const connecting =

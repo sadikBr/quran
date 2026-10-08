@@ -35,6 +35,8 @@ export default async function deletePracticeAssignment(input: unknown) {
         return { success: false as const };
     }
 
+    revalidatePath("/plans/today");
+    revalidatePath("/weekly");
     revalidatePath("/practice");
     revalidatePath("/practice/read");
     revalidatePath("/dashboard");

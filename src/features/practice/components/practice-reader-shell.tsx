@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import AppLogo from "@/components/app-logo";
 import AppPrimaryNav from "@/components/app-primary-nav";
+import TodayReturnLink from "@/features/plans/components/today-return-link";
 import type { Language } from "@/features/settings/preferences";
 import { getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ export default function PracticeReaderShell({
             <header className="sticky top-0 z-30 bg-background/92 backdrop-blur-xl">
                 <div className="app-container flex h-[calc(4rem+env(safe-area-inset-top))] items-center justify-between gap-4 pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))]">
                     <AppPrimaryNav />
+                    <TodayReturnLink />
                     <AppLogo />
                 </div>
             </header>

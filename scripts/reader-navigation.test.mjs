@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
+import { todayActivityHref } from "../src/features/plans/navigation";
 
 const source = readFileSync(
     new URL(
@@ -20,6 +21,7 @@ const compiled = ts.transpileModule(handler, {
 }).outputText;
 
 function press({
+    fromToday = false,
     interactive = false,
     overlay = false,
     hiddenOverlay = false,
@@ -35,6 +37,8 @@ function press({
         }
     }
     const context = {
+        fromToday,
+        todayActivityHref,
         HTMLElement: Element,
         document: {
             querySelectorAll: () =>
@@ -78,4 +82,11 @@ test("reader arrows leave controls, overlays, and handled events alone", () => {
         assert.deepEqual(press(options), []);
     }
     assert.deepEqual(press({ hiddenOverlay: true }), ["/quran/page/3"]);
+});
+
+test("reader arrows retain the Today return link throughout a planned reading", () => {
+    assert.deepEqual(press({ fromToday: true }), ["/quran/page/3?from=today"]);
+    assert.deepEqual(press({ fromToday: true, key: "ArrowRight" }), [
+        "/quran/page/1?from=today",
+    ]);
 });

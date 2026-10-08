@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
+import QuranPlanReturn from "@/features/plans/components/quran-plan-return";
 import AyahTargetScroller from "@/features/quran/components/ayah-target-scroller";
 import QuranHeader from "@/features/quran/components/quran-header";
 import ReaderPositionTracker from "@/features/quran/components/reader-position-tracker";
@@ -24,6 +25,9 @@ export default async function QuranReaderLayout({
         >
             <div className="quran-focus-chrome">
                 <QuranHeader showSurahIndex riwayah={riwayah} />
+                <Suspense>
+                    <QuranPlanReturn />
+                </Suspense>
             </div>
             <main
                 id="quran-reader-main"

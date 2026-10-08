@@ -41,16 +41,14 @@
             "title": "Make time for the Quran.",
             "description": "Choose what you need today.",
             "rhythm": {
-                "eyebrow": "A Wird with clear boundaries",
-                "title": "Daily Wird",
-                "description": "Choose your portion once, then return each day to a clear starting point and saved progress.",
-                "action": "Open daily Wird"
+                "title": "Plans",
+                "description": "Your reading, memorization, revision, and personal routines in one place.",
+                "action": "Open Today"
             },
             "practice": {
-                "eyebrow": "Practise with intention",
-                "title": "Personal practice",
-                "description": "Choose an exact range, hide the text while reciting, and reveal it only when you need a prompt.",
-                "action": "Choose a passage"
+                "title": "Memorization progress",
+                "description": "See what you have memorized and keep track of your progress.",
+                "action": "View progress"
             },
             "groups": {
                 "eyebrow": "Community and accountability",

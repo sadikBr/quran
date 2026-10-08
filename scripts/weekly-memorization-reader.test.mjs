@@ -90,6 +90,8 @@ function loadPage(
         exports,
         require(name) {
             if (name === "react/jsx-runtime") return jsx;
+            if (name === "@/features/plans/components/today-return-link")
+                return "TodayReturnLink";
             if (
                 name === "@/features/retention/components/connecting-passage" ||
                 name === "@/features/retention/components/record-mistake"
@@ -203,13 +205,13 @@ test("reader page checks session ownership and plan state before loading the pas
     expect(reader.props.assignment.status).toBe("in_progress");
     expect(calls).toBe(1);
     userId = "other";
-    await expect(run()).rejects.toThrow("redirect:/practice");
+    await expect(run()).rejects.toThrow("redirect:/plans/today");
     userId = "owner";
     requested = "missing";
-    await expect(run()).rejects.toThrow("redirect:/practice");
+    await expect(run()).rejects.toThrow("redirect:/plans/today");
     requested = "weekly-session";
     enabled = false;
-    await expect(run()).rejects.toThrow("redirect:/practice");
+    await expect(run()).rejects.toThrow("redirect:/plans/today");
     enabled = true;
     admin = true;
     await expect(run()).rejects.toThrow("redirect:/admin");
@@ -526,10 +528,10 @@ for (const kind of ["revision", "memorization"]) {
         expect(reader.props.showTranslation).toBe(true);
         expect(reader.props.continuousRecitation).toBe(true);
         active = false;
-        await expect(run()).rejects.toThrow("redirect:/practice");
+        await expect(run()).rejects.toThrow("redirect:/plans/today");
         active = true;
         authorized = false;
-        await expect(run()).rejects.toThrow("redirect:/practice");
+        await expect(run()).rejects.toThrow("redirect:/plans/today");
         expect(loadCalls).toBe(1);
     });
 }
@@ -602,16 +604,12 @@ test("both weekly readers link ayah actions to the saved reading and offer the m
             "/quran/ayah/2/141?riwayah=warsh",
             "/quran/ayah/2/156?riwayah=warsh",
         ]);
-        expect(
-            nodes.some(
-                (n) => n.type === "Link" && n.props.href === "/practice",
-            ),
-        ).toBe(true);
+        expect(nodes.some((n) => n.type === "TodayReturnLink")).toBe(true);
     }
 });
 
 for (const kind of ["memorization", "revision"]) {
-    test(`${kind}: an expired reader returns to Practice without saving progress`, async () => {
+    test(`${kind}: an expired reader returns to Today without saving progress`, async () => {
         const harness = mountReader(
             { ...memorizationReaderAssignment(item, "hafs"), kind },
             { success: false, reason: "inactive" },
@@ -627,7 +625,7 @@ for (const kind of ["memorization", "revision"]) {
         await button.props.onClick();
         expect(harness.calls.at(-1)).toEqual({
             name: "redirect",
-            input: "/practice",
+            input: "/plans/today",
         });
     });
 }

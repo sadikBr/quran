@@ -96,5 +96,7 @@ export default async function updateWirdProgress(input: unknown) {
     revalidatePath("/wird");
     revalidatePath("/wird/read");
     revalidatePath("/dashboard");
+    revalidatePath("/plans");
+    revalidatePath("/plans/today");
     return { success: true as const, revision };
 }

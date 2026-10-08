@@ -20,9 +20,9 @@ import KhatmahMilestones from "@/features/khatmah/components/khatmah-milestones"
 import KhatmahPlanner from "@/features/khatmah/components/khatmah-planner";
 import getKhatmahHistory from "@/features/khatmah/server/get-khatmah-history";
 import getKhatmahPlan from "@/features/khatmah/server/get-khatmah-plan";
+import PlanManagementNavigation from "@/features/plans/components/plan-management-navigation";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getPreferences from "@/features/settings/server/get-preferences";
-import CompleteWirdButton from "@/features/wird/components/complete-wird-button";
 import WirdHistory from "@/features/wird/components/wird-history";
 import WirdPreferenceForm from "@/features/wird/components/wird-preference-form";
 import { wirdProgress } from "@/features/wird/progress";
@@ -80,7 +80,11 @@ export default async function WirdPage() {
                   end: wird.end.pageNumber,
               })
         : "";
-    const startReadingHref = "/wird/read";
+    const plansT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Plans",
+    });
     const progressSummary =
         wird && !wird.completed && !wird.scheduledForFuture
             ? await getWirdReaderData(wird, preferences)
@@ -124,9 +128,10 @@ export default async function WirdPage() {
                     data-tour="wird-page"
                     className="pb-12 pt-5 sm:pb-16 sm:pt-8"
                 >
+                    <PlanManagementNavigation />
                     <PageHeading
-                        title={t("title")}
-                        description={t("description")}
+                        title={plansT("readingPlan")}
+                        description={plansT("readingPlanHint")}
                         icon={<MoonStar />}
                     />
 
@@ -257,31 +262,15 @@ export default async function WirdPage() {
                                                 >
                                                     <Link
                                                         data-tour="wird-read"
-                                                        href={startReadingHref}
+                                                        href="/plans/today"
                                                     >
                                                         <BookOpen
                                                             aria-hidden="true"
                                                             className="size-4"
                                                         />
-                                                        {t(
-                                                            wird.progressGlobalAyah
-                                                                ? "today.continueReading"
-                                                                : "today.startReading",
-                                                        )}
+                                                        {plansT("goToToday")}
                                                     </Link>
                                                 </Button>
-                                                <CompleteWirdButton
-                                                    portion={{
-                                                        targetDate:
-                                                            wird.targetDate,
-                                                        start: wird.start
-                                                            .globalAyahNumber,
-                                                        end: wird.end
-                                                            .globalAyahNumber,
-                                                        revision:
-                                                            wird.revision ?? "",
-                                                    }}
-                                                />
                                             </div>
                                         </>
                                     )}

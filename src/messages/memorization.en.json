@@ -431,7 +431,7 @@
             "deleted": "Plan deleted. Your recorded progress is kept.",
             "deleteStale": "This plan changed while the confirmation was open. Close this dialog, review the updated plan and try again.",
             "cancelAction": "Cancel",
-            "sessionsHint": "Open today’s highlighted session to practice."
+            "sessionsHint": "Start today’s highlighted sessions from Today."
         },
         "retention": {
             "tools": "Memorization tools",

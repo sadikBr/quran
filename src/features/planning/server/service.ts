@@ -20,6 +20,11 @@ import { getMemorizationPlanView } from "@/features/learning/server/service";
 import { assessmentVerses } from "@/features/memorization/progress";
 import getMemoryCatalogue from "@/features/memorization/server/get-memory-catalogue";
 import { lockRecord } from "@/features/memorization/server/record-service";
+import {
+    recurringPlanningTasks,
+    recurringToday,
+} from "@/features/plans/recurrence";
+import { getRecurringState } from "@/features/plans/server/service";
 import getQuranNavigationMeta from "@/features/quran/server/get-quran-navigation-meta";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import { getRevisionView } from "@/features/revision/server/service";
@@ -82,7 +87,7 @@ async function rawState(
         .orderBy(asc(practiceAssignment.id))
         .$dynamic();
     if (lock) query = query.for("update", { of: practiceAssignment });
-    const [assignments, [saved], wirdHistory] = await Promise.all([
+    const [assignments, [saved], wirdHistory, recurring] = await Promise.all([
         query,
         tx
             .select()
@@ -107,6 +112,7 @@ async function rawState(
                 ),
             )
             .orderBy(asc(userWirdHistory.id)),
+        getRecurringState(userId, weekStart, shift(weekStart, 6), tx),
     ]);
     return {
         assignments,
@@ -114,6 +120,7 @@ async function rawState(
         wird: wird ?? null,
         khatmah: khatmah ?? null,
         wirdHistory,
+        recurring,
     };
 }
 
@@ -250,6 +257,12 @@ async function loadPlanning(userId: string, requestedWeek?: string) {
         ]);
     const estimates = raw.saved?.estimates ?? {};
     const tasks = [
+        ...recurringPlanningTasks(
+            raw.recurring,
+            dates,
+            estimates,
+            now.toJSDate(),
+        ),
         ...planTasks("memorization", memorization, dates, estimates),
         ...planTasks("revision", revision, dates, estimates),
         ...buildWirdPlanningTasks({
@@ -347,6 +360,9 @@ async function loadPlanning(userId: string, requestedWeek?: string) {
         timezone,
         riwayah: preferences.riwayah,
         wDay: getWirdDate(now.toJSDate()),
+        cDays: raw.recurring.plans.map((plan) =>
+            recurringToday(plan, now.toJSDate()),
+        ),
         m: memorization.version,
         r: revision.version,
         mDay: memorization.week ? memorization.today : null,
@@ -411,6 +427,9 @@ export async function commitPlanningWeek(
                 timezone: state.view.timezone,
                 riwayah: state.riwayah,
                 wDay: getWirdDate(new Date(clock.rows[0].now)),
+                cDays: raw.recurring.plans.map((plan) =>
+                    recurringToday(plan, new Date(clock.rows[0].now)),
+                ),
                 m,
                 r,
                 mDay: state.memorization.week

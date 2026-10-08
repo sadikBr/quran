@@ -1,8 +1,8 @@
 import {
     ArrowRight,
-    BookMarked,
     BookOpen,
-    MoonStar,
+    CalendarDays,
+    Sparkles,
     UsersRound,
 } from "lucide-react";
 import type { Metadata } from "next";
@@ -16,20 +16,19 @@ import { auth } from "@/features/auth/auth";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
 import getPreferences from "@/features/settings/server/get-preferences";
-import getDailyWird from "@/features/wird/server/get-daily-wird";
 import { getMessages, getTextDirection } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
 const readerTools = [
     {
-        icon: MoonStar,
+        icon: CalendarDays,
         key: "rhythm",
-        href: "/wird",
+        href: "/plans/today",
     },
     {
-        icon: BookMarked,
+        icon: Sparkles,
         key: "practice",
-        href: "/practice",
+        href: "/memorization",
     },
     {
         icon: UsersRound,
@@ -62,11 +61,6 @@ export default async function Home() {
         getPreferences(),
         getReadingProgress(),
     ]);
-    const dailyWird = session
-        ? await getDailyWird(session.user.id, preferences.arabicEdition).catch(
-              () => null,
-          )
-        : null;
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
@@ -79,10 +73,12 @@ export default async function Home() {
             : readingProgress.lastSurahNumber;
     const currentNumber = savedNumber ?? 1;
     const readingHref = `/quran/${preferences.readingMode}/${currentNumber}`;
-    const hasPendingWird = Boolean(
-        dailyWird && !dailyWird.completed && !dailyWird.scheduledForFuture,
-    );
-    const href = hasPendingWird ? "/wird/read" : readingHref;
+    const plansT = createTranslator({
+        locale: preferences.language,
+        messages,
+        namespace: "Plans",
+    });
+    const href = session ? "/plans/today" : readingHref;
     let continueReadingLabel = t("hero.beginReading");
     let readingPlace =
         preferences.readingMode === "page"
@@ -103,13 +99,7 @@ export default async function Home() {
         continueReadingLabel = t("hero.continueReading");
     }
 
-    if (hasPendingWird) {
-        continueReadingLabel = t(
-            dailyWird?.progressGlobalAyah
-                ? "hero.continueWird"
-                : "hero.startWird",
-        );
-    }
+    if (session) continueReadingLabel = plansT("goToToday");
 
     return (
         <main
@@ -239,8 +229,8 @@ export default async function Home() {
                                     )}
                                 >
                                     <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-background/30 text-primary backdrop-blur-sm dark:bg-white/10">
-                                        {hasPendingWird ? (
-                                            <MoonStar
+                                        {session ? (
+                                            <CalendarDays
                                                 aria-hidden="true"
                                                 className="size-4"
                                             />
@@ -253,15 +243,15 @@ export default async function Home() {
                                     </span>
                                     <div>
                                         <p className="text-xs font-semibold tracking-[0.14em] uppercase">
-                                            {hasPendingWird
-                                                ? t("hero.todayWird")
+                                            {session
+                                                ? plansT("title")
                                                 : savedNumber === null
                                                   ? t("progress.startingPlace")
                                                   : t("progress.continueFrom")}
                                         </p>
                                         <p className="mt-2 text-base font-semibold leading-7 text-foreground dark:text-white">
-                                            {hasPendingWird
-                                                ? t("hero.wirdReady")
+                                            {session
+                                                ? plansT("today")
                                                 : readingPlace}
                                         </p>
                                     </div>
@@ -302,18 +292,8 @@ export default async function Home() {
                                             session && "mt-2 w-full",
                                         )}
                                     >
-                                        <Link
-                                            href={
-                                                session
-                                                    ? "/dashboard"
-                                                    : "/quran"
-                                            }
-                                        >
-                                            {t(
-                                                session
-                                                    ? "hero.openDashboard"
-                                                    : "hero.browseQuran",
-                                            )}
+                                        <Link href={"/quran"}>
+                                            {t("hero.browseQuran")}
                                         </Link>
                                     </Button>
                                 </div>

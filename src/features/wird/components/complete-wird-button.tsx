@@ -13,7 +13,9 @@ import completeDailyWird from "../server/complete-daily-wird";
 export default function CompleteWirdButton({
     disabled = false,
     portion,
+    returnToToday = false,
 }: {
+    returnToToday?: boolean;
     disabled?: boolean;
     portion: WirdCompletion;
 }) {
@@ -45,6 +47,7 @@ export default function CompleteWirdButton({
             }
             toast.success(t("completeSuccess"));
             setOpen(false);
+            if (returnToToday) router.replace("/plans/today");
             router.refresh();
         } catch {
             toast.error(t("completeError"));

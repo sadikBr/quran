@@ -28,7 +28,7 @@ export default async function WeeklyMemorizationReader({
         preferences.riwayah,
     );
     const item = view.sessions.find((s) => s.id === sessionId);
-    if (!item?.active || !view.week) redirect("/practice");
+    if (!item?.active || !view.week) redirect("/plans/today");
     const assignment = memorizationReaderAssignment(item, view.week.riwayah);
     let groups = await getPracticeReaderData(assignment, preferences);
     if (!item.done && item.completed > 0)

@@ -4,6 +4,7 @@ import { createTranslator } from "next-intl";
 import AppLogo from "@/components/app-logo";
 import AppPrimaryNav from "@/components/app-primary-nav";
 import { auth } from "@/features/auth/auth";
+import TodayReturnLink from "@/features/plans/components/today-return-link";
 import getPreferences from "@/features/settings/server/get-preferences";
 import WirdReader from "@/features/wird/components/wird-reader";
 import getDailyWird from "@/features/wird/server/get-daily-wird";
@@ -20,7 +21,8 @@ export default async function WirdReaderPage() {
         getMessages(preferences.language),
         getDailyWird(session.user.id, preferences.arabicEdition),
     ]);
-    if (!wird || wird.completed || wird.scheduledForFuture) redirect("/wird");
+    if (!wird) redirect("/plans");
+    if (wird.completed || wird.scheduledForFuture) redirect("/plans/today");
 
     const groups = await getWirdReaderData(wird, preferences);
     const t = createTranslator({
@@ -43,6 +45,7 @@ export default async function WirdReaderPage() {
             <header className="sticky top-0 z-30 bg-background/92 backdrop-blur-xl">
                 <div className="app-container flex h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] sm:h-[calc(5rem+env(safe-area-inset-top))] items-center justify-between gap-4">
                     <AppPrimaryNav />
+                    <TodayReturnLink />
                     <AppLogo />
                 </div>
             </header>

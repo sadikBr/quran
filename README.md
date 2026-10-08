@@ -165,6 +165,56 @@ Wird and sends a notification that opens `/wird/read`. Two once-daily UTC cron
 entries cover Morocco's seasonal UTC offset; the endpoint sends only during the
 local 11 PM hour and records each delivery to prevent duplicates.
 
+## Plans and personal routines
+
+**Plans** is the main navigation entry for daily activities and schedules and
+opens **Today** (`/plans/today`). **My plans** (`/plans`) creates and manages
+reading, memorization, revision, custom routines, and individual practice.
+Existing setup URLs remain available with the same Today / Week / My plans tabs.
+Today combines due reading, guided practice, personal/circle preparation
+(including unscheduled and overdue work), and recurring activities; the dashboard
+shows the same task feed. The **Week** tab uses the existing `/weekly` planner.
+Quran reading and Memorization progress remain separate destinations.
+
+Practice and wird readers offer **Back to Today** at the top and bottom, and
+completing a wird returns to Today automatically. Quran passages opened from a
+plan carry a `from=today` context flag so the reader offers the same return link,
+including after next/previous navigation. Personal practice saves return to Today;
+all practice mutations refresh the daily and weekly views.
+
+Recurring activities support daily or selected-weekday schedules, a saved time
+zone, notes, an estimated duration, an optional surah and resource link, and an
+optional reminder. Al-Kahf on Fridays, Al-Mulk daily, and Saturday tafsir are
+editable templates. Up to 40 unarchived recurring plans are supported. Each local
+date is independent: complete or skip today's session, or undo it on that day.
+Missing a session never creates a backlog. Pausing or archiving stops future
+sessions; editing and archiving preserve recorded history and its original title
+and settings. History shows the latest 100 completed/skipped recurring sessions.
+Opening the Quran reader does not automatically complete a routine or grant
+memorization credit. Recurring dates stay fixed when balancing the week; skipped
+sessions release their estimated time. Stale edits and weekly drafts are rejected.
+
+Apply migration `0041_personal_recurring_plans` with `bun run db:migrate` before
+running this version against an existing database. It adds new tables without
+rewriting existing plans or progress. Personal-data resets remove the user's
+recurring plans and cascade to their history and reminder delivery records.
+
+For optional push reminders, enable notifications on the device, configure the
+existing VAPID credentials, and have a trusted scheduler call
+`GET /api/cron/plan-reminder` every minute with `Authorization: Bearer <CRON_SECRET>`.
+The endpoint sends during the 30 minutes following the selected local time,
+once per plan/date/device. Completed, skipped, paused, archived, and suspended
+users' routines are excluded. Failed deliveries may retry; no external scheduler
+is created by this change. The existing deployment cron configuration is retained.
+
+Checks: `bun test scripts/recurring-plans.test.mjs` and
+`bun test scripts/weekly-planning.test.mjs scripts/weekly-wird-planning.test.mjs`.
+Database checks require an **empty disposable** PostgreSQL database ending in
+`_recurring_tests`: set `RECURRING_TEST_DATABASE_URL` and run
+`bun test scripts/recurring-plans.integration.test.mjs`. Tests stub push delivery;
+no notifications are sent. Weekly integration checks also cover recurring
+forecasts, fixed dates, time estimates, and stale drafts.
+
 ## Weekly planning
 
 At `/weekly`, learners plan memorization, revision, personal practice, circle
