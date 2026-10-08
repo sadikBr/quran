@@ -295,6 +295,13 @@
             "when": 1791477026442,
             "tag": "0041_personal_recurring_plans",
             "breakpoints": true
+        },
+        {
+            "idx": 42,
+            "version": "7",
+            "when": 1791481155601,
+            "tag": "0042_daily_checklist",
+            "breakpoints": true
         }
     ]
 }

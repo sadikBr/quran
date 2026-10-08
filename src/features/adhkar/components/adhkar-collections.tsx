@@ -2,6 +2,7 @@
 
 import { HandHeart, Moon, MoonStar, Sunrise } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import type { DailyChecklistState } from "@/features/plans/daily-checklist";
 import type { AdhkarCategory } from "../catalog";
 import { ADHKAR, isAdhkarCategory } from "../catalog";
 import type { AdhkarEntry } from "../types";
@@ -10,7 +11,11 @@ import AdhkarReader from "./adhkar-reader";
 export default function AdhkarCollections({
     collections,
     ar,
+    checklist,
+    storageScope,
 }: {
+    checklist?: DailyChecklistState;
+    storageScope?: string;
     collections: Record<AdhkarCategory, AdhkarEntry[]>;
     ar: boolean;
 }) {
@@ -27,7 +32,7 @@ export default function AdhkarCollections({
                 {Object.entries(ADHKAR).map(([key, item]) => (
                     <a
                         key={key}
-                        href={`/azkar?category=${key}`}
+                        href={`/azkar?category=${key}${searchParams.get("from") === "today" ? "&from=today" : ""}`}
                         onClick={(event) => {
                             if (
                                 event.button !== 0 ||
@@ -71,10 +76,15 @@ export default function AdhkarCollections({
                 aria-label={ADHKAR[category][ar ? "ar" : "en"]}
             >
                 <AdhkarReader
-                    key={category}
+                    key={`${storageScope ?? "guest"}:${category}`}
                     entries={collections[category]}
                     category={category}
                     ar={ar}
+                    storageScope={storageScope}
+                    timezone={checklist?.timezone}
+                    dailyCompletion={checklist?.adhkar.find(
+                        (item) => item.category === category,
+                    )}
                 />
             </section>
         </>

@@ -24,7 +24,7 @@ import { getMeetingDisplayTimezone } from "@/features/groups/server/meeting-sche
 import getMemorizationRecord from "@/features/memorization/server/get-memorization-record";
 import GuideDirectory from "@/features/onboarding/guide-directory";
 import TodayTasks from "@/features/plans/components/today-tasks";
-import { getTodayPlanTasks } from "@/features/plans/server/today";
+import { getTodayPlanView } from "@/features/plans/server/today";
 import { getAssignedPracticeAssignments } from "@/features/practice/server/get-practice-assignment";
 import getSurahsMeta from "@/features/quran/server/get-surahs-meta";
 import getReadingProgress from "@/features/reading-progress/server/get-reading-progress";
@@ -107,7 +107,7 @@ export default async function DashboardPage() {
             getMemorizationRecord(session.user.id, preferences.riwayah),
             getNextGroupMeetingForUser(session.user.id),
         ]);
-    const todayTasks = await getTodayPlanTasks(session.user.id, preferences);
+    const todayTasks = await getTodayPlanView(session.user.id, preferences);
     const messages = await getMessages(preferences.language);
     const t = createTranslator({
         locale: preferences.language,
@@ -272,7 +272,8 @@ export default async function DashboardPage() {
 
                     <div className="mt-8">
                         <TodayTasks
-                            tasks={todayTasks}
+                            tasks={todayTasks.tasks}
+                            checklist={todayTasks.checklist}
                             surahs={surahs}
                             compact
                         />

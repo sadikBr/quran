@@ -97,6 +97,58 @@
         "personalPractice": "Personal practice",
         "personalPracticeHint": "Choose or change a passage for an individual practice session.",
         "readingPlan": "Reading plan",
-        "readingPlanHint": "Manage your daily wird, khatmah, and reading history. Start your next session from Today."
+        "readingPlanHint": "Manage your daily wird, khatmah, and reading history. Start your next session from Today.",
+        "checklist": {
+            "customize": "Choose what appears",
+            "customizeHint": "Choose the activities you want in Today. These choices also apply to your Dashboard. Your plans and reminders keep their current settings.",
+            "privacyHint": "Your checklist is personal. There are no scores, rankings, or comparisons.",
+            "intro": "Reading, practice, and remembrance, at your own pace.",
+            "label": "Today’s checklist",
+            "start": "Start",
+            "pending": "Not completed",
+            "submitted": "Submitted",
+            "submittedHint": "Your preparation is submitted. Your supervisor’s review is separate.",
+            "viewAssignment": "View assignment",
+            "adhkar": "Adhkar",
+            "check": "Mark {name} complete",
+            "uncheck": "Undo completion of {name}",
+            "hiddenEmpty": "Your checklist is clear",
+            "hiddenHint": "No activities match your current choices. Use “Choose what appears” to include more.",
+            "completionHint": "Reading and practice update when you finish. You can check off adhkar and custom activities here, including those done away from the app.",
+            "close": "Close",
+            "cancel": "Cancel",
+            "save": "Save choices",
+            "saving": "Saving…",
+            "readerTitle": "Today’s checklist",
+            "readerHint": "Completing this collection records it in Today. You can also mark it complete if you read it away from the app.",
+            "readerSaved": "Recorded in Today.",
+            "readerComplete": "Mark collection complete",
+            "readerUndo": "Undo completion",
+            "errors": {
+                "invalid": "Please check your choices and try again.",
+                "failed": "We couldn’t save this change. Please try again.",
+                "stale": "This changed in another tab or device. Review the updated checklist and try again.",
+                "date": "The day or time zone changed. Reload to see your current checklist."
+            },
+            "choices": {
+                "wird": "Daily wird",
+                "memorization": "Memorization",
+                "revision": "Revision",
+                "practice": "Personal practice",
+                "circle": "Circle assignments",
+                "recurring": "Custom routines",
+                "adhkar": {
+                    "morning": "Morning adhkar",
+                    "evening": "Evening adhkar",
+                    "sleep": "Bedtime adhkar"
+                }
+            },
+            "otherActivities": "Also in your day",
+            "readWird": "Read today’s wird",
+            "wirdHint": "A little time with the Quran, every day.",
+            "wirdCompleted": "Today’s wird is complete",
+            "wirdCompletedHint": "You’ve finished today’s portion. May Allah accept it.",
+            "readingPlan": "View reading plan"
+        }
     }
 }

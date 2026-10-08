@@ -177,6 +177,7 @@ export default async function reviewMemberAssignment(input: unknown) {
     revalidatePath("/assignments");
     revalidatePath("/practice");
     revalidatePath("/dashboard");
+    revalidatePath("/plans/today");
     revalidatePath("/memorization");
     revalidatePath("/memorization/test");
     revalidatePath("/memorization/mistakes");

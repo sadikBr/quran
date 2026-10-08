@@ -101,6 +101,8 @@ export const personalData = [
             s.learningSchedule,
             s.weeklyPlanning,
             s.recurringPlan,
+            s.dailyAdhkarCompletion,
+            s.dailyChecklistSettings,
         ],
     },
     {

@@ -10,8 +10,16 @@ import {
     Plus,
     RotateCcw,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import TodayReturnLink from "@/features/plans/components/today-return-link";
+import useAdhkarCompletion from "@/features/plans/components/use-adhkar-completion";
+import {
+    type DailyAdhkarCompletion,
+    localChecklistDate,
+} from "@/features/plans/daily-checklist";
 import { ADHKAR, type AdhkarCategory } from "../catalog";
 import { incrementRepetition } from "../counter";
 import { readingParagraphs } from "../reading-paragraphs";
@@ -22,23 +30,37 @@ export default function AdhkarReader({
     entries,
     category,
     ar,
+    storageScope,
+    timezone,
+    dailyCompletion,
 }: {
+    storageScope?: string;
+    timezone?: string;
+    dailyCompletion?: DailyAdhkarCompletion;
     entries: AdhkarEntry[];
     category: AdhkarCategory;
     ar: boolean;
 }) {
+    const checklistT = useTranslations("Plans.checklist");
+    const completion = useAdhkarCompletion(dailyCompletion);
+    const router = useRouter();
     const [index, setIndex] = useState(0);
     const [read, setRead] = useState<number[]>([]);
     const [showIndex, setShowIndex] = useState(false);
     const [fontSize, setFontSize] = useState(1);
     const [counts, setCounts] = useState<Record<number, number>>({});
     const [storageReady, setStorageReady] = useState(false);
-    const storageKey = `adhkar:${category}`;
+    const storageKey = storageScope
+        ? `adhkar:${storageScope}:${category}`
+        : `adhkar:${category}`;
     const dayRef = useRef("");
     useEffect(() => {
         function restore() {
-            const day = new Date().toLocaleDateString("en-CA");
+            const day = timezone
+                ? localChecklistDate(timezone)
+                : new Date().toLocaleDateString("en-CA");
             if (dayRef.current === day) return;
+            if (dayRef.current && timezone) router.refresh();
             dayRef.current = day;
             let saved: unknown = {};
             try {
@@ -65,7 +87,7 @@ export default function AdhkarReader({
             clearInterval(timer);
             window.removeEventListener("focus", restore);
         };
-    }, [storageKey, entries, category]);
+    }, [storageKey, entries, category, timezone, router]);
     useEffect(() => {
         if (!storageReady) return;
         try {
@@ -93,6 +115,8 @@ export default function AdhkarReader({
         if (textRef.current) textRef.current.scrollTop = 0;
     }
     function complete() {
+        if (!read.includes(entry.ID) && read.length + 1 === entries.length)
+            void completion.save(true);
         setRead((current) =>
             current.includes(entry.ID) ? current : [...current, entry.ID],
         );
@@ -488,6 +512,46 @@ export default function AdhkarReader({
                         )}
                     </details>
                 </article>
+                {dailyCompletion && (
+                    <section
+                        className="app-card mt-4 space-y-3 p-4 sm:p-5"
+                        aria-label={checklistT("readerTitle")}
+                    >
+                        <p className="text-sm leading-7 text-muted-foreground">
+                            {checklistT(
+                                completion.completed
+                                    ? "readerSaved"
+                                    : "readerHint",
+                            )}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <Button
+                                variant="outline"
+                                disabled={completion.pending}
+                                onClick={() =>
+                                    completion.save(!completion.completed)
+                                }
+                            >
+                                {checklistT(
+                                    completion.pending
+                                        ? "saving"
+                                        : completion.completed
+                                          ? "readerUndo"
+                                          : "readerComplete",
+                                )}
+                            </Button>
+                            <TodayReturnLink />
+                        </div>
+                        {completion.error && (
+                            <p
+                                role="alert"
+                                className="text-sm text-destructive"
+                            >
+                                {checklistT(`errors.${completion.error}`)}
+                            </p>
+                        )}
+                    </section>
+                )}
                 {finished && (
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/10 p-4">
                         <div className="flex items-center gap-3">

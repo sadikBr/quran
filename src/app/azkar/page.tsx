@@ -1,4 +1,5 @@
 import { Bell, CircleDot, MoonStar } from "lucide-react";
+import { headers } from "next/headers";
 import Link from "next/link";
 import ActionCard from "@/components/action-card";
 import PageBackground from "@/components/page-background";
@@ -6,10 +7,28 @@ import PageHeading from "@/components/page-heading";
 import StickyAppHeader from "@/components/sticky-app-header";
 import AdhkarCollections from "@/features/adhkar/components/adhkar-collections";
 import data from "@/features/adhkar/data/collections.json";
+import { auth } from "@/features/auth/auth";
+import TodayReturnLink from "@/features/plans/components/today-return-link";
+import { getDailyChecklistState } from "@/features/plans/server/daily-checklist-service";
 import getPreferences from "@/features/settings/server/get-preferences";
 
-export default async function AdhkarPage() {
-    const { language } = await getPreferences();
+export default async function AdhkarPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ from?: string }>;
+}) {
+    const [{ language, adhkarTimezone }, session, query] = await Promise.all([
+        getPreferences(),
+        auth.api.getSession({ headers: await headers() }),
+        searchParams,
+    ]);
+    const checklist =
+        session && session.user.role !== "admin"
+            ? await getDailyChecklistState(session.user.id, adhkarTimezone)
+            : undefined;
+    const storageScope = session
+        ? `${session.user.id}:${session.user.dataResetAt?.toISOString() ?? "initial"}`
+        : undefined;
     const ar = language === "ar";
     return (
         <main
@@ -20,6 +39,7 @@ export default async function AdhkarPage() {
             <PageBackground />
             <div className="app-container ">
                 <StickyAppHeader navigation />
+                {query.from === "today" && <TodayReturnLink />}
                 <PageHeading
                     className="mt-5 sm:mt-8"
                     title={ar ? "الأذكار" : "Adhkar"}
@@ -50,7 +70,12 @@ export default async function AdhkarPage() {
                             : "Count your dhikr at your own pace."
                     }
                 />
-                <AdhkarCollections collections={data.collections} ar={ar} />
+                <AdhkarCollections
+                    collections={data.collections}
+                    ar={ar}
+                    checklist={checklist}
+                    storageScope={storageScope}
+                />
             </div>
         </main>
     );

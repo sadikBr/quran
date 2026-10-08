@@ -176,6 +176,26 @@ Today combines due reading, guided practice, personal/circle preparation
 shows the same task feed. The **Week** tab uses the existing `/weekly` planner.
 Quran reading and Memorization progress remain separate destinations.
 
+Today is a personal checklist with morning, evening, and sleep adhkar alongside
+scheduled activities. **Choose what appears** saves visibility choices per account
+for Today and its Dashboard preview, without pausing plans or changing reminders.
+Completed reading and practice remain checked for their relevant day; submitted
+circle work is labeled separately from supervisor approval. Adhkar can be checked
+or undone directly, and finishing its reader also completes it on Today. The
+adhkar reader includes a return link. Daily adhkar uses the saved reminder time
+zone and starts fresh each day. There are no checklist scores, streaks, or rankings.
+When visible, the daily wird is always the first item, including after completion,
+in a featured reading card above the other activities.
+
+Apply migration `0042_daily_checklist` with `bun run db:migrate` before deploying
+this checklist. It adds account preferences and daily adhkar completion tables;
+personal-data reset and account deletion also remove these records. Checks:
+`bun test scripts/daily-checklist.test.mjs scripts/today-plan-practice.test.mjs`.
+Set `CHECKLIST_TEST_DATABASE_URL` to an **empty disposable** PostgreSQL database
+ending in `_checklist_tests`, then run
+`bun test scripts/daily-checklist.integration.test.mjs` to verify migrations,
+ownership, concurrent updates, midnight rollover, stale forms, and assignments.
+
 Practice and wird readers offer **Back to Today** at the top and bottom, and
 completing a wird returns to Today automatically. Quran passages opened from a
 plan carry a `from=today` context flag so the reader offers the same return link,

@@ -12,15 +12,21 @@ export default function OccurrenceActions({
     occurrence,
     onChanged,
     disabled = false,
+    checklist = false,
 }: {
     occurrence: NonNullable<PlanningTask["recurring"]>;
     onChanged?: () => void;
     disabled?: boolean;
+    checklist?: boolean;
 }) {
     const t = useTranslations("Plans"),
         router = useRouter();
     const [pending, startTransition] = useTransition();
-    if (!occurrence.actionable) return null;
+    if (
+        !occurrence.actionable ||
+        (checklist && occurrence.status !== "pending")
+    )
+        return null;
     function update(status: "pending" | "completed" | "skipped") {
         startTransition(async () => {
             try {
@@ -46,18 +52,20 @@ export default function OccurrenceActions({
         <div className="flex flex-wrap gap-2" aria-busy={pending}>
             {occurrence.status === "pending" ? (
                 <>
-                    <Button
-                        size="sm"
-                        disabled={pending || disabled}
-                        onClick={() => update("completed")}
-                    >
-                        {pending ? (
-                            <LoaderCircle className="size-4 animate-spin" />
-                        ) : (
-                            <Check className="size-4" />
-                        )}
-                        {t("complete")}
-                    </Button>
+                    {!checklist && (
+                        <Button
+                            size="sm"
+                            disabled={pending || disabled}
+                            onClick={() => update("completed")}
+                        >
+                            {pending ? (
+                                <LoaderCircle className="size-4 animate-spin" />
+                            ) : (
+                                <Check className="size-4" />
+                            )}
+                            {t("complete")}
+                        </Button>
+                    )}
                     <Button
                         size="sm"
                         variant="ghost"

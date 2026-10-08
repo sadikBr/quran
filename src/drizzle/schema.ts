@@ -2,6 +2,7 @@ export * from "./schema/adhkar-reminder";
 export * from "./schema/admin-activity";
 export * from "./schema/auth-schema";
 export * from "./schema/bookmark-collection";
+export * from "./schema/daily-checklist";
 export * from "./schema/khatmah-history";
 export * from "./schema/khatmah-plan";
 export * from "./schema/learning-plan";

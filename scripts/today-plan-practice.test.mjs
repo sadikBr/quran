@@ -96,6 +96,28 @@ test("changing saved weekdays removes today's cards until the next selected day"
     }
 });
 
+test("daily checklist keeps completed guided sessions, including carried work and paused plans", () => {
+    const completed = row("finished", "2026-10-02", {
+        done: true,
+        completedAt: `${today}T10:00:00Z`,
+    });
+    const projected = carryForwardSessions(
+        [completed, row("next", today)],
+        today,
+        [1, 2, 3, 4, 5, 6, 7],
+        "UTC",
+    );
+    const paused = view(projected, { plan: { enabled: false } });
+    expect(todayPlanSessions(paused, view([]))).toEqual([]);
+    expect(
+        todayPlanSessions(paused, view([]), true).map((s) => [s.id, s.done]),
+    ).toEqual([["finished", true]]);
+    const tomorrow = view([row("old", today, { done: true })], {
+        today: "2026-10-04",
+    });
+    expect(todayPlanSessions(tomorrow, view([]), true)).toEqual([]);
+});
+
 test("each plan uses its own local day across midnight, not the viewer's UTC date", () => {
     const now = new Date("2026-10-03T23:30:00Z");
     const local = weekCalendar(now, "Africa/Casablanca").today;

@@ -1,6 +1,18 @@
 import "server-only";
 
-import { and, desc, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
+import {
+    and,
+    desc,
+    eq,
+    gte,
+    inArray,
+    isNotNull,
+    isNull,
+    lt,
+    or,
+} from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { DateTime } from "luxon";
 import db from "@/drizzle/db";
 import {
     groupMeeting,
@@ -199,5 +211,52 @@ export async function getAssignedPracticeAssignments(
         )
         .orderBy(practiceAssignment.dueAt, desc(practiceAssignment.createdAt));
 
+    return results.map(mapAssignment);
+}
+
+/** Include today's finished work without loading the user's entire assignment history. */
+export async function getChecklistPracticeAssignments(
+    userId: string,
+    today: string,
+    timezone: string,
+) {
+    const start = DateTime.fromISO(today, { zone: timezone }).startOf("day");
+    const end = start.plus({ days: 1 });
+    const withinDay = (column: AnyPgColumn<{ data: Date }>) =>
+        and(gte(column, start.toJSDate()), lt(column, end.toJSDate()));
+    const results = await db
+        .select(assignmentSelection())
+        .from(practiceAssignment)
+        .leftJoin(
+            memorizationGroup,
+            eq(practiceAssignment.groupId, memorizationGroup.id),
+        )
+        .leftJoin(
+            groupMeeting,
+            eq(practiceAssignment.groupId, groupMeeting.groupId),
+        )
+        .leftJoin(user, eq(practiceAssignment.assignedById, user.id))
+        .where(
+            and(
+                eq(practiceAssignment.assigneeId, userId),
+                or(
+                    isNull(practiceAssignment.groupId),
+                    eq(memorizationGroup.isActive, true),
+                ),
+                or(
+                    inArray(practiceAssignment.status, activeStatuses),
+                    and(
+                        eq(practiceAssignment.status, "completed"),
+                        or(
+                            withinDay(practiceAssignment.reviewedAt),
+                            withinDay(practiceAssignment.submittedAt),
+                            eq(practiceAssignment.plannedDate, today),
+                            withinDay(practiceAssignment.dueAt),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        .orderBy(desc(practiceAssignment.updatedAt));
     return results.map(mapAssignment);
 }

@@ -14,20 +14,27 @@ export type TodayPlanSession = {
     started: boolean;
     credited: number;
     total: number;
+    done: boolean;
 };
 
 export function todayPlanSessions(
     memorization: MemorizationPlanView,
     revision: RevisionView,
+    includeCompleted = false,
 ): TodayPlanSession[] {
     const result: TodayPlanSession[] = [];
     for (const [kind, view] of [
         ["memorization", memorization],
         ["revision", revision],
     ] as const) {
-        if (!view.plan?.enabled || !view.week) continue;
+        if (!view.week) continue;
         for (const item of view.sessions) {
-            if (!item.active || item.scheduledDate !== view.today) continue;
+            if (item.scheduledDate !== view.today) continue;
+            if (
+                !(view.plan?.enabled && item.active) &&
+                !(includeCompleted && item.done)
+            )
+                continue;
             result.push({
                 id: item.id,
                 kind,
@@ -43,6 +50,7 @@ export function todayPlanSessions(
                 ),
                 credited: "peer" in item ? item.peer : item.completed,
                 total: item.total,
+                done: item.done,
             });
         }
     }
